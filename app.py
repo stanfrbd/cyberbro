@@ -31,6 +31,9 @@ if not os.path.exists(DATA_DIR):
 # Read the secrets from the secrets.json file
 secrets = get_config()
 
+# Retrieve from secrets or default to 1MB - MAX_FORM_MEMORY_SIZE is the maximum size of the form data in bytes
+app.config['MAX_FORM_MEMORY_SIZE'] = secrets.get("max_form_memory_size", 1 * 1024 * 1024)
+
 # Define API_PREFIX
 API_PREFIX = secrets.get("api_prefix", "api")
 
@@ -53,7 +56,7 @@ app.config['SQLALCHEMY_POOL_SIZE'] = 10
 app.config['SQLALCHEMY_MAX_OVERFLOW'] = 20
 
 # Set version 
-app.config['VERSION'] = "v0.6.2"
+app.config['VERSION'] = "v0.6.3"
 
 # Initialize the database
 db.init_app(app)

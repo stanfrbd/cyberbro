@@ -29,6 +29,7 @@ secrets = {
     "crowdstrike_client_secret": "",
     "crowdstrike_falcon_base_url": "https://falcon.crowdstrike.com",
     "webscout": "",
+    "max_form_memory_size": 1048576,
     "api_prefix": "api",
     "config_page_enabled": False,
     "gui_enabled_engines": [],

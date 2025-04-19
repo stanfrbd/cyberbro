@@ -1,6 +1,7 @@
 requests
 flask
 flask-cors
+flask-caching
 pandas
 jwt
 openpyxl

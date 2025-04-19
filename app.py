@@ -15,6 +15,8 @@ from utils.export import prepare_data_for_export, export_to_csv, export_to_excel
 from models.analysis_result import AnalysisResult, db
 from utils.stats import get_analysis_stats
 from utils.analysis import perform_analysis, check_analysis_in_progress
+from flask_caching import Cache
+import hashlib
 
 app = Flask(__name__)
 
@@ -31,8 +33,16 @@ if not os.path.exists(DATA_DIR):
 # Read the secrets from the secrets.json file
 secrets = get_config()
 
+# Cache configuration
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = secrets.get("api_cache_timeout", 86400)  # Default to 1 day
+logger.debug(f"CACHE_DEFAULT_TIMEOUT: {app.config['CACHE_DEFAULT_TIMEOUT']}")
+
+cache = Cache(app)
+
 # Retrieve from secrets or default to 1MB - MAX_FORM_MEMORY_SIZE is the maximum size of the form data in bytes
 app.config['MAX_FORM_MEMORY_SIZE'] = secrets.get("max_form_memory_size", 1 * 1024 * 1024)
+logger.debug(f"MAX_FORM_MEMORY_SIZE: {app.config['MAX_FORM_MEMORY_SIZE']}")
 
 # Define API_PREFIX
 API_PREFIX = secrets.get("api_prefix", "api")
@@ -56,7 +66,7 @@ app.config['SQLALCHEMY_POOL_SIZE'] = 10
 app.config['SQLALCHEMY_MAX_OVERFLOW'] = 20
 
 # Set version 
-app.config['VERSION'] = "v0.6.3"
+app.config['VERSION'] = "v0.6.4"
 
 # Initialize the database
 db.init_app(app)
@@ -104,13 +114,33 @@ def index():
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    """Handle the analyze request."""
+    """Handle the analyze request with caching and an option to ignore cache."""
     form_data = ioc_fanger.fang(request.form.get("observables", ""))
     observables = extract_observables(form_data)
     selected_engines = request.form.getlist("engines")
+    ignore_cache = request.args.get("ignore_cache", "false").lower() == "true"
 
+    # Generate a secure hash for form data and engines using SHA-256
+    combined_data = f"{form_data}|{','.join(selected_engines)}"
+    cache_key = f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
+
+    if not ignore_cache:
+        # Check cache
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            logger.debug(f"Cache hit: {cache_key}")
+            logger.debug(f"Cached result: {cached_result}")
+            return render_template('waiting.html', analysis_id=cached_result['analysis_id'], API_PREFIX=API_PREFIX), 200
+
+    # If no cache
     analysis_id = str(uuid.uuid4())
     threading.Thread(target=perform_analysis, args=(app, observables, selected_engines, analysis_id)).start()
+
+    # Generate response
+    response_data = {'analysis_id': analysis_id}
+    # Store in cache with a custom timeout from secrets or default to 30 minutes
+    gui_cache_timeout = secrets.get("gui_cache_timeout", 30 * 60)  # Default to 30 minutes
+    cache.set(cache_key, response_data, timeout=gui_cache_timeout)
 
     return render_template('waiting.html', analysis_id=analysis_id, API_PREFIX=API_PREFIX), 200
 
@@ -156,6 +186,11 @@ def page_not_found(e):
 def internal_server_error(e):
     """Handle 500 errors."""
     return render_template('500.html'), 500
+
+@app.errorhandler(413)
+def request_entity_too_large(e):
+    """Handle 413 errors."""
+    return render_template('413.html'), 413
 
 @app.route('/history')
 def history():
@@ -229,18 +264,36 @@ def get_results(analysis_id):
 
 @app.route(f'/{API_PREFIX}/analyze', methods=['POST'])
 def analyze_api():
-    """Handle the analyze request via API. (Only JSON data is accepted)"""
+    """Handle the analyze request via API with caching and hashing."""
     data = request.get_json()
     form_data = ioc_fanger.fang(data.get("text", ""))
-    observables = extract_observables(form_data)
-    # all engines
     selected_engines = data.get("engines", [])
+    ignore_cache = data.get("ignore_cache", False)
 
+    # Generate a secure hash for form data and engines using SHA-256
+    combined_data = f"{form_data}|{','.join(selected_engines)}"
+    cache_key = f"api-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
+
+    if not ignore_cache:
+        # Check cache
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            logger.debug(f"Cache hit: {cache_key}")
+            logger.debug(f"Cached result: {cached_result}")
+            return jsonify(cached_result), 200
+
+    # If no cache
     analysis_id = str(uuid.uuid4())
-    threading.Thread(target=perform_analysis, args=(app, observables, selected_engines, analysis_id)).start()
+    threading.Thread(target=perform_analysis, args=(app, extract_observables(form_data), selected_engines, analysis_id)).start()
 
-    # return the page link to the analysis and the analysis_id
-    return jsonify({'analysis_id': analysis_id, 'link': f"/results/{analysis_id}"}), 200
+    # Generate response
+    response_data = {'analysis_id': analysis_id, 'link': f"/results/{analysis_id}"}
+    response = jsonify(response_data)
+
+    # Store in cache with the specified timeout for the API (api_cache_timeout)
+    cache.set(cache_key, response_data)
+
+    return response, 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)

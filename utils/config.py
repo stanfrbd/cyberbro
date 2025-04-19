@@ -27,13 +27,15 @@ secrets = {
     "opencti_url": "",
     "crowdstrike_client_id": "",
     "crowdstrike_client_secret": "",
-    "crowdstrike_falcon_base_url": "https://falcon.crowdstrike.com",
+    "crowdstrike_falcon_base_url": "https://falcon.crowdstrike.com", # Default URL
     "webscout": "",
-    "max_form_memory_size": 1048576,
+    "max_form_memory_size": 1048576, # 1 MB
     "api_prefix": "api",
     "config_page_enabled": False,
     "gui_enabled_engines": [],
-    "ssl_verify": True
+    "ssl_verify": True, # Default to be secure
+    "api_cache_timeout": 86400,  # Default to 1 day
+    "gui_cache_timeout": 1800   # Default to 30 minutes
 }
 
 secrets_file_exists = False

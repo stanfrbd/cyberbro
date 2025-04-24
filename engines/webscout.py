@@ -1,6 +1,7 @@
 import logging
 import requests
 import time
+import pycountry
 from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
@@ -53,36 +54,54 @@ def query_webscout(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: b
         if data.get("status") == "success":
             ip_resp = data["data"].get("ip", "Unknown")
             risk_score = data["data"].get("risk_score", "Unknown")
-            country_name = data["data"]["location"].get("country_name", "Unknown")
-            country_code = data["data"]["location"].get("country_iso", "Unknown")
-            region = data["data"]["location"].get("region", "Unknown")
+            location = data["data"].get("location", {})
+            country_code = location.get("country_iso", "Unknown")
+            city = location.get("city", "Unknown")
+            # Attempt to resolve country name
+            try:
+                country_obj = pycountry.countries.get(alpha_2=country_code)
+                country_name = country_obj.name if country_obj else "Unknown"
+            except Exception:
+                country_name = "Unknown"
             hostnames = data["data"].get("hostnames", [])
             domains_on_ip = data["data"].get("domains_on_ip", "Unknown")
-            operator = data["data"].get("operator", "Unknown")
-            network_type = data["data"].get("network_type", "Unknown")
-            network_provider = data["data"].get("network_provider", "Unknown")
-            network_service = data["data"].get("network_service", "Unknown")
-            network_service_region = data["data"].get("network_service_region", "Unknown")
-            network_provider_services = data["data"].get("network_provider_services", [])
-            behavior = data["data"].get("behavior", [])
-            as_org = data["data"].get("as_org", "Unknown")
-            asn = data["data"].get("asn", [])
-            provider_description = data["data"].get("provider_description", "Unknown")
-            operator_description = data["data"].get("operator_description", "Unknown")
-            network_risk_score = data["data"].get("network_risk_score", "Unknown")
-            network_range = data["data"].get("network_range", "Unknown")
-            is_private = data["data"].get("is_private", False)
-            open_ports = data["data"].get("open_ports", [])
+            network = data["data"].get("network", {})
+            network_type = network.get("type", "Unknown")
+            network_service = network.get("service", "Unknown")
+            network_service_region = network.get("region", "Unknown")
+            network_risk_score = network.get("risk_score", "Unknown")
+            network_range = network.get("range", "Unknown")
+            is_private = network.get("private", False)
+            as_data = data["data"].get("as", {})
+            as_org = as_data.get("organization", "Unknown")
+            asn = as_data.get("as_numbers", [])
+            company = data["data"].get("company", {})
+            network_provider = company.get("name", "Unknown")
+            network_provider_services = company.get("business", [])
+            description = company.get("description", "Unknown")
+            behavior_data = data["data"].get("behavior", {})
+            behavior = behavior_data.get("tags", [])
+            osint_data = data["data"].get("osint", {})
+            osint_tags = osint_data.get("tags", [])
+            behavior = behavior or []  # Ensure behavior is a list
+            osint_tags = osint_tags or []  # Ensure osint_tags is a list
+            if behavior or osint_tags:
+                behavior = list(set(behavior + osint_tags))  # Merge and remove duplicates
+            open_ports = behavior_data.get("open_ports", [])
+            anonymization = data["data"].get("anonymization", {})
+            is_vpn = anonymization.get("vpn", False)
+            is_proxy = anonymization.get("proxy", False)
+            is_tor = anonymization.get("tor", False)
+            anonymization_service = anonymization.get("service", "")
 
             return {
                 "ip": ip_resp,
                 "risk_score": risk_score,
-                "location": f"{country_name}, {region}",
+                "location": f"{country_name}, {city}",
                 "country_code": country_code,
                 "country_name": country_name,
                 "hostnames": hostnames,
                 "domains_on_ip": domains_on_ip,
-                "operator": operator,
                 "network_type": network_type,
                 "network_provider": network_provider,
                 "network_service": network_service,
@@ -91,13 +110,16 @@ def query_webscout(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: b
                 "behavior": behavior,
                 "as_org": as_org,
                 "asn": asn,
-                "provider_description": provider_description,
-                "operator_description": operator_description,
+                "description": description,
                 "network_risk_score": network_risk_score,
                 "network_range": network_range,
                 "is_private": is_private,
-                "open_ports": open_ports
-            }
+                "open_ports": open_ports,
+                "is_vpn": is_vpn,
+                "is_proxy": is_proxy,
+                "is_tor": is_tor,
+                "anonymization_service": anonymization_service
+                }
 
     except Exception as e:
         logger.error("Error querying webscout for '%s': %s", ip, e, exc_info=True)

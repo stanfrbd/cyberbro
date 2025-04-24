@@ -658,19 +658,26 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                             if (result.webscout) {
                                 plainText += `WebScout: `;
                                 if (result.webscout.risk_score) plainText += `Risk Score: ${result.webscout.risk_score}, `;
+                                if (result.webscout.is_vpn) {
+                                    plainText += ` - VPN: ${result.webscout.is_vpn}\n`;
+                                }
+                                if (result.webscout.is_tor) {
+                                    plainText += ` - Tor: ${result.webscout.is_tor}\n`;
+                                }
+                                if (result.webscout.is_proxy) {
+                                    plainText += ` - Proxy: ${result.webscout.is_proxy}\n`;
+                                }
                                 if (result.webscout.country_name) plainText += `Country: ${result.webscout.country_name}, `;
                                 if (result.webscout.hostnames) plainText += `Hostnames: ${result.webscout.hostnames.join(', ')}, `;
                                 if (result.webscout.asn) plainText += `ASN: ${result.webscout.asn.join(', ')} ${result.webscout.as_org}\n`;
+                                if (result.webscout.description) plainText += ` - Description: ${result.webscout.description}\n`;
                                 if (result.webscout.domains_on_ip) plainText += ` - Domains on IP: ${result.webscout.domains_on_ip}\n`;
-                                if (result.webscout.operator) plainText += ` - Operator: ${result.webscout.operator}\n`;
                                 if (result.webscout.network_type) plainText += ` - Type: ${result.webscout.network_type}\n`;
                                 if (result.webscout.network_service) plainText += ` - Network Service: ${result.webscout.network_service}\n`;
                                 if (result.webscout.network_service_region) plainText += ` - Network Service Region: ${result.webscout.network_service_region}\n`;
                                 if (result.webscout.network_provider_services.length > 0) plainText += ` - Services: ${result.webscout.network_provider_services.join(', ')}\n`;
                                 if (result.webscout.behavior) plainText += ` - Behavior: ${result.webscout.behavior.join(', ')}\n`;
                                 if (result.webscout.open_ports) plainText += ` - Open Ports: ${result.webscout.open_ports.join(', ')}\n`;
-                                if (result.webscout.operator_description) plainText += ` - Operator Description: ${result.webscout.operator_description}\n`;
-                                if (result.webscout.provider_description) plainText += ` - Provider Description: ${result.webscout.provider_description}\n`;
                             }
 
                             if (result.virustotal) {
@@ -992,7 +999,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                         warning-row
                     {% elif result.crowdstrike and result.crowdstrike.indicator_found and result.crowdstrike.malicious_confidence == 'high' %}
                         high-risk
-                    {% elif result.webscout and 'vpn' in result.webscout.network_provider_services | map('lower') or result.webscout and 'proxy' in result.webscout.network_provider_services | map('lower') %}
+                    {% elif result.webscout and 'vpn' in result.webscout.network_provider_services | map('lower') or result.webscout and 'proxy' in result.webscout.network_provider_services | map('lower') or result.webscout and result.webscout.is_proxy or result.webscout and result.webscout.is_tor or result.webscout and result.webscout.is_vpn %}
                         warning-row
                     {% elif result.webscout and result.webscout.risk_score > 50 %}
                         high-risk
@@ -1460,10 +1467,10 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                         {% if result.webscout %}
                         {% if result.webscout.ip %}<strong>IP: </strong>{{ result.webscout.ip }}<br>{% endif %}
                         {% if result.webscout.risk_score %}<strong>Risk Score: </strong>{{ result.webscout.risk_score }}<br>{% endif %}
-                        {% if result.webscout.country_name %}<strong>Country: </strong>{{ result.webscout.country_name }} <span class="fi fi-{{ result.webscout.country_code | lower }}"></span><br>{% endif %}
+                        {% if result.webscout.country_name %}<strong>Country: </strong> <span class="country country-{{result.webscout.country_name | lower}}">{{result.webscout.country_name}}</span> <span class="fi fi-{{ result.webscout.country_code | lower }}"></span><br>{% endif %}
                         {% if result.webscout.hostnames %}<strong>Hostnames: </strong>{{ result.webscout.hostnames | join(', ') }}<br>{% endif %}
                         {% if result.webscout.asn %}
-                            <span title="{% if result.webscout.provider_description %}{{ result.webscout.provider_description }}{% endif %}{% if result.webscout.operator_description %}{{ result.webscout.operator_description }}{% endif %}">
+                            <span title="{% if result.webscout.description %}{{ result.webscout.description }}{% endif %}">
                                 <strong>ASN: </strong>
                             {% if result.webscout.asn and result.webscout.asn != "" %}
                                 {{ result.webscout.asn | join(', ') }}
@@ -1471,20 +1478,28 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                             {% if result.webscout.as_org and result.webscout.as_org != "" %}
                                 {{ result.webscout.as_org }}
                             {% endif %}
-                            {% if (result.webscout.provider_description and result.webscout.provider_description != "") or (result.webscout.operator_description and result.webscout.operator_description != "") %}
+                            {% if (result.webscout.description and result.webscout.description != "") %}
                                 ℹ️
                             {% endif %}
                             </span>
                             <br>
                         {% endif %}
                         {% if result.webscout.domains_on_ip %}<strong>Domains on IP: </strong>{{ result.webscout.domains_on_ip }}<br>{% endif %}
-                        {% if result.webscout.operator %}<strong>Operator: </strong>{{ result.webscout.operator }}<br>{% endif %}
                         {% if result.webscout.network_type %}<strong>Type: </strong>{{ result.webscout.network_type }}<br>{% endif %}
                         {% if result.webscout.network_service %}<strong>Network Service: </strong>{{ result.webscout.network_service }}<br>{% endif %}
                         {% if result.webscout.network_service_region %}<strong>Network Service Region: </strong>{{ result.webscout.network_service_region }}<br>{% endif %}
                         {% if result.webscout.network_provider_services %}<strong>Services: </strong>{{ result.webscout.network_provider_services | join(', ') }}<br>{% endif %}
                         {% if result.webscout.behavior %}<strong>Behavior: </strong>{{ result.webscout.behavior | join(', ') }}<br>{% endif %}
                         {% if result.webscout.open_ports %}<strong>Open Ports: </strong>{{ result.webscout.open_ports | join(', ') }}{% endif %}
+                        {% if result.webscout.is_proxy %}
+                        <strong>Proxy: </strong>{{ result.webscout.is_proxy }}<br>
+                        {% endif %}
+                        {% if result.webscout.is_vpn %}
+                        <strong>VPN: </strong>{{ result.webscout.is_vpn }}<br>
+                        {% endif %}
+                        {% if result.webscout.is_tor %}
+                        <strong>Tor: </strong>{{ result.webscout.is_tor }}<br>
+                        {% endif %}
                         {% else %}
                         Not applicable
                         {% endif %}
@@ -1642,7 +1657,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 {% endif %}
                 {% if analysis_results.results[0].webscout %}
                 <div class="card
-                {% if 'vpn' in analysis_results.results[0].webscout.network_provider_services | map('lower') or 'proxy' in analysis_results.results[0].webscout.network_provider_services | map('lower') %}
+                {% if 'vpn' in analysis_results.results[0].webscout.network_provider_services | map('lower') or 'proxy' in analysis_results.results[0].webscout.network_provider_services | map('lower') or analysis_results.results[0].webscout.is_vpn or analysis_results.results[0].webscout.is_proxy or analysis_results.results[0].webscout.is_tor %}
                     warning-row" style="background-color: orange;" 
                 {% elif analysis_results.results[0].webscout.risk_score > 50 %}
                     high-risk" style="background-color: red;" 
@@ -1665,7 +1680,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     {% endif %}
                     {% if analysis_results.results[0].webscout.asn %}
                     <p>
-                        <span title="{% if analysis_results.results[0].webscout.provider_description %}{{ analysis_results.results[0].webscout.provider_description }}{% endif %}{% if analysis_results.results[0].webscout.operator_description %}{{ analysis_results.results[0].webscout.operator_description }}{% endif %}">
+                        <span title="{% if analysis_results.results[0].webscout.description %}{{ analysis_results.results[0].webscout.description }}{% endif %}">
                             <strong>ASN: </strong>
                         {% if analysis_results.results[0].webscout.asn and analysis_results.results[0].webscout.asn != "" %}
                             {{ analysis_results.results[0].webscout.asn | join(', ') }}
@@ -1673,7 +1688,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                         {% if analysis_results.results[0].webscout.as_org and analysis_results.results[0].webscout.as_org != "" %}
                             {{ analysis_results.results[0].webscout.as_org }}
                         {% endif %}
-                        {% if (analysis_results.results[0].webscout.provider_description and analysis_results.results[0].webscout.provider_description != "") or (analysis_results.results[0].webscout.operator_description and analysis_results.results[0].webscout.operator_description != "") %}
+                        {% if (analysis_results.results[0].webscout.description and analysis_results.results[0].webscout.description != "") %}
                             ℹ️
                         {% endif %}
                         </span>
@@ -1681,9 +1696,6 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     {% endif %}
                     {% if analysis_results.results[0].webscout.domains_on_ip %}
                     <p><strong>Domains on IP: </strong>{{ analysis_results.results[0].webscout.domains_on_ip }}</p>
-                    {% endif %}
-                    {% if analysis_results.results[0].webscout.operator %}
-                    <p><strong>Operator: </strong>{{ analysis_results.results[0].webscout.operator }}</p>
                     {% endif %}
                     {% if analysis_results.results[0].webscout.network_type %}
                     <p><strong>Type: </strong>{{ analysis_results.results[0].webscout.network_type }}</p>
@@ -1702,6 +1714,15 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     {% endif %}
                     {% if analysis_results.results[0].webscout.open_ports %}
                     <p><strong>Open Ports: </strong>{{ analysis_results.results[0].webscout.open_ports | join(', ') }}</p>
+                    {% endif %}
+                    {% if analysis_results.results[0].webscout.is_vpn %}
+                    <p><strong>VPN: </strong>{{ analysis_results.results[0].webscout.is_vpn }}</p>
+                    {% endif %}
+                    {% if analysis_results.results[0].webscout.is_proxy %}
+                    <p><strong>Proxy: </strong>{{ analysis_results.results[0].webscout.is_proxy }}</p>
+                    {% endif %}
+                    {% if analysis_results.results[0].webscout.is_tor %}
+                    <p><strong>Tor: </strong>{{ analysis_results.results[0].webscout.is_tor }}</p>
                     {% endif %}
                 </div>
                 {% endif %}
@@ -2103,7 +2124,6 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             }
 
             if (showRow && countryFilter !== "all") {
-
                 const countrySpan = tr[i].querySelector(".country");
                 const country = countrySpan ? countrySpan.className.split("-")[1] : "";
                 showRow = country === countryFilter;

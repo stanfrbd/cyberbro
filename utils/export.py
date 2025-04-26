@@ -103,11 +103,7 @@ def prepare_row(result, selected_engines):
         row["ws_network_provider_services"] = webscout_data.get("network_provider_services") if webscout_data else None
         row["ws_behavior"] = webscout_data.get("behavior") if webscout_data else None
         row["ws_as_org"] = webscout_data.get("as_org") if webscout_data else None
-        row["ws_asn"] = (
-            str(webscout_data.get("asn")[0]) if len(webscout_data.get("asn", [])) == 1 
-            else ', '.join(map(str, webscout_data.get("asn", []))) if webscout_data.get("asn") 
-            else None
-        )
+        row["ws_asn"] = webscout_data.get("asn") if webscout_data else None
         row["ws_desc"] = webscout_data.get("description") if webscout_data else None
 
     if "google_safe_browsing" in selected_engines:

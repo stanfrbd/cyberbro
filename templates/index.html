@@ -622,6 +622,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 <button type="submit" name="format" value="csv" class="btn">Export to CSV</button>
                 <button type="submit" name="format" value="excel" class="btn">Export to Excel</button>
             </form>
+            <button class="btn" onclick="location.href='/graph/{{ analysis_results.id }}'">Graph (experimental)</button>
             <button class="btn" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">Raw</button>
             <button class="btn" onclick="copyAsPlainText()">Copy as Plain Text</button>
         </div>
@@ -669,7 +670,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                                 }
                                 if (result.webscout.country_name) plainText += `Country: ${result.webscout.country_name}, `;
                                 if (result.webscout.hostnames) plainText += `Hostnames: ${result.webscout.hostnames.join(', ')}, `;
-                                if (result.webscout.asn) plainText += `ASN: ${result.webscout.asn.join(', ')} ${result.webscout.as_org}\n`;
+                                if (result.webscout.asn) plainText += `ASN: ${result.webscout.asn} ${result.webscout.as_org}\n`;
                                 if (result.webscout.description) plainText += ` - Description: ${result.webscout.description}\n`;
                                 if (result.webscout.domains_on_ip) plainText += ` - Domains on IP: ${result.webscout.domains_on_ip}\n`;
                                 if (result.webscout.network_type) plainText += ` - Type: ${result.webscout.network_type}\n`;
@@ -1473,7 +1474,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                             <span title="{% if result.webscout.description %}{{ result.webscout.description }}{% endif %}">
                                 <strong>ASN: </strong>
                             {% if result.webscout.asn and result.webscout.asn != "" %}
-                                {{ result.webscout.asn | join(', ') }}
+                                {{ result.webscout.asn}}
                             {% endif %}
                             {% if result.webscout.as_org and result.webscout.as_org != "" %}
                                 {{ result.webscout.as_org }}
@@ -1683,7 +1684,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                         <span title="{% if analysis_results.results[0].webscout.description %}{{ analysis_results.results[0].webscout.description }}{% endif %}">
                             <strong>ASN: </strong>
                         {% if analysis_results.results[0].webscout.asn and analysis_results.results[0].webscout.asn != "" %}
-                            {{ analysis_results.results[0].webscout.asn | join(', ') }}
+                            {{ analysis_results.results[0].webscout.asn }}
                         {% endif %}
                         {% if analysis_results.results[0].webscout.as_org and analysis_results.results[0].webscout.as_org != "" %}
                             {{ analysis_results.results[0].webscout.as_org }}

@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Analysis</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+    <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+    <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --background-color: #f8f9fa;
+            --text-color: #343a40;
+            --border-color: #ced4da;
+            --border-radius: 5px;
+            --dark-background-color: #1e2a36;
+            --dark-text-color: #d1d1d1;
+            --dark-border-color: #3a4b5a;
+            --dark-primary-color: #3a4b5a;
+            --dark-primary-hover-color: #4b5c6d;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: #e9ecef;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover-color);
+        }
+
+        .high-risk {
+            background-color: #dc3545;
+            color: black;
+        }
+
+        .high-detection {
+            background-color: #dc3545;
+            color: black;
+        }
+
+        .clean-detection {
+            background-color: #28a745;
+            color: black;
+        }
+
+        .warning-row {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            width: calc(100% - 22px);
+            font-size: 1rem;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .filters-container .filter-input,
+        .filters-container .filter-select,
+        .filters-container .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+            color: black;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-background-color);
+            color: var(--dark-text-color);
+        }
+
+        #network {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid var(--border-color);
+            margin-top: 20px;
+            background-color: var(--background-color); /* Use light mode background color */
+        }
+
+        body.dark-mode #network {
+            border-color: var(--dark-border-color);
+            background-color: var(--dark-background-color); /* Use dark mode background color */
+        }
+
+        body.dark-mode th {
+            background-color: #2b3a47;
+        }
+
+        body.dark-mode td,
+        body.dark-mode th {
+            border-color: var(--dark-border-color);
+        }
+
+        body.dark-mode .filter-input,
+        body.dark-mode .filter-select {
+            background-color: #2b3a47;
+            color: var(--dark-text-color);
+            border-color: var(--dark-border-color);
+        }
+
+        body.dark-mode .filter-input:focus,
+        body.dark-mode .filter-select:focus {
+            border-color: var(--dark-primary-hover-color);
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: var(--primary-hover-color);
+        }
+
+        body.dark-mode tr:hover {
+            background-color: #2b3a47;
+            color: var(--dark-text-color);
+        }
+
+        .github-logo-light {
+            display: block;
+        }
+
+        .github-logo-dark {
+            display: none;
+        }
+
+        body.dark-mode .github-logo-light {
+            display: none;
+        }
+
+        body.dark-mode .github-logo-dark {
+            display: block;
+        }
+
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: var(--primary-hover-color);
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .footer nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .footer nav ul li {
+            display: inline;
+        }
+
+        .footer nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .footer nav ul li a:hover {
+            color: var(--primary-hover-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+            <img id="darkModeIcon" src="https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png" alt="Dark Mode"
+                width="20" height="20">
+        </button>
+        <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="github-logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
+                width="40" height="40" class="github-logo-light">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
+                width="40" height="40" class="github-logo-dark" style="filter: invert(1);">
+        </a>
+        <h1>Cyberbro - Graph view (experimental)</h1>
+        <button class="btn" onclick="goBack()">Go Back</button>
+        <button class="btn" onclick="toggleFullScreen()">Full Screen</button>
+        <button class="btn" id="layoutButton" onclick="switchLayout()">Switch to Circular</button>
+        <button class="btn" id="physicsButton" onclick="togglePhysics()">Stop Physics</button>
+        <script>
+            let physicsEnabled = true;
+
+            function togglePhysics() {
+            const container = document.getElementById("network");
+            if (!container) {
+                console.error("Network container not found.");
+                return;
+            }
+
+            const network = container.networkInstance;
+            if (!network) {
+                console.error("Network instance is not initialized.");
+                return;
+            }
+
+            physicsEnabled = !physicsEnabled;
+            console.log(`Toggling physics: ${physicsEnabled}`);
+            network.setOptions({
+                physics: {
+                enabled: physicsEnabled,
+                },
+            });
+
+            const physicsButton = document.getElementById("physicsButton");
+            physicsButton.textContent = physicsEnabled ? "Stop Physics" : "Enable Physics";
+            }
+
+            let currentLayoutIndex = 0;
+            const layouts = [
+                { name: "Organic", options: { layout: { randomSeed: undefined } } },
+                { name: "Circular", options: { layout: { hierarchical: false } } },
+                { name: "Orthogonal", options: { layout: { hierarchical: { direction: "UD", sortMethod: "directed" } } } },
+                { name: "Tree", options: { layout: { hierarchical: { direction: "LR", sortMethod: "hubsize" } } } },
+                { name: "Hierarchical", options: { layout: { hierarchical: { direction: "UD", sortMethod: "directed" } } } }
+            ];
+
+            function switchLayout() {
+                const container = document.getElementById("network");
+                const network = container.networkInstance;
+                if (!network) {
+                    console.error("Network instance is not initialized.");
+                    return;
+                }
+
+                currentLayoutIndex = (currentLayoutIndex + 1) % layouts.length;
+                const selectedLayout = layouts[currentLayoutIndex];
+                console.log(`Switching to layout: ${selectedLayout.name}`);
+
+                // Preserve the current physics state
+                const currentPhysicsState = physicsEnabled;
+                network.setOptions({
+                    ...(selectedLayout.options || {}),
+                    physics: { enabled: currentPhysicsState }
+                });
+
+                const layoutButton = document.getElementById("layoutButton");
+                layoutButton.textContent = `Switch to ${layouts[(currentLayoutIndex + 1) % layouts.length].name}`;
+            }
+        </script>
+        <button class="btn" onclick="exportToPNG()">Export to PNG (experimental)</button>
+        <script>
+            function exportToPNG() {
+                const container = document.getElementById("network");
+                if (!container) {
+                    console.error("Network container not found.");
+                    return;
+                }
+
+                const network = container.networkInstance;
+                if (!network) {
+                    console.error("Network instance is not initialized.");
+                    return;
+                }
+
+                // Temporarily set the container to its full size
+                const originalWidth = container.style.width;
+                const originalHeight = container.style.height;
+                container.style.width = "100%";
+                container.style.height = "100%";
+
+                // Stop physics simulation to stabilize the graph
+                network.setOptions({ physics: { enabled: false } });
+
+                // Set matching background color
+                const backgroundColor = getComputedStyle(document.body).backgroundColor;
+
+                html2canvas(container, {
+                    scale: 2, // Increase scale for higher resolution
+                    backgroundColor: backgroundColor // Match background color
+                }).then(canvas => {
+                    const link = document.createElement("a");
+                    link.download = "graph.png";
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                }).catch(err => {
+                    console.error("Error exporting graph to PNG:", err);
+                }).finally(() => {
+                    // Restore the container's original size
+                    container.style.width = originalWidth;
+                    container.style.height = originalHeight;
+
+                    // Re-enable physics simulation
+                    network.setOptions({ physics: { enabled: true } });
+                });
+            }
+
+            function toggleFullScreen() {
+                const container = document.getElementById("network");
+                if (!document.fullscreenElement) {
+                    container.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            function goBack() {
+            window.history.back();
+            }
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <div id="network"></div>
+    </div>
+
+    <script>
+        const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
+        const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+            updateDarkModeIcon();
+        }
+
+        function updateDarkModeIcon() {
+            const darkModeIcon = document.getElementById("darkModeIcon");
+            if (document.body.classList.contains("dark-mode")) {
+                darkModeIcon.src = sunIcon;
+                darkModeIcon.alt = "Light Mode";
+            } else {
+                darkModeIcon.src = moonIcon;
+                darkModeIcon.alt = "Dark Mode";
+            }
+        }
+
+        function applyDarkMode() {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark-mode");
+            }
+            updateDarkModeIcon();
+        }
+
+        applyDarkMode();
+
+        function generateGraph(data) {
+            const nodes = [];
+            const edges = [];
+            const addedNodes = new Set();
+
+            function addNode(id, label, group = "default") {
+            if (!addedNodes.has(id)) {
+                nodes.push({ id, label, group });
+                addedNodes.add(id);
+            }
+            }
+
+            data.forEach(entry => {
+            const obs = entry.observable;
+            if (!obs) return;
+
+            addNode(obs, obs, "observable");
+
+            const providers = ["ipinfo", "ipquery", "webscout"];
+            providers.forEach(provider => {
+                if (entry[provider]?.asn) {
+                const asn = String(entry[provider].asn);
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns) {
+                    entry.reverse_dns.reverse_dns.forEach(reverse => {
+                        addNode(asn, asn, "asn");
+                        edges.push({ from: reverse, to: asn, label: `ASN (${provider})` });
+                    });
+                    }
+                } else {
+                    addNode(asn, asn, "asn");
+                    edges.push({ from: obs, to: asn, label: `ASN (${provider})` });
+                }
+                }
+
+                if (entry[provider]?.country_name) {
+                const country = entry[provider].country_name;
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns) {
+                    entry.reverse_dns.reverse_dns.forEach(reverse => {
+                        addNode(country, country, "country_name");
+                        edges.push({ from: reverse, to: country, label: `Country (${provider})` });
+                    });
+                    }
+                } else {
+                    addNode(country, country, "country_name");
+                    edges.push({ from: obs, to: country, label: `Country (${provider})` });
+                }
+                }
+            });
+
+            if (entry.spur?.tunnels && entry.spur.tunnels !== "Not anonymous") {
+                const tunnels = entry.spur.tunnels;
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns) {
+                        entry.reverse_dns.reverse_dns.forEach(reverse => {
+                            addNode(tunnels, tunnels, "tunnels");
+                            edges.push({ from: reverse, to: tunnels, label: "Tunnel (Spur.us)" });
+                        });
+                    }
+                } else {
+                    addNode(tunnels, tunnels, "tunnels");
+                    edges.push({ from: obs, to: tunnels, label: "Tunnel (Spur.us)" });
+                }
+            }
+
+            if (entry.shodan?.ports) {
+                entry.shodan.ports.forEach(port => {
+                const portNode = `Port ${port}`;
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns) {
+                    entry.reverse_dns.reverse_dns.forEach(reverse => {
+                        addNode(portNode, portNode, "port");
+                        edges.push({ from: reverse, to: portNode, label: "Port" });
+                    });
+                    }
+                } else {
+                    addNode(portNode, portNode, "port");
+                    edges.push({ from: obs, to: portNode, label: "Port" });
+                }
+                });
+            }
+
+            if (entry.reverse_dns?.reverse_dns) {
+                entry.reverse_dns.reverse_dns.forEach(reverse => {
+                addNode(reverse, reverse, "reverse_dns");
+                edges.push({ from: obs, to: reverse, label: "Reverse DNS" });
+                });
+            }
+
+            if (entry.threatfox?.malware_printable) {
+                entry.threatfox.malware_printable.forEach(malware => {
+                addNode(malware, malware, "malware");
+                edges.push({ from: obs, to: malware, label: "Malware" });
+                });
+            }
+
+            if (entry.urlscan?.top_domains) {
+                entry.urlscan.top_domains.forEach(domainEntry => {
+                const domain = domainEntry.domain;
+                addNode(domain, domain, "domain");
+                edges.push({ from: obs, to: domain, label: `Related domain (URLscan)` });
+                });
+            }
+
+            if (entry.github?.results) {
+                entry.github.results.forEach(githubEntry => {
+                const githubTitle = githubEntry.title;
+                addNode(githubTitle, githubTitle, "github");
+                edges.push({ from: obs, to: githubTitle, label: "GitHub" });
+                });
+            }
+
+            if (entry.google?.results) {
+                entry.google.results.forEach(googleEntry => {
+                const googleTitle = googleEntry.title;
+                if (googleTitle && googleTitle.trim() !== "") {
+                    addNode(googleTitle, googleTitle, "google");
+                    edges.push({ from: obs, to: googleTitle, label: "Google" });
+                }
+                });
+            }
+
+            if (entry.ioc_one_html?.results) {
+                entry.ioc_one_html.results.forEach(result => {
+                const htmlTitle = result.title;
+                if (htmlTitle && htmlTitle.trim() !== "") {
+                    addNode(htmlTitle, htmlTitle, "ioc_one_html");
+                    edges.push({ from: obs, to: htmlTitle, label: "Ioc[.]One" });
+                }
+                });
+            }
+
+            if (entry.ioc_one_pdf?.results) {
+                entry.ioc_one_pdf.results.forEach(result => {
+                const pdfTitle = result.title;
+                if (pdfTitle && pdfTitle.trim() !== "") {
+                    addNode(pdfTitle, pdfTitle, "ioc_one_pdf");
+                    edges.push({ from: obs, to: pdfTitle, label: "Ioc[.]One" });
+                }
+                });
+            }
+            });
+
+            data.forEach(entry => {
+            if ((entry.type === "FQDN" || entry.type === "URL") && entry.rdap) {
+                const rdap = entry.rdap;
+
+                if (rdap.registrar) {
+                addNode(rdap.registrar, rdap.registrar, "rdap_registrar");
+                edges.push({ from: entry.observable, to: rdap.registrar, label: "Registrar" });
+                }
+
+                if (rdap.organization) {
+                addNode(rdap.organization, rdap.organization, "rdap_organization");
+                edges.push({ from: entry.observable, to: rdap.organization, label: "Organization" });
+                }
+
+                if (rdap.abuse_contact) {
+                addNode(rdap.abuse_contact, rdap.abuse_contact, "rdap_abuse_contact");
+                edges.push({ from: entry.observable, to: rdap.abuse_contact, label: "Abuse Contact" });
+                }
+
+                if (rdap.registrant) {
+                addNode(rdap.registrant, rdap.registrant, "rdap_registrant");
+                edges.push({ from: entry.observable, to: rdap.registrant, label: "Registrant" });
+                }
+
+                if (rdap.registrant_email) {
+                addNode(rdap.registrant_email, rdap.registrant_email, "rdap_registrant_email");
+                edges.push({ from: entry.observable, to: rdap.registrant_email, label: "Registrant Email" });
+                }
+
+                if (rdap.name_servers && Array.isArray(rdap.name_servers)) {
+                rdap.name_servers.forEach(nameServer => {
+                    addNode(nameServer, nameServer, "rdap_name_server");
+                    edges.push({ from: entry.observable, to: nameServer, label: "Name Server" });
+                });
+                }
+            }
+            });
+
+            const container = document.getElementById("network");
+            const networkData = {
+            nodes: new vis.DataSet(nodes),
+            edges: new vis.DataSet(edges),
+            };
+            const options = {
+            nodes: {
+                shape: "dot",
+                size: 12,
+                font: {
+                    size: 12,
+                    color: document.body.classList.contains("dark-mode") ? "white" : "black" // Adjust node label color based on mode
+                }
+            },
+            edges: {
+                font: {
+                    size: 12,
+                    align: "horizontal",
+                    strokeWidth: 0, // Removes shadow of edge labels
+                    color: document.body.classList.contains("dark-mode") ? "white" : "black", // Adjust label color based on mode
+                }
+            },
+            groups: {
+                observable: { color: { background: "#ff6f61" } },
+                asn: { color: { background: "#87ceeb" } },
+                country_name: { color: { background: "#90ee90" } },
+                port: { color: { background: "#f5b041" } },
+                reverse_dns: { color: { background: "#d4a6ff" } },
+                malware: { color: { background: "#ffcccb" } },
+            },
+            physics: {
+                stabilization: false,
+                barnesHut: { gravitationalConstant: -20000 }
+            },
+            layout: {
+                improvedLayout: true
+            }
+            };
+            const network = new vis.Network(container, networkData, options);
+            container.networkInstance = network; // Assign the network instance to the container
+        }
+
+        // Parse JSON data from Jinja variable and generate the graph
+        const data = JSON.parse(`{{ analysis_results | tojson | safe }}`);
+        generateGraph(data);
+    </script>
+
+    
+</body>
+<footer class="footer">
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/history">History</a></li>
+            <li><a href="/stats">Statistics</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+</footer>
+
+</html>

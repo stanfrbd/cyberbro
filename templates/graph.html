@@ -657,10 +657,16 @@
             const network = new vis.Network(container, networkData, options);
             container.networkInstance = network; // Assign the network instance to the container
         }
-
-        // Parse JSON data from Jinja variable and generate the graph
-        const data = JSON.parse(`{{ analysis_results | tojson | safe }}`);
-        generateGraph(data);
+        
+        // Fetch the analysis results from the server
+        fetch(`/{{ API_PREFIX }}/results/{{ analysis_id }}`)
+            .then(response => response.json())
+            .then(data => {
+            generateGraph(data);
+            })
+            .catch(error => {
+            console.error('Error fetching analysis results:', error);
+            });
     </script>
 
     

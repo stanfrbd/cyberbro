@@ -455,13 +455,15 @@
             const providers = ["ipinfo", "ipquery", "webscout"];
             providers.forEach(provider => {
                 if (entry[provider]?.asn) {
-                const asn = String(entry[provider].asn);
+                const asn = (provider === "ipquery") 
+                    ? `${entry[provider].asn} ${entry[provider].isp}` 
+                    : String(entry[provider].asn);
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
-                    entry.reverse_dns.reverse_dns.forEach(reverse => {
-                        addNode(asn, asn, "asn");
-                        edges.push({ from: reverse, to: asn, label: `ASN (${provider})` });
-                    });
+                        if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
+                            addNode(asn, asn, "asn");
+                            edges.push({ from: entry[provider].ip, to: asn, label: `ASN (${provider})` });
+                        }
                     }
                 } else {
                     addNode(asn, asn, "asn");
@@ -469,30 +471,33 @@
                 }
                 }
 
-                if (entry[provider]?.country_name) {
-                const country = entry[provider].country_name;
-                if (entry.type === "FQDN" || entry.type === "URL") {
-                    if (entry.reverse_dns?.reverse_dns) {
-                    entry.reverse_dns.reverse_dns.forEach(reverse => {
-                        addNode(country, country, "country_name");
-                        edges.push({ from: reverse, to: country, label: `Country (${provider})` });
-                    });
-                    }
-                } else {
-                    addNode(country, country, "country_name");
-                    edges.push({ from: obs, to: country, label: `Country (${provider})` });
-                }
-                }
-            });
+                if (entry[provider]?.country_name && entry[provider]?.country_code) {
+                    const country = entry[provider].country_name;
+                    const countryCode = entry[provider].country_code.toLowerCase();
+                    const flagUrl = `https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/1x1/${countryCode}.svg`;
 
-            if (entry.spur?.tunnels && entry.spur.tunnels !== "Not anonymous") {
+                    addNode(country, country, "country_name");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = flagUrl;
+
+                    const fromNode = (entry.type === "FQDN" || entry.type === "URL") && entry.reverse_dns?.reverse_dns?.includes(entry[provider].ip)
+                        ? entry[provider].ip
+                        : obs;
+
+                    edges.push({ from: fromNode, to: country, label: `Country (${provider})` });
+                }
+                
+                // Check if the provider has an IP address
+                if (entry[provider]?.ip) {
+                // Check for IP address with Spur.us data
+                if (entry.spur?.tunnels && entry.spur.tunnels !== "Not anonymous") {
                 const tunnels = entry.spur.tunnels;
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
-                        entry.reverse_dns.reverse_dns.forEach(reverse => {
+                        if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
                             addNode(tunnels, tunnels, "tunnels");
-                            edges.push({ from: reverse, to: tunnels, label: "Tunnel (Spur.us)" });
-                        });
+                            edges.push({ from: entry[provider].ip, to: tunnels, label: "Tunnel (Spur.us)" });
+                        }
                     }
                 } else {
                     addNode(tunnels, tunnels, "tunnels");
@@ -500,15 +505,32 @@
                 }
             }
 
+            // Check for Abusix data
+            if (entry.abusix?.abuse) {
+                const abuseAddress = entry.abusix.abuse;
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns) {
+                        if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
+                            addNode(abuseAddress, abuseAddress, "abuse");
+                            edges.push({ from: entry[provider].ip, to: abuseAddress, label: "Abuse (Abusix)" });
+                        }
+                    }
+                } else {
+                    addNode(abuseAddress, abuseAddress, "abuse");
+                    edges.push({ from: obs, to: abuseAddress, label: "Abuse (Abusix)" });
+                }
+            }
+            
+            // Check for Shodan data
             if (entry.shodan?.ports) {
                 entry.shodan.ports.forEach(port => {
                 const portNode = `Port ${port}`;
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
-                    entry.reverse_dns.reverse_dns.forEach(reverse => {
+                    if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
                         addNode(portNode, portNode, "port");
-                        edges.push({ from: reverse, to: portNode, label: "Port" });
-                    });
+                        edges.push({ from: entry[provider].ip, to: portNode, label: "Port" });
+                    }
                     }
                 } else {
                     addNode(portNode, portNode, "port");
@@ -516,6 +538,10 @@
                 }
                 });
             }
+        }
+
+            // end of provider loop
+            });
 
             if (entry.reverse_dns?.reverse_dns) {
                 entry.reverse_dns.reverse_dns.forEach(reverse => {
@@ -543,6 +569,8 @@
                 entry.github.results.forEach(githubEntry => {
                 const githubTitle = githubEntry.title;
                 addNode(githubTitle, githubTitle, "github");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/github.png'; /* GitHub icon */
                 edges.push({ from: obs, to: githubTitle, label: "GitHub" });
                 });
             }
@@ -552,9 +580,88 @@
                 const googleTitle = googleEntry.title;
                 if (googleTitle && googleTitle.trim() !== "") {
                     addNode(googleTitle, googleTitle, "google");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/google-logo.png'; /* Example: Icons8 Google icon */
                     edges.push({ from: obs, to: googleTitle, label: "Google" });
                 }
                 });
+            }
+
+            if (entry.opencti?.latest_indicator_name && entry.opencti.latest_indicator_name.trim() !== "") {
+                const indicatorName = "Known CTI Indicator";
+                addNode(indicatorName, indicatorName, "known_indicator");
+                const revocation_status = entry.opencti.revoked ? "Revoked" : "Active";
+                const opencti_score = `Score: ${entry.opencti.x_opencti_score}`;
+                edges.push({ from: obs, to: indicatorName, label: `OpenCTI entity (${revocation_status}, ${opencti_score})` });
+            }
+
+            if (entry.type === "Email" && entry.hudsonrock?.stealers) {
+                entry.hudsonrock.stealers.forEach(stealer => {
+                    if (stealer.computer_name) {
+                        addNode(stealer.computer_name, stealer.computer_name, "compromised_computer");
+                        edges.push({ from: obs, to: stealer.computer_name, label: "Compromised Computer (Hudson Rock)" });
+                    }
+                    if (stealer.malware_path) {
+                        addNode(stealer.malware_path, stealer.malware_path, "malware_path");
+                        edges.push({ from: obs, to: stealer.malware_path, label: "Malware Path (Hudson Rock)" });
+                    }
+                    if (stealer.ip) {
+                        addNode(stealer.ip, stealer.ip, "ip");
+                        edges.push({ from: obs, to: stealer.ip, label: "IP Address (Hudson Rock)" });
+                    }
+                    if (stealer.operating_system) {
+                        addNode(stealer.operating_system, stealer.operating_system, "operating_system");
+                        edges.push({ from: obs, to: stealer.operating_system, label: "Operating System (Hudson Rock)" });
+                    }
+                });
+            }
+
+            // Handle Hudson Rock results for FQDN
+            if (entry.type === "FQDN" && entry.hudsonrock) {
+                const hudsonrock = entry.hudsonrock;
+
+                // Add applications
+                if (hudsonrock.applications) {
+                    hudsonrock.applications.forEach(app => {
+                        const appKeyword = app.keyword;
+                        addNode(appKeyword, appKeyword, "application");
+                        edges.push({ from: obs, to: appKeyword, label: "Application (Hudson Rock)" });
+                    });
+                }
+
+                // Add all_urls (Employee and User URLs)
+                if (hudsonrock.data?.all_urls) {
+                    hudsonrock.data.all_urls.forEach(urlEntry => {
+                        const url = urlEntry.url;
+                        const urlType = urlEntry.type;
+                        if (!url.includes("\u2022")) { // Ignore URLs containing "\u2022"
+                            addNode(url, url, "url");
+                            edges.push({ from: obs, to: url, label: `${urlType} URL (Hudson Rock)` });
+                        }
+                    });
+                }
+
+                // Add stealer families
+                if (hudsonrock.stealerFamilies) {
+                    Object.keys(hudsonrock.stealerFamilies).forEach(family => {
+                        if (family !== "total" && family.toLowerCase() !== "unknown") {
+                            const familyNode = `${family}`;
+                            addNode(familyNode, familyNode, "stealer_family");
+                            edges.push({ from: obs, to: familyNode, label: "Stealer Family (Hudson Rock)" });
+                        }
+                    });
+                }
+
+                // Add third-party domains
+                if (hudsonrock.thirdPartyDomains) {
+                    hudsonrock.thirdPartyDomains.forEach(domainEntry => {
+                        const domain = domainEntry.domain;
+                        if (!domain.includes("\u2022")) { // Ignore domains containing "\u2022"
+                            addNode(domain, domain, "third_party_domain");
+                            edges.push({ from: obs, to: domain, label: "Third Party Domain (Hudson Rock)" });
+                        }
+                    });
+                }
             }
 
             if (entry.ioc_one_html?.results) {
@@ -576,6 +683,23 @@
                 }
                 });
             }
+
+            // Check for Chrome / Edge extension data
+            if (entry.type == "CHROME_EXTENSION") {
+                const extensionName = entry.extension.name;
+                addNode(extensionName, extensionName, "extension");
+                edges.push({ from: obs, to: extensionName, label: "Extension Name" });
+            }
+
+            if (entry.type == "Email") {
+                const email = entry.observable;
+                const domain = email.split("@")[1]; // Extract the domain name from the email address
+                if (domain) {
+                    addNode(domain, domain, "domain"); // Add the domain as a node if it doesn't already exist
+                    edges.push({ from: email, to: domain, label: "Email Domain" }); // Link the email to the domain
+                }
+            }
+
             });
 
             data.forEach(entry => {

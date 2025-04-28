@@ -550,6 +550,37 @@
                 }
                 });
             }
+
+            if (entry.abuseipdb) {
+                const abuseipdbData = entry.abuseipdb;
+                const abuseipdbNode = "AbuseIPDB flagged";
+
+                let edgeLabel = "";
+                if (abuseipdbData.reports) {
+                    edgeLabel += `Reports: ${abuseipdbData.reports}`;
+                }
+                if (abuseipdbData.risk_score) {
+                    edgeLabel += (edgeLabel ? ", " : "") + `Risk: ${abuseipdbData.risk_score} %`;
+                }
+
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns) {
+                        if (entry[provider]?.ip && entry.reverse_dns.reverse_dns.includes(entry[provider]?.ip)) {
+                            addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged");
+                            nodes[nodes.length - 1].shape = 'image';
+                            nodes[nodes.length - 1].image = 'https://www.abuseipdb.com/img/abuseipdb-logo.svg'; /* AbuseIPDB icon */
+                            edges.push({ from: entry[provider]?.ip, to: abuseipdbNode, label: edgeLabel });
+                        }
+                    }
+                } else {
+                    addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://www.abuseipdb.com/img/abuseipdb-logo.svg'; /* AbuseIPDB icon */
+                    edges.push({ from: obs, to: abuseipdbNode, label: edgeLabel });
+                }
+            }
+
+            
         }
 
             // end of provider loop
@@ -622,25 +653,6 @@
                     vtEdgeLabel += (vtEdgeLabel ? ", " : "") + `Community: ${entry.virustotal.community_score}`;
                 }
                 edges.push({ from: obs, to: vtNodeLabel, label: vtEdgeLabel });
-            }
-
-            if (entry.abuseipdb) {
-                const abuseipdbData = entry.abuseipdb;
-
-                const abuseipdbNode = "AbuseIPDB flagged";
-                addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://www.abuseipdb.com/img/abuseipdb-logo.svg'; /* AbuseIPDB icon */
-
-                let edgeLabel = "";
-                if (abuseipdbData.reports) {
-                    edgeLabel += `Reports: ${abuseipdbData.reports}`;
-                }
-                if (abuseipdbData.risk_score) {
-                    edgeLabel += (edgeLabel ? ", " : "") + `Risk: ${abuseipdbData.risk_score} %`;
-                }
-
-                edges.push({ from: obs, to: abuseipdbNode, label: edgeLabel });
             }
 
             if (entry.type === "Email" && entry.hudsonrock?.stealers) {

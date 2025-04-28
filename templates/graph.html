@@ -560,6 +560,8 @@
             if (entry.urlscan?.top_domains) {
                 entry.urlscan.top_domains.forEach(domainEntry => {
                 const domain = domainEntry.domain;
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://urlscan.io/img/urlscan_256.png';
                 addNode(domain, domain, "domain");
                 edges.push({ from: obs, to: domain, label: `Related domain (URLscan)` });
                 });
@@ -593,6 +595,15 @@
                 const revocation_status = entry.opencti.revoked ? "Revoked" : "Active";
                 const opencti_score = `Score: ${entry.opencti.x_opencti_score}`;
                 edges.push({ from: obs, to: indicatorName, label: `OpenCTI entity (${revocation_status}, ${opencti_score})` });
+            }
+
+            if (entry.virustotal && entry.virustotal.total_malicious > 0) {
+                const vtNodeLabel = "VT flagged";
+                addNode(vtNodeLabel, vtNodeLabel, "virustotal");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://images.icon-icons.com/2699/PNG/32/virustotal_logo_icon_171247.png'; /* VirusTotal icon */
+                const vtEdgeLabel = `VT ${entry.virustotal.detection_ratio || "N/A"}, Community: ${entry.virustotal.community_score || "N/A"}`;
+                edges.push({ from: obs, to: vtNodeLabel, label: vtEdgeLabel });
             }
 
             if (entry.type === "Email" && entry.hudsonrock?.stealers) {

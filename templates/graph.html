@@ -462,11 +462,15 @@
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
                             addNode(asn, asn, "asn");
+                            nodes[nodes.length - 1].shape = 'image';
+                            nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
                             edges.push({ from: entry[provider].ip, to: asn, label: `ASN (${provider})` });
                         }
                     }
                 } else {
                     addNode(asn, asn, "asn");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
                     edges.push({ from: obs, to: asn, label: `ASN (${provider})` });
                 }
                 }
@@ -496,11 +500,15 @@
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
                             addNode(tunnels, tunnels, "tunnels");
+                            nodes[nodes.length - 1].shape = 'image';
+                            nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/lock.png';
                             edges.push({ from: entry[provider].ip, to: tunnels, label: "Tunnel (Spur.us)" });
                         }
                     }
                 } else {
                     addNode(tunnels, tunnels, "tunnels");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/lock.png';
                     edges.push({ from: obs, to: tunnels, label: "Tunnel (Spur.us)" });
                 }
             }
@@ -512,11 +520,15 @@
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
                             addNode(abuseAddress, abuseAddress, "abuse");
+                            nodes[nodes.length - 1].shape = 'image';
+                            nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
                             edges.push({ from: entry[provider].ip, to: abuseAddress, label: "Abuse (Abusix)" });
                         }
                     }
                 } else {
                     addNode(abuseAddress, abuseAddress, "abuse");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
                     edges.push({ from: obs, to: abuseAddress, label: "Abuse (Abusix)" });
                 }
             }
@@ -590,11 +602,11 @@
             }
 
             if (entry.opencti?.latest_indicator_name && entry.opencti.latest_indicator_name.trim() !== "") {
-                const indicatorName = "Known CTI Indicator";
-                addNode(indicatorName, indicatorName, "known_indicator");
+                const indicatorName = "OpenCTI flagged";
+                addNode(indicatorName, indicatorName, "opencti_indicator");
                 const revocation_status = entry.opencti.revoked ? "Revoked" : "Active";
                 const opencti_score = `Score: ${entry.opencti.x_opencti_score}`;
-                edges.push({ from: obs, to: indicatorName, label: `OpenCTI entity (${revocation_status}, ${opencti_score})` });
+                edges.push({ from: obs, to: indicatorName, label: `OpenCTI indicator (${revocation_status}, ${opencti_score})` });
             }
 
             if (entry.virustotal && entry.virustotal.total_malicious > 0) {
@@ -602,8 +614,33 @@
                 addNode(vtNodeLabel, vtNodeLabel, "virustotal");
                 nodes[nodes.length - 1].shape = 'image';
                 nodes[nodes.length - 1].image = 'https://images.icon-icons.com/2699/PNG/32/virustotal_logo_icon_171247.png'; /* VirusTotal icon */
-                const vtEdgeLabel = `VT ${entry.virustotal.detection_ratio || "N/A"}, Community: ${entry.virustotal.community_score || "N/A"}`;
+                let vtEdgeLabel = "";
+                if (entry.virustotal.detection_ratio) {
+                    vtEdgeLabel += `VT ${entry.virustotal.detection_ratio}`;
+                }
+                if (entry.virustotal.community_score) {
+                    vtEdgeLabel += (vtEdgeLabel ? ", " : "") + `Community: ${entry.virustotal.community_score}`;
+                }
                 edges.push({ from: obs, to: vtNodeLabel, label: vtEdgeLabel });
+            }
+
+            if (entry.abuseipdb) {
+                const abuseipdbData = entry.abuseipdb;
+
+                const abuseipdbNode = "AbuseIPDB flagged";
+                addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://www.abuseipdb.com/img/abuseipdb-logo.svg'; /* AbuseIPDB icon */
+
+                let edgeLabel = "";
+                if (abuseipdbData.reports) {
+                    edgeLabel += `Reports: ${abuseipdbData.reports}`;
+                }
+                if (abuseipdbData.risk_score) {
+                    edgeLabel += (edgeLabel ? ", " : "") + `Risk: ${abuseipdbData.risk_score} %`;
+                }
+
+                edges.push({ from: obs, to: abuseipdbNode, label: edgeLabel });
             }
 
             if (entry.type === "Email" && entry.hudsonrock?.stealers) {
@@ -680,6 +717,8 @@
                 const htmlTitle = result.title;
                 if (htmlTitle && htmlTitle.trim() !== "") {
                     addNode(htmlTitle, htmlTitle, "ioc_one_html");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/document.png';
                     edges.push({ from: obs, to: htmlTitle, label: "Ioc[.]One" });
                 }
                 });
@@ -690,6 +729,8 @@
                 const pdfTitle = result.title;
                 if (pdfTitle && pdfTitle.trim() !== "") {
                     addNode(pdfTitle, pdfTitle, "ioc_one_pdf");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/document.png';
                     edges.push({ from: obs, to: pdfTitle, label: "Ioc[.]One" });
                 }
                 });
@@ -719,32 +760,44 @@
 
                 if (rdap.registrar) {
                 addNode(rdap.registrar, rdap.registrar, "rdap_registrar");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
                 edges.push({ from: entry.observable, to: rdap.registrar, label: "Registrar" });
                 }
 
                 if (rdap.organization) {
                 addNode(rdap.organization, rdap.organization, "rdap_organization");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
                 edges.push({ from: entry.observable, to: rdap.organization, label: "Organization" });
                 }
 
                 if (rdap.abuse_contact) {
                 addNode(rdap.abuse_contact, rdap.abuse_contact, "rdap_abuse_contact");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
                 edges.push({ from: entry.observable, to: rdap.abuse_contact, label: "Abuse Contact" });
                 }
 
                 if (rdap.registrant) {
                 addNode(rdap.registrant, rdap.registrant, "rdap_registrant");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
                 edges.push({ from: entry.observable, to: rdap.registrant, label: "Registrant" });
                 }
 
                 if (rdap.registrant_email) {
                 addNode(rdap.registrant_email, rdap.registrant_email, "rdap_registrant_email");
+                nodes[nodes.length - 1].shape = 'image';
+                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
                 edges.push({ from: entry.observable, to: rdap.registrant_email, label: "Registrant Email" });
                 }
 
                 if (rdap.name_servers && Array.isArray(rdap.name_servers)) {
                 rdap.name_servers.forEach(nameServer => {
                     addNode(nameServer, nameServer, "rdap_name_server");
+                    nodes[nodes.length - 1].shape = 'image';
+                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/server.png';
                     edges.push({ from: entry.observable, to: nameServer, label: "Name Server" });
                 });
                 }

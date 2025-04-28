@@ -625,6 +625,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             <button class="btn" onclick="location.href='/graph/{{ analysis_results.id }}'">Graph (experimental)</button>
             <button class="btn" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">Raw</button>
             <button class="btn" onclick="copyAsPlainText()">Copy as Plain Text</button>
+            <button class="btn" onclick="copyAsDefanged()">Copy Defanged [.]</button>
         </div>
 
         <script>
@@ -700,7 +701,20 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                                 plainText += `Abusix: ${result.abusix.abuse}\n`;
                             }
                             if (result.rdap) {
-                                plainText += `RDAP: Registrar: ${result.rdap.registrar}, Abuse Contact: ${result.rdap.abuse_contact}, Registrant: ${result.rdap.registrant}, Organization: ${result.rdap.organization}, Registrant Email: ${result.rdap.registrant_email}, Creation Date: ${result.rdap.creation_date}, Expiration Date: ${result.rdap.expiration_date}, Updated Date: ${result.rdap.update_date}, Name Servers: ${result.rdap.name_servers.join(', ')}\n`;
+                                if (result.rdap) {
+                                    plainText += `RDAP:\n`;
+                                    if (result.rdap.registrar) plainText += `- Registrar: ${result.rdap.registrar}\n`;
+                                    if (result.rdap.abuse_contact) plainText += `- Abuse Contact: ${result.rdap.abuse_contact}\n`;
+                                    if (result.rdap.registrant) plainText += `- Registrant: ${result.rdap.registrant}\n`;
+                                    if (result.rdap.organization) plainText += `- Organization: ${result.rdap.organization}\n`;
+                                    if (result.rdap.registrant_email) plainText += `- Registrant Email: ${result.rdap.registrant_email}\n`;
+                                    if (result.rdap.creation_date) plainText += `- Creation Date: ${result.rdap.creation_date}\n`;
+                                    if (result.rdap.expiration_date) plainText += `- Expiration Date: ${result.rdap.expiration_date}\n`;
+                                    if (result.rdap.update_date) plainText += `- Updated Date: ${result.rdap.update_date}\n`;
+                                    if (result.rdap.name_servers && result.rdap.name_servers.length > 0) {
+                                        plainText += `- Name Servers: ${result.rdap.name_servers.join(', ')}\n`;
+                                    }
+                                }
                             }
                             if (result.threatfox && result.threatfox.count > 0) {
                                 plainText += `ThreatFox: Count: ${result.threatfox.count}, Malware: ${result.threatfox.malware_printable.join(', ')}\n`;
@@ -840,6 +854,27 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     .catch(err => {
                         console.error('Failed to fetch results: ', err);
                     });
+            }
+
+            function copyAsDefanged() {
+                copyAsPlainText(); // Use the existing function to copy plain text
+                setTimeout(() => {
+                    navigator.clipboard.readText().then((plainText) => {
+                        const defangedText = plainText
+                            .replace(/\./g, '[.]')
+                            .replace(/@/g, '[@]')
+                            .replace(/:\/\//g, '[://]');
+                        navigator.clipboard.writeText(defangedText).then(() => {
+                            const copyButton = document.querySelector('.btn[onclick="copyAsDefanged()"]');
+                            copyButton.style.backgroundColor = 'green';
+                            copyButton.textContent = 'Defanged and Copied!';
+                        }).catch(err => {
+                            console.error('Failed to copy defanged text: ', err);
+                        });
+                    }).catch(err => {
+                        console.error('Failed to read clipboard text: ', err);
+                    });
+                }, 100); // Add a slight delay to ensure clipboard content is updated
             }
         </script>
 

@@ -43,6 +43,14 @@ Inspired by [Cybergordon](https://cybergordon.com/) and [IntelOwl](https://githu
 This project aims to provide a simple and efficient way to check the reputation of your observables using multiple services, 
 without having to deploy a **complex** solution.
 
+# Demo
+
+## New graph feature
+
+![cyberbro_graph](https://github.com/user-attachments/assets/0b4e46d0-64ad-4950-8520-c5b2f5102206)
+
+## Bulk
+
 ![cyberbro_gh](https://github.com/user-attachments/assets/d82a021c-a199-4f07-ab26-7af8e1b650a0)
 
 # Features
@@ -63,6 +71,7 @@ without having to deploy a **complex** solution.
 * **Grep.App**: Search for observables with Grep.App API (fast GitHub searches).
 * **Hudson Rock**: Check if an email / domain was part of a data breach or was victim of an infostealer.
 * **Analysis History**: Maintain a history of analyses with easy retrieval and search functionality.
+* **Graph view**: view your analysis as a graph (experimental)
 
 # What Cyberbro does that others don't
 

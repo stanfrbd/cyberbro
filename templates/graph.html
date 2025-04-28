@@ -274,7 +274,7 @@
                 width="40" height="40" class="github-logo-dark" style="filter: invert(1);">
         </a>
         <h1>Cyberbro - Graph view (experimental)</h1>
-        <button class="btn" onclick="goBack()">Go Back</button>
+        <button class="btn" onclick="window.location.href='/results/{{ analysis_id }}'">Go Back</button>
         <button class="btn" onclick="toggleFullScreen()">Full Screen</button>
         <button class="btn" id="layoutButton" onclick="switchLayout()">Switch to Circular</button>
         <button class="btn" id="physicsButton" onclick="togglePhysics()">Stop Physics</button>
@@ -338,52 +338,8 @@
                 layoutButton.textContent = `Switch to ${layouts[(currentLayoutIndex + 1) % layouts.length].name}`;
             }
         </script>
-        <button class="btn" onclick="exportToPNG()">Export to PNG (experimental)</button>
+        
         <script>
-            function exportToPNG() {
-                const container = document.getElementById("network");
-                if (!container) {
-                    console.error("Network container not found.");
-                    return;
-                }
-
-                const network = container.networkInstance;
-                if (!network) {
-                    console.error("Network instance is not initialized.");
-                    return;
-                }
-
-                // Temporarily set the container to its full size
-                const originalWidth = container.style.width;
-                const originalHeight = container.style.height;
-                container.style.width = "100%";
-                container.style.height = "100%";
-
-                // Stop physics simulation to stabilize the graph
-                network.setOptions({ physics: { enabled: false } });
-
-                // Set matching background color
-                const backgroundColor = getComputedStyle(document.body).backgroundColor;
-
-                html2canvas(container, {
-                    scale: 2, // Increase scale for higher resolution
-                    backgroundColor: backgroundColor // Match background color
-                }).then(canvas => {
-                    const link = document.createElement("a");
-                    link.download = "graph.png";
-                    link.href = canvas.toDataURL("image/png");
-                    link.click();
-                }).catch(err => {
-                    console.error("Error exporting graph to PNG:", err);
-                }).finally(() => {
-                    // Restore the container's original size
-                    container.style.width = originalWidth;
-                    container.style.height = originalHeight;
-
-                    // Re-enable physics simulation
-                    network.setOptions({ physics: { enabled: true } });
-                });
-            }
 
             function toggleFullScreen() {
                 const container = document.getElementById("network");
@@ -395,12 +351,7 @@
                     document.exitFullscreen();
                 }
             }
-
-            function goBack() {
-            window.history.back();
-            }
         </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
         <div id="network"></div>
     </div>
 
@@ -550,9 +501,15 @@
 
             if (entry.abuseipdb) {
                 const abuseipdbData = entry.abuseipdb;
-                const abuseipdbNode = "AbuseIPDB flagged";
 
+                // Skip adding a node if both reports and risk_score are 0
+                if (abuseipdbData.reports === 0 && abuseipdbData.risk_score === 0) {
+                    return;
+                }
+
+                const abuseipdbNode = "AbuseIPDB flagged";
                 let edgeLabel = "";
+
                 if (abuseipdbData.reports) {
                     edgeLabel += `Reports: ${abuseipdbData.reports}`;
                 }

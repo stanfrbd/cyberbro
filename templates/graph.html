@@ -439,18 +439,29 @@
             const edges = [];
             const addedNodes = new Set();
 
-            function addNode(id, label, group = "default") {
-            if (!addedNodes.has(id)) {
-                nodes.push({ id, label, group });
-                addedNodes.add(id);
-            }
+            function addNode(id, label, group = "default", imageUrl = null) {
+                if (!addedNodes.has(id)) {
+                    const newNode = {
+                        id,
+                        label,
+                        group
+                    };
+
+                    if (imageUrl) {
+                        newNode.shape = 'image';
+                        newNode.image = imageUrl;
+                    }
+
+                    nodes.push(newNode);
+                    addedNodes.add(id);
+                }
             }
 
             data.forEach(entry => {
             const obs = entry.observable;
             if (!obs) return;
 
-            addNode(obs, obs, "observable");
+            addNode(obs, obs, "observable", "https://img.icons8.com/officexs/32/goal.png");
 
             const providers = ["ipinfo", "ipquery", "webscout"];
             providers.forEach(provider => {
@@ -461,16 +472,12 @@
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
-                            addNode(asn, asn, "asn");
-                            nodes[nodes.length - 1].shape = 'image';
-                            nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
+                            addNode(asn, asn, "asn", 'https://img.icons8.com/officexs/32/organization.png');
                             edges.push({ from: entry[provider].ip, to: asn, label: `ASN (${provider})` });
                         }
                     }
                 } else {
-                    addNode(asn, asn, "asn");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
+                    addNode(asn, asn, "asn", 'https://img.icons8.com/officexs/32/organization.png');
                     edges.push({ from: obs, to: asn, label: `ASN (${provider})` });
                 }
                 }
@@ -480,9 +487,7 @@
                     const countryCode = entry[provider].country_code.toLowerCase();
                     const flagUrl = `https://raw.githubusercontent.com/lipis/flag-icons/refs/heads/main/flags/1x1/${countryCode}.svg`;
 
-                    addNode(country, country, "country_name");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = flagUrl;
+                    addNode(country, country, "country_name", flagUrl);
 
                     const fromNode = (entry.type === "FQDN" || entry.type === "URL") && entry.reverse_dns?.reverse_dns?.includes(entry[provider].ip)
                         ? entry[provider].ip
@@ -499,16 +504,12 @@
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
-                            addNode(tunnels, tunnels, "tunnels");
-                            nodes[nodes.length - 1].shape = 'image';
-                            nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/lock.png';
+                            addNode(tunnels, tunnels, "tunnels", 'https://img.icons8.com/officexs/32/lock.png');
                             edges.push({ from: entry[provider].ip, to: tunnels, label: "Tunnel (Spur.us)" });
                         }
                     }
                 } else {
-                    addNode(tunnels, tunnels, "tunnels");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/lock.png';
+                    addNode(tunnels, tunnels, "tunnels", "https://img.icons8.com/officexs/32/lock.png");
                     edges.push({ from: obs, to: tunnels, label: "Tunnel (Spur.us)" });
                 }
             }
@@ -519,16 +520,12 @@
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider].ip && entry.reverse_dns.reverse_dns.includes(entry[provider].ip)) {
-                            addNode(abuseAddress, abuseAddress, "abuse");
-                            nodes[nodes.length - 1].shape = 'image';
-                            nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
+                            addNode(abuseAddress, abuseAddress, "abuse", 'https://img.icons8.com/officexs/32/email.png');
                             edges.push({ from: entry[provider].ip, to: abuseAddress, label: "Abuse (Abusix)" });
                         }
                     }
                 } else {
-                    addNode(abuseAddress, abuseAddress, "abuse");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
+                    addNode(abuseAddress, abuseAddress, "abuse", 'https://img.icons8.com/officexs/32/email.png');
                     edges.push({ from: obs, to: abuseAddress, label: "Abuse (Abusix)" });
                 }
             }
@@ -566,16 +563,12 @@
                 if (entry.type === "FQDN" || entry.type === "URL") {
                     if (entry.reverse_dns?.reverse_dns) {
                         if (entry[provider]?.ip && entry.reverse_dns.reverse_dns.includes(entry[provider]?.ip)) {
-                            addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged");
-                            nodes[nodes.length - 1].shape = 'image';
-                            nodes[nodes.length - 1].image = 'https://www.abuseipdb.com/img/abuseipdb-logo.svg'; /* AbuseIPDB icon */
+                            addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged", 'https://www.abuseipdb.com/img/abuseipdb-logo.svg');
                             edges.push({ from: entry[provider]?.ip, to: abuseipdbNode, label: edgeLabel });
                         }
                     }
                 } else {
-                    addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://www.abuseipdb.com/img/abuseipdb-logo.svg'; /* AbuseIPDB icon */
+                    addNode(abuseipdbNode, abuseipdbNode, "abuseipdb_flagged", 'https://www.abuseipdb.com/img/abuseipdb-logo.svg');
                     edges.push({ from: obs, to: abuseipdbNode, label: edgeLabel });
                 }
             }
@@ -588,14 +581,14 @@
 
             if (entry.reverse_dns?.reverse_dns) {
                 entry.reverse_dns.reverse_dns.forEach(reverse => {
-                addNode(reverse, reverse, "reverse_dns");
+                addNode(reverse, reverse, "reverse_dns", "https://img.icons8.com/officexs/32/dns.png");
                 edges.push({ from: obs, to: reverse, label: "Reverse DNS" });
                 });
             }
 
             if (entry.threatfox?.malware_printable) {
                 entry.threatfox.malware_printable.forEach(malware => {
-                addNode(malware, malware, "malware");
+                addNode(malware, malware, "malware", "https://img.icons8.com/officexs/32/spam.png");
                 edges.push({ from: obs, to: malware, label: "Malware" });
                 });
             }
@@ -603,9 +596,7 @@
             if (entry.urlscan?.top_domains) {
                 entry.urlscan.top_domains.forEach(domainEntry => {
                 const domain = domainEntry.domain;
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://urlscan.io/img/urlscan_256.png';
-                addNode(domain, domain, "domain");
+                addNode(domain, domain, "domain", 'https://urlscan.io/img/urlscan_256.png');
                 edges.push({ from: obs, to: domain, label: `Related domain (URLscan)` });
                 });
             }
@@ -613,9 +604,7 @@
             if (entry.github?.results) {
                 entry.github.results.forEach(githubEntry => {
                 const githubTitle = githubEntry.title;
-                addNode(githubTitle, githubTitle, "github");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/github.png'; /* GitHub icon */
+                addNode(githubTitle, githubTitle, "github", 'https://img.icons8.com/officexs/32/github.png');
                 edges.push({ from: obs, to: githubTitle, label: "GitHub" });
                 });
             }
@@ -624,9 +613,7 @@
                 entry.google.results.forEach(googleEntry => {
                 const googleTitle = googleEntry.title;
                 if (googleTitle && googleTitle.trim() !== "") {
-                    addNode(googleTitle, googleTitle, "google");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/google-logo.png'; /* Example: Icons8 Google icon */
+                    addNode(googleTitle, googleTitle, "google", 'https://img.icons8.com/officexs/32/google-logo.png');
                     edges.push({ from: obs, to: googleTitle, label: "Google" });
                 }
                 });
@@ -634,7 +621,7 @@
 
             if (entry.opencti?.latest_indicator_name && entry.opencti.latest_indicator_name.trim() !== "") {
                 const indicatorName = "OpenCTI flagged";
-                addNode(indicatorName, indicatorName, "opencti_indicator");
+                addNode(indicatorName, indicatorName, "opencti_indicator", "https://img.icons8.com/officexs/32/fire-element.png");
                 const revocation_status = entry.opencti.revoked ? "Revoked" : "Active";
                 const opencti_score = `Score: ${entry.opencti.x_opencti_score}`;
                 edges.push({ from: obs, to: indicatorName, label: `OpenCTI indicator (${revocation_status}, ${opencti_score})` });
@@ -642,9 +629,7 @@
 
             if (entry.virustotal && entry.virustotal.total_malicious > 0) {
                 const vtNodeLabel = "VT flagged";
-                addNode(vtNodeLabel, vtNodeLabel, "virustotal");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://images.icon-icons.com/2699/PNG/32/virustotal_logo_icon_171247.png'; /* VirusTotal icon */
+                addNode(vtNodeLabel, vtNodeLabel, "virustotal", 'https://images.icon-icons.com/2699/PNG/32/virustotal_logo_icon_171247.png');
                 let vtEdgeLabel = "";
                 if (entry.virustotal.detection_ratio) {
                     vtEdgeLabel += `VT ${entry.virustotal.detection_ratio}`;
@@ -728,9 +713,7 @@
                 entry.ioc_one_html.results.forEach(result => {
                 const htmlTitle = result.title;
                 if (htmlTitle && htmlTitle.trim() !== "") {
-                    addNode(htmlTitle, htmlTitle, "ioc_one_html");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/document.png';
+                    addNode(htmlTitle, htmlTitle, "ioc_one_html", 'https://img.icons8.com/officexs/32/document.png');
                     edges.push({ from: obs, to: htmlTitle, label: "Ioc[.]One" });
                 }
                 });
@@ -740,9 +723,7 @@
                 entry.ioc_one_pdf.results.forEach(result => {
                 const pdfTitle = result.title;
                 if (pdfTitle && pdfTitle.trim() !== "") {
-                    addNode(pdfTitle, pdfTitle, "ioc_one_pdf");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/document.png';
+                    addNode(pdfTitle, pdfTitle, "ioc_one_pdf", 'https://img.icons8.com/officexs/32/document.png');
                     edges.push({ from: obs, to: pdfTitle, label: "Ioc[.]One" });
                 }
                 });
@@ -771,45 +752,33 @@
                 const rdap = entry.rdap;
 
                 if (rdap.registrar) {
-                addNode(rdap.registrar, rdap.registrar, "rdap_registrar");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
+                addNode(rdap.registrar, rdap.registrar, "rdap_registrar", 'https://img.icons8.com/officexs/32/organization.png');
                 edges.push({ from: entry.observable, to: rdap.registrar, label: "Registrar" });
                 }
 
                 if (rdap.organization) {
-                addNode(rdap.organization, rdap.organization, "rdap_organization");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
+                addNode(rdap.organization, rdap.organization, "rdap_organization", 'https://img.icons8.com/officexs/32/organization.png');
                 edges.push({ from: entry.observable, to: rdap.organization, label: "Organization" });
                 }
 
                 if (rdap.abuse_contact) {
-                addNode(rdap.abuse_contact, rdap.abuse_contact, "rdap_abuse_contact");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
+                addNode(rdap.abuse_contact, rdap.abuse_contact, "rdap_abuse_contact", 'https://img.icons8.com/officexs/32/email.png');
                 edges.push({ from: entry.observable, to: rdap.abuse_contact, label: "Abuse Contact" });
                 }
 
                 if (rdap.registrant) {
-                addNode(rdap.registrant, rdap.registrant, "rdap_registrant");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/organization.png';
+                addNode(rdap.registrant, rdap.registrant, "rdap_registrant", 'https://img.icons8.com/officexs/32/organization.png');
                 edges.push({ from: entry.observable, to: rdap.registrant, label: "Registrant" });
                 }
 
                 if (rdap.registrant_email) {
-                addNode(rdap.registrant_email, rdap.registrant_email, "rdap_registrant_email");
-                nodes[nodes.length - 1].shape = 'image';
-                nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/email.png';
+                addNode(rdap.registrant_email, rdap.registrant_email, "rdap_registrant_email", 'https://img.icons8.com/officexs/32/email.png');
                 edges.push({ from: entry.observable, to: rdap.registrant_email, label: "Registrant Email" });
                 }
 
                 if (rdap.name_servers && Array.isArray(rdap.name_servers)) {
                 rdap.name_servers.forEach(nameServer => {
-                    addNode(nameServer, nameServer, "rdap_name_server");
-                    nodes[nodes.length - 1].shape = 'image';
-                    nodes[nodes.length - 1].image = 'https://img.icons8.com/officexs/32/server.png';
+                    addNode(nameServer, nameServer, "rdap_name_server", 'https://img.icons8.com/officexs/32/server.png');
                     edges.push({ from: entry.observable, to: nameServer, label: "Name Server" });
                 });
                 }

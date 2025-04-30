@@ -538,7 +538,7 @@
 
             if (entry.reverse_dns?.reverse_dns) {
                 entry.reverse_dns.reverse_dns.forEach(reverse => {
-                addNode(reverse, reverse, "reverse_dns", "https://img.icons8.com/officexs/32/dns.png");
+                addNode(reverse, reverse, "reverse_dns", "https://img.icons8.com/officexs/32/server.png");
                 edges.push({ from: obs, to: reverse, label: "Reverse DNS" });
                 });
             }
@@ -697,7 +697,7 @@
                 const email = entry.observable;
                 const domain = email.split("@")[1]; // Extract the domain name from the email address
                 if (domain) {
-                    addNode(domain, domain, "domain"); // Add the domain as a node if it doesn't already exist
+                    addNode(domain, domain, "domain", "https://img.icons8.com/officexs/32/root-server.png"); // Add the domain as a node if it doesn't already exist
                     edges.push({ from: email, to: domain, label: "Email Domain" }); // Link the email to the domain
                 }
             }
@@ -735,7 +735,7 @@
 
                 if (rdap.name_servers && Array.isArray(rdap.name_servers)) {
                 rdap.name_servers.forEach(nameServer => {
-                    addNode(nameServer, nameServer, "rdap_name_server", 'https://img.icons8.com/officexs/32/server.png');
+                    addNode(nameServer, nameServer, "rdap_name_server", 'https://img.icons8.com/officexs/32/dns.png');
                     edges.push({ from: entry.observable, to: nameServer, label: "Name Server" });
                 });
                 }

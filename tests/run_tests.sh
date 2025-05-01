@@ -1,3 +1,3 @@
 #/bin/bash
 
-pytest -v tests/tests_utils.py
+pytest -v tests/test_utils.py

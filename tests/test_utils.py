@@ -2,9 +2,10 @@ import pytest
 
 import sys
 
-sys.path.append('utils')
+sys.path.append("utils")
 
-from utils import is_really_ipv6, identify_observable_type, extract_observables
+from utils.utils import is_really_ipv6, identify_observable_type, extract_observables
+
 
 def test_is_really_ipv6():
     # Test a valid IPv6 address
@@ -18,6 +19,7 @@ def test_is_really_ipv6():
     # Test an invalid IPv6 address
     invalid_ipv6_address = "2001:0db8:85a3:0000:0000:8a2e:0370:7334:1234"
     assert not is_really_ipv6(invalid_ipv6_address)
+
 
 def test_identify_observable_type():
     # Test identifying a URL
@@ -62,9 +64,16 @@ def test_identify_observable_type():
     result = identify_observable_type(observable)
     assert result == expected
 
+
 def test_extract_observables():
     # Test extracting observables from a text containing a URL and an IPv4 address
     text = "http://example.com oui non pas vraiment 1.1.1.1 192.168.1.0"
-    expected = [{'value': 'http://example.com', 'type': 'URL'}, {'value': '1.1.1.1', 'type': 'IPv4'}, {'value': '192.168.1.0', 'type': 'IPv4'}]
+    expected = [
+        {"value": "http://example.com", "type": "URL"},
+        {"value": "1.1.1.1", "type": "IPv4"},
+        {"value": "192.168.1.0", "type": "IPv4"},
+    ]
     result = extract_observables(text)
-    assert all(any(item == expected_item for item in result) for expected_item in expected)
+    assert all(
+        any(item == expected_item for item in result) for expected_item in expected
+    )

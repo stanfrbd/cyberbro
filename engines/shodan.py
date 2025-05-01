@@ -1,15 +1,14 @@
 import logging
+from typing import Any
+
 import requests
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
+
 def query_shodan(
-    observable: str,
-    api_key: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    observable: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True
+) -> dict[str, Any] | None:
     """
     Queries the Shodan API for information about a given observable (typically an IP).
 
@@ -28,14 +27,13 @@ def query_shodan(
               }
         None: If the request was unsuccessful or an error occurred.
     """
-    headers = {
-        "Accept": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
-    url = f"https://api.shodan.io/shodan/host/{observable}"
+    headers = {"Accept": "application/json"}
+    url = f"https://api.shodan.io/shodan/host/{observable}?key={api_key}"
 
     try:
-        response = requests.get(url, headers=headers, proxies=proxies, verify=ssl_verify, timeout=5)
+        response = requests.get(
+            url, headers=headers, proxies=proxies, verify=ssl_verify, timeout=5
+        )
         response.raise_for_status()
 
         data = response.json()
@@ -45,7 +43,7 @@ def query_shodan(
         return {
             "ports": data.get("ports", []),
             "tags": data.get("tags", []),
-            "link": data["link"]
+            "link": data["link"],
         }
 
     except Exception as e:

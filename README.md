@@ -316,6 +316,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 
 * [Florian PILLOT](https://github.com/Harukunnn) who reworked engines (refactoring and optimizations).
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
+* [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He improved code structure too.
 
 Your contributions are greatly appreciated!
 

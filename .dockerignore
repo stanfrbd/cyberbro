@@ -20,3 +20,6 @@ tests
 
 # Ignore Markdown files
 *.md
+
+# Ignore ini files
+*.ini

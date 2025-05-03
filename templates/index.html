@@ -368,7 +368,7 @@
                 width: 100%;
             }
         }
-    
+
         .upgrade-notification {
             background-color: #f8d7da;
             color: black;
@@ -411,7 +411,7 @@
                 function closeNotification() {
                     document.getElementById('upgrade-notification').style.display = 'none';
                 }
-        
+
                 function hideNotification() {
                     closeNotification();
                     const expirationDate = new Date();
@@ -419,7 +419,7 @@
                     expirationDate.setDate(expirationDate.getDate() + 14);
                     localStorage.setItem('hideUpgradeNotification', JSON.stringify({ value: 'true', expires: expirationDate }));
                 }
-        
+
                 document.addEventListener('DOMContentLoaded', (event) => {
                     const hideUpgradeNotification = JSON.parse(localStorage.getItem('hideUpgradeNotification'));
                     if (hideUpgradeNotification && hideUpgradeNotification.value === 'true') {
@@ -427,7 +427,7 @@
                     }
                 });
             </script>
-    
+
             <div class="upgrade-notification" id="upgrade-notification">
                 <span class="close-upgrade-notification" onclick="closeNotification()">×</span>
                 A new version of Cyberbro is available! <a href="https://github.com/stanfrbd/cyberbro/" target="_blank">Upgrade</a>
@@ -495,7 +495,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                             document.querySelector('#analyzeForm div').appendChild(label);
                             document.querySelector('#analyzeForm div').appendChild(document.createElement('br'));
                         });
-                        
+
                         document.querySelector('#analyzeForm div').appendChild(document.createElement('br'));
                     </script>
                 </div>
@@ -504,6 +504,8 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     <div class="radio-container">
                         <input type="radio" id="selectAll" name="engineSelection">
                         <label title="Can be long" for="selectAll" onclick="selectAllEngines()">All</label>
+                        <input type="radio" id="selectNone" name="engineSelection">
+                        <label title="Clear all engines" for="selectNone" onclick="selectNone()">Clear</label>
                         <input type="radio" id="selectAbuseChecker" name="engineSelection">
                         <label title="Abuse mail, only IP, domain, URL - All free, no key" for="selectAbuseChecker"
                             onclick="selectAbuseChecker()">Abuse</label>
@@ -525,6 +527,10 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 <script>
                     function selectAllEngines() {
                         document.querySelectorAll('input[name="engines"]').forEach(checkbox => checkbox.checked = true);
+                    }
+
+                    function selectNone() {
+                        document.querySelectorAll('input[name="engines"]').forEach(checkbox => checkbox.checked = false);
                     }
 
                     function selectAbuseChecker() {
@@ -862,10 +868,10 @@ function copyAsPlainText() {
             const copyButton = document.querySelector('.btn[onclick="copyAsPlainText()"]');
             const initialBackgroundColor = copyButton.style.backgroundColor;
             const initialTextContent = copyButton.textContent;
-            
+
             copyButton.style.backgroundColor = 'green';
             copyButton.textContent = 'Copied!';
-            
+
             setTimeout(() => {
                 copyButton.style.backgroundColor = initialBackgroundColor;
                 copyButton.textContent = initialTextContent;
@@ -894,10 +900,10 @@ function copyAsDefanged() {
             const copyButton = document.querySelector('.btn[onclick="copyAsDefanged()"]');
             const initialBackgroundColor = copyButton.style.backgroundColor;
             const initialTextContent = copyButton.textContent;
-            
+
             copyButton.style.backgroundColor = 'green';
             copyButton.textContent = 'Defanged and Copied!';
-            
+
             setTimeout(() => {
                 copyButton.style.backgroundColor = initialBackgroundColor;
                 copyButton.textContent = initialTextContent;
@@ -1725,9 +1731,9 @@ function copyAsDefanged() {
                 {% if analysis_results.results[0].webscout %}
                 <div class="card
                 {% if 'vpn' in analysis_results.results[0].webscout.network_provider_services | map('lower') or 'proxy' in analysis_results.results[0].webscout.network_provider_services | map('lower') or analysis_results.results[0].webscout.is_vpn or analysis_results.results[0].webscout.is_proxy or analysis_results.results[0].webscout.is_tor %}
-                    warning-row" style="background-color: orange;" 
+                    warning-row" style="background-color: orange;"
                 {% elif analysis_results.results[0].webscout.risk_score > 50 %}
-                    high-risk" style="background-color: red;" 
+                    high-risk" style="background-color: red;"
                 {% else %}
                     "
                 {% endif %}

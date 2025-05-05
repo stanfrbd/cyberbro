@@ -1,0 +1,15 @@
+{% if result.alienvault %}
+<strong>Pulses Count: </strong>{{ result.alienvault.count }}<br>
+{% for search_result in result.alienvault.pulses %}
+<a href="{{ search_result.url }}" target="_blank" title="{{ search_result.title }}">{{ search_result.title }}</a><br>
+{% endfor %}
+{% if result.alienvault.malware_families %}
+<strong>Malware Families: </strong>{{ result.alienvault.malware_families | join(', ') }}<br>
+{% endif %}
+{% if result.alienvault.adversary %}
+<strong>Adversary: </strong>{{ result.alienvault.adversary | join(', ') }}<br>
+{% endif %}
+<strong>Link: </strong><a href="{{ result.alienvault.link }}" target="_blank">See on Alienvault</a><br>
+{% else %}
+Not applicable
+{% endif %}

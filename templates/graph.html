@@ -686,6 +686,37 @@ function generateGraph(data) {
             });
         }
 
+        // Alienvault Pulses
+        if (entry.alienvault?.pulses) {
+            entry.alienvault.pulses.forEach(result => {
+                const alienTitle = result.title;
+                if (alienTitle && alienTitle.trim() !== "") {
+                    addNode(alienTitle, alienTitle, "alienvault_pulse", 'https://img.icons8.com/officexs/32/document.png');
+                    edges.push({ from: obs, to: alienTitle, label: "Alienvault Pulse" });
+                }
+            });
+        }
+
+        // Alienvault Malware families
+        if (entry.alienvault?.malware_families) {
+            entry.alienvault.malware_families.forEach(alienMalware => {
+                if (alienMalware && alienMalware.trim() !== "") {
+                    addNode(alienMalware, alienMalware, "alienvault_malware", 'https://img.icons8.com/officexs/32/spam.png');
+                    edges.push({ from: obs, to: alienMalware, label: "Malware family (alienvault)" });
+                }
+            });
+        }
+
+        // Alienvault Adversary
+        if (entry.alienvault?.adversary) {
+            entry.alienvault.adversary.forEach(alienAdvers => {
+                if (alienAdvers && alienAdvers.trim() !== "") {
+                    addNode(alienAdvers, alienAdvers, "alienvault_pulse", "https://img.icons8.com/officexs/32/walter-white.png");
+                    edges.push({ from: obs, to: alienAdvers, label: "Adversary (alienvault)" });
+                }
+            });
+        }
+
         // Check for Chrome / Edge extension data
         if (entry.type == "CHROME_EXTENSION") {
             const extensionName = entry.extension.name;

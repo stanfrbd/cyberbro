@@ -40,7 +40,7 @@
 
 Inspired by [Cybergordon](https://cybergordon.com/) and [IntelOwl](https://github.com/intelowlproject/IntelOwl).
 
-This project aims to provide a simple and efficient way to check the reputation of your observables using multiple services, 
+This project aims to provide a simple and efficient way to check the reputation of your observables using multiple services,
 without having to deploy a **complex** solution.
 
 # Demo
@@ -113,19 +113,21 @@ cp secrets-sample.json secrets.json
 
 ```json
 {
-    "virustotal": "token_here",
     "abuseipdb": "token_here",
-    "ipinfo": "token_here",
-    "google_safe_browsing": "token_here",
-    "proxy_url": "",
-    "mde_tenant_id": "tenant_here",
-    "mde_client_id": "client_id_here",
-    "mde_client_secret": "client_secret_here",
-    "shodan": "token_here",
-    "opencti_api_key": "token_here",
-    "opencti_url": "https://demo.opencti.io",
+    "alienvault": "token_here",
+    "criminalip_api_key": "token_here",
     "crowdstrike_client_id": "client_id_here",
     "crowdstrike_client_secret": "client_secret_here",
+    "google_safe_browsing": "token_here",
+    "ipinfo": "token_here",
+    "mde_client_id": "client_id_here",
+    "mde_client_secret": "client_secret_here",
+    "mde_tenant_id": "tenant_here",
+    "opencti_api_key": "token_here",
+    "opencti_url": "https://demo.opencti.io",
+    "proxy_url": "",
+    "shodan": "token_here",
+    "virustotal": "token_here",
     "webscout": "token_here"
 }
 
@@ -172,7 +174,7 @@ pip install -r requirements.txt
 * Run the app with `gunicorn` (clean mode).
 
 ```bash
-gunicorn -w 4 -t 4 -b 0.0.0.0:5000 app:app
+gunicorn -b 0.0.0.0:5000 app:app
 ```
 
 * Run the app with in development mode.
@@ -204,7 +206,7 @@ python3 app.py
 
 <p>
 <a href="https://addons.mozilla.org/addon/cyberbro-analyzer/"><img src="https://user-images.githubusercontent.com/585534/107280546-7b9b2a00-6a26-11eb-8f9f-f95932f4bfec.png" alt="Get Cyberbro Analyzer for Firefox"></a>
-<a href="https://chromewebstore.google.com/detail/cyberbro-analyzer/nfcfigpaollodajabegcdobhmgaclbbm"><img src="https://user-images.githubusercontent.com/585534/107280622-91a8ea80-6a26-11eb-8d07-77c548b28665.png" alt="Get Cyberbro Analyzer for Chromium"></a> 
+<a href="https://chromewebstore.google.com/detail/cyberbro-analyzer/nfcfigpaollodajabegcdobhmgaclbbm"><img src="https://user-images.githubusercontent.com/585534/107280622-91a8ea80-6a26-11eb-8d07-77c548b28665.png" alt="Get Cyberbro Analyzer for Chromium"></a>
 <a href="https://microsoftedge.microsoft.com/addons/detail/cyberbro-analyzer/lbponbmcggcepflackehgpbceehagiam"><img src="https://user-images.githubusercontent.com/585534/107280673-a5ece780-6a26-11eb-9cc7-9fa9f9f81180.png" alt="Get Cyberbro Analyzer for Microsoft Edge"></a>
 </p>
 
@@ -283,28 +285,30 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 
 # API and third-party services
 
-* [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [AbuseIPDB](https://docs.abuseipdb.com/)
-* [IPquery](https://ipquery.gitbook.io/ipquery-docs)
-* [IPinfo](https://ipinfo.io/developers)
-* [Google Safe Browsing](https://developers.google.com/safe-browsing)
-* [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
-* [Shodan](https://developer.shodan.io/)
-* [Spur.us](https://spur.us/)
 * [Abusix](https://abusix.com/)
-* [Phishtank](https://www.phishtank.com/)
-* [OpenRDAP](https://openrdap.org/api)
-* [ICANN](https://lookup.icann.org/)
-* [Google](https://google.com/)
+* [CriminalIP](https://www.criminalip.io/)
+* [CrowdStrike](https://www.crowdstrike.com/)
 * [Github](https://github.com/)
-* [ThreatFox](https://threatfox.abuse.ch/api/)
-* [URLscan](https://urlscan.io/)
-* [Ioc.One](https://ioc.one/)
-* [OpenCTI](https://www.opencti.io/)
+* [Google Safe Browsing](https://developers.google.com/safe-browsing)
+* [Google](https://google.com/)
 * [Grep.App](https://grep.app/)
 * [Hudson Rock](https://hudsonrock.com/)
-* [CrowdStrike](https://www.crowdstrike.com/)
+* [ICANN](https://lookup.icann.org/)
+* [IPinfo](https://ipinfo.io/developers)
+* [IPquery](https://ipquery.gitbook.io/ipquery-docs)
+* [Ioc.One](https://ioc.one/)
+* [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
+* [OpenCTI](https://www.opencti.io/)
+* [OpenRDAP](https://openrdap.org/api)
+* [Phishtank](https://www.phishtank.com/)
+* [Shodan](https://developer.shodan.io/)
+* [Spur.us](https://spur.us/)
+* [ThreatFox](https://threatfox.abuse.ch/api/)
+* [URLscan](https://urlscan.io/)
+* [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [WebScout](https://webscout.io/)
+* [Alienvault](https://otx.alienvault.com/)
 
 > [!NOTE]
 > Any questions? Check the [wiki](https://github.com/stanfrbd/cyberbro/wiki) or raise an [issue](https://github.com/stanfrbd/cyberbro/issues/new) \
@@ -327,22 +331,22 @@ MIT License
 
 Copyright (c) 2025 stanfrbd
 
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to deal 
-in the Software without restriction, including without limitation the rights 
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-copies of the Software, and to permit persons to whom the Software is 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included 
+The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ```
 

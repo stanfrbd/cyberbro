@@ -1,0 +1,20 @@
+<div class="card">
+    {% if analysis_results.results[0].alienvault.count > 0 %}
+    <h3>Alienvault</h3>
+    <strong>Pulses Count: </strong>{{ analysis_results.results[0].alienvault.count }}<br>
+    {% for search_result in analysis_results.results[0].alienvault.pulses %}
+    <a href="{{ search_result.url }}" target="_blank" title="{{ search_result.title }}">{{ search_result.title
+        }}</a><br>
+    {% endfor %}
+    {% if analysis_results.results[0].alienvault.malware_families %}
+    <strong>Malware Families: </strong>{{ analysis_results.results[0].alienvault.malware_families | join(', ') }}<br>
+    {% endif %}
+    {% if analysis_results.results[0].alienvault.adversary %}
+    <strong>Adversary: </strong>{{ analysis_results.results[0].alienvault.adversary | join(', ') }}<br>
+    {% endif %}
+    <strong>Link: </strong><a href="{{ analysis_results.results[0].alienvault.link }}" target="_blank">See on
+        Alienvault</a><br>
+    {% else %}
+    <p>Not found</p>
+    {% endif %}
+</div>

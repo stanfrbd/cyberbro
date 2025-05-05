@@ -27,16 +27,22 @@ def query_shodan(
               }
         None: If the request was unsuccessful or an error occurred.
     """
-    headers = {"Accept": "application/json"}
-    url = f"https://api.shodan.io/shodan/host/{observable}?key={api_key}"
+    headers: dict = {"Accept": "application/json"}
+    params: dict = {"key": api_key}
+    url: str = f"https://api.shodan.io/shodan/host/{observable}"
 
     try:
         response = requests.get(
-            url, headers=headers, proxies=proxies, verify=ssl_verify, timeout=5
+            url,
+            headers=headers,
+            params=params,
+            proxies=proxies,
+            verify=ssl_verify,
+            timeout=5,
         )
         response.raise_for_status()
 
-        data = response.json()
+        data: dict = response.json()
         # Shodan returns a more comprehensive JSON; we just pick out key fields
         data["link"] = f"https://www.shodan.io/host/{observable}"
 

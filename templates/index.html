@@ -153,6 +153,20 @@
             color: black;
         }
 
+        .good-value {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .bad-value {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .neutral-value {
+            color: var(--text-color);
+        }
+
         .warning-row {
             background-color: #ffc107;
             color: black;
@@ -453,28 +467,30 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     <script>
                         const GUI_ENABLED_ENGINES = JSON.parse('{% if GUI_ENABLED_ENGINES | length > 0 %} {{ GUI_ENABLED_ENGINES | tojson }} {% else %} [] {% endif %}');
                         const allEngines = [
-                            { name: "reverse_dns", label: "Reverse DNS", supports: "default domain ip abuse free_no_key", checked: true, title: "Performs a reverse DNS lookup for IP, domain, URL (on your machine)" },
-                            { name: "rdap", label: "RDAP (ex Whois)", supports: "default abuse domain free_no_key", checked: true, title: "Checks RDAP (ex Whois) record for domain, URL, no API key required" },
-                            { name: "ipquery", label: "IPquery", supports: "default ip risk vpn proxy free_no_key", checked: true, title: "Checks IPquery for IP, reversed obtained IP for a given domain / URL, free, no API key" },
                             { name: "abuseipdb", label: "AbuseIPDB", supports: "risk", checked: false, title: "Checks AbuseIPDB for IP, reversed obtained IP for a given domain / URL, free API key required" },
-                            { name: "ipinfo", label: "IPinfo", supports: "ip", checked: false, title: "Checks IPinfo for IP, reversed obtained IP for a given domain / URL, free API key required" },
-                            { name: "virustotal", label: "VirusTotal", supports: "hash risk ip domain url", checked: false, title: "Checks VirusTotal for IP, domain, URL, hash, free API key required" },
-                            { name: "spur", label: "Spur.us", supports: "vpn proxy free_no_key scraping", checked: false, title: "Scraps Spur.us for IP, reversed obtained IP for a given domain / URL, free, no API key" },
-                            { name: "webscout", label: "WebScout", supports: "ip vpn proxy risk", checked: false, title: "Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required" },
-                            { name: "mde", label: "Microsoft Defender for Endpoint", supports: "hash ip domain url", checked: false, title: "Checks Microsoft Defender for Endpoint, paid API info on Azure required" },
+                            { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, title: "Checks abuse contact with Abusix only for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                            { name: "alienvault", label: "Alienvault", supports: "hash ip domain url", checked: false, title: "Checks Alienvault for IP, domain, URL, hash, free API key required" },
+                            { name: "criminalip", label: "Criminal IP", supports: "ip", checked: false, title: "Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting, free, with paid upgrades available"},
                             { name: "crowdstrike", label: "CrowdStrike", supports: "hash ip domain url", checked: false, title: "Checks CrowdStrike for IP, domain, URL, hash, paid API key required" },
-                            { name: "google_safe_browsing", label: "Google Safe Browsing", supports: "risk domain ip", checked: false, title: "Checks Google Safe Browsing, free API key required" },
-                            { name: "shodan", label: "Shodan", supports: "ports ip", checked: false, title: "Checks Shodan, reversed obtained IP for a given domain / URL, free API key required" },
-                            { name: "phishtank", label: "Phishtank", supports: "risk domain url free_no_key", checked: false, title: "Checks Phishtank for domains, URL, free, no API key" },
-                            { name: "threatfox", label: "ThreatFox", supports: "ip domain url free_no_key", checked: false, title: "Checks ThreatFox by Abuse.ch for IP, domains, URL, free, no API key" },
-                            { name: "urlscan", label: "URLscan", supports: "domain url ip hash free_no_key", checked: false, title: "Checks URLscan for for IP, domains, URL, hash, free, no API key" },
-                            { name: "google", label: "Google", supports: "domain url ip hash extension free_no_key scraping", checked: false, title: "Scraps Google search results for all types of observable, free, no API key" },
                             { name: "github", label: "Github", supports: "domain url ip hash extension free_no_key scraping", checked: false, title: "Get Github grep.app API search results for all types of observable, free, no API key" },
+                            { name: "google", label: "Google", supports: "domain url ip hash extension free_no_key scraping", checked: false, title: "Scraps Google search results for all types of observable, free, no API key" },
+                            { name: "google_safe_browsing", label: "Google Safe Browsing", supports: "risk domain ip", checked: false, title: "Checks Google Safe Browsing, free API key required" },
                             { name: "ioc_one_html", label: "Ioc.One (HTML)", supports: "domain url ip hash extension scraping", checked: false, title: "Scraps (can be long) Ioc.One HTML search results for all types of observable, free, no API key" },
                             { name: "ioc_one_pdf", label: "Ioc.One (PDF)", supports: "domain url ip hash extension scraping", checked: false, title: "Scraps (can be long) Ioc.One PDF search results for all types of observable, free, no API key" },
+                            { name: "hudsonrock", label: "Hudson Rock", supports: "domain url email free_no_key", checked: false, title: "Searches Hudson Rock leak / infostealer results for domains, URL, Email, free, no API key" },
+                            { name: "ipinfo", label: "IPinfo", supports: "ip", checked: false, title: "Checks IPinfo for IP, reversed obtained IP for a given domain / URL, free API key required" },
+                            { name: "ipquery", label: "IPquery", supports: "default ip risk vpn proxy free_no_key", checked: true, title: "Checks IPquery for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                            { name: "mde", label: "Microsoft Defender for Endpoint", supports: "hash ip domain url", checked: false, title: "Checks Microsoft Defender for Endpoint, paid API info on Azure required" },
                             { name: "opencti", label: "OpenCTI", supports: "domain url ip hash extension", checked: false, title: "Searches OpenCTI results for all types of observable, API key required" },
-                            { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, title: "Checks abuse contact with Abusix only for IP, reversed obtained IP for a given domain / URL, free, no API key" },
-                            { name: "hudsonrock", label: "Hudson Rock", supports: "domain url email free_no_key", checked: false, title: "Searches Hudson Rock leak / infostealer results for domains, URL, Email, free, no API key" }
+                            { name: "phishtank", label: "Phishtank", supports: "risk domain url free_no_key", checked: false, title: "Checks Phishtank for domains, URL, free, no API key" },
+                            { name: "reverse_dns", label: "Reverse DNS", supports: "default domain ip abuse free_no_key", checked: true, title: "Performs a reverse DNS lookup for IP, domain, URL (on your machine)" },
+                            { name: "rdap", label: "RDAP (ex Whois)", supports: "default abuse domain free_no_key", checked: true, title: "Checks RDAP (ex Whois) record for domain, URL, no API key required" },
+                            { name: "shodan", label: "Shodan", supports: "ports ip", checked: false, title: "Checks Shodan, reversed obtained IP for a given domain / URL, free API key required" },
+                            { name: "spur", label: "Spur.us", supports: "vpn proxy free_no_key scraping", checked: false, title: "Scraps Spur.us for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                            { name: "threatfox", label: "ThreatFox", supports: "ip domain url free_no_key", checked: false, title: "Checks ThreatFox by Abuse.ch for IP, domains, URL, free, no API key" },
+                            { name: "urlscan", label: "URLscan", supports: "domain url ip hash free_no_key", checked: false, title: "Checks URLscan for for IP, domains, URL, hash, free, no API key" },
+                            { name: "virustotal", label: "VirusTotal", supports: "hash risk ip domain url", checked: false, title: "Checks VirusTotal for IP, domain, URL, hash, free API key required" },
+                            { name: "webscout", label: "WebScout", supports: "ip vpn proxy risk", checked: false, title: "Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required" },
                         ];
 
                         const enginesToDisplay = GUI_ENABLED_ENGINES.length > 0 ? allEngines.filter(engine => GUI_ENABLED_ENGINES.includes(engine.name)) : allEngines;
@@ -781,6 +797,47 @@ function formatResults(data) {
             }
         }
 
+        if (result.criminalip) {
+            plainText += `Criminal IP:\n`;
+            plainText += `  - Abuse Record Count: ${result.criminalip.abuse_record_count}\n`;
+            if (result.criminalip.score) {
+                plainText += `  - Score:\n`;
+                plainText += `    - Inbound: ${result.criminalip.score.inbound}\n`;
+                plainText += `    - Outbound: ${result.criminalip.score.outbound}\n`;
+            }
+            if (result.criminalip.current_open_port && result.criminalip.current_open_port.count > 0) {
+                plainText += `  - Current Open Ports:\n`;
+                result.criminalip.current_open_port.forEach(port => {
+                    plainText += `    - ${port}\n`;
+                });
+            }
+            if (result.criminalip.issues) {
+                for (const [issue_name, value] of Object.entries(result.criminalip.issues)) {
+                    plainText += `    - ${issue_name}: ${value}\n`;
+                }
+            }
+            if (result.criminalip.represenative_domain) {
+                plainText += `  - Representative Domain: ${result.criminalip.represenative_domain}\n`;
+            }
+        }
+
+        if (result.alienvault) {
+            plainText += `Alienvault:\n`;
+            plainText += `  - Pulse Count: ${result.alienvault.count}\n`;
+            if (result.alienvault.count > 0) {
+            result.alienvault.pulses.forEach(alienvaultPulse => {
+                plainText += `  - ${alienvaultPulse.title}: ${alienvaultPulse.url}\n`;
+            });
+            }
+            if (result.alienvault.malware_families.length > 0) {
+                plainText += `  - Malware Families: ${result.alienvault.malware_families.join(', ')}\n`;
+            }
+            if (result.alienvault.adversary.length > 0) {
+                plainText += `  - Adversary: ${result.alienvault.adversary.join(', ')}\n`;
+            }
+
+        }
+
         if (result.hudsonrock) {
             plainText += `Hudson Rock:\n`;
 
@@ -852,6 +909,23 @@ function formatResults(data) {
                 }
             }
         }
+
+        if (result.alienvault) {
+            plainText += `Alienvault:\n`;
+            plainText += `  - Pulse Count: ${result.alienvault.count}\n`;
+            if (result.alienvault.count > 0) {
+            result.alienvault.pulses.forEach(alienvaultPulse => {
+                plainText += `  - ${alienvaultPulse.title}: ${alienvaultPulse.url}\n`;
+            });
+            }
+            if (result.alienvault.malware_families.length > 0) {
+                plainText += `  - Malware Families: ${result.alienvault.malware_families.join(', ')}\n`;
+            }
+            if (result.alienvault.adversary.length > 0) {
+                plainText += `  - Adversary: ${result.alienvault.adversary.join(', ')}\n`;
+            }
+
+        }
         plainText += '\n';
     });
 
@@ -918,7 +992,7 @@ function copyAsDefanged() {
         <p>Analysis start time: {{ analysis_results.start_time_string }}</p>
         <p>Analysis duration: {{ analysis_results.analysis_duration_string }}</p>
 
-        {% if analysis_results.results | length > 1 %}
+        {% if display_mode == "table" or analysis_results.results | length > 1 %}
 
         <div class="filters-container">
             <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
@@ -1050,6 +1124,12 @@ function copyAsDefanged() {
                     {% endif %}
                     {% if "webscout" in analysis_results.selected_engines %}
                     <th>WebScout</th>
+                    {% endif %}
+                    {% if "criminalip" in analysis_results.selected_engines %}
+                    <th>Criminal IP</th>
+                    {% endif %}
+                    {% if "alienvault" in analysis_results.selected_engines %}
+                    <th>Alienvault</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -1578,6 +1658,20 @@ function copyAsDefanged() {
                         {% endif %}
                     </td>
                     {% endif %}
+                    {% if "criminalip" in analysis_results.selected_engines %}
+                    <td>
+                    {% include "engine_layouts/criminalip_table.html" %}
+                    {% else %}
+                    Not applicable
+                    </td>
+                    {% endif %}
+                    {% if "alienvault" in analysis_results.selected_engines %}
+                    <td>
+                    {% include "engine_layouts/alienvault_table.html" %}
+                    {% else %}
+                    Not applicable
+                    </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
@@ -1602,7 +1696,7 @@ function copyAsDefanged() {
                 <div class="card
                 {% if analysis_results.results[0].virustotal and (analysis_results.results[0].virustotal.total_malicious > 10 or analysis_results.results[0].virustotal.community_score < -10) %}
                  high-detection" style="background-color: red;" {% elif analysis_results.results[0].virustotal and
-                    analysis_results.results[0].virustotal.community_score> 100 %}
+                    analysis_results.results[0].virustotal.community_score > 100 %}
                     clean-detection" style="background-color: green;"
                     {% else %}
                     "
@@ -2118,6 +2212,12 @@ function copyAsDefanged() {
                     <p>Not applicable</p>
                     {% endif %}
                 </div>
+                {% endif %}
+                {% if analysis_results.results[0].criminalip %}
+                {% include "engine_layouts/criminalip_card.html" %}
+                {% endif %}
+                {% if analysis_results.results[0].alienvault %}
+                {% include "engine_layouts/alienvault_card.html" %}
                 {% endif %}
 
             </div>

@@ -1,0 +1,51 @@
+{% set good_value = 'good-value' %}
+{% set bad_value = 'bad-value' %}
+{% set neutral_value = 'neutral-value' %}
+
+    <!-- Criminal IP dataset for reference
+    {{ result.criminalip | tojson(indent=2) }}
+    -->
+
+{% if result.criminalip and result.criminalip.status == 200 %}
+
+    {% set font_class = bad_value if result.criminalip.abuse_record_count > 0 else good_value %}
+    <strong>Abuse Record Count: </strong><span class="{{ font_class }}">{{ result.criminalip.abuse_record_count }}</span><br>
+
+    {% if result.criminalip.score %}
+        {% if result.criminalip.score.inbound in ["Dangerous", "Critical"] %}
+            {% set inbound_class = bad_value %}
+        {% elif result.criminalip.score.inbound in ["Safe", "Low"] %}
+            {% set inbound_class = good_value %}
+        {% else %}
+            {% set inbound_class = neutral_value %}
+        {% endif %}
+        <strong>Score: </strong>Inbound: <span class="{{ inbound_class }}">{{ result.criminalip.score.inbound }}</span>,
+        {% if result.criminalip.score.outbound in ["Dangerous", "Critical"] %}
+            {% set outbound_class = bad_value %}
+        {% elif result.criminalip.score.outbound in ["Safe", "Low"] %}
+            {% set outbound_class = good_value %}
+        {% else %}
+            {% set outbound_class = neutral_value %}
+        {% endif %}
+        Outbound: <span class="{{ outbound_class }}">{{ result.criminalip.score.outbound }}</span><br>
+    {% endif %}
+
+    {% if result.criminalip.current_opened_port and result.criminalip.current_opened_port.count > 0 %}
+        <strong>Current Open Ports:</strong> {{ result.criminalip.current_opened_port.data | map(attribute='port') | join(', ') }}</p>
+    {% endif %}
+
+    {% if result.criminalip.issues %}
+        <strong>Issues:</strong><br>
+        {% for issue_name, value in result.criminalip.issues | dictsort %}
+            {% set font_class = good_value if value == false else bad_value %}
+            {{ issue_name }}: <span class="{{ font_class }}">{{ value }}</span><br>
+        {% endfor %}
+    {% endif %}
+
+    {% if result.criminalip.represenative_domain %}
+        <strong>Representative Domain: </strong>{{ result.criminalip.represenative_domain }}<br>
+    {% endif %}
+
+{% else %}
+Not applicable
+{% endif %}

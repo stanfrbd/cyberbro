@@ -1,0 +1,81 @@
+{% set criminalip = analysis_results.results[0].criminalip %}
+
+{% set good_value = 'good-value' %}
+{% set bad_value = 'bad-value' %}
+{% set neutral_value = 'neutral-value' %}
+
+<div class="card">
+<h3 title="Criminal IP">Criminal IP</h3>
+
+    {% set font_class = bad_value if criminalip.abuse_record_count > 0 else good_value %}
+    <p><strong>Abuse Record Count</strong>:
+        <span class="{{ font_class }}">{{ criminalip.abuse_record_count }}</span>
+    </p>
+
+{% if criminalip.score %}
+    <div><h4>Score</h4>
+        {% if criminalip.score.inbound in ["Dangerous", "Critical"] %}
+            {% set inbound_class = bad_value %}
+        {% elif criminalip.score.inbound in ["Safe", "Low"] %}
+            {% set inbound_class = good_value %}
+        {% else %}
+            {% set inbound_class = neutral_value %}
+        {% endif %}
+        <p>Inbound:<span class="{{ inbound_class }}"> {{ criminalip.score.inbound }}</span><br>
+        {% if criminalip.score.outbound in ["Dangerous", "Critical"] %}
+            {% set outbound_class = bad_value %}
+        {% elif criminalip.score.outbound in ["Safe", "Low"] %}
+            {% set outbound_class = good_value %}
+        {% else %}
+            {% set outbound_class = neutral_value %}
+        {% endif %}
+        Outbound:<span class="{{ outbound_class }}"> {{ criminalip.score.outbound }}</span></p>
+    </div>
+{% endif %}
+
+{% if criminalip.issues is defined %}
+    <div><h4>Issues</h4>
+    <p><ul>
+    {% for issue_name, value in criminalip.issues.items() %}
+        {% set font_class = good_value if value == false else bad_value %}
+        <li> {{ issue_name }}: <span class="{{ font_class }}">{{ value }}</span></li>
+    {% endfor %}
+    </ul></p>
+    </div>
+{% endif %}
+
+{% if criminalip.ids.count > 0 %}
+    <div><h4>IDS</h4>
+    <div><ul>
+    {% for ids in criminalip.ids.data %}
+        <li>Classification: {{ ids.classification }}<br>
+        Confirmed Time: {{ ids.confirmed_time }}<br>
+        Message: {{ ids.message }}<br>
+        Source System: {{ ids.source_system }}<br>
+        Url: {{ ids.url }}</li>
+    {% endfor %}
+    </ul></div>
+    </div>
+{% endif %}
+
+{% if criminalip.current_opened_port and criminalip.current_opened_port.count > 0 %}
+    <div><h4>Current Open Ports</h4>
+    {% for port in criminalip.current_opened_port.data %}
+        <div><ul>
+            <li><strong>Port</strong>: {{ port.port }}<br>
+        {% set font_class = bad_value if port.is_vulnerability else neutral_value %}
+        Vulnerability: <span class="{{ font_class }}">{{ port.is_vulnerability }}</span><br>
+        Product Name: {{ port.product_name }}<br>
+        {% if port.protocol %}
+            Protocol: {{ port.protocol }}<br>
+        {% endif %}
+        Socket Type: {{ port.socket_type }}</li></ul>
+        </div>
+    {% endfor %}
+    </div>
+{% endif %}
+
+{% if criminalip.represenative_domain %}
+    <div><strong>Representative Domain</strong>: {{ criminalip.represenative_domain }}</div>
+{% endif %}
+</div>

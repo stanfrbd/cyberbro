@@ -9,6 +9,7 @@ dnspython
 pycountry
 fake_useragent
 bs4
+pydantic
 pytest
 querycontacts
 flask_sqlalchemy

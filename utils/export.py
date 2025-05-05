@@ -81,6 +81,12 @@ def prepare_row(result, selected_engines):
         row["vt_nb_detect"] = virustotal_data.get("total_malicious") if virustotal_data else None
         row["vt_community"] = virustotal_data.get("community_score") if virustotal_data else None
 
+    if "alienvault" in selected_engines:
+        alienvault_data = result.get("alienvault", {})
+        row["alienvault_pulses"] = alienvault_data.get("count") if alienvault_data else None
+        row["alienvault_malwares"] = alienvault_data.get("malware_families") if alienvault_data else None
+        row["alienvault_adversary"] = alienvault_data.get("adversary") if alienvault_data else None
+
     if "spur" in selected_engines:
         spur_data = result.get("spur", {})
         row["spur_us_anon"] = spur_data.get("tunnels") if spur_data else None

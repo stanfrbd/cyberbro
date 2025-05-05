@@ -5,6 +5,7 @@ import time
 from engines import (
     abuseipdb,
     abusix,
+    criminalip,
     crowdstrike,
     extension,
     github,
@@ -25,6 +26,7 @@ from engines import (
     urlscan,
     virustotal,
     webscout,
+    alienvault
 )
 from models.analysis_result import AnalysisResult
 from utils.config import Secrets, get_config
@@ -253,6 +255,23 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
+    if "alienvault" in selected_engines and observable["type"] in [
+        "MD5",
+        "SHA1",
+        "SHA256",
+        "URL",
+        "FQDN",
+        "IPv4",
+        "IPv6",
+    ]:
+        result["alienvault"] = alienvault.query_alienvault(
+            observable["value"],
+            observable["type"],
+            PROXIES,
+            SSL_VERIFY,
+            secrets.alienvault
+        )
+
     if "google_safe_browsing" in selected_engines and observable["type"] in [
         "URL",
         "FQDN",
@@ -272,6 +291,16 @@ def perform_engine_queries(observable, selected_engines, result):
     if "phishtank" in selected_engines and observable["type"] in ["FQDN", "URL"]:
         result["phishtank"] = phishtank.query_phishtank(
             observable["value"], observable["type"], PROXIES, SSL_VERIFY
+        )
+
+    if "criminalip" in selected_engines and observable["type"] in [
+        "IPv4",
+        "IPv6",
+    ]:
+        result["criminalip"] = criminalip.run_criminal_ip_analysis(
+            observable["value"],
+            PROXIES,
+            SSL_VERIFY,
         )
 
     if "hudsonrock" in selected_engines and observable["type"] in [

@@ -1661,15 +1661,11 @@ function copyAsDefanged() {
                     {% if "criminalip" in analysis_results.selected_engines %}
                     <td>
                     {% include "engine_layouts/criminalip_table.html" %}
-                    {% else %}
-                    Not applicable
                     </td>
                     {% endif %}
                     {% if "alienvault" in analysis_results.selected_engines %}
                     <td>
                     {% include "engine_layouts/alienvault_table.html" %}
-                    {% else %}
-                    Not applicable
                     </td>
                     {% endif %}
                 </tr>

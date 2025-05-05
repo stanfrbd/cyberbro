@@ -287,6 +287,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 
 * [AbuseIPDB](https://docs.abuseipdb.com/)
 * [Abusix](https://abusix.com/)
+* [Alienvault](https://otx.alienvault.com/)
 * [CriminalIP](https://www.criminalip.io/)
 * [CrowdStrike](https://www.crowdstrike.com/)
 * [Github](https://github.com/)
@@ -308,7 +309,6 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [URLscan](https://urlscan.io/)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [WebScout](https://webscout.io/)
-* [Alienvault](https://otx.alienvault.com/)
 
 > [!NOTE]
 > Any questions? Check the [wiki](https://github.com/stanfrbd/cyberbro/wiki) or raise an [issue](https://github.com/stanfrbd/cyberbro/issues/new) \

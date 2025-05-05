@@ -1,6 +1,6 @@
 <div class="card">
-    {% if analysis_results.results[0].alienvault.count > 0 %}
     <h3>Alienvault</h3>
+    {% if analysis_results.results[0].alienvault.count > 0 %}
     <strong>Pulses Count: </strong>{{ analysis_results.results[0].alienvault.count }}<br>
     {% for search_result in analysis_results.results[0].alienvault.pulses %}
     <a href="{{ search_result.url }}" target="_blank" title="{{ search_result.title }}">{{ search_result.title

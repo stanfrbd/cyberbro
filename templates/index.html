@@ -909,23 +909,6 @@ function formatResults(data) {
                 }
             }
         }
-
-        if (result.alienvault) {
-            plainText += `Alienvault:\n`;
-            plainText += `  - Pulse Count: ${result.alienvault.count}\n`;
-            if (result.alienvault.count > 0) {
-            result.alienvault.pulses.forEach(alienvaultPulse => {
-                plainText += `  - ${alienvaultPulse.title}: ${alienvaultPulse.url}\n`;
-            });
-            }
-            if (result.alienvault.malware_families.length > 0) {
-                plainText += `  - Malware Families: ${result.alienvault.malware_families.join(', ')}\n`;
-            }
-            if (result.alienvault.adversary.length > 0) {
-                plainText += `  - Adversary: ${result.alienvault.adversary.join(', ')}\n`;
-            }
-
-        }
         plainText += '\n';
     });
 

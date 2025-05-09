@@ -1,26 +1,31 @@
-import pandas as pd
 import threading
 import time
-import os
+from pathlib import Path
+
+import pandas as pd
 from flask import send_file
+
 
 def prepare_row(result, selected_engines):
     """
-    Prepares a dictionary (row) with data extracted from the result dictionary based on the selected engines.
+    Prepares a dictionary (row) with data extracted from the result dictionary
+    based on the selected engines.
+
     Args:
-        result (dict): A dictionary containing various data sources and their respective information.
-        selected_engines (list): A list of strings representing the selected engines to include in the row.
+        result (dict): A dictionary containing various data sources and their
+            respective information.
+        selected_engines (list): A list of strings representing the selected
+            engines to include in the row.
+
     Returns:
-        dict: A dictionary containing the prepared row with data from the result dictionary based on the selected engines.
+        dict: A dictionary containing the prepared row with data from the
+            result dictionary based on the selected engines.
     """
     rev_dns_data = result.get("reverse_dns", {})
     ipinfo_data = result.get("ipinfo", {})
     abuseipdb_data = result.get("abuseipdb", {})
 
-    row = {
-        "observable": result.get("observable"),
-        "type": result.get("type")
-    }
+    row = {"observable": result.get("observable"), "type": result.get("type")}
 
     # Will be at the end of the report if there are other observable types
     if result.get("type") == "CHROME_EXTENSION":
@@ -46,7 +51,7 @@ def prepare_row(result, selected_engines):
         row["ipinfo_cn"] = ipinfo_data.get("country_code") if ipinfo_data else None
         row["ipinfo_country"] = ipinfo_data.get("country_name") if ipinfo_data else None
         row["ipinfo_geo"] = ipinfo_data.get("geolocation") if ipinfo_data else None
-        asn_data = ipinfo_data.get("asn").split(' ', 1) if ipinfo_data.get("asn") else []
+        asn_data = ipinfo_data.get("asn").split(" ", 1) if ipinfo_data.get("asn") else []
         row["ipinfo_asn"] = asn_data[0] if len(asn_data) > 0 else None
         row["ipinfo_org"] = asn_data[1] if len(asn_data) > 1 else None
 
@@ -90,7 +95,7 @@ def prepare_row(result, selected_engines):
     if "spur" in selected_engines:
         spur_data = result.get("spur", {})
         row["spur_us_anon"] = spur_data.get("tunnels") if spur_data else None
-    
+
     if "webscout" in selected_engines:
         webscout_data = result.get("webscout", {})
         row["ws_risk"] = webscout_data.get("risk_score") if webscout_data else None
@@ -141,10 +146,12 @@ def prepare_row(result, selected_engines):
         opencti_data = result.get("opencti", {})
         row["opencti_entity_counts"] = opencti_data.get("entity_counts") if opencti_data else None
         row["opencti_global_count"] = opencti_data.get("global_count") if opencti_data else None
-    
+
     if "hudsonrock" in selected_engines:
         hudsonrock_data = result.get("hudsonrock", {})
-        row["hr_total_corporate_services"] = hudsonrock_data.get("total_corporate_services") if hudsonrock_data else None
+        row["hr_total_corporate_services"] = (
+            hudsonrock_data.get("total_corporate_services") if hudsonrock_data else None
+        )
         row["hr_total_user_services"] = hudsonrock_data.get("total_user_services") if hudsonrock_data else None
         row["hr_total"] = hudsonrock_data.get("total") if hudsonrock_data else None
         row["hr_total_stealers"] = hudsonrock_data.get("totalStealers") if hudsonrock_data else None
@@ -162,18 +169,22 @@ def prepare_row(result, selected_engines):
         row["cs_malwares"] = crowdstrike_data.get("malware_families") if crowdstrike_data else None
         row["cs_kill_chain"] = crowdstrike_data.get("kill_chain") if crowdstrike_data else None
         row["cs_vulns"] = crowdstrike_data.get("vulnerabilities") if crowdstrike_data else None
-    
+
     return row
+
 
 def prepare_data_for_export(analysis_results):
     """
     Prepares data for export based on the analysis results.
 
     Args:
-        analysis_results (AnalysisResults): An object containing the results of the analysis and the selected engines.
+        analysis_results (AnalysisResults): An object containing the results of
+            the analysis and the selected engines.
 
-    Returns:
-        list: A list of rows, where each row is prepared based on the analysis results and selected engines.
+        list: A list of rows, where each row is prepared based on the analysis results
+            and selected engines.
+        list: A list of rows, where each row is prepared based on the analysis results
+            and selected engines.
     """
     data = []
     for result in analysis_results.results:
@@ -181,12 +192,14 @@ def prepare_data_for_export(analysis_results):
         data.append(row)
     return data
 
+
 def export_to_csv(data, timestamp):
     """
     Exports the given data to a CSV file and sends it as an attachment.
 
     Args:
-        data (list or dict): The data to be exported to CSV. It should be in a format that can be converted to a pandas DataFrame.
+        data (list or dict): The data to be exported to CSV.
+        It should be in a format that can be converted to a pandas DataFrame.
         timestamp (str): A timestamp string to be used in the CSV file name.
 
     Returns:
@@ -195,11 +208,12 @@ def export_to_csv(data, timestamp):
     The CSV file is named using the provided timestamp and is deleted 10 seconds after being sent.
     """
     df = pd.DataFrame(data)
-    csv_path = f'{timestamp}_analysis_result.csv'
-    df.to_csv(csv_path, index=False, sep=';')
-    response = send_file(csv_path, as_attachment=True)
-    threading.Thread(target=lambda path: (time.sleep(10), os.remove(path)), args=(csv_path,)).start()
-    return response
+    csv_path = f"{timestamp}_analysis_result.csv"
+    df.to_csv(csv_path, index=False, sep=";")
+    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)).start()
+    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)).start()
+    return send_file(csv_path, as_attachment=True)
+
 
 def export_to_excel(data, timestamp):
     """
@@ -225,11 +239,10 @@ def export_to_excel(data, timestamp):
         This function requires the 'pandas', 'openpyxl', 'flask', 'threading', 'time', and 'os' modules.
     """
     df = pd.DataFrame(data)
-    excel_path = f'{timestamp}_analysis_result.xlsx'
-    with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Results')
-        workbook = writer.book
-        worksheet = writer.sheets['Results']
+    excel_path = f"{timestamp}_analysis_result.xlsx"
+    with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Results")
+        worksheet = writer.sheets["Results"]
         (max_row, max_col) = df.shape
         worksheet.auto_filter.ref = worksheet.dimensions
         for col in worksheet.columns:
@@ -239,10 +252,10 @@ def export_to_excel(data, timestamp):
                 try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except:
+                except Exception:
                     pass
-            adjusted_width = (max_length + 2)
+            adjusted_width = max_length + 2
             worksheet.column_dimensions[column].width = adjusted_width
     response = send_file(excel_path, as_attachment=True)
-    threading.Thread(target=lambda path: (time.sleep(10), os.remove(path)), args=(excel_path,)).start()
+    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(excel_path,)).start()
     return response

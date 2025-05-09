@@ -1,15 +1,17 @@
 import logging
+from typing import Any, Optional
+
 import requests
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
+
 
 def query_urlscan(
     observable: str,
     observable_type: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries the urlscan.io API for information about a given observable (URL, IP, or file hash).
 
@@ -34,7 +36,7 @@ def query_urlscan(
         "SHA1": "files.sha1",
         "SHA256": "files.sha256",
         "URL": "page.domain",
-        "FQDN": "page.domain"
+        "FQDN": "page.domain",
     }
     query_field = query_fields.get(observable_type, "page.domain")
 
@@ -66,10 +68,16 @@ def query_urlscan(
         return {
             "scan_count": scan_count,
             "top_domains": top_domains,
-            "link": f"https://urlscan.io/search/#{query_field}:{observable}"
+            "link": f"https://urlscan.io/search/#{query_field}:{observable}",
         }
 
     except Exception as e:
-        logger.error("Error querying urlscan.io for '%s' (%s): %s", observable, observable_type, e, exc_info=True)
+        logger.error(
+            "Error querying urlscan.io for '%s' (%s): %s",
+            observable,
+            observable_type,
+            e,
+            exc_info=True,
+        )
 
     return None

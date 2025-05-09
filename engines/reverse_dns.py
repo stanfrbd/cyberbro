@@ -1,17 +1,16 @@
 import logging
+from typing import Any, Optional
+
 import dns.resolver
 import dns.reversename
-from typing import Optional, Dict, Any
 
 # We assume these utility functions exist in utils.utils
-from utils.utils import is_really_ipv6, identify_observable_type
+from utils.utils import identify_observable_type, is_really_ipv6
 
 logger = logging.getLogger(__name__)
 
-def reverse_dns(
-    observable: str,
-    observable_type: str
-) -> Optional[Dict[str, Any]]:
+
+def reverse_dns(observable: str, observable_type: str) -> Optional[dict[str, Any]]:
     """
     Perform a reverse DNS or standard DNS lookup on the given observable.
 
@@ -50,24 +49,32 @@ def reverse_dns(
                     reverse_name = dns.reversename.from_address(extracted)
                     answer = dns.resolver.resolve(reverse_name, "PTR")
                     return {"reverse_dns": [str(answer[0])]}
-                else:
-                    # Remove the port to isolate domain or IPv4
-                    extracted = extracted.split(":")[0]
+                # Remove the port to isolate domain or IPv4
+                extracted = extracted.split(":")[0]
 
             # Identify the cleaned-up host type
             extracted_type = identify_observable_type(extracted)
             if extracted_type == "FQDN":
                 answer = dns.resolver.resolve(extracted, "A")
                 return {"reverse_dns": [str(ip) for ip in answer]}
-            elif extracted_type == "IPv4":
+            if extracted_type == "IPv4":
                 reverse_name = dns.reversename.from_address(extracted)
                 answer = dns.resolver.resolve(reverse_name, "PTR")
                 return {"reverse_dns": [str(answer[0])]}
 
-        logger.warning("Unsupported observable_type '%s' or no relevant logic found.", observable_type)
+        logger.warning(
+            "Unsupported observable_type '%s' or no relevant logic found.",
+            observable_type,
+        )
         return None
 
     except Exception as e:
-        logger.error("Error resolving reverse DNS for '%s' (%s): %s", observable, observable_type, e, exc_info=True)
+        logger.error(
+            "Error resolving reverse DNS for '%s' (%s): %s",
+            observable,
+            observable_type,
+            e,
+            exc_info=True,
+        )
 
     return None

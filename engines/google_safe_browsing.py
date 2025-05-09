@@ -1,16 +1,18 @@
 import logging
+from typing import Any, Optional
+
 import requests
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
+
 
 def query_google_safe_browsing(
     observable: str,
     observable_type: str,
     api_key: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries the Google Safe Browsing API to check if the given observable is associated with any threats.
 
@@ -35,12 +37,13 @@ def query_google_safe_browsing(
         # Assign the URL to check based on the observable type
         if observable_type == "URL":
             threat_entries.append({"url": observable})
-        elif observable_type == "FQDN":
-            threat_entries.append({"url": f"http://{observable}"})
-        elif observable_type in ["IPv4", "IPv6"]:
+        elif observable_type == "FQDN" or observable_type in ["IPv4", "IPv6"]:
             threat_entries.append({"url": f"http://{observable}"})
         else:
-            logger.warning("Unsupported observable_type '%s' for Google Safe Browsing.", observable_type)
+            logger.warning(
+                "Unsupported observable_type '%s' for Google Safe Browsing.",
+                observable_type,
+            )
             return None
 
         body = {
@@ -50,11 +53,11 @@ def query_google_safe_browsing(
                     "SOCIAL_ENGINEERING",
                     "UNWANTED_SOFTWARE",
                     "POTENTIALLY_HARMFUL_APPLICATION",
-                    "THREAT_TYPE_UNSPECIFIED"
+                    "THREAT_TYPE_UNSPECIFIED",
                 ],
                 "platformTypes": ["ALL"],
                 "threatEntryTypes": ["URL"],
-                "threatEntries": threat_entries
+                "threatEntries": threat_entries,
             }
         }
 
@@ -64,10 +67,14 @@ def query_google_safe_browsing(
         data = response.json()
         if "matches" in data:
             return {"threat_found": "Threat found", "details": data["matches"]}
-        else:
-            return {"threat_found": "No threat found", "details": None}
+        return {"threat_found": "No threat found", "details": None}
 
     except Exception as e:
-        logger.error("Error while querying Google Safe Browsing for '%s': %s", observable, e, exc_info=True)
+        logger.error(
+            "Error while querying Google Safe Browsing for '%s': %s",
+            observable,
+            e,
+            exc_info=True,
+        )
 
     return None

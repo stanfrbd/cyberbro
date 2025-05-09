@@ -1,11 +1,13 @@
 import logging
-import requests
+from typing import Any, Optional
+
 import pycountry
-from typing import Optional, Dict, Any
+import requests
 
 logger = logging.getLogger(__name__)
 
-def query_ipinfo(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: bool = True) -> Optional[Dict[str, Any]]:
+
+def query_ipinfo(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Queries the IP information from the ipinfo.io API.
 
@@ -41,7 +43,7 @@ def query_ipinfo(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: boo
                 "country_name": "",
                 "hostname": "Private IP",
                 "asn": "BOGON",
-                "link": f"https://ipinfo.io/{ip}"
+                "link": f"https://ipinfo.io/{ip}",
             }
 
         if "ip" in data:
@@ -66,7 +68,7 @@ def query_ipinfo(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: boo
                 "country_name": country_name,
                 "hostname": hostname,
                 "asn": asn,
-                "link": f"https://ipinfo.io/{ip_resp}"
+                "link": f"https://ipinfo.io/{ip_resp}",
             }
 
     except Exception as e:

@@ -47,9 +47,7 @@ class Secrets:
 
         if field_name in self.__dataclass_fields__:
             return self.__dataclass_fields__[field_name].type
-        raise KeyError(
-            f"Field '{field_name}' does not exist in {self.__class__.__name__}"
-        )
+        raise KeyError(f"Field '{field_name}' does not exist in {self.__class__.__name__}")
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Set the value of a field in the dataclass.
@@ -74,13 +72,9 @@ class Secrets:
             try:
                 value = int(value)
             except ValueError:
-                logger.warning(
-                    f"Invalid value for {name}: {value}. Expected int. {name} not updated."
-                )
-                print(
-                    f"Invalid value for {name}: {value}. Expected int. {name} not updated."
-                )
-                return None
+                logger.warning(f"Invalid value for {name}: {value}. Expected int. {name} not updated.")
+                print(f"Invalid value for {name}: {value}. Expected int. {name} not updated.")
+                return
 
         if field_type is bool and isinstance(value, str):
             # Convert string to bool
@@ -143,19 +137,13 @@ def read_secrets_from_file(secrets_file: Path) -> Secrets:
             with secrets_file.open() as f:
                 secrets.update(json.load(f))
         except OSError as e:
-            print(
-                "Unable to read secrets file. Reading environment variables anyway..."
-            )
+            print("Unable to read secrets file. Reading environment variables anyway...")
             logger.debug(f"Error reading secrets file: {e}")
-            logger.error(
-                "Unable to read secrets file. Reading environment variables anyway..."
-            )
+            logger.error("Unable to read secrets file. Reading environment variables anyway...")
         except json.JSONDecodeError as e:
             print("Error while decoding secrets:", e)
             logger.debug(f"Error while decoding secrets: {e}")
-            logger.error(
-                "Error while decoding secrets. Reading environment variables anyway..."
-            )
+            logger.error("Error while decoding secrets. Reading environment variables anyway...")
     else:
         print("Secrets file not found. Reading environment variables anyway...")
         logger.info("Secrets file not found. Reading environment variables anyway...")
@@ -179,12 +167,8 @@ def read_secrets_from_env(secrets: Secrets) -> Secrets:
             secrets.update({key: env_value})
 
     if not env_configured:
-        print(
-            "No environment variables were configured. You can configure secrets later in secrets.json."
-        )
-        logger.info(
-            "No environment variables were configured. You can configure secrets later in secrets.json."
-        )
+        print("No environment variables were configured. You can configure secrets later in secrets.json.")
+        logger.info("No environment variables were configured. You can configure secrets later in secrets.json.")
 
     return secrets
 
@@ -199,16 +183,16 @@ def save_secrets_to_file(secrets: Secrets, secrets_file: Path) -> None:
     except OSError as e:
         print(f"Unable to write secrets file: {e}")
         logger.error(f"Unable to write secrets file: {e}")
-        return None
+        return
     except json.JSONDecodeError as e:
         print("Error while encoding secrets:", e)
         logger.error("Error while encoding secrets: %s", e)
-        return None
+        return
 
     print("Secrets file was updated.")
     logger.info("Secrets file was updated.")
 
-    return None
+    return
 
 
 @lru_cache
@@ -225,9 +209,7 @@ def get_config() -> Secrets:
     # If the secrets are not the same as the defaults, save them to the file
     if secrets != DEFAULT_SECRETS:
         if not SECRETS_FILE.exists():
-            print(
-                "Secrets file was not found. Attempting to save current values to a new one."
-            )
+            print("Secrets file was not found. Attempting to save current values to a new one.")
 
         save_secrets_to_file(secrets, SECRETS_FILE)
 

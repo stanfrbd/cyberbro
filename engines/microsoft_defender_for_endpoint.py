@@ -1,11 +1,13 @@
-import json
 import logging
-import requests
-import jwt
 import time
-from typing import Optional, Dict, Any
+from pathlib import Path
+from typing import Any, Optional
+
+import jwt
+import requests
 
 logger = logging.getLogger(__name__)
+
 
 def check_token_validity(token: str) -> bool:
     try:
@@ -14,33 +16,39 @@ def check_token_validity(token: str) -> bool:
         exp = decoded_token.get("exp")
         if exp and exp > time.time():
             return True
-        else:
-            logger.warning("MDE Token has expired.")
-            return False
+        logger.warning("MDE Token has expired.")
+        return False
     except Exception as e:
         logger.error("Failed to decode MDE token: %s", e, exc_info=True)
         return False
 
+
 def read_token() -> Optional[str]:
     try:
-        with open("mde_token.txt", "r") as f:
-            token = f.read().strip()
+        token_path = Path("mde_token.txt")
+        token = token_path.read_text().strip()
         if check_token_validity(token):
             return token
-        else:
-            logger.warning("Invalid JWT token found in mde_token.txt")
+        logger.warning("Invalid JWT token found in mde_token.txt")
     except Exception as e:
         logger.error("Failed to read token from file: %s", e, exc_info=True)
     return None
 
-def get_token(tenant_id: str, client_id: str, client_secret: str, proxies: Dict[str, str], ssl_verify: bool = True) -> str:
+
+def get_token(
+    tenant_id: str,
+    client_id: str,
+    client_secret: str,
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> str:
     url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/token"
     resource_app_id_uri = "https://api.securitycenter.microsoft.com"
     body = {
         "resource": resource_app_id_uri,
         "client_id": client_id,
         "client_secret": client_secret,
-        "grant_type": "client_credentials"
+        "grant_type": "client_credentials",
     }
     try:
         response = requests.post(url, data=body, proxies=proxies, verify=ssl_verify)
@@ -52,12 +60,13 @@ def get_token(tenant_id: str, client_id: str, client_secret: str, proxies: Dict[
 
     try:
         aad_token = json_response["access_token"]
-        with open("mde_token.txt", "w") as f:
-            f.write(aad_token)
+        token_path = Path("mde_token.txt")
+        token_path.write_text(aad_token)
         return aad_token
     except KeyError:
         logger.error("Unable to retrieve token from JSON response: %s", json_response)
         return "invalid"
+
 
 def query_microsoft_defender_for_endpoint(
     observable: str,
@@ -65,9 +74,9 @@ def query_microsoft_defender_for_endpoint(
     tenant_id: str,
     client_id: str,
     client_secret: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries Microsoft Defender for Endpoint for information about a given observable.
 
@@ -139,6 +148,11 @@ def query_microsoft_defender_for_endpoint(
         return data
 
     except Exception as e:
-        logger.error("Error querying Microsoft Defender for Endpoint for '%s': %s", observable, e, exc_info=True)
+        logger.error(
+            "Error querying Microsoft Defender for Endpoint for '%s': %s",
+            observable,
+            e,
+            exc_info=True,
+        )
 
     return None

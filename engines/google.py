@@ -1,11 +1,12 @@
 import logging
-import requests
-from typing import Optional, Dict, Any
+from typing import Any, Optional
+
 from googlesearch import search
 
 logger = logging.getLogger(__name__)
 
-def query_google(observable: str, proxies: Dict[str, str], ssl_verify: bool = True) -> Optional[Dict[str, Any]]:
+
+def query_google(observable: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Perform a Google search query limited to 5 search results.
 
@@ -25,22 +26,24 @@ def query_google(observable: str, proxies: Dict[str, str], ssl_verify: bool = Tr
     """
     try:
         search_iterator = search(
-            f"\"{observable}\"",
+            f'"{observable}"',
             num_results=5,
             proxy=proxies.get("http"),
             ssl_verify=ssl_verify,
             advanced=True,
             lang="en",
-            region="US"
+            region="US",
         )
-        
+
         search_results = []
         for result in search_iterator:
-            search_results.append({
-                "title": result.title,
-                "description": result.description,
-                "url": result.url
-            })
+            search_results.append(
+                {
+                    "title": result.title,
+                    "description": result.description,
+                    "url": result.url,
+                }
+            )
 
         return {"results": search_results}
 

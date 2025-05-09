@@ -1,16 +1,18 @@
-import logging
 import json
+import logging
+from typing import Any, Optional
+
 import requests
-from typing import Optional, Dict, Any, List
 
 logger = logging.getLogger(__name__)
+
 
 def query_threatfox(
     observable: str,
     observable_type: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries the ThreatFox API for information about a given observable (URL, IP, hash).
 
@@ -36,18 +38,9 @@ def query_threatfox(
             observable = domain_part
 
         url = "https://threatfox-api.abuse.ch/api/v1/"
-        payload = {
-            "query": "search_ioc",
-            "search_term": observable
-        }
+        payload = {"query": "search_ioc", "search_term": observable}
 
-        response = requests.post(
-            url,
-            data=json.dumps(payload),
-            proxies=proxies,
-            verify=ssl_verify,
-            timeout=5
-        )
+        response = requests.post(url, data=json.dumps(payload), proxies=proxies, verify=ssl_verify, timeout=5)
         response.raise_for_status()
 
         result = response.json()
@@ -68,7 +61,7 @@ def query_threatfox(
         return {
             "count": count,
             "malware_printable": list(malware_printable_set),
-            "link": link
+            "link": link,
         }
 
     except Exception as e:

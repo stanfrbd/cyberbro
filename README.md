@@ -71,7 +71,7 @@ without having to deploy a **complex** solution.
 * **Grep.App**: Search for observables with Grep.App API (fast GitHub searches).
 * **Hudson Rock**: Check if an email / domain was part of a data breach or was victim of an infostealer.
 * **Analysis History**: Maintain a history of analyses with easy retrieval and search functionality.
-* **Graph view**: view your analysis as a graph (experimental)
+* **Graph view**: view your analysis as a graph (experimental).
 
 # What Cyberbro does that others don't
 
@@ -130,7 +130,6 @@ cp secrets-sample.json secrets.json
     "virustotal": "token_here",
     "webscout": "token_here"
 }
-
 ```
 
 * Obtain API keys from the official documentation of each service.

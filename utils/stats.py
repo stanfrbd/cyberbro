@@ -1,9 +1,10 @@
 from models.analysis_result import AnalysisResult, db
 
+
 def get_analysis_stats():
     analyses = db.session.query(AnalysisResult).all()
     num_analyses = len(analyses)
-    
+
     unique_observables = set()
     unique_engines = set()
     observable_type_count = {}
@@ -32,7 +33,7 @@ def get_analysis_stats():
             else:
                 engine_count[engine] = 1
 
-    stats = {
+    return {
         "num_analyses": num_analyses,
         "num_unique_observables": len(unique_observables),
         "unique_observables": list(unique_observables),
@@ -40,7 +41,5 @@ def get_analysis_stats():
         "unique_engines": list(unique_engines),
         "observable_type_count": observable_type_count,
         "engine_count": engine_count,
-        "observable_count": observable_count
+        "observable_count": observable_count,
     }
-
-    return stats

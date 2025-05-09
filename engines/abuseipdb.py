@@ -1,10 +1,14 @@
 import logging
+from typing import Any, Optional
+
 import requests
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
-def query_abuseipdb(ip: str, api_key: str, proxies: Optional[Dict[str, str]], ssl_verify: bool = True) -> Optional[Dict[str, Any]]:
+
+def query_abuseipdb(
+    ip: str, api_key: str, proxies: Optional[dict[str, str]], ssl_verify: bool = True
+) -> Optional[dict[str, Any]]:
     """
     Queries the AbuseIPDB API for information about a given IP address.
 
@@ -25,14 +29,18 @@ def query_abuseipdb(ip: str, api_key: str, proxies: Optional[Dict[str, str]], ss
         ValueError: If the response cannot be parsed as JSON.
     """
     url = "https://api.abuseipdb.com/api/v2/check"
-    headers = {
-        "Key": api_key,
-        "Accept": "application/json"
-    }
+    headers = {"Key": api_key, "Accept": "application/json"}
     params = {"ipAddress": ip}
 
     try:
-        response = requests.get(url, headers=headers, params=params, proxies=proxies, verify=ssl_verify, timeout=5)
+        response = requests.get(
+            url,
+            headers=headers,
+            params=params,
+            proxies=proxies,
+            verify=ssl_verify,
+            timeout=5,
+        )
         response.raise_for_status()  # Raises an HTTPError for 4xx/5xx statuses
 
         json_response = response.json()
@@ -45,11 +53,7 @@ def query_abuseipdb(ip: str, api_key: str, proxies: Optional[Dict[str, str]], ss
         risk_score = data.get("abuseConfidenceScore", 0)
         link = f"https://www.abuseipdb.com/check/{ip}"
 
-        return {
-            "reports": reports,
-            "risk_score": risk_score,
-            "link": link
-        }
+        return {"reports": reports, "risk_score": risk_score, "link": link}
 
     except requests.exceptions.RequestException as req_err:
         logger.error("Network error while querying AbuseIPDB: %s", req_err, exc_info=True)

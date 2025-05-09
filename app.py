@@ -145,9 +145,7 @@ def get_latest_version_from_updated_cache_file(cache_file: Path) -> str:
 
     try:
         with cache_file.open("w") as f:
-            json.dump(
-                {"last_checked": time.time(), "latest_version": latest_version}, f
-            )
+            json.dump({"last_checked": time.time(), "latest_version": latest_version}, f)
             logger.info(f"Cache file updated with latest version: {latest_version}")
     except OSError as e:
         logger.error(f"Error writing to cache file: {e}")
@@ -195,9 +193,7 @@ def analyze():
 
     # Generate a secure hash for form data and engines using SHA-256
     combined_data = f"{form_data}|{','.join(selected_engines)}"
-    cache_key = (
-        f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
-    )
+    cache_key = f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
 
     if not ignore_cache:
         # Check cache
@@ -213,9 +209,7 @@ def analyze():
 
     # If no cache
     analysis_id = str(uuid.uuid4())
-    threading.Thread(
-        target=perform_analysis, args=(app, observables, selected_engines, analysis_id)
-    ).start()
+    threading.Thread(target=perform_analysis, args=(app, observables, selected_engines, analysis_id)).start()
 
     # Generate response
     response_data = {"analysis_id": analysis_id}
@@ -223,9 +217,7 @@ def analyze():
     gui_cache_timeout = secrets.gui_cache_timeout
     cache.set(cache_key, response_data, timeout=gui_cache_timeout)
 
-    return render_template(
-        "waiting.html", analysis_id=analysis_id, API_PREFIX=API_PREFIX
-    ), 200
+    return render_template("waiting.html", analysis_id=analysis_id, API_PREFIX=API_PREFIX), 200
 
 
 @app.route("/results/<analysis_id>", methods=["GET"])
@@ -339,22 +331,14 @@ def update_config():
         secrets.virustotal = request.form.get("virustotal", secrets.virustotal)
         secrets.abuseipdb = request.form.get("abuseipdb", secrets.abuseipdb)
         secrets.ipinfo = request.form.get("ipinfo", secrets.ipinfo)
-        secrets.google_safe_browsing = request.form.get(
-            "google_safe_browsing", secrets.google_safe_browsing
-        )
+        secrets.google_safe_browsing = request.form.get("google_safe_browsing", secrets.google_safe_browsing)
         secrets.mde_tenant_id = request.form.get("mde_tenant_id", secrets.mde_tenant_id)
         secrets.mde_client_id = request.form.get("mde_client_id", secrets.mde_client_id)
-        secrets.mde_client_secret = request.form.get(
-            "mde_client_secret", secrets.mde_client_secret
-        )
+        secrets.mde_client_secret = request.form.get("mde_client_secret", secrets.mde_client_secret)
         secrets.shodan = request.form.get("shodan", secrets.shodan)
-        secrets.opencti_api_key = request.form.get(
-            "opencti_api_key", secrets.opencti_api_key
-        )
+        secrets.opencti_api_key = request.form.get("opencti_api_key", secrets.opencti_api_key)
         secrets.opencti_url = request.form.get("opencti_url", secrets.opencti_url)
-        secrets.crowdstrike_client_id = request.form.get(
-            "crowdstrike_client_id", secrets.crowdstrike_client_id
-        )
+        secrets.crowdstrike_client_id = request.form.get("crowdstrike_client_id", secrets.crowdstrike_client_id)
         secrets.crowdstrike_client_secret = request.form.get(
             "crowdstrike_client_secret", secrets.crowdstrike_client_secret
         )
@@ -367,10 +351,7 @@ def update_config():
         updated_gui_enabled_engines: str = request.form.get("gui_enabled_engines", "")
         if updated_gui_enabled_engines:
             global GUI_ENABLED_ENGINES
-            secrets.gui_enabled_engines = [
-                engine.strip().lower()
-                for engine in updated_gui_enabled_engines.split(",")
-            ]
+            secrets.gui_enabled_engines = [engine.strip().lower() for engine in updated_gui_enabled_engines.split(",")]
             GUI_ENABLED_ENGINES = secrets.gui_enabled_engines
 
         # Save the secrets to the secrets.json file
@@ -401,9 +382,7 @@ def analyze_api():
 
     # Generate a secure hash for form data and engines using SHA-256
     combined_data = f"{form_data}|{','.join(selected_engines)}"
-    cache_key = (
-        f"api-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
-    )
+    cache_key = f"api-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
 
     if not ignore_cache:
         # Check cache
@@ -435,9 +414,7 @@ def graph(analysis_id):
     """Render the graph visualization for the given analysis ID."""
     analysis_results = db.session.get(AnalysisResult, analysis_id)
     if analysis_results:
-        return render_template(
-            "graph.html", analysis_id=analysis_id, API_PREFIX=API_PREFIX
-        ), 200
+        return render_template("graph.html", analysis_id=analysis_id, API_PREFIX=API_PREFIX), 200
     return render_template("404.html"), 404
 
 

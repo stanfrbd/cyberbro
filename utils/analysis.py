@@ -5,6 +5,7 @@ import time
 from engines import (
     abuseipdb,
     abusix,
+    alienvault,
     criminalip,
     crowdstrike,
     extension,
@@ -26,7 +27,6 @@ from engines import (
     urlscan,
     virustotal,
     webscout,
-    alienvault
 )
 from models.analysis_result import AnalysisResult
 from utils.config import Secrets, get_config
@@ -51,9 +51,7 @@ def perform_analysis(app, observables, selected_engines, analysis_id):
             results=[],
             start_time=start_time,
             end_time=None,
-            start_time_string=time.strftime(
-                "%Y-%m-%d %H:%M:%S", time.localtime(start_time)
-            ),
+            start_time_string=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time)),
             end_time_string="",
             analysis_duration_string="",
             analysis_duration=0,
@@ -108,9 +106,7 @@ def perform_engine_queries(observable, selected_engines, result):
         "IPv4",
         "IPv6",
     ]:
-        result["urlscan"] = urlscan.query_urlscan(
-            observable["value"], observable["type"], PROXIES, SSL_VERIFY
-        )
+        result["urlscan"] = urlscan.query_urlscan(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
     if "ioc_one_html" in selected_engines and observable["type"] in [
         "MD5",
@@ -122,9 +118,7 @@ def perform_engine_queries(observable, selected_engines, result):
         "IPv6",
         "CHROME_EXTENSION",
     ]:
-        result["ioc_one_html"] = ioc_one.query_ioc_one_html(
-            observable["value"], PROXIES, SSL_VERIFY
-        )
+        result["ioc_one_html"] = ioc_one.query_ioc_one_html(observable["value"], PROXIES, SSL_VERIFY)
 
     if "ioc_one_pdf" in selected_engines and observable["type"] in [
         "MD5",
@@ -136,9 +130,7 @@ def perform_engine_queries(observable, selected_engines, result):
         "IPv6",
         "CHROME_EXTENSION",
     ]:
-        result["ioc_one_pdf"] = ioc_one.query_ioc_one_pdf(
-            observable["value"], PROXIES, SSL_VERIFY
-        )
+        result["ioc_one_pdf"] = ioc_one.query_ioc_one_pdf(observable["value"], PROXIES, SSL_VERIFY)
 
     if "google" in selected_engines and observable["type"] in [
         "MD5",
@@ -165,9 +157,7 @@ def perform_engine_queries(observable, selected_engines, result):
         result["github"] = github.query_github(observable["value"], PROXIES, SSL_VERIFY)
 
     if "rdap" in selected_engines and observable["type"] in ["FQDN", "URL"]:
-        result["rdap"] = rdap.query_openrdap(
-            observable["value"], observable["type"], PROXIES, SSL_VERIFY
-        )
+        result["rdap"] = rdap.query_openrdap(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
     if "mde" in selected_engines and observable["type"] in [
         "MD5",
@@ -179,16 +169,14 @@ def perform_engine_queries(observable, selected_engines, result):
         "IPv6",
         "BOGON",
     ]:
-        result["mde"] = (
-            microsoft_defender_for_endpoint.query_microsoft_defender_for_endpoint(
-                observable["value"],
-                observable["type"],
-                secrets.mde_tenant_id,
-                secrets.mde_client_id,
-                secrets.mde_client_secret,
-                PROXIES,
-                SSL_VERIFY,
-            )
+        result["mde"] = microsoft_defender_for_endpoint.query_microsoft_defender_for_endpoint(
+            observable["value"],
+            observable["type"],
+            secrets.mde_tenant_id,
+            secrets.mde_client_id,
+            secrets.mde_client_secret,
+            PROXIES,
+            SSL_VERIFY,
         )
 
     if "crowdstrike" in selected_engines and observable["type"] in [
@@ -234,9 +222,7 @@ def perform_engine_queries(observable, selected_engines, result):
         "IPv4",
         "IPv6",
     ]:
-        result["threatfox"] = threatfox.query_threatfox(
-            observable["value"], observable["type"], PROXIES, SSL_VERIFY
-        )
+        result["threatfox"] = threatfox.query_threatfox(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
     if "virustotal" in selected_engines and observable["type"] in [
         "MD5",
@@ -269,7 +255,7 @@ def perform_engine_queries(observable, selected_engines, result):
             observable["type"],
             PROXIES,
             SSL_VERIFY,
-            secrets.alienvault
+            secrets.alienvault,
         )
 
     if "google_safe_browsing" in selected_engines and observable["type"] in [
@@ -278,20 +264,16 @@ def perform_engine_queries(observable, selected_engines, result):
         "IPv4",
         "IPv6",
     ]:
-        result["google_safe_browsing"] = (
-            google_safe_browsing.query_google_safe_browsing(
-                observable["value"],
-                observable["type"],
-                secrets.google_safe_browsing,
-                PROXIES,
-                SSL_VERIFY,
-            )
+        result["google_safe_browsing"] = google_safe_browsing.query_google_safe_browsing(
+            observable["value"],
+            observable["type"],
+            secrets.google_safe_browsing,
+            PROXIES,
+            SSL_VERIFY,
         )
 
     if "phishtank" in selected_engines and observable["type"] in ["FQDN", "URL"]:
-        result["phishtank"] = phishtank.query_phishtank(
-            observable["value"], observable["type"], PROXIES, SSL_VERIFY
-        )
+        result["phishtank"] = phishtank.query_phishtank(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
     if "criminalip" in selected_engines and observable["type"] in [
         "IPv4",
@@ -308,9 +290,7 @@ def perform_engine_queries(observable, selected_engines, result):
         "FQDN",
         "URL",
     ]:
-        result["hudsonrock"] = hudsonrock.query_hudsonrock(
-            observable["value"], observable["type"], PROXIES, SSL_VERIFY
-        )
+        result["hudsonrock"] = hudsonrock.query_hudsonrock(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
     # 2. Reverse DNS if possible, change observable type to IP if possible
     if "reverse_dns" in selected_engines and observable["type"] in [
@@ -320,9 +300,7 @@ def perform_engine_queries(observable, selected_engines, result):
         "URL",
         "BOGON",
     ]:
-        reverse_dns_result = reverse_dns.reverse_dns(
-            observable["value"], observable["type"]
-        )
+        reverse_dns_result = reverse_dns.reverse_dns(observable["value"], observable["type"])
         result["reverse_dns"] = reverse_dns_result
         if reverse_dns_result:
             result["reversed_success"] = True
@@ -331,40 +309,28 @@ def perform_engine_queries(observable, selected_engines, result):
                 observable["value"] = reverse_dns_result["reverse_dns"][0]
 
     if "ipquery" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
-        result["ipquery"] = ipquery.query_ipquery(
-            observable["value"], PROXIES, SSL_VERIFY
-        )
+        result["ipquery"] = ipquery.query_ipquery(observable["value"], PROXIES, SSL_VERIFY)
 
     if "ipinfo" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
-        result["ipinfo"] = ipinfo.query_ipinfo(
-            observable["value"], secrets.ipinfo, PROXIES, SSL_VERIFY
-        )
+        result["ipinfo"] = ipinfo.query_ipinfo(observable["value"], secrets.ipinfo, PROXIES, SSL_VERIFY)
 
     if "abuseipdb" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
-        result["abuseipdb"] = abuseipdb.query_abuseipdb(
-            observable["value"], secrets.abuseipdb, PROXIES, SSL_VERIFY
-        )
+        result["abuseipdb"] = abuseipdb.query_abuseipdb(observable["value"], secrets.abuseipdb, PROXIES, SSL_VERIFY)
 
     if "spur" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
         result["spur"] = spur_us_free.get_spur(observable["value"], PROXIES, SSL_VERIFY)
 
     if "webscout" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
-        result["webscout"] = webscout.query_webscout(
-            observable["value"], secrets.webscout, PROXIES, SSL_VERIFY
-        )
+        result["webscout"] = webscout.query_webscout(observable["value"], secrets.webscout, PROXIES, SSL_VERIFY)
 
     if "shodan" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
-        result["shodan"] = shodan.query_shodan(
-            observable["value"], secrets.shodan, PROXIES, SSL_VERIFY
-        )
+        result["shodan"] = shodan.query_shodan(observable["value"], secrets.shodan, PROXIES, SSL_VERIFY)
 
     if "abusix" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
         result["abusix"] = abusix.query_abusix(observable["value"])
 
     if observable["type"] == "CHROME_EXTENSION":
-        result["extension"] = extension.get_name_from_id(
-            observable["value"], PROXIES, SSL_VERIFY
-        )
+        result["extension"] = extension.get_name_from_id(observable["value"], PROXIES, SSL_VERIFY)
 
     # print("Results: ", result, file=sys.stderr)
     return result
@@ -388,11 +354,11 @@ def update_analysis_metadata(analysis_id, start_time, selected_engines, results)
     if analysis_result:
         end_time = time.time()
         analysis_result.end_time = end_time
-        analysis_result.end_time_string = time.strftime(
-            "%Y-%m-%d %H:%M:%S", time.localtime(end_time)
-        )
+        analysis_result.end_time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
         analysis_result.analysis_duration = end_time - start_time
-        analysis_result.analysis_duration_string = f"{int((end_time - start_time) // 60)} minutes, {(end_time - start_time) % 60:.2f} seconds"
+        analysis_result.analysis_duration_string = (
+            f"{int((end_time - start_time) // 60)} minutes, {(end_time - start_time) % 60:.2f} seconds"
+        )
         analysis_result.results = results
         analysis_result.in_progress = False
         save_analysis_result(analysis_result)

@@ -1,12 +1,14 @@
 import logging
-import requests
 import time
+from typing import Any, Optional
+
 import pycountry
-from typing import Optional, Dict, Any
+import requests
 
 logger = logging.getLogger(__name__)
 
-def query_webscout(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: bool = True) -> Optional[Dict[str, Any]]:
+
+def query_webscout(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Queries the IP information from the webscout.io API.
 
@@ -119,8 +121,8 @@ def query_webscout(ip: str, api_key: str, proxies: Dict[str, str], ssl_verify: b
                 "is_vpn": is_vpn,
                 "is_proxy": is_proxy,
                 "is_tor": is_tor,
-                "anonymization_service": anonymization_service
-                }
+                "anonymization_service": anonymization_service,
+            }
 
     except Exception as e:
         logger.error("Error querying webscout for '%s': %s", ip, e, exc_info=True)

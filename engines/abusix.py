@@ -1,11 +1,12 @@
 import logging
-from typing import Optional, Dict
+from typing import Optional
 
 import querycontacts
 
 logger = logging.getLogger(__name__)
 
-def query_abusix(observable: str) -> Optional[Dict[str, str]]:
+
+def query_abusix(observable: str) -> Optional[dict[str, str]]:
     """
     Queries the Abusix service for contact information related to the given observable.
 
@@ -30,7 +31,12 @@ def query_abusix(observable: str) -> Optional[Dict[str, str]]:
         return {"abuse": results[0]}
 
     except Exception as e:
-        logger.error("Error querying Abusix for observable '%s': %s", observable, e, exc_info=True)
+        logger.error(
+            "Error querying Abusix for observable '%s': %s",
+            observable,
+            e,
+            exc_info=True,
+        )
 
     # Return None if any error or unexpected scenario occurred
     return None

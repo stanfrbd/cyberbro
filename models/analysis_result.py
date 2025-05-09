@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class AnalysisResult(db.Model):
     id = db.Column(db.String, primary_key=True)
     results = db.Column(db.JSON, nullable=False)

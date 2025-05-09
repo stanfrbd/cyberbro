@@ -1,17 +1,19 @@
-import logging
 import base64
+import logging
+from typing import Any, Optional
+
 import requests
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
+
 
 def query_virustotal(
     observable: str,
     observable_type: str,
     api_key: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries the VirusTotal API for information about a given observable (IP, domain, URL, or file hash).
 
@@ -67,7 +69,7 @@ def query_virustotal(
                 "detection_ratio": detection_ratio,
                 "total_malicious": total_malicious,
                 "link": link,
-                "community_score": community_score
+                "community_score": community_score,
             }
 
         # If 'data' or 'attributes' key is missing, fallback
@@ -76,7 +78,7 @@ def query_virustotal(
             "detection_ratio": "0/0",
             "total_malicious": 0,
             "link": f"https://www.virustotal.com/gui/search/{observable}",
-            "community_score": 0
+            "community_score": 0,
         }
 
     except Exception as e:

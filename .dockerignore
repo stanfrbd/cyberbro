@@ -23,3 +23,6 @@ tests
 
 # Ignore ini files
 *.ini
+
+# Ignore project files
+*.toml

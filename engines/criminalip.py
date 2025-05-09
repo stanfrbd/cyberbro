@@ -138,9 +138,7 @@ def get_suspicious_info_report(
     headers: dict = {"x-api-key": f"{api_key}"}
 
     try:
-        response = requests.get(
-            url, params=params, headers=headers, proxies=proxies, verify=ssl_verify
-        )
+        response = requests.get(url, params=params, headers=headers, proxies=proxies, verify=ssl_verify)
         response.raise_for_status()
     except HTTPError as e:
         logger.error(
@@ -150,9 +148,7 @@ def get_suspicious_info_report(
         return None
 
     try:
-        suspcious_info_report: SuspiciousInfoReport = SuspiciousInfoReport(
-            **response.json()
-        )
+        suspcious_info_report: SuspiciousInfoReport = SuspiciousInfoReport(**response.json())
     except ValidationError as e:
         logger.error(
             f"Error validating Criminal IP Suspicious Info report for {observable}: {e}",
@@ -178,9 +174,7 @@ def run_criminal_ip_analysis(
         logger.error("No observable provided to CriminalIP engine.")
         return None
 
-    report: SuspiciousInfoReport | None = get_suspicious_info_report(
-        api_key, observable, proxies, ssl_verify
-    )
+    report: SuspiciousInfoReport | None = get_suspicious_info_report(api_key, observable, proxies, ssl_verify)
 
     if not report:
         logger.error("Failed to retrieve the report.")
@@ -204,9 +198,7 @@ if __name__ == "__main__":
         logger.error("No observable provided.")
         exit(1)
 
-    report: SuspiciousInfoReport | None = get_suspicious_info_report(
-        api_key, observable, ssl_verify=ssl_verify
-    )
+    report: SuspiciousInfoReport | None = get_suspicious_info_report(api_key, observable, ssl_verify=ssl_verify)
 
     if report:
         print("Suspicious Info Report:")

@@ -1,16 +1,18 @@
 import logging
+from typing import Any, Optional
+
 import requests
 import tldextract
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
+
 
 def query_openrdap(
     observable: str,
     observable_type: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries the Open RDAP service for information about a given domain.
     Open RDAP is a free RDAP resolver that provides information about domain names.
@@ -21,7 +23,7 @@ def query_openrdap(
         proxies (dict): A dictionary of proxies to use for the request.
 
     Returns:
-        dict: The JSON-like information from the RDAP service, including abuse contact, registrar, 
+        dict: The JSON-like information from the RDAP service, including abuse contact, registrar,
               creation/expiration dates, etc. For example:
               {
                 'abuse_contact': ...,
@@ -116,18 +118,24 @@ def query_openrdap(
             "creation_date": creation_date,
             "expiration_date": expiration_date,
             "update_date": update_date,
-            "link": link
+            "link": link,
         }
 
     except Exception as e:
-        logger.error("Error querying RDAP for '%s' (%s): %s", observable, observable_type, e, exc_info=True)
+        logger.error(
+            "Error querying RDAP for '%s' (%s): %s",
+            observable,
+            observable_type,
+            e,
+            exc_info=True,
+        )
 
     return None
 
 
-def _extract_vcard_field(entity: Dict[str, Any], field: str) -> str:
+def _extract_vcard_field(entity: dict[str, Any], field: str) -> str:
     """
-    Helper to extract a specific field (e.g., 'email', 'fn', 'org') from 
+    Helper to extract a specific field (e.g., 'email', 'fn', 'org') from
     an entity's 'vcardArray' if present.
     """
     vcard_array = entity.get("vcardArray", [])

@@ -1,17 +1,15 @@
 import logging
+from typing import Optional
+
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 ua = UserAgent()
 
-def get_spur(
-    ip: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, str]]:
+
+def get_spur(ip: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, str]]:
     """
     Retrieves information about the given IP address from the spur.us website.
 
@@ -34,7 +32,7 @@ def get_spur(
             proxies=proxies,
             verify=ssl_verify,
             headers={"User-Agent": ua.random},
-            timeout=5
+            timeout=5,
         )
         response.raise_for_status()
 
@@ -51,10 +49,7 @@ def get_spur(
         else:
             content = "Not anonymous"
 
-        return {
-            "link": spur_url,
-            "tunnels": content
-        }
+        return {"link": spur_url, "tunnels": content}
 
     except Exception as e:
         logger.error("Error querying spur.us for IP '%s': %s", ip, e, exc_info=True)

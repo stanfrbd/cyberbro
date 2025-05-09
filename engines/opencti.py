@@ -1,17 +1,19 @@
 import logging
-import requests
-from typing import Optional, Dict, Any
+from typing import Any, Optional
 from urllib.parse import urljoin
 
+import requests
+
 logger = logging.getLogger(__name__)
+
 
 def query_opencti(
     observable: str,
     api_key: str,
     opencti_url: str,
-    proxies: Dict[str, str],
-    ssl_verify: bool = True
-) -> Optional[Dict[str, Any]]:
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+) -> Optional[dict[str, Any]]:
     """
     Queries the OpenCTI API for information about a given observable.
 
@@ -34,7 +36,7 @@ def query_opencti(
         url = f"{base_url}/graphql"
         headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         query = """
@@ -99,22 +101,29 @@ def query_opencti(
                         "key": "entity_type",
                         "values": ["Stix-Core-Object"],
                         "operator": "eq",
-                        "mode": "or"
+                        "mode": "or",
                     }
                 ],
-                "filterGroups": []
+                "filterGroups": [],
             },
-            "search": observable
+            "search": observable,
         }
 
         payload = {
             "id": "SearchStixCoreObjectsLinesPaginationQuery",
             "query": query,
-            "variables": variables
+            "variables": variables,
         }
         search_link = f"{base_url}/dashboard/search/knowledge/{observable}"
 
-        response = requests.post(url, headers=headers, json=payload, proxies=proxies, verify=ssl_verify, timeout=5)
+        response = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            proxies=proxies,
+            verify=ssl_verify,
+            timeout=5,
+        )
         response.raise_for_status()
         data = response.json()
 
@@ -144,7 +153,7 @@ def query_opencti(
                 "revoked": None,
                 "valid_from": None,
                 "valid_until": None,
-                "confidence": None
+                "confidence": None,
             }
 
         latest_created_at = first_element["created_at"]
@@ -186,9 +195,16 @@ def query_opencti(
             """
             additional_payload = {
                 "query": additional_query,
-                "variables": {"id": first_id}
+                "variables": {"id": first_id},
             }
-            add_response = requests.post(url, headers=headers, json=additional_payload, proxies=proxies, verify=ssl_verify, timeout=5)
+            add_response = requests.post(
+                url,
+                headers=headers,
+                json=additional_payload,
+                proxies=proxies,
+                verify=ssl_verify,
+                timeout=5,
+            )
             add_response.raise_for_status()
             additional_data = add_response.json()
             indicator_data = additional_data.get("data", {}).get("indicator", {})
@@ -219,7 +235,7 @@ def query_opencti(
             "revoked": revoked,
             "valid_from": valid_from,
             "valid_until": valid_until,
-            "confidence": confidence
+            "confidence": confidence,
         }
 
     except Exception as e:

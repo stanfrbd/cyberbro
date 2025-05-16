@@ -1,0 +1,24 @@
+<td>
+    {% if result.opencti %}
+        <strong>Global count:</strong> {{ result.opencti.global_count }}<br/>
+        <strong>Entity counts:</strong>
+        <ul>
+        {% for entity, count in result.opencti.entity_counts.items() %}
+            <li>{{ entity }}: {{ count }}</li>
+        {% endfor %}
+        </ul>
+        <strong>Search link:</strong> <a href="{{ result.opencti.search_link }}" target="_blank">See on OpenCTI</a><br/>
+        <strong>Latest Entity Created At:</strong>{{ result.opencti.latest_created_at }}<br/>
+        {% if result.opencti.latest_indicator_link %}
+            <strong>Latest Indicator Name: </strong>{{ result.opencti.latest_indicator_name }}<br/>
+            <strong>Latest Indicator Link: </strong><a href="{{ result.opencti.latest_indicator_link }}" target="_blank">See Indicator</a><br/>
+            <strong>OpenCTI Score: </strong>{{ result.opencti.x_opencti_score }} / 100<br/>
+            <strong>Confidence: </strong>{{ result.opencti.confidence }}<br/>
+            <strong>Revoked: </strong>{{ result.opencti.revoked }}<br/>
+            <strong>Valid From: </strong>{{ result.opencti.valid_from }}<br/>
+            <strong>Valid Until: </strong>{{ result.opencti.valid_until }}<br/>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

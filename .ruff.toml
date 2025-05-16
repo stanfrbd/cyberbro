@@ -20,6 +20,10 @@ select = [
     "YTT", # Flake8-2020
 ]
 
+ignore = [
+    "RET501", # unnecessary-return-none (RET501)
+]
+
 [format]
 # Like Black, use double quotes for strings.
 quote-style = "double"

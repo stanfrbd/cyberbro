@@ -1,0 +1,14 @@
+<div class="card">
+    <h3>Phishtank</h3>
+    {% if analysis_results.results[0].phishtank.in_database == True and analysis_results.results[0].phishtank.valid == True and analysis_results.results[0].phishtank.verified == True %}
+        <p><a href="{{ analysis_results.results[0].phishtank.phish_detail_page }}" target="_blank">Found (valid and verified)</a></p>
+    {% elif analysis_results.results[0].phishtank.in_database == True and analysis_results.results[0].phishtank.valid == False %}
+        <p><a href="{{ analysis_results.results[0].phishtank.phish_detail_page }}" target="_blank">Found (invalid)</a></p>
+    {% elif analysis_results.results[0].phishtank.in_database == True and analysis_results.results[0].phishtank.verified == False %}
+        <p><a href="{{ analysis_results.results[0].phishtank.phish_detail_page }}" target="_blank">Found (not verified)</a></p>
+    {% elif analysis_results.results[0].phishtank.in_database == False %}
+        <p>Not Found</p>
+    {% else %}
+        <p>Not applicable</p>
+    {% endif %}
+</div>

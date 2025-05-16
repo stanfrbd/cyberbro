@@ -1,0 +1,40 @@
+{% if analysis_results.results[0].crowdstrike.indicator_found and analysis_results.results[0].crowdstrike.malicious_confidence == 'high' %}
+    <div class="card high-risk" style="background-color: red;">
+{% else %}
+    <div class="card">
+{% endif %}
+
+    <h3>CrowdStrike</h3>
+    <p><strong>Device Count: </strong>{{ analysis_results.results[0].crowdstrike.device_count }}</p>
+    <p><strong>Link: </strong><a href="{{ analysis_results.results[0].crowdstrike.link }}" target="_blank">See on CrowdStrike</a></p>
+
+    {% if analysis_results.results[0].crowdstrike.indicator_found %}
+        <p><strong>Published Date: </strong>{{ analysis_results.results[0].crowdstrike.published_date }}</p>
+        <p><strong>Last Updated: </strong>{{ analysis_results.results[0].crowdstrike.last_updated }}</p>
+
+        {% if analysis_results.results[0].crowdstrike.actors %}
+            <p><strong>Actors: </strong>{{ analysis_results.results[0].crowdstrike.actors | join(', ') }}</p>
+        {% endif %}
+
+        {% if analysis_results.results[0].crowdstrike.malicious_confidence %}
+            <p><strong>Malicious Confidence: </strong>{{ analysis_results.results[0].crowdstrike.malicious_confidence }}</p>
+        {% endif %}
+
+        {% if analysis_results.results[0].crowdstrike.threat_types %}
+            <p><strong>Threat Types: </strong>{{ analysis_results.results[0].crowdstrike.threat_types | join(', ') }}</p>
+        {% endif %}
+
+        {% if analysis_results.results[0].crowdstrike.malware_families %}
+        <p><strong>Malware Families: </strong>{{ analysis_results.results[0].crowdstrike.malware_families | join(', ') }}</p>
+        {% endif %}
+
+        {% if analysis_results.results[0].crowdstrike.kill_chain %}
+            <p><strong>Kill Chain: </strong>{{ analysis_results.results[0].crowdstrike.kill_chain | join(', ') }}</p>
+        {% endif %}
+
+        {% if analysis_results.results[0].crowdstrike.vulnerabilities | length > 0 %}
+            <p><strong>Vulnerabilities: </strong>{{ analysis_results.results[0].crowdstrike.vulnerabilities | join(', ') }}</p>
+        {% endif %}
+
+    {% endif %}
+</div>

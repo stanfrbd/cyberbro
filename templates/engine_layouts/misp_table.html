@@ -1,0 +1,15 @@
+<td>
+    {% if result.misp %}
+    {% if result.misp.count > 0 %}
+    <strong>Events Count: </strong>{{ result.misp.count }}<br>
+    {% for event in result.misp.events %}
+    <a href="{{ event.url }}" target="_blank" title="{{ event.title }}">{{ event.title }}</a><br>
+    {% endfor %}
+    <strong>Link: </strong><a href="{{ result.misp.link }}" target="_blank">See on MISP</a><br>
+    {% else %}
+    <p>Not found</p>
+    {% endif %}
+    {% else %}
+    Not applicable
+    {% endif %}
+</td>

@@ -1,0 +1,16 @@
+{% if analysis_results.results[0].threatfox and analysis_results.results[0].threatfox.count != 0 %}
+    <div class="card high-risk" style="background-color: red;">
+{% else %}
+    <div class="card">
+{% endif %}
+
+<h3>ThreatFox</h3>
+{% if analysis_results.results[0].threatfox.count != 0 %}
+    <p><strong>Count:</strong>
+        <a href="{{ analysis_results.results[0].threatfox.link }}" target="_blank">{{ analysis_results.results[0].threatfox.count }}</a></p>
+    <p><strong>Malware: </strong>{{ analysis_results.results[0].threatfox.malware_printable | join(', ') }}</p>
+{% else %}
+    <p>Not Found</p>
+{% endif %}
+
+</div>

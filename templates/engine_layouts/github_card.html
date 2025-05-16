@@ -1,0 +1,11 @@
+<div class="card">
+    <h3>Github</h3>
+    <p><strong>Search results: </strong></p>
+    {% if analysis_results.results[0].github.results | length > 0 %}
+        {% for search_result in analysis_results.results[0].github.results %}
+            <p><a href="{{ search_result.url }}" target="_blank" title="{{ search_result.description }}">{{ search_result.title }}</a></p>
+        {% endfor %}
+    {% else %}
+        <p>Not Found</p>
+    {% endif %}
+</div>

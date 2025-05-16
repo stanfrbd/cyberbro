@@ -1,0 +1,29 @@
+<td>
+    {% if result.ipquery %}
+        <strong>IP: </strong><a href="{{ result.ipquery.link }}" target="_blank">{{ result.ipquery.ip }}</a><br />
+        <strong>Score: </strong><a href="{{ result.ipquery.link }}" target="_blank">{{ result.ipquery.risk_score }}</a><br />
+        <strong>Geoloc: </strong>{{ result.ipquery.geolocation }}<br />
+        <strong>Country: </strong><span class="country country-{{result.ipquery.country_name | lower}}">{{result.ipquery.country_name}}</span>
+        <span class="fi fi-{{ result.ipquery.country_code | lower }}"></span><br />
+        <strong>ASN: </strong>{{ result.ipquery.asn }} {{ result.ipquery.isp }}<br />
+
+        {% if result.ipquery.is_proxy == True %}
+            <strong>Proxy: </strong>{{ result.ipquery.is_proxy }}<br />
+        {% endif %}
+
+        {% if result.ipquery.is_vpn == True %}
+            <strong>VPN: </strong>{{ result.ipquery.is_vpn }}<br />
+        {% endif %}
+
+        {% if result.ipquery.is_tor == True %}
+            <strong>Tor: </strong>{{ result.ipquery.is_tor }}<br />
+        {% endif %}
+
+        {% if result.ipquery.is_tor == False and result.ipquery.is_vpn == False and result.ipquery.is_proxy == False %}
+            <strong>Type: </strong>Not anonymous<br />
+        {% endif %}
+
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

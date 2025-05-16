@@ -1,0 +1,21 @@
+<div class="card">
+    <h3>URLscan</h3>
+    <p><strong>Scan count: </strong><a href="{{ analysis_results.results[0].urlscan.link }}"
+        target="_blank">{{ analysis_results.results[0].urlscan.scan_count }}</a></p>
+    {% if analysis_results.results[0].urlscan.scan_count == 0 %}
+        <p>Not Found</p>
+    {% else %}
+        <p><strong>
+            {% if analysis_results.results[0].type in ["FQDN", "URL"] %}
+                Top domains:
+            {% else %}
+                Top related domains:
+            {% endif %}
+        </strong></p>
+        <ul>
+        {% for domain in analysis_results.results[0].urlscan.top_domains %}
+            <li>{{ domain.domain }} ({{ domain.count }})</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</div>

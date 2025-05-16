@@ -1,0 +1,319 @@
+<div class="filters-container">
+    <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
+
+    <select id="typeFilter" class="filter-select" onchange="filterTable()">
+        <option value="all">All observables types</option>
+        {% set types = [] %}
+        {% for result in analysis_results.results %}
+        {% if result.type not in types %}
+        {% set _ = types.append(result.type) %}
+        <option value="{{ result.type }}">{{ result.type }}</option>
+        {% endif %}
+        {% endfor %}
+    </select>
+
+    <select id="countryFilter" class="filter-select" onchange="filterTable()">
+        <option value="all">All Countries</option>
+        {% set countries = [] %}
+        {% for result in analysis_results.results %}
+        {% if (result.ipinfo and result.ipinfo.country_name not in countries) or (result.ipquery and
+        result.ipquery.country_name not in countries) or (result.webscout and result.webscout.country_name not in
+        countries) %}
+        {% if result.ipinfo and result.ipinfo.country_name not in countries %}
+        {% set _ = countries.append(result.ipinfo.country_name) %}
+        <option value="{{ result.ipinfo.country_name | lower }}">{{ result.ipinfo.country_name }}</option>
+        {% endif %}
+
+        {% if result.ipquery and result.ipquery.country_name not in countries %}
+        {% set _ = countries.append(result.ipquery.country_name) %}
+        <option value="{{ result.ipquery.country_name | lower }}">{{ result.ipquery.country_name }}</option>
+        {% endif %}
+
+        {% if result.webscout and result.webscout.country_name not in countries %}
+        {% set _ = countries.append(result.webscout.country_name) %}
+        <option value="{{ result.webscout.country_name | lower }}">{{ result.webscout.country_name }}</option>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </select>
+
+    <select id="riskFilter" class="filter-select" onchange="filterTable()">
+        <option value="all">All Risks</option>
+        <option value="high">High Risk</option>
+        <option value="low">Low Risk</option>
+    </select>
+
+    <select id="detectionFilter" class="filter-select" onchange="filterTable()">
+        <option value="all">All Detections</option>
+        <option value="high">High Detection</option>
+        <option value="clean">Clean Detection</option>
+    </select>
+
+    <select id="proxyVpnFilter" class="filter-select" onchange="filterTable()">
+        <option value="all">All connection info</option>
+        <option value="proxy">Proxy</option>
+        <option value="vpn">VPN</option>
+        <option value="not anonymous">Not anonymous</option>
+    </select>
+
+    <button class="btn" onclick="clearFilters()">Clear Filters</button>
+</div>
+
+<table id="resultsTable">
+    <thead>
+        <tr>
+            <th>Observable</th>
+            <th>Type</th>
+            {% if "reverse_dns" in analysis_results.selected_engines %}
+            <th>DNS Lookup</th>
+            {% endif %}
+
+            {% if "CHROME_EXTENSION" in analysis_results.results | map(attribute='type') %}
+            <th>Extension</th>
+            {% endif %}
+
+            {% if "ipquery" in analysis_results.selected_engines %}
+            <th>IPquery</th>
+            {% endif %}
+
+            {% if "ipinfo" in analysis_results.selected_engines %}
+            <th>IPinfo</th>
+            {% endif %}
+
+            {% if "abuseipdb" in analysis_results.selected_engines %}
+            <th>AbuseIPDB</th>
+            {% endif %}
+
+            {% if "spur" in analysis_results.selected_engines %}
+            <th>Spur.us</th>
+            {% endif %}
+
+            {% if "virustotal" in analysis_results.selected_engines %}
+            <th>VirusTotal</th>
+            {% endif %}
+
+            {% if "mde" in analysis_results.selected_engines %}
+            <th>Microsoft Defender for Endpoint</th>
+            {% endif %}
+
+            {% if "google_safe_browsing" in analysis_results.selected_engines %}
+            <th>Google Safe Browsing</th>
+            {% endif %}
+
+            {% if "shodan" in analysis_results.selected_engines %}
+            <th>Shodan</th>
+            {% endif %}
+
+            {% if "phishtank" in analysis_results.selected_engines %}
+            <th>Phishtank</th>
+            {% endif %}
+
+            {% if "abusix" in analysis_results.selected_engines %}
+            <th>Abusix</th>
+            {% endif %}
+
+            {% if "rdap" in analysis_results.selected_engines %}
+            <th>RDAP</th>
+            {% endif %}
+
+            {% if "threatfox" in analysis_results.selected_engines %}
+            <th>ThreatFox</th>
+            {% endif %}
+
+            {% if "google" in analysis_results.selected_engines %}
+            <th>Google</th>
+            {% endif %}
+
+            {% if "github" in analysis_results.selected_engines %}
+            <th>Github</th>
+            {% endif %}
+
+            {% if "ioc_one_html" in analysis_results.selected_engines %}
+            <th>Ioc.One (HTML)</th>
+            {% endif %}
+
+            {% if "ioc_one_pdf" in analysis_results.selected_engines %}
+            <th>Ioc.One (PDF)</th>
+            {% endif %}
+
+            {% if "urlscan" in analysis_results.selected_engines %}
+            <th>URLscan</th>
+            {% endif %}
+
+            {% if "opencti" in analysis_results.selected_engines %}
+            <th>OpenCTI</th>
+            {% endif %}
+
+            {% if "hudsonrock" in analysis_results.selected_engines %}
+            <th>Hudson Rock</th>
+            {% endif %}
+
+            {% if "crowdstrike" in analysis_results.selected_engines %}
+            <th>CrowdStrike</th>
+            {% endif %}
+
+            {% if "webscout" in analysis_results.selected_engines %}
+            <th>WebScout</th>
+            {% endif %}
+
+            {% if "criminalip" in analysis_results.selected_engines %}
+            <th>Criminal IP</th>
+            {% endif %}
+
+            {% if "alienvault" in analysis_results.selected_engines %}
+            <th>Alienvault</th>
+            {% endif %}
+
+            {% if "google_dns" in analysis_results.selected_engines %}
+            <th>Google DNS (common records)</th>
+            {% endif %}
+
+            {% if "misp" in analysis_results.selected_engines %}
+            <th>MISP</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in analysis_results.results %}
+        {% if result.abuseipdb and result.abuseipdb.risk_score > 50 %}
+        <tr class="high-risk">
+            {% elif result.virustotal and (result.virustotal.total_malicious > 10 or result.virustotal.community_score <
+                -10) %} <tr class="high-risk high-detection">
+                {% elif result.spur and result.spur.tunnels not in ['Not anonymous', 'Non applicable'] %}
+        <tr class="warning-row">
+            {% elif result.ipquery and (result.ipquery.is_proxy or result.ipquery.is_vpn or result.ipquery.is_tor) %}
+        <tr class="warning-row">
+            {% elif result.ipquery and result.ipquery.risk_score > 50 %}
+        <tr class="high-risk">
+            {% elif result.threatfox and result.threatfox.count != 0 %}
+        <tr class="high-risk">
+            {% elif result.opencti and result.opencti.latest_indicator_link and not result.opencti.revoked %}
+        <tr class="warning-row">
+            {% elif result.crowdstrike and result.crowdstrike.indicator_found and
+            result.crowdstrike.malicious_confidence == 'high' %}
+        <tr class="high-risk">
+            {% elif result.webscout and ('vpn' in result.webscout.network_provider_services | map('lower') or 'proxy' in
+            result.webscout.network_provider_services | map('lower') or result.webscout.is_proxy or
+            result.webscout.is_tor or result.webscout.is_vpn) %}
+        <tr class="warning-row">
+            {% elif result.webscout and result.webscout.risk_score > 50 %}
+        <tr class="high-risk">
+            {% elif result.virustotal and result.virustotal.community_score > 100 %}
+        <tr class="clean-detection">
+            {% endif %}
+
+            <td title="{{ result.observable }}">{{ result.observable[:64] }}{% if result.observable | length > 64
+                %}...{% endif %}</td>
+
+            <td>{{ result.type }}</td>
+            {% if "reverse_dns" in analysis_results.selected_engines %}
+            {% include "engine_layouts/reverse_dns_table.html" %}
+            {% endif %}
+
+            {% if "CHROME_EXTENSION" in analysis_results.results | map(attribute='type') %}
+            {% include "engine_layouts/extension_table.html" %}
+            {% endif %}
+
+            {% if "ipquery" in analysis_results.selected_engines %}
+            {% include "engine_layouts/ipquery_table.html" %}
+            {% endif %}
+
+            {% if "ipinfo" in analysis_results.selected_engines %}
+            {% include "engine_layouts/ipinfo_table.html" %}
+            {% endif %}
+
+            {% if "abuseipdb" in analysis_results.selected_engines %}
+            {% include "engine_layouts/abuseipdb_table.html" %}
+            {% endif %}
+
+            {% if "spur" in analysis_results.selected_engines %}
+            {% include "engine_layouts/spur_table.html" %}
+            {% endif %}
+
+            {% if "virustotal" in analysis_results.selected_engines %}
+            {% include "engine_layouts/virustotal_table.html" %}
+            {% endif %}
+
+            {% if "mde" in analysis_results.selected_engines %}
+            {% include "engine_layouts/mde_table.html" %}
+            {% endif %}
+
+            {% if "google_safe_browsing" in analysis_results.selected_engines %}
+            {% include "engine_layouts/google_safe_browsing_table.html" %}
+            {% endif %}
+
+            {% if "shodan" in analysis_results.selected_engines %}
+            {% include "engine_layouts/shodan_table.html" %}
+            {% endif %}
+
+            {% if "phishtank" in analysis_results.selected_engines %}
+            {% include "engine_layouts/phishtank_table.html" %}
+            {% endif %}
+
+            {% if "abusix" in analysis_results.selected_engines %}
+            {% include "engine_layouts/abusix_table.html" %}
+            {% endif %}
+
+            {% if "rdap" in analysis_results.selected_engines %}
+            {% include "engine_layouts/rdap_table.html" %}
+            {% endif %}
+
+            {% if "threatfox" in analysis_results.selected_engines %}
+            {% include "engine_layouts/threatfox_table.html" %}
+            {% endif %}
+
+            {% if "google" in analysis_results.selected_engines %}
+            {% include "engine_layouts/google_table.html" %}
+            {% endif %}
+
+            {% if "github" in analysis_results.selected_engines %}
+            {% include "engine_layouts/github_table.html" %}
+            {% endif %}
+
+            {% if "ioc_one_html" in analysis_results.selected_engines %}
+            {% include "engine_layouts/ioc_one_html_table.html" %}
+            {% endif %}
+
+            {% if "ioc_one_pdf" in analysis_results.selected_engines %}
+            {% include "engine_layouts/ioc_one_pdf_table.html" %}
+            {% endif %}
+
+            {% if "urlscan" in analysis_results.selected_engines %}
+            {% include "engine_layouts/urlscan_table.html" %}
+            {% endif %}
+
+            {% if "opencti" in analysis_results.selected_engines %}
+            {% include "engine_layouts/opencti_table.html" %}
+            {% endif %}
+
+            {% if "hudsonrock" in analysis_results.selected_engines %}
+            {% include "engine_layouts/hudsonrock_table.html" %}
+            {% endif %}
+
+            {% if "crowdstrike" in analysis_results.selected_engines %}
+            {% include "engine_layouts/crowdstrike_table.html" %}
+            {% endif %}
+
+            {% if "webscout" in analysis_results.selected_engines %}
+            {% include "engine_layouts/webscout_table.html" %}
+            {% endif %}
+
+            {% if "criminalip" in analysis_results.selected_engines %}
+            {% include "engine_layouts/criminalip_table.html" %}
+            {% endif %}
+
+            {% if "alienvault" in analysis_results.selected_engines %}
+            {% include "engine_layouts/alienvault_table.html" %}
+            {% endif %}
+
+            {% if "google_dns" in analysis_results.selected_engines %}
+            {% include "engine_layouts/google_dns_table.html" %}
+            {% endif %}
+
+            {% if "misp" in analysis_results.selected_engines %}
+            {% include "engine_layouts/misp_table.html" %}
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

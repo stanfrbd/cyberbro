@@ -1,0 +1,18 @@
+<td>
+    {% if result.shodan %}
+        <strong>Ports:</strong><br/>
+        <a href="{{ result.shodan.link }}" target="_blank">
+            {% for port in result.shodan.ports %}
+                {{ port }}<br/>
+            {% endfor %}
+        </a>
+        {% if result.shodan.tags | length > 0 %}
+            <strong>Tags: </strong>
+            {% for tag in result.shodan.tags %}
+                {{ tag | upper }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

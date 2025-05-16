@@ -27,6 +27,8 @@ class Secrets:
     mde_client_id: str = ""
     mde_client_secret: str = ""
     mde_tenant_id: str = ""
+    misp_api_key: str = ""
+    misp_url: str = ""
     opencti_api_key: str = ""
     opencti_url: str = ""
     proxy_url: str = ""

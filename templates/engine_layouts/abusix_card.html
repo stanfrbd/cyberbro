@@ -1,0 +1,6 @@
+<div class="card">
+    <h3>Abusix</h3>
+    <p><strong>Abuse contact: </strong><a
+            href="mailto:{{ analysis_results.results[0].abusix.abuse }}?subject=Report of abuse concerning {{ analysis_results.results[0].observable }}&body=Hello,%0D%0A%0D%0AOur team found out that your {{ analysis_results.results[0].type }} {{ analysis_results.results[0].observable }} does malicious activity.%0D%0A%0D%0APlease take actions.">{{
+            analysis_results.results[0].abusix.abuse }}</a></p>
+</div>

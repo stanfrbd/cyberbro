@@ -1,0 +1,11 @@
+<td>
+    {% if result.spur and result.reversed_success and result.type in ["URL", "FQDN"] %}
+        Reverse DNS applied<br/>
+    {% endif %}
+
+    {% if result.spur %}
+        <a href="{{ result.spur.link }}" target="_blank">{{ result.spur.tunnels }}</a><br/>
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

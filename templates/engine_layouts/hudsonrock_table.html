@@ -1,0 +1,103 @@
+<td>
+    {% if result.type == "Email" and result.hudsonrock and result.hudsonrock.stealers %}
+        <strong>Compromised Computer Details:</strong><br/>
+        {% for stealer in result.hudsonrock.stealers %}
+            {% if stealer.computer_name %}
+                <strong>Computer Name: </strong>{{ stealer.computer_name }}<br/>
+            {% endif %}
+
+            {% if stealer.operating_system %}
+                <strong>Operating System: </strong>{{ stealer.operating_system }}<br/>
+            {% endif %}
+
+            {% if stealer.date_compromised %}
+                <strong>Date Compromised: </strong>{{ stealer.date_compromised }}<br/>
+            {% endif %}
+
+            {% if stealer.total_corporate_services %}
+                <strong>Total Corporate Services:</strong> {{ stealer.total_corporate_services }}<br/>
+            {% endif %}
+
+            {% if stealer.total_user_services %}
+                <strong>Total User Services:</strong> {{ stealer.total_user_services }}<br/>
+            {% endif %}
+        {% endfor %}
+
+    {% elif result.hudsonrock and (result.type == "URL" or result.type == "FQDN") and result.hudsonrock.total %}
+        <strong>Compromised domain details</strong>
+        {% if result.hudsonrock.total %}
+            <p><strong>Total:</strong> {{ result.hudsonrock.total }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.total and result.hudsonrock.totalStealers %}
+            <p><strong>Total Stealers:</strong> {{ result.hudsonrock.totalStealers }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.employees %}
+            <p><strong>Employees:</strong> {{ result.hudsonrock.employees }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.users %}
+            <p><strong>Users:</strong> {{ result.hudsonrock.users }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.third_parties %}
+            <p><strong>Third Parties:</strong> {{ result.hudsonrock.third_parties }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.totalUrls %}
+            <p><strong>Total URLs:</strong> {{ result.hudsonrock.totalUrls }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.last_employee_compromised %}
+            <p><strong>Last Employee Compromised:</strong>
+               {{ result.hudsonrock.last_employee_compromised.split('T')[0] }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.last_user_compromised %}
+            <p><strong>Last User Compromised:</strong> {{ result.hudsonrock.last_user_compromised.split('T')[0] }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.is_shopify %}
+            <p><strong>Is Shopify:</strong> {{ result.hudsonrock.is_shopify }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.applications %}
+            <p><strong>Applications:</strong>
+               {{ result.hudsonrock.applications | map(attribute='keyword') | join(', ') }}</p>
+        {% endif %}
+
+        {% if result.hudsonrock.stealerFamilies %}
+            <p><strong>Stealer Families: </strong></p>
+            <ul>
+            {% for family, count in result.hudsonrock.stealerFamilies.items() %}
+                <li>{{ family }}: {{ count }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if result.hudsonrock.stats.employees_urls %}
+            <p><strong>Employee URLs: </strong></p>
+            <ul>
+            {% for url in result.hudsonrock.stats.employees_urls %}
+                {% if "••" not in url %}
+                    <li><a href="{{ url }}" target="_blank">{{ url }}</a></li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if result.hudsonrock.stats.clients_urls %}
+            <p><strong>Client URLs: </strong></p>
+            <ul>
+            {% for url in result.hudsonrock.stats.clients_urls %}
+                {% if "••" not in url %}
+                <li><a href="{{ url }}" target="_blank">{{ url }}</a></li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

@@ -1,0 +1,29 @@
+<td>
+    {% if result.google_dns %}
+    {% if result.google_dns.Answer and result.google_dns.Answer|length > 0 %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Data</th>
+                <th>TTL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in result.google_dns.Answer %}
+            <tr>
+                <td>{{ record.type_name }}</td>
+                <td title="{{ record.data }}">{{ record.data[:50] }}{% if record.data | length > 50 %}...{% endif %}
+                </td>
+                <td>{{ record.TTL }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    No DNS record found
+    {% endif %}
+    {% else %}
+    Not applicable
+    {% endif %}
+</td>

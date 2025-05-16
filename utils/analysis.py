@@ -11,12 +11,14 @@ from engines import (
     extension,
     github,
     google,
+    google_dns,
     google_safe_browsing,
     hudsonrock,
     ioc_one,
     ipinfo,
     ipquery,
     microsoft_defender_for_endpoint,
+    misp,
     opencti,
     phishtank,
     rdap,
@@ -258,6 +260,16 @@ def perform_engine_queries(observable, selected_engines, result):
             secrets.alienvault,
         )
 
+    if "misp" in selected_engines and observable["type"] in ["MD5", "SHA1", "SHA256", "URL", "FQDN", "IPv4", "IPv6"]:
+        result["misp"] = misp.query_misp(
+            observable["value"],
+            observable["type"],
+            PROXIES,
+            SSL_VERIFY,
+            secrets.misp_api_key,
+            secrets.misp_url,
+        )
+
     if "google_safe_browsing" in selected_engines and observable["type"] in [
         "URL",
         "FQDN",
@@ -291,6 +303,14 @@ def perform_engine_queries(observable, selected_engines, result):
         "URL",
     ]:
         result["hudsonrock"] = hudsonrock.query_hudsonrock(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
+
+    if "google_dns" in selected_engines and observable["type"] in [
+        "IPv4",
+        "IPv6",
+        "FQDN",
+        "URL",
+    ]:
+        result["google_dns"] = google_dns.query_google_dns(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
     # 2. Reverse DNS if possible, change observable type to IP if possible
     if "reverse_dns" in selected_engines and observable["type"] in [

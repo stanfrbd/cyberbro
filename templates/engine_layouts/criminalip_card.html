@@ -21,7 +21,7 @@
         {% else %}
             {% set inbound_class = neutral_value %}
         {% endif %}
-        <p>Inbound:<span class="{{ inbound_class }}"> {{ criminalip.score.inbound }}</span><br>
+        <p>Inbound:<span class="{{ inbound_class }}"> {{ criminalip.score.inbound }}</span><br/>
         {% if criminalip.score.outbound in ["Dangerous", "Critical"] %}
             {% set outbound_class = bad_value %}
         {% elif criminalip.score.outbound in ["Safe", "Low"] %}
@@ -48,10 +48,10 @@
     <div><h4>IDS</h4>
     <div><ul>
     {% for ids in criminalip.ids.data %}
-        <li>Classification: {{ ids.classification }}<br>
-        Confirmed Time: {{ ids.confirmed_time }}<br>
-        Message: {{ ids.message }}<br>
-        Source System: {{ ids.source_system }}<br>
+        <li>Classification: {{ ids.classification }}<br/>
+        Confirmed Time: {{ ids.confirmed_time }}<br/>
+        Message: {{ ids.message }}<br/>
+        Source System: {{ ids.source_system }}<br/>
         Url: {{ ids.url }}</li>
     {% endfor %}
     </ul></div>
@@ -62,12 +62,12 @@
     <div><h4>Current Open Ports</h4>
     {% for port in criminalip.current_opened_port.data %}
         <div><ul>
-            <li><strong>Port</strong>: {{ port.port }}<br>
+            <li><strong>Port</strong>: {{ port.port }}<br/>
         {% set font_class = bad_value if port.is_vulnerability else neutral_value %}
-        Vulnerability: <span class="{{ font_class }}">{{ port.is_vulnerability }}</span><br>
-        Product Name: {{ port.product_name }}<br>
+        Vulnerability: <span class="{{ font_class }}">{{ port.is_vulnerability }}</span><br/>
+        Product Name: {{ port.product_name }}<br/>
         {% if port.protocol %}
-            Protocol: {{ port.protocol }}<br>
+            Protocol: {{ port.protocol }}<br/>
         {% endif %}
         Socket Type: {{ port.socket_type }}</li></ul>
         </div>

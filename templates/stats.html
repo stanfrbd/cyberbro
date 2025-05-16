@@ -1,47 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Cyberbro - Analysis Statistics{% endblock title %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Statistics</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+{% block head %}
+{{ super() }}
     <style>
-        :root {
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --background-color: #f8f9fa;
-            --text-color: #343a40;
-            --border-color: #ced4da;
-            --border-radius: 5px;
-            --dark-background-color: #1e2a36;
-            --dark-text-color: #d1d1d1;
-            --dark-border-color: #3a4b5a;
-            --dark-primary-color: #3a4b5a;
-            --dark-primary-hover-color: #4b5c6d;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
         .dashboard {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
-
 
         .dashboard-small {
             display: flex;
@@ -50,365 +17,209 @@
             padding-top: 20px;
         }
 
-        .card {
-            flex: 1;
-            min-width: 250px;
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h3 {
-            margin-top: 0;
-        }
-
         .card p {
             font-size: 1.7em;
             text-align: center;
             font-weight: bold;
         }
-
-        .dark-mode-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-
-        .dark-mode-toggle:hover {
-            background-color: var(--primary-hover-color);
-        }
-
-        body.dark-mode {
-            background-color: var(--dark-background-color);
-            color: var(--dark-text-color);
-        }
-
-        body.dark-mode .card {
-            background-color: var(--dark-background-color);
-            border-color: var(--dark-border-color);
-        }
-
-        .github-logo-light {
-            display: block;
-        }
-
-        .github-logo-dark {
-            display: none;
-        }
-
-        body.dark-mode .github-logo-light {
-            display: none;
-        }
-
-        body.dark-mode .github-logo-dark {
-            display: block;
-        }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        a:hover {
-            color: var(--primary-hover-color);
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .footer nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .footer nav ul li {
-            display: inline;
-        }
-
-        .footer nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-        }
-
-        .footer nav ul li a:hover {
-            color: var(--primary-hover-color);
-        }
     </style>
-</head>
+{% endblock head %}
 
-<body>
-    <div class="container">
-        <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-            <img id="darkModeIcon" src="https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png" alt="Dark Mode"
-                width="20" height="20">
-        </button>
-        <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="github-logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo-light">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo-dark" style="filter: invert(1);">
-        </a>
-        <h1>Cyberbro - Analysis Statistics</h1>
-        <div class="dashboard">
-            <div class="card">
-                <h3>Observables Types</h3>
-                <canvas id="observablesChart"></canvas>
-            </div>
-            <div class="card">
-                <h3>Observables</h3>
-                <canvas id="observablesRepartitionChart"></canvas>
-            </div>
-            <div class="card">
-                <h3>Engines</h3>
-                <canvas id="enginesChart"></canvas>
-            </div>
+{% block content %}
+    <h1>{{ self.title() }}</h1>
+    <div class="dashboard">
+        <div class="card">
+            <h3>Observables Types</h3>
+            <canvas id="observablesChart"></canvas>
         </div>
-        <div class="dashboard-small">
-            <div class="card small-card">
-                <h3>Total Analyses</h3>
-                <p>{{ stats.num_analyses }}</p>
-            </div>
-            <div class="card small-card">
-                <h3>Unique Observables</h3>
-                <p>{{ stats.num_unique_observables }}</p>
-            </div>
-            <div class="card small-card">
-                <h3>Used Engines</h3>
-                <p>{{ stats.num_unique_engines }}</p>
-            </div>
+        <div class="card">
+            <h3>Observables</h3>
+            <canvas id="observablesRepartitionChart"></canvas>
+        </div>
+        <div class="card">
+            <h3>Engines</h3>
+            <canvas id="enginesChart"></canvas>
         </div>
     </div>
-    <script>
-        const observablesLabels = JSON.parse('{{ stats.observable_type_count.keys() | list | tojson | safe }}');
-        const observablesData = JSON.parse('{{ stats.observable_type_count.values() | list | tojson | safe }}');
-    </script>
+    <div class="dashboard-small">
+        <div class="card small-card">
+            <h3>Total Analyses</h3>
+            <p>{{ stats.num_analyses }}</p>
+        </div>
+        <div class="card small-card">
+            <h3>Unique Observables</h3>
+            <p>{{ stats.num_unique_observables }}</p>
+        </div>
+        <div class="card small-card">
+            <h3>Used Engines</h3>
+            <p>{{ stats.num_unique_engines }}</p>
+        </div>
+    </div>
+</div>
+<script>
+    const observablesLabels = JSON.parse('{{ stats.observable_type_count.keys() | list | tojson | safe }}');
+    const observablesData = JSON.parse('{{ stats.observable_type_count.values() | list | tojson | safe }}');
+</script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
-        const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-            updateDarkModeIcon();
-        }
-
-        function updateDarkModeIcon() {
-            const darkModeIcon = document.getElementById("darkModeIcon");
-            if (document.body.classList.contains("dark-mode")) {
-                darkModeIcon.src = sunIcon;
-                darkModeIcon.alt = "Light Mode";
-            } else {
-                darkModeIcon.src = moonIcon;
-                darkModeIcon.alt = "Dark Mode";
-            }
-        }
-
-        function applyDarkMode() {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark-mode");
-            }
-            updateDarkModeIcon();
-        }
-
-        applyDarkMode();
-
-        const ctx = document.getElementById('observablesChart').getContext('2d');
-        const observablesChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: observablesLabels,
-                datasets: [{
-                    label: 'Observables Repartition',
-                    data: observablesData,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed + ' observables';
-                                }
-                                return label;
+<script>
+    const ctx = document.getElementById('observablesChart').getContext('2d');
+    const observablesChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: observablesLabels,
+            datasets: [{
+                label: 'Observables Repartition',
+                data: observablesData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
                             }
+                            if (context.parsed !== null) {
+                                label += context.parsed + ' observables';
+                            }
+                            return label;
                         }
                     }
                 }
             }
-        });
+        }
+    });
 
-        const enginesLabels = JSON.parse('{{ stats.engine_count.keys() | list | tojson | safe }}');
-        const enginesData = JSON.parse('{{ stats.engine_count.values() | list | tojson | safe }}');
-        const observablesRepartitionLabels = JSON.parse('{{ stats.observable_count.keys() | list | tojson | safe }}');
-        const observablesRepartitionData = JSON.parse('{{ stats.observable_count.values() | list | tojson | safe }}');
+    const enginesLabels = JSON.parse('{{ stats.engine_count.keys() | list | tojson | safe }}');
+    const enginesData = JSON.parse('{{ stats.engine_count.values() | list | tojson | safe }}');
+    const observablesRepartitionLabels = JSON.parse('{{ stats.observable_count.keys() | list | tojson | safe }}');
+    const observablesRepartitionData = JSON.parse('{{ stats.observable_count.values() | list | tojson | safe }}');
 
-        const enginesCtx = document.getElementById('enginesChart').getContext('2d');
-        const enginesChart = new Chart(enginesCtx, {
-            type: 'pie',
-            data: {
-                labels: enginesLabels,
-                datasets: [{
-                    label: 'Engine Repartition',
-                    data: enginesData,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed + ' engines';
-                                }
-                                return label;
+    const enginesCtx = document.getElementById('enginesChart').getContext('2d');
+    const enginesChart = new Chart(enginesCtx, {
+        type: 'pie',
+        data: {
+            labels: enginesLabels,
+            datasets: [{
+                label: 'Engine Repartition',
+                data: enginesData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
                             }
+                            if (context.parsed !== null) {
+                                label += context.parsed + ' engines';
+                            }
+                            return label;
                         }
                     }
                 }
             }
-        });
+        }
+    });
 
-        const observablesRepartitionCtx = document.getElementById('observablesRepartitionChart').getContext('2d');
-        const observablesRepartitionChart = new Chart(observablesRepartitionCtx, {
-            type: 'pie',
-            data: {
-                labels: observablesRepartitionLabels,
-                datasets: [{
-                    label: 'Observable Repartition',
-                    data: observablesRepartitionData,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)',
-                        'rgba(153, 102, 255, 0.2)',
-                        'rgba(255, 159, 64, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed !== null) {
-                                    label += context.parsed + ' observables';
-                                }
-                                return label;
+    const observablesRepartitionCtx = document.getElementById('observablesRepartitionChart').getContext('2d');
+    const observablesRepartitionChart = new Chart(observablesRepartitionCtx, {
+        type: 'pie',
+        data: {
+            labels: observablesRepartitionLabels,
+            datasets: [{
+                label: 'Observable Repartition',
+                data: observablesRepartitionData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.label || '';
+                            if (label) {
+                                label += ': ';
                             }
+                            if (context.parsed !== null) {
+                                label += context.parsed + ' observables';
+                            }
+                            return label;
                         }
                     }
                 }
             }
-        });
-    </script>
-</body>
-<footer class="footer">
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/history">History</a></li>
-            <li><a href="/stats">Statistics</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
-        </ul>
-    </nav>
-</footer>
-
-</html>
+        }
+    });
+</script>
+{% endblock content %}

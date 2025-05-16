@@ -1,0 +1,25 @@
+<td>
+    {% if result.mde and result.mde.ipAddress %}
+        <strong>Devices: </strong><a href="{{ result.mde.link }}" target="_blank">{{ result.mde.orgPrevalence }}</a><br/>
+        <strong>First seen: </strong>{{ result.mde.orgFirstSeen }} <br/>
+        <strong>Last seen: </strong>{{ result.mde.orgLastSeen }} <br/>
+    {% elif result.mde and result.mde.sha1 %}
+        <strong>Devices: </strong><a href="{{ result.mde.link }}" target="_blank">{{ result.mde.organizationPrevalence }}</a><br/>
+        <strong>First seen: </strong>{{ result.mde.orgFirstSeen }} <br/>
+        <strong>Last seen: </strong>{{ result.mde.orgLastSeen }} <br/>
+        <strong>Top filenames: </strong>{{ result.mde.topFileNames }} <br/>
+        <strong>File product name: </strong>{{ result.mde.fileProductName }} <br/>
+        <strong>File publisher: </strong>{{ result.mde.filePublisher }} <br/>
+        <strong>Signer : </strong>{{ result.mde.signer }} <br/>
+        <strong>Issuer: </strong>{{ result.mde.issuer }} <br/>
+        <strong>IsValidCertificate: </strong>{{ result.mde.isValidCertificate }} <br/>
+        <strong>Determination: </strong>{{ result.mde.determinationType }} <br/>
+        <strong>Determination value: </strong>{{ result.mde.determinationValue }}
+    {% elif result.mde and result.mde.host %}
+        </strong>Devices: </strong><a href="{{ result.mde.link }}" target="_blank">{{ result.mde.orgPrevalence }}</a><br/>
+        </strong>First seen: </strong>{{ result.mde.orgFirstSeen }} <br/>
+        </strong>Last seen: </strong>{{ result.mde.orgLastSeen }} <br/>
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

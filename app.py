@@ -27,7 +27,7 @@ from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
 from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
-VERSION: str = "v0.7.7"
+VERSION: str = "v0.8.0"
 
 
 class InvalidCachefileError(Exception):
@@ -229,7 +229,7 @@ def show_results(analysis_id):
     analysis_results = db.session.get(AnalysisResult, analysis_id)
     if analysis_results:
         return render_template(
-            "index.html",
+            "results.html",
             analysis_results=analysis_results,
             API_PREFIX=API_PREFIX,
             display_mode=display,

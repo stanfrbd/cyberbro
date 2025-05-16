@@ -1,0 +1,8 @@
+<td>
+    {% if result.google_safe_browsing %}
+        <strong>Threat: </strong>{{ result.google_safe_browsing.threat_found }} <br/>
+        <strong>Details: </strong>{{ result.google_safe_browsing.details }}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

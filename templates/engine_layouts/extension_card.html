@@ -1,0 +1,9 @@
+<div class="card">
+    <h3>Extension</h3>
+    {% if analysis_results.results[0].extension.url %}
+    <p><a href="{{ analysis_results.results[0].extension.url }}"
+            target="_blank">{{ analysis_results.results[0].extension.name }}</a></p>
+    {% else %}
+    <p>Not Found</p>
+    {% endif %}
+</div>

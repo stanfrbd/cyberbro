@@ -1,0 +1,33 @@
+{% if (analysis_results.results[0].ipquery.is_proxy or analysis_results.results[0].ipquery.is_vpn or
+analysis_results.results[0].ipquery.is_tor) %}
+<div class="card warning-row" style="background-color: orange;">
+    {% elif analysis_results.results[0].ipquery.risk_score > 50 %}
+    <div class="card high-risk" style="background-color: red;">
+        {% else %}
+        <div class="card">
+            {% endif %}
+
+            <h3>IPquery</h3>
+            <p><strong>IP: </strong><a href="{{ analysis_results.results[0].ipquery.link }}" target="_blank">{{
+                    analysis_results.results[0].ipquery.ip }}</a></p>
+            <p><strong>Score: </strong>{{ analysis_results.results[0].ipquery.risk_score }}</p>
+            <p><strong>Geoloc: </strong>{{ analysis_results.results[0].ipquery.geolocation }}</p>
+            <p><strong>Country: </strong>{{ analysis_results.results[0].ipquery.country_name }} <span
+                    class="fi fi-{{ analysis_results.results[0].ipquery.country_code | lower }}"></span></p>
+            <p><strong>ASN: </strong>{{ analysis_results.results[0].ipquery.asn }} {{
+                analysis_results.results[0].ipquery.isp }}</p>
+
+            {% if analysis_results.results[0].ipquery.is_proxy %}
+            <p><strong>Proxy: </strong>{{ analysis_results.results[0].ipquery.is_proxy }}</p>
+            {% endif %}
+            {% if analysis_results.results[0].ipquery.is_vpn %}
+            <p><strong>VPN: </strong>{{ analysis_results.results[0].ipquery.is_vpn }}</p>
+            {% endif %}
+            {% if analysis_results.results[0].ipquery.is_tor %}
+            <p><strong>Tor: </strong>{{ analysis_results.results[0].ipquery.is_tor }}</p>
+            {% endif %}
+            {% if not analysis_results.results[0].ipquery.is_tor and not analysis_results.results[0].ipquery.is_vpn
+            and not analysis_results.results[0].ipquery.is_proxy %}
+            <p><strong>Type: </strong>Not anonymous</p>
+            {% endif %}
+        </div>

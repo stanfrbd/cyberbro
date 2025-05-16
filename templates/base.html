@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+{% block head %}
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>{% block title %}Cyberbro{% endblock title %}</title>
+{% endblock head %}
+</head>
+
+<body>
+    <div class="container">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+            <img
+                id="darkModeIcon"
+                src="https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png"
+                alt="Dark Mode"
+                width="20"
+                height="20"
+            />
+        </button>
+        <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="github-logo">
+            <img
+                src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
+                alt="GitHub Logo"
+                width="40"
+                height="40"
+                class="github-logo-light"
+            />
+            <img
+                src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"
+                alt="GitHub Logo"
+                width="40"
+                height="40"
+                class="github-logo-dark"
+                style="filter: invert(1)"
+            />
+        </a>
+
+    {% block content %}{% endblock content %}
+    </div>
+</body>
+
+<div class="end-of-page-padding">
+
+</div>
+
+<footer class="footer">
+{% block footer %}
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/history">History</a></li>
+            <li><a href="/stats">Statistics</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+{% endblock footer %}
+</footer>
+
+</html>
+
+{% block postcontent %}
+<script>
+
+    const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
+    const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
+
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+        updateDarkModeIcon();
+    }
+
+    function updateDarkModeIcon() {
+        const darkModeIcon = document.getElementById("darkModeIcon");
+        if (document.body.classList.contains("dark-mode")) {
+            darkModeIcon.src = sunIcon;
+            darkModeIcon.alt = "Light Mode";
+        } else {
+            darkModeIcon.src = moonIcon;
+            darkModeIcon.alt = "Dark Mode";
+        }
+    }
+
+    function applyDarkMode() {
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+        updateDarkModeIcon();
+    }
+
+    applyDarkMode();
+</script>
+{% endblock postcontent %}

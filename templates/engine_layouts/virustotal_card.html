@@ -1,0 +1,13 @@
+{% if analysis_results.results[0].virustotal and (analysis_results.results[0].virustotal.total_malicious > 10 or analysis_results.results[0].virustotal.community_score < -10) %}
+    <div class="card high-detection" style="background-color: red;">
+{% elif analysis_results.results[0].virustotal and analysis_results.results[0].virustotal.community_score > 100 %}
+    <div class="card clean-detection" style="background-color: green;">
+{% else %}
+    <div class="card">
+{% endif %}
+
+    <h3>VirusTotal</h3>
+    <p><strong>Ratio: </strong><a href="{{ analysis_results.results[0].virustotal.link }}"
+            target="_blank">{{ analysis_results.results[0].virustotal.detection_ratio }}</a></p>
+    <p><strong>Community: </strong>{{ analysis_results.results[0].virustotal.community_score }}</p>
+</div>

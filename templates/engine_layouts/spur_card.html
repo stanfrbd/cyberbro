@@ -1,0 +1,11 @@
+{% if analysis_results.results[0].spur and analysis_results.results[0].spur.tunnels not in ['Not anonymous', 'Non
+applicable'] %}
+<div class="card warning-row" style="background-color: orange;">
+    {% else %}
+    <div class="card">
+        {% endif %}
+
+        <h3>Spur.us</h3>
+        <p><a href="{{ analysis_results.results[0].spur.link }}" target="_blank">{{
+                analysis_results.results[0].spur.tunnels }}</a></p>
+    </div>

@@ -1,0 +1,16 @@
+<td>
+    {% if result.ipinfo and result.reversed_success and result.type in ["URL", "FQDN"] %}
+        Reverse DNS applied<br/>
+    {% endif %}
+
+    {% if result.ipinfo %}
+        <strong>IP: </strong><a href="{{ result.ipinfo.link }}" target="_blank">{{ result.ipinfo.ip }}</a><br/>
+        <strong>Geoloc: </strong>{{ result.ipinfo.geolocation }}<br/>
+        <strong>Country: </strong><span class="country country-{{result.ipinfo.country_name | lower}}">{{result.ipinfo.country_name}}</span>
+        <span class="fi fi-{{ result.ipinfo.country_code | lower }}"></span><br/>
+        <strong>Hostname: </strong>{{ result.ipinfo.hostname }}<br/>
+        <strong>ASN: </strong>{{ result.ipinfo.asn }}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

@@ -1,0 +1,23 @@
+<td>
+    {% if result.urlscan %}
+        <strong>Scan count:</strong> <a href="{{ result.urlscan.link }}" target="_blank">{{ result.urlscan.scan_count }}</a><br/>
+        {% if result.urlscan.scan_count == 0 %}
+            Not Found
+        {% else %}
+            <strong>
+            {% if result.type in ["FQDN", "URL"] %}
+                Top domains:
+            {% else %}
+                Top related domains:
+            {% endif %}
+            </strong>
+            <ul>
+            {% for domain in result.urlscan.top_domains %}
+                <li>{{ domain.domain }} ({{ domain.count }})</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

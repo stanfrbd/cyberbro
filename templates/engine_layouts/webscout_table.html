@@ -1,0 +1,79 @@
+<td>
+{% if result.webscout %}
+    {% if result.webscout.ip %}
+        <strong>IP:</strong> {{ result.webscout.ip }}<br/>
+    {% endif %}
+
+    {% if result.webscout.risk_score %}
+        <strong>Risk Score:</strong> {{ result.webscout.risk_score }}<br/>
+    {% endif %}
+
+    {% if result.webscout.country_name %}
+        <strong>Country:</strong><span class="country country-{{result.webscout.country_name | lower}}"> {{result.webscout.country_name}}</span><span class="fi fi-{{ result.webscout.country_code | lower }}"></span><br/>
+    {% endif %}
+
+    {% if result.webscout.hostnames %}
+        <strong>Hostnames:</strong> {{ result.webscout.hostnames | join(', ') }}<br/>
+    {% endif %}
+
+    {% if result.webscout.asn %}
+        <span title="{% if result.webscout.description %}{{ result.webscout.description }}{% endif %}">
+            <strong>ASN: </strong>
+            {% if result.webscout.asn and result.webscout.asn != "" %}
+                {{ result.webscout.asn}}
+            {% endif %}
+
+            {% if result.webscout.as_org and result.webscout.as_org != "" %}
+                {{ result.webscout.as_org }}
+            {% endif %}
+
+            {% if (result.webscout.description and result.webscout.description != "") %}
+                ℹ️
+            {% endif %}
+        </span><br/>
+    {% endif %}
+
+    {% if result.webscout.domains_on_ip %}
+        <strong>Domains on IP:</strong> {{ result.webscout.domains_on_ip }}<br/>
+    {% endif %}
+
+    {% if result.webscout.network_type %}
+        <strong>Type:</strong> {{ result.webscout.network_type }}<br/>
+    {% endif %}
+
+    {% if result.webscout.network_service %}
+        <strong>Network Service:</strong> {{ result.webscout.network_service }}<br/>
+    {% endif %}
+
+    {% if result.webscout.network_service_region %}
+        <strong>Network Service Region:</strong> {{ result.webscout.network_service_region }}<br/>
+    {% endif %}
+
+    {% if result.webscout.network_provider_services %}
+        <strong>Services:</strong> {{ result.webscout.network_provider_services | join(', ') }}<br/>
+    {% endif %}
+
+    {% if result.webscout.behavior %}
+        <strong>Behavior:</strong> {{ result.webscout.behavior | join(', ') }}<br/>
+    {% endif %}
+
+    {% if result.webscout.open_ports %}
+        <strong>Open Ports:</strong> {{ result.webscout.open_ports | join(', ') }}
+    {% endif %}
+
+    {% if result.webscout.is_proxy %}
+    <strong>Proxy:</strong> {{ result.webscout.is_proxy }}<br/>
+    {% endif %}
+
+    {% if result.webscout.is_vpn %}
+    <strong>VPN: </strong>{{ result.webscout.is_vpn }}<br/>
+    {% endif %}
+
+    {% if result.webscout.is_tor %}
+    <strong>Tor: </strong>{{ result.webscout.is_tor }}<br/>
+    {% endif %}
+
+{% else %}
+    Not applicable
+{% endif %}
+</td>

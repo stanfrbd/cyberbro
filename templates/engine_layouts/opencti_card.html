@@ -1,0 +1,51 @@
+{% if analysis_results.results[0].opencti.latest_indicator_link and not analysis_results.results[0].opencti.revoked %}
+<div class="card warning-row" style="background-color: orange;">
+    {% else %}
+    <div class="card">
+        {% endif %}
+
+        <h3>OpenCTI</h3>
+        <p>
+            <strong>Global count:</strong> {{ analysis_results.results[0].opencti.global_count }}
+        </p>
+        <p>
+            <strong>Entity counts:</strong>
+        </p>
+        <ul>
+            {% for entity, count in analysis_results.results[0].opencti.entity_counts.items() %}
+            <li>{{ entity }}: {{ count }}</li>
+            {% endfor %}
+        </ul>
+        <p>
+            <strong>Search link:</strong> <a href="{{ analysis_results.results[0].opencti.search_link }}"
+                target="_blank">See on OpenCTI</a>
+        </p>
+        <p>
+            <strong>Latest Entity Created At:</strong> {{ analysis_results.results[0].opencti.latest_created_at }}
+        </p>
+
+        {% if analysis_results.results[0].opencti.latest_indicator_link %}
+        <p>
+            <strong>Latest Indicator Name:</strong> {{ analysis_results.results[0].opencti.latest_indicator_name }}
+        </p>
+        <p>
+            <strong>Latest Indicator Link:</strong> <a
+                href="{{ analysis_results.results[0].opencti.latest_indicator_link }}" target="_blank">See Indicator</a>
+        </p>
+        <p>
+            <strong>OpenCTI Score:</strong> {{ analysis_results.results[0].opencti.x_opencti_score }} / 100
+        </p>
+        <p>
+            <strong>Confidence:</strong> {{ analysis_results.results[0].opencti.confidence }}
+        </p>
+        <p>
+            <strong>Revoked:</strong> {{ analysis_results.results[0].opencti.revoked }}
+        </p>
+        <p>
+            <strong>Valid From:</strong> {{ analysis_results.results[0].opencti.valid_from }}
+        </p>
+        <p>
+            <strong>Valid Until:</strong> {{ analysis_results.results[0].opencti.valid_until }}
+        </p>
+        {% endif %}
+    </div>

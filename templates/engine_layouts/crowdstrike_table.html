@@ -1,0 +1,37 @@
+<td>
+{% if result.crowdstrike %}
+    <strong>Device Count:</strong> {{ result.crowdstrike.device_count }}<br/>
+    <strong>Link:</strong> <a href="{{ result.crowdstrike.link }}" target="_blank">See on CrowdStrike</a><br/>
+
+    {% if result.crowdstrike.indicator_found %}
+        <strong>Published Date:</strong> {{ result.crowdstrike.published_date }}<br/>
+        <strong>Last Updated:</strong> {{ result.crowdstrike.last_updated }}<br/>
+
+        {% if result.crowdstrike.actors %}
+            <strong>Actors:</strong> {{ result.crowdstrike.actors | join(', ') }}<br/>
+        {% endif %}
+
+        {% if result.crowdstrike.malicious_confidence %}
+            <strong>Malicious Confidence:</strong> {{ result.crowdstrike.malicious_confidence }}<br/>
+        {% endif %}
+
+        {% if result.crowdstrike.threat_types %}
+            <strong>Threat Types:</strong> {{ result.crowdstrike.threat_types | join(', ') }}<br/>
+        {% endif %}
+
+        {% if result.crowdstrike.malware_families %}
+            <strong>Malware Families:</strong> {{ result.crowdstrike.malware_families | join(', ') }}<br/>
+        {% endif %}
+
+        {% if result.crowdstrike.kill_chain %}
+            <strong>Kill Chain:</strong> {{ result.crowdstrike.kill_chain | join(', ') }}<br/>
+        {% endif %}
+
+        {% if result.crowdstrike.vulnerabilities | length > 0 %}
+            <strong>Vulnerabilities:</strong> {{ result.crowdstrike.vulnerabilities | join(', ') }}<br/>
+        {% endif %}
+    {% endif %}
+{% else %}
+    Not applicable
+{% endif %}
+</td>

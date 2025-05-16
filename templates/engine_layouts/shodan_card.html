@@ -1,0 +1,7 @@
+<div class="card">
+    <h3>Shodan</h3>
+    <p><strong>Ports: </strong>{{ analysis_results.results[0].shodan.ports | join(', ') }}</p>
+    {% if analysis_results.results[0].shodan.tags | length > 0 %}
+        <p><strong>Tags: </strong>{{ analysis_results.results[0].shodan.tags | join(', ') }}</p>
+    {% endif %}
+</div>

@@ -1,0 +1,10 @@
+<div class="card">
+    <h3>IPinfo</h3>
+    <p><strong>IP: </strong><a href="{{ analysis_results.results[0].ipinfo.link }}" target="_blank">{{
+            analysis_results.results[0].ipinfo.ip }}</a></p>
+    <p><strong>Geoloc: </strong>{{ analysis_results.results[0].ipinfo.geolocation }}</p>
+    <p><strong>Country: </strong>{{ analysis_results.results[0].ipinfo.country_name }} <span
+            class="fi fi-{{ analysis_results.results[0].ipinfo.country_code | lower }}"></span></p>
+    <p><strong>Hostname: </strong>{{ analysis_results.results[0].ipinfo.hostname }}</p>
+    <p><strong>ASN: </strong>{{ analysis_results.results[0].ipinfo.asn }}</p>
+</div>

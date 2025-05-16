@@ -1,0 +1,11 @@
+<div class="card">
+    <h3>Ioc.One (PDF)</h3>
+    <p><strong>Search results: </strong></p>
+    {% if analysis_results.results[0].ioc_one_pdf.results | length > 0 %}
+        {% for search_result in analysis_results.results[0].ioc_one_pdf.results %}
+            <p><a href="{{ search_result.source }}" target="_blank" title="{{ search_result.header }}">{{ search_result.title }}</a></p>
+        {% endfor %}
+    {% else %}
+        <p>Not Found</p>
+    {% endif %}
+</div>

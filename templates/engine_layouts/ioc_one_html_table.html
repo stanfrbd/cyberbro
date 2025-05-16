@@ -1,0 +1,12 @@
+<td>
+    {% if result.ioc_one_html and result.ioc_one_html.results | length > 0 %}
+        <strong>Search results:</strong> <a href="{{ result.ioc_one_html.link }}" target="_blank">See on Ioc.One</a><br/> ---<br/>
+        {% for search_result in result.ioc_one_html.results %}
+            <a href="{{ search_result.source }}" target="_blank" title="{{ search_result.header }}">{{ search_result.title }}</a><br/>
+        {% endfor %}
+    {% elif result.ioc_one_html and result.ioc_one_html.results | length == 0 %}
+        Not Found
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

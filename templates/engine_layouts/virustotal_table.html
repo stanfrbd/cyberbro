@@ -1,0 +1,9 @@
+<td>
+    {% if result.virustotal %}
+        <strong>Ratio: </strong>
+        <a href="{{ result.virustotal.link }}" target="_blank">{{ result.virustotal.detection_ratio }}</a><br/>
+        <strong>Community: </strong>{{ result.virustotal.community_score }}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

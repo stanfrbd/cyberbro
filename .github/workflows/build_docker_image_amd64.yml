@@ -1,4 +1,4 @@
-name: Build and Publish Docker image on GitHub Container Registry
+name: Build and Publish amd64 (default) Docker image on GitHub Container Registry
 on:
   push:
     branches:

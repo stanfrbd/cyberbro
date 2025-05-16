@@ -1,0 +1,12 @@
+<td>
+    {% if result.github and result.github.results | length > 0 %}
+        <strong>Search results:</strong><br/>
+        {% for search_result in result.github.results %}
+            <a href="{{ search_result.url }}" target="_blank" title="{{ search_result.description }}">{{ search_result.title }}</a><br/>
+        {% endfor %}
+    {% elif result.github and result.github.results | length == 0 %}
+        Not Found
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

@@ -1,0 +1,13 @@
+<td>
+    {% if result.abuseipdb and result.reversed_success and result.type in ["URL", "FQDN"] %}
+        Reverse DNS applied<br/>
+    {% endif %}
+
+    {% if result.abuseipdb %}
+        <strong>Reports: </strong>
+        <a href="{{ result.abuseipdb.link }}" target="_blank">{{ result.abuseipdb.reports }}</a><br/>
+        <strong>Risk: </strong>{{ result.abuseipdb.risk_score }}%<br/>
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

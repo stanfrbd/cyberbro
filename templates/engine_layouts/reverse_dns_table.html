@@ -1,0 +1,9 @@
+<td>
+{% if result.reverse_dns %}
+    {% for dns in result.reverse_dns.reverse_dns %}
+        {{ dns }}<br/>
+    {% endfor %}
+{% else %}
+    Not applicable
+{% endif %}
+</td>

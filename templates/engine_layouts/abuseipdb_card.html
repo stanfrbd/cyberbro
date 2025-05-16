@@ -1,0 +1,11 @@
+{% if analysis_results.results[0].abuseipdb and analysis_results.results[0].abuseipdb.risk_score > 50 %}
+<div class="card high-risk" style="background-color: red;">
+{% else %}
+<div class="card">
+{% endif %}
+
+    <h3>AbuseIPDB</h3>
+    <p><strong>Reports: </strong><a href="{{ analysis_results.results[0].abuseipdb.link }}"
+            target="_blank">{{ analysis_results.results[0].abuseipdb.reports }}</a></p>
+    <p><strong>Risk: </strong>{{ analysis_results.results[0].abuseipdb.risk_score }}%</p>
+</div>

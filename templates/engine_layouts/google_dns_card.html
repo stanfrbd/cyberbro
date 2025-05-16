@@ -1,0 +1,27 @@
+<div class="card">
+    <h3>Google DNS (common records)</h3>
+    {% if analysis_results.results[0].google_dns.Answer %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Data</th>
+                <th>TTL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in analysis_results.results[0].google_dns.Answer %}
+            <tr>
+                <td>{{ record.type_name }}</td>
+                <td title="{{ record.data }}">{{ record.data[:50] }}{% if record.data | length > 50 %}...{% endif %}
+                </td>
+                </td>
+                <td>{{ record.TTL }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No DNS records found</p>
+    {% endif %}
+</div>

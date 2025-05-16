@@ -36,6 +36,35 @@ def prepare_row(result, selected_engines):
         row["rev_dns"] = result.get("reversed_success") if rev_dns_data else None
         row["dns_lookup"] = rev_dns_data.get("reverse_dns") if rev_dns_data else None
 
+    if "google_dns" in selected_engines:
+        google_dns_data = result.get("google_dns", {})
+        # google_dns_data is expected to have an "Answer" key with a list of records
+        if google_dns_data and "Answer" in google_dns_data:
+            # Group answers by type_name
+            dns_records = {}
+            for answer in google_dns_data["Answer"]:
+                type_name = answer.get("type_name", "").lower()
+                if type_name:
+                    dns_records.setdefault(type_name, []).append(answer.get("data"))
+            # Flatten lists or join as comma-separated strings
+            row["google_dns_a"] = ", ".join(dns_records.get("a", [])) if "a" in dns_records else None
+            row["google_dns_aaaa"] = ", ".join(dns_records.get("aaaa", [])) if "aaaa" in dns_records else None
+            row["google_dns_cname"] = ", ".join(dns_records.get("cname", [])) if "cname" in dns_records else None
+            row["google_dns_mx"] = ", ".join(dns_records.get("mx", [])) if "mx" in dns_records else None
+            row["google_dns_txt"] = ", ".join(dns_records.get("txt", [])) if "txt" in dns_records else None
+            row["google_dns_ptr"] = ", ".join(dns_records.get("ptr", [])) if "ptr" in dns_records else None
+            row["google_dns_ns"] = ", ".join(dns_records.get("ns", [])) if "ns" in dns_records else None
+            row["google_dns_soa"] = ", ".join(dns_records.get("soa", [])) if "soa" in dns_records else None
+        else:
+            row["google_dns_a"] = None
+            row["google_dns_aaaa"] = None
+            row["google_dns_cname"] = None
+            row["google_dns_mx"] = None
+            row["google_dns_txt"] = None
+            row["google_dns_ptr"] = None
+            row["google_dns_ns"] = None
+            row["google_dns_soa"] = None
+
     if "ipquery" in selected_engines:
         ipquery_data = result.get("ipquery", {})
         row["ipq_cn"] = ipquery_data.get("country_code") if ipquery_data else None
@@ -146,6 +175,13 @@ def prepare_row(result, selected_engines):
         opencti_data = result.get("opencti", {})
         row["opencti_entity_counts"] = opencti_data.get("entity_counts") if opencti_data else None
         row["opencti_global_count"] = opencti_data.get("global_count") if opencti_data else None
+        row["opencti_last_seen"] = opencti_data.get("latest_created_at") if opencti_data else None
+
+    if "misp" in selected_engines:
+        misp_data = result.get("misp", {})
+        row["misp_count"] = misp_data.get("count") if misp_data else None
+        row["misp_first_seen"] = misp_data.get("first_seen") if misp_data else None
+        row["misp_last_seen"] = misp_data.get("last_seen") if misp_data else None
 
     if "hudsonrock" in selected_engines:
         hudsonrock_data = result.get("hudsonrock", {})

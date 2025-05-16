@@ -1,391 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis History</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
-    <style>
-        :root {
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --background-color: #f8f9fa;
-            --text-color: #343a40;
-            --border-color: #ced4da;
-            --border-radius: 5px;
-            --dark-background-color: #1e2a36;
-            --dark-text-color: #d1d1d1;
-            --dark-border-color: #3a4b5a;
-            --dark-primary-color: #3a4b5a;
-            --dark-primary-hover-color: #4b5c6d;
-        }
+{% block title %}Cyberbro - Analysis History{% endblock title %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        textarea {
-            width: 100%;
-            height: 100px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 10px;
-            font-size: 1rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        th,
-        td {
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            text-align: left;
-        }
-
-        th {
-            background-color: #e9ecef;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            margin: 10px 0;
-            cursor: pointer;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover-color);
-        }
-
-        .high-risk {
-            background-color: #dc3545;
-            color: black;
-        }
-
-        .high-detection {
-            background-color: #dc3545;
-            color: black;
-        }
-
-        .clean-detection {
-            background-color: #28a745;
-            color: black;
-        }
-
-        .warning-row {
-            background-color: #ffc107;
-            color: black;
-        }
-
-        .filter-input,
-        .filter-select {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            width: calc(100% - 22px);
-            font-size: 1rem;
-        }
-
-        .filter-input:focus,
-        .filter-select:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        .filters-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .filters-container .filter-input,
-        .filters-container .filter-select,
-        .filters-container .btn {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-            color: black;
-        }
-
-        body.dark-mode {
-            background-color: var(--dark-background-color);
-            color: var(--dark-text-color);
-        }
-
-        body.dark-mode th {
-            background-color: #2b3a47;
-        }
-
-        body.dark-mode td,
-        body.dark-mode th {
-            border-color: var(--dark-border-color);
-        }
-
-        body.dark-mode .filter-input,
-        body.dark-mode .filter-select {
-            background-color: #2b3a47;
-            color: var(--dark-text-color);
-            border-color: var(--dark-border-color);
-        }
-
-        body.dark-mode .filter-input:focus,
-        body.dark-mode .filter-select:focus {
-            border-color: var(--dark-primary-hover-color);
-        }
-
-        .dark-mode-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-
-        .dark-mode-toggle:hover {
-            background-color: var(--primary-hover-color);
-        }
-
-        body.dark-mode tr:hover {
-            background-color: #2b3a47;
-            color: var(--dark-text-color);
-        }
-
-        .github-logo-light {
-            display: block;
-        }
-
-        .github-logo-dark {
-            display: none;
-        }
-
-        body.dark-mode .github-logo-light {
-            display: none;
-        }
-
-        body.dark-mode .github-logo-dark {
-            display: block;
-        }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        a:hover {
-            color: var(--primary-hover-color);
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .footer nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .footer nav ul li {
-            display: inline;
-        }
-
-        .footer nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-        }
-
-        .footer nav ul li a:hover {
-            color: var(--primary-hover-color);
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-            <img id="darkModeIcon" src="https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png" alt="Dark Mode"
-                width="20" height="20">
-        </button>
-        <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="github-logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo-light">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo-dark" style="filter: invert(1);">
-        </a>
-        <h1>Cyberbro - Last 60 Analyses</h1>
-        <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
-        <table id="historyTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Analysis ID</th>
-                    <th>Observables</th>
-                    <th>Results</th>
-                    <th>Engines</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for analysis in analysis_results %}
-                <tr>
-                    <td>{{ analysis.end_time_string }}</td>
-                    <td><a href="/results/{{ analysis.id }}">{{ analysis.id }}</a></td>
-                    <td>
-                        <p id="observables-in-analysis"
-                            title="{{ analysis.results|map(attribute='observable')|join(', ') }}">
-                            {% set observables = analysis.results|map(attribute='observable')|list %}
-                            {% set display_observables = observables[:3] %}
-                            {% set display_text = display_observables|join(', ') %}
-                            {% if display_text|length > 150 %}
-                            {{ display_text[:80] }}...
-                            {% else %}
-                            {{ display_text }}
-                            {% endif %}
-                            {% if observables|length > 3 %}...{% endif %}
-                        </p>
-                    </td>
-                    <td>{{ analysis.results|length }}</td>
-                    <td>
-                        <p id="engines-in-analysis" title="{{ analysis.selected_engines|join(', ') }}">
-                            {% for engine in analysis.selected_engines[:3] %}
-                            {{ engine }}{% if not loop.last %}, {% endif %}
-                            {% endfor %}
-                            {% if analysis.selected_engines|length > 3 %}...{% endif %}
-                        </p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <script>
-        const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
-        const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
-
-        function filterTable() {
-            const searchInput = document.getElementById("searchInput").value.toLowerCase();
-
-            const table = document.getElementById("historyTable");
-            const tr = table.getElementsByTagName("tr");
-
-            for (let i = 1; i < tr.length; i++) {
-                let td = tr[i].getElementsByTagName("td");
-                let showRow = true;
-
-                const observablesInAnalysis = tr[i].querySelector("#observables-in-analysis");
-                if (observablesInAnalysis) {
-                    observablesInAnalysis.innerText = observablesInAnalysis.title;
-                }
-
-                const enginesInAnalysis = tr[i].querySelector("#engines-in-analysis");
-                if (enginesInAnalysis) {
-                    enginesInAnalysis.innerText = enginesInAnalysis.title;
-                }
-
-                if (searchInput) {
-                    showRow = Array.from(td).some(cell =>
-                        cell.innerText.toLowerCase().includes(searchInput) ||
-                        (cell.querySelector('p') && cell.querySelector('p').title.toLowerCase().includes(searchInput))
-                    );
-                }
-
-                // replace the text matching the search input with a highlighted version, just with a replacement, not a regexp search, and just for p, not other elements
-                if (searchInput) {
-                    Array.from(td).forEach(cell => {
-                        if (cell.querySelector('p')) {
-                            cell.querySelector('p').innerHTML = cell.querySelector('p').title.replace(new RegExp(searchInput, 'gi'), match => `<span style="background-color: yellow;">${match}</span>`);
-                        }
-                    });
-                }
-
-                tr[i].style.display = showRow ? "" : "none";
-            }
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-            updateDarkModeIcon();
-        }
-
-        function updateDarkModeIcon() {
-            const darkModeIcon = document.getElementById("darkModeIcon");
-            if (document.body.classList.contains("dark-mode")) {
-                darkModeIcon.src = sunIcon;
-                darkModeIcon.alt = "Light Mode";
-            } else {
-                darkModeIcon.src = moonIcon;
-                darkModeIcon.alt = "Dark Mode";
-            }
-        }
-
-        function applyDarkMode() {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark-mode");
-            }
-            updateDarkModeIcon();
-        }
-
-        applyDarkMode();
-    </script>
-</body>
-<footer class="footer">
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/history">History</a></li>
-            <li><a href="/stats">Statistics</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
-        </ul>
-    </nav>
-</footer>
-
-</html>
+{% block content %}
+    <h1>Cyberbro - Last 60 Analyses</h1>
+    <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
+    <table id="historyTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Analysis ID</th>
+                <th>Observables</th>
+                <th>Results</th>
+                <th>Engines</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for analysis in analysis_results %}
+            <tr>
+                <td>{{ analysis.end_time_string }}</td>
+                <td><a href="/results/{{ analysis.id }}">{{ analysis.id }}</a></td>
+                <td>
+                    <p id="observables-in-analysis"
+                        title="{{ analysis.results|map(attribute='observable')|join(', ') }}">
+                        {% set observables = analysis.results|map(attribute='observable')|list %}
+                        {% set display_observables = observables[:3] %}
+                        {% set display_text = display_observables|join(', ') %}
+                        {% if display_text|length > 150 %}
+                        {{ display_text[:80] }}...
+                        {% else %}
+                        {{ display_text }}
+                        {% endif %}
+                        {% if observables|length > 3 %}...{% endif %}
+                    </p>
+                </td>
+                <td>{{ analysis.results|length }}</td>
+                <td>
+                    <p id="engines-in-analysis" title="{{ analysis.selected_engines|join(', ') }}">
+                        {% for engine in analysis.selected_engines[:3] %}
+                        {{ engine }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                        {% if analysis.selected_engines|length > 3 %}...{% endif %}
+                    </p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

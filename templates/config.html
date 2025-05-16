@@ -1,482 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Cyberbro - Configuration{% endblock title %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuration</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
-    <style>
-        :root {
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --background-color: #f8f9fa;
-            --text-color: #343a40;
-            --border-color: #ced4da;
-            --border-radius: 5px;
-            --dark-background-color: #1e2a36;
-            --dark-text-color: #d1d1d1;
-            --dark-border-color: #3a4b5a;
-            --dark-primary-color: #3a4b5a;
-            --dark-primary-hover-color: #4b5c6d;
-        }
+{% block content %}
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-        }
+<h1>{{ self.title() }}</h1>
 
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
+<form id="configForm">
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Value</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key, value in secrets.items() %}
+            <tr>
+                {% if key not in ["gui_enabled_engines", "api_prefix", "config_page_enabled", "ssl_verify"] and not key.startswith("supervisor") %}
+                    <td style="width: 15%;">
+                        <label class="secrets_key" for="secret_{{ key }}">{{ key }}</label>
+                    </td>
+                    <td style="width:50%">
+                        <input class="secrets_value" type="password" id="secret_{{ key }}" name="{{ key }}"
+                            value="{{ value }}" readonly>
+                    </td>
+                    <td style="width: 15%">
+                        <button type="button" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">✏️</button>
+                        <button type="button" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value }}', 'password')"
+                            style="display:none;">
+                            ❌
+                        </button>
+                        <button type="button" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'password')"
+                            style="display:none;">
+                            ✅
+                        </button>
+                    </td>
+                {% endif %}
 
-        textarea {
-            width: 100%;
-            height: 100px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 10px;
-            font-size: 1rem;
-        }
+                {% if key == 'gui_enabled_engines' %}
+                    <td style="width: 15%;">
+                        <label class="secrets_key" for="secret_{{ key }}">{{ key }} (separated by ",") - when empty, all engines are enabled.</label>
+                    </td>
+                    <td style="width: 50%;">
+                        <input class="enabled_engines_value" type="text" id="secret_{{ key }}" name="{{ key }}"
+                            value="{{ value | join(',') }}" readonly>
+                    </td>
+                    <td style="width: 15%">
+                        <button type="button" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">✏️</button>
+                        <button type="button" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value | join(',') }}', 'text')"
+                            style="display:none;">
+                            ❌
+                        </button>
+                        <button type="button" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'text')"
+                            style="display:none;">
+                            ✅
+                        </button>
+                    </td>
+                {% endif %}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn save" style="margin-bottom: 20px;">Save</button>
+</form>
 
-        th,
-        td {
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            text-align: left;
-        }
-
-        th {
-            background-color: #e9ecef;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            margin: 10px 0;
-            cursor: pointer;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover-color);
-        }
-
-        tr:hover {
-            background-color: #f1f1f1;
-            color: black;
-        }
-
-        body.dark-mode {
-            background-color: var(--dark-background-color);
-            color: var(--dark-text-color);
-        }
-
-        body.dark-mode th {
-            background-color: #2b3a47;
-        }
-
-        body.dark-mode td,
-        body.dark-mode th {
-            border-color: var(--dark-border-color);
-        }
-
-        body.dark-mode .filter-input,
-        body.dark-mode .filter-select {
-            background-color: #2b3a47;
-            color: var(--dark-text-color);
-            border-color: var(--dark-border-color);
-        }
-
-        body.dark-mode .filter-input:focus,
-        body.dark-mode .filter-select:focus {
-            border-color: var(--dark-primary-hover-color);
-        }
-
-        .dark-mode-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-
-        .dark-mode-toggle:hover {
-            background-color: var(--primary-hover-color);
-        }
-
-        body.dark-mode tr:hover {
-            background-color: #2b3a47;
-            color: var(--dark-text-color);
-        }
-
-        .github-logo-light {
-            display: block;
-        }
-
-        .github-logo-dark {
-            display: none;
-        }
-
-        body.dark-mode .github-logo-light {
-            display: none;
-        }
-
-        body.dark-mode .github-logo-dark {
-            display: block;
-        }
-
-        a {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        a:hover {
-            color: var(--primary-hover-color);
-        }
-
-        .secrets_key {
-            font-weight: bold;
-            font-family: consolas, monospace;
-        }
-
-        .secrets_value {
-            width: 100%;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 3px;
-            font-family: consolas, monospace;
-            background-color: #e9ecef;
-        }
-
-        .enabled_engines_value {
-            width: 100%;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 3px;
-            font-family: consolas, monospace;
-            background-color: #e9ecef;
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .footer nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .footer nav ul li {
-            display: inline;
-        }
-
-        .footer nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-        }
-
-        .footer nav ul li a:hover {
-            color: var(--primary-hover-color);
-        }
-
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: var(--border-radius);
-            padding: 16px;
-            position: fixed;
-            z-index: 1;
-            left: 50%;
-            bottom: 30px;
-            font-size: 17px;
-        }
-
-        .toast.show {
-            visibility: visible;
-            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-
-        .toast.success {
-            background-color: green;
-        }
-
-        .toast.error {
-            background-color: red;
-        }
-
-        @-webkit-keyframes fadein {
-            from {
-                bottom: 0;
-                opacity: 0;
-            }
-
-            to {
-                bottom: 30px;
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadein {
-            from {
-                bottom: 0;
-                opacity: 0;
-            }
-
-            to {
-                bottom: 30px;
-                opacity: 1;
-            }
-        }
-
-        @-webkit-keyframes fadeout {
-            from {
-                bottom: 30px;
-                opacity: 1;
-            }
-
-            to {
-                bottom: 0;
-                opacity: 0;
-            }
-        }
-
-        @keyframes fadeout {
-            from {
-                bottom: 30px;
-                opacity: 1;
-            }
-
-            to {
-                bottom: 0;
-                opacity: 0;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-        <button class="dark-mode-toggle" onclick="toggleDarkMode()">
-            <img id="darkModeIcon" src="https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png" alt="Dark Mode"
-                width="20" height="20">
-        </button>
-        <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="github-logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo-light">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo-dark" style="filter: invert(1);">
-        </a>
-        <h1>Cyberbro - Configuration</h1>
-
-        <form id="configForm">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Value</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for key, value in secrets.items() %}
-
-                    
-                    <tr>
-                        {% if key not in ["gui_enabled_engines", "api_prefix", "config_page_enabled", "ssl_verify"] and not key.startswith("supervisor") %}
-                        <td style="width: 15%;">
-                            <label class="secrets_key" for="secret_{{ key }}">{{ key }}</label>
-                        </td>
-                        <td style="width:50%">
-                            <input class="secrets_value" type="password" id="secret_{{ key }}" name="{{ key }}"
-                                value="{{ value }}" readonly>
-                        </td>
-                        <td style="width: 15%">
-                            <button type="button" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">✏️</button>
-                            <button type="button" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value }}', 'password')"
-                                style="display:none;">
-                                ❌
-                            </button>
-                            <button type="button" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'password')"
-                                style="display:none;">
-                                ✅
-                            </button>
-                        </td>
-                        
-                        {% endif %}
-                        
-                        {% if key == 'gui_enabled_engines' %}
-                        <td style="width: 15%;">
-                            <label class="secrets_key" for="secret_{{ key }}">{{ key }} (separated by ",") - when empty, all engines are enabled.</label>
-                        </td>
-                        <td style="width: 50%;">
-                            <input class="enabled_engines_value" type="text" id="secret_{{ key }}" name="{{ key }}"
-                                value="{{ value | join(',') }}" readonly>
-                        </td>
-                        <td style="width: 15%">
-                            <button type="button" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">✏️</button>
-                            <button type="button" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value | join(',') }}', 'text')"
-                                style="display:none;">
-                                ❌
-                            </button>
-                            <button type="button" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'text')"
-                                style="display:none;">
-                                ✅
-                            </button>
-                        </td>
-                        {% endif %}
-
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <button type="submit" class="btn save" style="margin-bottom: 20px;">Save</button>
-        </form>
-
-        <div id="toast" class="toast"></div>
-
-        <script>
-            function editSecret(key) {
-                const input = document.getElementById('secret_' + key);
-                input.type = 'text';
-                input.readOnly = false;
-                input.dataset.originalValue = input.value;
-                document.getElementById('cancel_' + key).style.display = 'inline';
-                document.getElementById('validate_' + key).style.display = 'inline';
-                document.getElementById('edit_' + key).style.display = 'none';
-            }
-
-            function cancelEdit(key, originalValue, input_type) {
-                const input = document.getElementById('secret_' + key);
-                input.value = input.dataset.originalValue;
-                input.type = input_type;
-                input.readOnly = true;
-                document.getElementById('cancel_' + key).style.display = 'none';
-                document.getElementById('validate_' + key).style.display = 'none';
-                document.getElementById('edit_' + key).style.display = 'inline';
-            }
-
-            function validateEdit(key, input_type) {
-                const input = document.getElementById('secret_' + key);
-                input.readOnly = true;
-                document.getElementById('cancel_' + key).style.display = 'none';
-                document.getElementById('validate_' + key).style.display = 'none';
-                document.getElementById('edit_' + key).style.display = 'inline';
-                input.type = input_type;
-            }
-
-            document.getElementById('configForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const formData = new FormData(this);
-                fetch('/update_config', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        showToast(data.message);
-                    })
-                    .catch(error => {
-                        showToast('An error occurred.', 'error');
-                    });
-            });
-
-            function showToast(message, type = 'success') {
-                const toast = document.getElementById('toast');
-                toast.className = 'toast show ' + (message.toLowerCase().includes('error') ? 'error' : 'success');
-                toast.textContent = message;
-                setTimeout(() => {
-                    toast.className = toast.className.replace('show', '');
-                }, 3000);
-            }
-        </script>
-    </div>
-
+<div id="toast" class="toast"></div>
     <script>
-        const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
-        const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
-
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-            updateDarkModeIcon();
+        function editSecret(key) {
+            const input = document.getElementById('secret_' + key);
+            input.type = 'text';
+            input.readOnly = false;
+            input.dataset.originalValue = input.value;
+            document.getElementById('cancel_' + key).style.display = 'inline';
+            document.getElementById('validate_' + key).style.display = 'inline';
+            document.getElementById('edit_' + key).style.display = 'none';
         }
 
-        function updateDarkModeIcon() {
-            const darkModeIcon = document.getElementById("darkModeIcon");
-            if (document.body.classList.contains("dark-mode")) {
-                darkModeIcon.src = sunIcon;
-                darkModeIcon.alt = "Light Mode";
-            } else {
-                darkModeIcon.src = moonIcon;
-                darkModeIcon.alt = "Dark Mode";
-            }
+        function cancelEdit(key, originalValue, input_type) {
+            const input = document.getElementById('secret_' + key);
+            input.value = input.dataset.originalValue;
+            input.type = input_type;
+            input.readOnly = true;
+            document.getElementById('cancel_' + key).style.display = 'none';
+            document.getElementById('validate_' + key).style.display = 'none';
+            document.getElementById('edit_' + key).style.display = 'inline';
         }
 
-        function applyDarkMode() {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark-mode");
-            }
-            updateDarkModeIcon();
+        function validateEdit(key, input_type) {
+            const input = document.getElementById('secret_' + key);
+            input.readOnly = true;
+            document.getElementById('cancel_' + key).style.display = 'none';
+            document.getElementById('validate_' + key).style.display = 'none';
+            document.getElementById('edit_' + key).style.display = 'inline';
+            input.type = input_type;
         }
 
-        applyDarkMode();
+        document.getElementById('configForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('/update_config', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showToast(data.message);
+                })
+                .catch(error => {
+                    showToast('An error occurred.', 'error');
+                });
+        });
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast show ' + (message.toLowerCase().includes('error') ? 'error' : 'success');
+            toast.textContent = message;
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
     </script>
-</body>
-<footer class="footer" style="margin-top: 20px;">
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/history">History</a></li>
-            <li><a href="/stats">Statistics</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
-        </ul>
-    </nav>
-</footer>
+</div>
 
-</html>
+{% endblock content %}

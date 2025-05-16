@@ -1,0 +1,14 @@
+<td>
+    {% if result.threatfox and result.threatfox.count != 0 %}
+        <strong>Count: </strong>
+        <a href="{{ result.threatfox.link }}" target="_blank" title="Might not be available in the website itself.">{{ result.threatfox.count }}</a><br/>
+        <strong>Malware:</strong><br/>
+        {% for malware in result.threatfox.malware_printable %}
+            {{ malware }}<br/>
+        {% endfor %}
+    {% elif result.threatfox and result.threatfox.count == 0 %}
+        Not Found
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

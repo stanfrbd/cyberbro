@@ -1,0 +1,13 @@
+<td>
+    {% if result.phishtank and result.phishtank.in_database == True and result.phishtank.valid == True and result.phishtank.verified == True %}
+        <a href="{{ result.phishtank.phish_detail_page }}" target="_blank">Found (valid and verified)</a>
+    {% elif result.phishtank and result.phishtank.in_database == True and result.phishtank.valid == False %}
+        <a href="{{ result.phishtank.phish_detail_page }}" target="_blank">Found (invalid)</a>
+    {% elif result.phishtank and result.phishtank.in_database == True and result.phishtank.verified == False %}
+        <a href="{{ result.phishtank.phish_detail_page }}" target="_blank">Found (not verified)</a>
+    {% elif result.phishtank and result.phishtank.in_database == False %}
+        Not Found
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

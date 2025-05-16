@@ -1,0 +1,85 @@
+{% if 'vpn' in analysis_results.results[0].webscout.network_provider_services | map('lower') or 'proxy' in analysis_results.results[0].webscout.network_provider_services | map('lower') or analysis_results.results[0].webscout.is_vpn or analysis_results.results[0].webscout.is_proxy or analysis_results.results[0].webscout.is_tor %}
+    <div class="card warning-row" style="background-color: orange;">
+{% elif analysis_results.results[0].webscout.risk_score > 50 %}
+    <div class="card high-risk" style="background-color: red;">
+{% else %}
+    <div class="card">
+{% endif %}
+
+    <h3>WebScout</h3>
+    {% if analysis_results.results[0].webscout.ip %}
+        <p><strong>IP: </strong>{{ analysis_results.results[0].webscout.ip }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.risk_score %}
+        <p><strong>Risk Score: </strong>{{ analysis_results.results[0].webscout.risk_score }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.country_name %}
+        <p><strong>Country:</strong> {{ analysis_results.results[0].webscout.country_name }} <span class="fi fi-{{ analysis_results.results[0].webscout.country_code | lower }}"></span></p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.hostnames %}
+        <p><strong>Hostnames:</strong> {{ analysis_results.results[0].webscout.hostnames | join(', ') }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.asn %}
+    <p>
+        <span title="{% if analysis_results.results[0].webscout.description %}{{ analysis_results.results[0].webscout.description }}{% endif %}">
+            <strong>ASN: </strong>
+
+        {% if analysis_results.results[0].webscout.asn and analysis_results.results[0].webscout.asn != "" %}
+            {{ analysis_results.results[0].webscout.asn }}
+        {% endif %}
+
+        {% if analysis_results.results[0].webscout.as_org and analysis_results.results[0].webscout.as_org != "" %}
+            {{ analysis_results.results[0].webscout.as_org }}
+        {% endif %}
+
+        {% if (analysis_results.results[0].webscout.description and analysis_results.results[0].webscout.description != "") %}
+            ℹ️
+        {% endif %}
+        </span>
+    </p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.domains_on_ip %}
+        <p><strong>Domains on IP:</strong> {{ analysis_results.results[0].webscout.domains_on_ip }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.network_type %}
+        <p><strong>Type:</strong> {{ analysis_results.results[0].webscout.network_type }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.network_service %}
+        <p><strong>Network Service:</strong> {{ analysis_results.results[0].webscout.network_service }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.network_service_region %}
+        <p><strong>Network Service Region:</strong> {{ analysis_results.results[0].webscout.network_service_region }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.network_provider_services %}
+        <p><strong>Services:</strong> {{ analysis_results.results[0].webscout.network_provider_services | join(', ') }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.behavior %}
+        <p><strong>Behavior:</strong> {{ analysis_results.results[0].webscout.behavior | join(', ') }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.open_ports %}
+        <p><strong>Open Ports:</strong> {{ analysis_results.results[0].webscout.open_ports | join(', ') }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.is_vpn %}
+        <p><strong>VPN:</strong> {{ analysis_results.results[0].webscout.is_vpn }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.is_proxy %}
+        <p><strong>Proxy:</strong> {{ analysis_results.results[0].webscout.is_proxy }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].webscout.is_tor %}
+        <p><strong>Tor:</strong> {{ analysis_results.results[0].webscout.is_tor }}</p>
+    {% endif %}
+</div>

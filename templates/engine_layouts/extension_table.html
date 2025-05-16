@@ -1,0 +1,7 @@
+<td>
+    {% if result.type == "CHROME_EXTENSION" %}
+        <a href="{{ result.extension.url }}" target="_blank">{{ result.extension.name }}</a>
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

@@ -123,6 +123,8 @@ cp secrets-sample.json secrets.json
     "mde_client_id": "client_id_here",
     "mde_client_secret": "client_secret_here",
     "mde_tenant_id": "tenant_here",
+    "misp_api_key": "token_here",
+    "misp_url": "https://misp.local",
     "opencti_api_key": "token_here",
     "opencti_url": "https://demo.opencti.io",
     "proxy_url": "",

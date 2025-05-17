@@ -3,48 +3,90 @@
 {% block title %}Cyberbro - Analysis History{% endblock title %}
 
 {% block content %}
-    <h1>Cyberbro - Last 60 Analyses</h1>
-    <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
-    <table id="historyTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Analysis ID</th>
-                <th>Observables</th>
-                <th>Results</th>
-                <th>Engines</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for analysis in analysis_results %}
-            <tr>
-                <td>{{ analysis.end_time_string }}</td>
-                <td><a href="/results/{{ analysis.id }}">{{ analysis.id }}</a></td>
-                <td>
-                    <p id="observables-in-analysis"
-                        title="{{ analysis.results|map(attribute='observable')|join(', ') }}">
-                        {% set observables = analysis.results|map(attribute='observable')|list %}
-                        {% set display_observables = observables[:3] %}
-                        {% set display_text = display_observables|join(', ') %}
-                        {% if display_text|length > 150 %}
-                        {{ display_text[:80] }}...
-                        {% else %}
-                        {{ display_text }}
-                        {% endif %}
-                        {% if observables|length > 3 %}...{% endif %}
-                    </p>
-                </td>
-                <td>{{ analysis.results|length }}</td>
-                <td>
-                    <p id="engines-in-analysis" title="{{ analysis.selected_engines|join(', ') }}">
-                        {% for engine in analysis.selected_engines[:3] %}
-                        {{ engine }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                        {% if analysis.selected_engines|length > 3 %}...{% endif %}
-                    </p>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<script>
+    function filterTable() {
+        const searchInput = document.getElementById("searchInput").value.toLowerCase();
+
+        const table = document.getElementById("historyTable");
+        const tr = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < tr.length; i++) {
+            let td = tr[i].getElementsByTagName("td");
+            let showRow = true;
+
+            const observablesInAnalysis = tr[i].querySelector("#observables-in-analysis");
+            if (observablesInAnalysis) {
+                observablesInAnalysis.innerText = observablesInAnalysis.title;
+            }
+
+            const enginesInAnalysis = tr[i].querySelector("#engines-in-analysis");
+            if (enginesInAnalysis) {
+                enginesInAnalysis.innerText = enginesInAnalysis.title;
+            }
+
+            if (searchInput) {
+                showRow = Array.from(td).some(cell =>
+                    cell.innerText.toLowerCase().includes(searchInput) ||
+                    (cell.querySelector('p') && cell.querySelector('p').title.toLowerCase().includes(searchInput))
+                );
+            }
+
+            // replace the text matching the search input with a highlighted version, just with a replacement, not a regexp search, and just for p, not other elements
+            if (searchInput) {
+                Array.from(td).forEach(cell => {
+                    if (cell.querySelector('p')) {
+                        cell.querySelector('p').innerHTML = cell.querySelector('p').title.replace(new RegExp(searchInput, 'gi'), match => `<span style="background-color: yellow;">${match}</span>`);
+                    }
+                });
+            }
+
+            tr[i].style.display = showRow ? "" : "none";
+        }
+    }
+</script>
+
+<h1>Cyberbro - Last 60 Analyses</h1>
+<input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
+<table id="historyTable">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Analysis ID</th>
+            <th>Observables</th>
+            <th>Results</th>
+            <th>Engines</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for analysis in analysis_results %}
+        <tr>
+            <td>{{ analysis.end_time_string }}</td>
+            <td><a href="/results/{{ analysis.id }}">{{ analysis.id }}</a></td>
+            <td>
+                <p id="observables-in-analysis" title="{{ analysis.results|map(attribute='observable')|join(', ') }}">
+                    {% set observables = analysis.results|map(attribute='observable')|list %}
+                    {% set display_observables = observables[:3] %}
+                    {% set display_text = display_observables|join(', ') %}
+                    {% if display_text|length > 150 %}
+                    {{ display_text[:80] }}...
+                    {% else %}
+                    {{ display_text }}
+                    {% endif %}
+                    {% if observables|length > 3 %}...{% endif %}
+                </p>
+            </td>
+            <td>{{ analysis.results|length }}</td>
+            <td>
+                <p id="engines-in-analysis" title="{{ analysis.selected_engines|join(', ') }}">
+                    {% for engine in analysis.selected_engines[:3] %}
+                    {{ engine }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                    {% if analysis.selected_engines|length > 3 %}...{% endif %}
+                </p>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock content %}

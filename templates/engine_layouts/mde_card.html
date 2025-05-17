@@ -1,25 +1,29 @@
 <div class="card">
     <h3>Microsoft Defender for Endpoint</h3>
     {% if analysis_results.results[0].mde.ipAddress %}
-        <p><strong>Devices: </strong><a href="{{ analysis_results.results[0].mde.link }}" target="_blank">{{ analysis_results.results[0].mde.orgPrevalence }}</a></p>
-        <p><strong>First seen: </strong>{{ analysis_results.results[0].mde.orgFirstSeen }}</p>
-        <p><strong>Last seen: </strong>{{ analysis_results.results[0].mde.orgLastSeen }}</p>
+    <p><strong>Devices: </strong><a href="{{ analysis_results.results[0].mde.link }}" target="_blank">{{
+            analysis_results.results[0].mde.orgPrevalence }}</a></p>
+    <p><strong>First seen: </strong>{{ analysis_results.results[0].mde.orgFirstSeen }}</p>
+    <p><strong>Last seen: </strong>{{ analysis_results.results[0].mde.orgLastSeen }}</p>
     {% elif analysis_results.results[0].mde.sha1 %}
-        <p><strong>Devices: </strong><a href="{{ analysis_results.results[0].mde.link }}" target="_blank">{{ analysis_results.results[0].mde.organizationPrevalence }}</a></p>
-        <p><strong>First seen: </strong>{{ analysis_results.results[0].mde.orgFirstSeen }}</p>
-        <p><strong>Last seen: </strong>{{ analysis_results.results[0].mde.orgLastSeen }}</p>
-        <p><strong>Top filenames: </strong>{{ analysis_results.results[0].mde.topFileNames }}</p>
-        <p><strong>File product name: </strong>{{ analysis_results.results[0].mde.fileProductName }}</p>
-        <p><strong>File publisher: </strong>{{ analysis_results.results[0].mde.filePublisher }}</p>
-        <p><strong>Signer: </strong>{{ analysis_results.results[0].mde.signer }}</p>
-        <p><strong>Issuer: </strong>{{ analysis_results.results[0].mde.issuer }}</p>
-        <p><strong>IsValidCertificate: </strong>{{ analysis_results.results[0].mde.isValidCertificate }}</p>
-        <p><strong>Determination: </strong>{{ analysis_results.results[0].mde.determinationType }}</p>
-        <p><strong>Determination value: </strong>{{ analysis_results.results[0].mde.determinationValue }}
-        </p>
+    <p><strong>Devices: </strong><a href="{{ analysis_results.results[0].mde.link }}" target="_blank">{{
+            analysis_results.results[0].mde.organizationPrevalence }}</a></p>
+    <p><strong>First seen: </strong>{{ analysis_results.results[0].mde.orgFirstSeen }}</p>
+    <p><strong>Last seen: </strong>{{ analysis_results.results[0].mde.orgLastSeen }}</p>
+    <p><strong>Top filenames: </strong>{{ analysis_results.results[0].mde.topFileNames }}</p>
+    <p><strong>File product name: </strong>{{ analysis_results.results[0].mde.fileProductName }}</p>
+    <p><strong>File publisher: </strong>{{ analysis_results.results[0].mde.filePublisher }}</p>
+    <p><strong>Signer: </strong>{{ analysis_results.results[0].mde.signer }}</p>
+    <p><strong>Issuer: </strong>{{ analysis_results.results[0].mde.issuer }}</p>
+    <p><strong>IsValidCertificate: </strong>{{ analysis_results.results[0].mde.isValidCertificate }}</p>
+    <p><strong>Determination: </strong>{{ analysis_results.results[0].mde.determinationType }}</p>
+    <p><strong>Determination value: </strong>{{ analysis_results.results[0].mde.determinationValue }}</p>
     {% elif analysis_results.results[0].mde.host %}
-        <p><strong>Devices: </strong><a href="{{ analysis_results.results[0].mde.link }}" target="_blank">{{ analysis_results.results[0].mde.orgPrevalence }}</a></p>
-        <p><strong>First seen: </strong>{{ analysis_results.results[0].mde.orgFirstSeen }}</p>
-        <p><strong>Last seen: </strong>{{ analysis_results.results[0].mde.orgLastSeen }}</p>
+    <p><strong>Devices: </strong><a href="{{ analysis_results.results[0].mde.link }}" target="_blank">{{
+            analysis_results.results[0].mde.orgPrevalence }}</a></p>
+    <p><strong>First seen: </strong>{{ analysis_results.results[0].mde.orgFirstSeen }}</p>
+    <p><strong>Last seen: </strong>{{ analysis_results.results[0].mde.orgLastSeen }}</p>
+    {% else %}
+    <p>Not applicable</p>
     {% endif %}
 </div>

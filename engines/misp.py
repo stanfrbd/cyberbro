@@ -7,6 +7,15 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "FQDN",
+    "IPv4",
+    "IPv6",
+    "MD5",
+    "SHA1",
+    "SHA256",
+    "URL",
+]
 
 def query_misp(
     observable: str,

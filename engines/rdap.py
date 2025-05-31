@@ -6,6 +6,10 @@ import tldextract
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "FQDN",
+    "URL",
+]
 
 def query_openrdap(
     observable: str,

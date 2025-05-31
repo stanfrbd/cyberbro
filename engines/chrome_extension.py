@@ -6,6 +6,10 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "CHROME_EXTENSION",
+]
+
 
 def get_name_from_id(extension_id: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, str]]:
     """

@@ -5,6 +5,10 @@ import querycontacts
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "IPv4",
+    "IPv6",
+]
 
 def query_abusix(observable: str) -> Optional[dict[str, str]]:
     """

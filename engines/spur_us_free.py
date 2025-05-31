@@ -6,8 +6,13 @@ from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 
 logger = logging.getLogger(__name__)
-ua = UserAgent()
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "IPv4",
+    "IPv6",
+]
+
+ua = UserAgent()
 
 def get_spur(ip: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, str]]:
     """

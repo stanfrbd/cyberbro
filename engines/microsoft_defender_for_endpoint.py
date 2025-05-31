@@ -8,6 +8,16 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "BOGON",
+    "FQDN",
+    "IPv4",
+    "IPv6",
+    "MD5",
+    "SHA1",
+    "SHA256",
+    "URL",
+]
 
 def check_token_validity(token: str) -> bool:
     try:

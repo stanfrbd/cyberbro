@@ -2,20 +2,20 @@
 
 {% block title %}Cyberbro - Graph Analysis (experimental){% endblock title %}
 {% block head %}
-{{ super() }}
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
-<link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+    {{ super() }}
+    <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.js"></script>
+    <link href="https://unpkg.com/vis-network@9.1.2/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 {% endblock head %}
 
 {% block content %}
-<h1>{{ self.title() }}</h1>
-<button class="btn" onclick="window.location.href='/results/{{ analysis_id }}'">Go Back</button>
-<button class="btn" onclick="toggleFullScreen()">Full Screen</button>
-<button class="btn" id="layoutButton" onclick="switchLayout()">Switch to Circular</button>
-<button class="btn" id="physicsButton" onclick="togglePhysics()">Stop Physics</button>
-<script>
-    let physicsEnabled = true;
+    {{ super() }}
+    <h1>{{ self.title() }}</h1>
+    <button class="btn" onclick="window.location.href='/results/{{ analysis_id }}'">Go Back</button>
+    <button class="btn" onclick="toggleFullScreen()">Full Screen</button>
+    <button class="btn" id="layoutButton" onclick="switchLayout()">Switch to Circular</button>
+    <button class="btn" id="physicsButton" onclick="togglePhysics()">Stop Physics</button>
+    <script>
+        let physicsEnabled = true;
 
     function togglePhysics() {
         const container = document.getElementById("network");

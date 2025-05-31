@@ -12,3 +12,5 @@ data/
 log*/
 secrets.json
 tests/
+site/
+.cache/

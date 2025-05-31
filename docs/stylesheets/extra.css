@@ -1,0 +1,13 @@
+:root {
+  --md-primary-fg-color: #007bff;
+  --primary-hover-color: #0056b3;
+  --background-color: #f8f9fa;
+  --text-color: #343a40;
+  --border-color: #ced4da;
+  --border-radius: 5px;
+  --dark-background-color: #1e2a36;
+  --dark-text-color: #d1d1d1;
+  --dark-border-color: #3a4b5a;
+  --dark-primary-color: #3a4b5a;
+  --dark-primary-hover-color: #4b5c6d;
+}

@@ -9,14 +9,18 @@ from requests.exceptions import HTTPError
 
 from utils.config import Secrets, get_config
 
-logger = logging.getLogger(__name__)
-
 """
 Criminal IP API integration for retrieving suspicious information about IP addresses.
 
 API info for Suspicious Info Report aavailable at https://www.criminalip.io/developer/api/get-v2-ip-suspicious-info
 """
 
+logger = logging.getLogger(__name__)
+
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "IPv4",
+    "IPv6",
+]
 
 class OpenPort(BaseModel):
     port: int | None = None
@@ -143,7 +147,6 @@ def get_suspicious_info_report(
     except HTTPError as e:
         logger.error(
             f"Error retrieving Criminal IP Suspicious Info report for {observable}: {e}",
-            exc_info=True,
         )
         return None
 
@@ -152,7 +155,6 @@ def get_suspicious_info_report(
     except ValidationError as e:
         logger.error(
             f"Error validating Criminal IP Suspicious Info report for {observable}: {e}",
-            exc_info=True,
         )
         return None
 

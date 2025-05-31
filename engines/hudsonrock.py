@@ -6,6 +6,11 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "Email",
+    "FQDN",
+    "URL",
+]
 
 def query_hudsonrock(
     observable: str,
@@ -41,7 +46,28 @@ def query_hudsonrock(
 
         response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=5)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+
+        # Remove any URL / domain that contains "••" for reducing output size
+        if observable_type == "FQDN":
+            for section in ["data", "stats"]:
+                if section in data:
+                    for key in ["all_urls", "clients_urls", "employees_urls"]:
+                        if key in data[section]:
+                            data[section][key] = [
+                                entry for entry in data[section][key] if "url" not in entry or "••" not in entry["url"]
+                            ]
+                if section == "stats":
+                    for key in ["clients_urls", "employees_urls"]:
+                        if key in data[section]:
+                            data[section][key] = [url for url in data[section][key] if "••" not in url]
+                if "thirdPartyDomains" in data:
+                    data["thirdPartyDomains"] = [
+                        entry
+                        for entry in data["thirdPartyDomains"]
+                        if "domain" in entry and entry["domain"] is not None and "••" not in entry["domain"]
+                    ]
+        return data
 
     except Exception as e:
         logger.error(

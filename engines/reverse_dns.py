@@ -9,6 +9,13 @@ from utils.utils import identify_observable_type, is_really_ipv6
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "BOGON",
+    "FQDN",
+    "IPv4",
+    "IPv6",
+    "URL",
+]
 
 def reverse_dns(observable: str, observable_type: str) -> Optional[dict[str, Any]]:
     """

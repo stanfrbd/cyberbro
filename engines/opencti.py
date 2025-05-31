@@ -6,6 +6,16 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "CHROME_EXTENSION",
+    "FQDN",
+    "IPv4",
+    "IPv6",
+    "MD5",
+    "SHA1",
+    "SHA256",
+    "URL",
+]
 
 def query_opencti(
     observable: str,

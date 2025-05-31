@@ -6,9 +6,9 @@ from engines import (
     abuseipdb,
     abusix,
     alienvault,
+    chrome_extension,
     criminalip,
     crowdstrike,
-    extension,
     github,
     google,
     google_dns,
@@ -99,78 +99,25 @@ def perform_engine_queries(observable, selected_engines, result):
     if observable["type"] in ["IPv4", "IPv6"] and is_bogon(observable["value"]):
         observable["type"] = "BOGON"
 
-    if "urlscan" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-    ]:
+    if "urlscan" in selected_engines and observable["type"] in urlscan.SUPPORTED_OBSERVABLE_TYPES:
         result["urlscan"] = urlscan.query_urlscan(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
-    if "ioc_one_html" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "CHROME_EXTENSION",
-    ]:
+    if "ioc_one_html" in selected_engines and observable["type"] in ioc_one.SUPPORTED_OBSERVABLE_TYPES:
         result["ioc_one_html"] = ioc_one.query_ioc_one_html(observable["value"], PROXIES, SSL_VERIFY)
 
-    if "ioc_one_pdf" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "CHROME_EXTENSION",
-    ]:
+    if "ioc_one_pdf" in selected_engines and observable["type"] in ioc_one.SUPPORTED_OBSERVABLE_TYPES:
         result["ioc_one_pdf"] = ioc_one.query_ioc_one_pdf(observable["value"], PROXIES, SSL_VERIFY)
 
-    if "google" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "CHROME_EXTENSION",
-    ]:
+    if "google" in selected_engines and observable["type"] in google.SUPPORTED_OBSERVABLE_TYPES:
         result["google"] = google.query_google(observable["value"], PROXIES, SSL_VERIFY)
 
-    if "github" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "CHROME_EXTENSION",
-    ]:
+    if "github" in selected_engines and observable["type"] in github.SUPPORTED_OBSERVABLE_TYPES:
         result["github"] = github.query_github(observable["value"], PROXIES, SSL_VERIFY)
 
-    if "rdap" in selected_engines and observable["type"] in ["FQDN", "URL"]:
+    if "rdap" in selected_engines and observable["type"] in rdap.SUPPORTED_OBSERVABLE_TYPES:
         result["rdap"] = rdap.query_openrdap(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
-    if "mde" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "BOGON",
-    ]:
+    if "mde" in selected_engines and observable["type"] in microsoft_defender_for_endpoint.SUPPORTED_OBSERVABLE_TYPES:
         result["mde"] = microsoft_defender_for_endpoint.query_microsoft_defender_for_endpoint(
             observable["value"],
             observable["type"],
@@ -181,15 +128,7 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
-    if "crowdstrike" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-    ]:
+    if "crowdstrike" in selected_engines and observable["type"] in crowdstrike.SUPPORTED_OBSERVABLE_TYPES:
         result["crowdstrike"] = crowdstrike.query_crowdstrike(
             observable["value"],
             observable["type"],
@@ -200,16 +139,7 @@ def perform_engine_queries(observable, selected_engines, result):
             PROXIES,
         )
 
-    if "opencti" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "CHROME_EXTENSION",
-    ]:
+    if "opencti" in selected_engines and observable["type"] in opencti.SUPPORTED_OBSERVABLE_TYPES:
         result["opencti"] = opencti.query_opencti(
             observable["value"],
             secrets.opencti_api_key,
@@ -218,23 +148,10 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
-    if "threatfox" in selected_engines and observable["type"] in [
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-    ]:
+    if "threatfox" in selected_engines and observable["type"] in threatfox.SUPPORTED_OBSERVABLE_TYPES:
         result["threatfox"] = threatfox.query_threatfox(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
-    if "virustotal" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-    ]:
+    if "virustotal" in selected_engines and observable["type"] in virustotal.SUPPORTED_OBSERVABLE_TYPES:
         result["virustotal"] = virustotal.query_virustotal(
             observable["value"],
             observable["type"],
@@ -243,15 +160,7 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
-    if "alienvault" in selected_engines and observable["type"] in [
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-    ]:
+    if "alienvault" in selected_engines and observable["type"] in alienvault.SUPPORTED_OBSERVABLE_TYPES:
         result["alienvault"] = alienvault.query_alienvault(
             observable["value"],
             observable["type"],
@@ -260,7 +169,7 @@ def perform_engine_queries(observable, selected_engines, result):
             secrets.alienvault,
         )
 
-    if "misp" in selected_engines and observable["type"] in ["MD5", "SHA1", "SHA256", "URL", "FQDN", "IPv4", "IPv6"]:
+    if "misp" in selected_engines and observable["type"] in misp.SUPPORTED_OBSERVABLE_TYPES:
         result["misp"] = misp.query_misp(
             observable["value"],
             observable["type"],
@@ -270,12 +179,7 @@ def perform_engine_queries(observable, selected_engines, result):
             secrets.misp_url,
         )
 
-    if "google_safe_browsing" in selected_engines and observable["type"] in [
-        "URL",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-    ]:
+    if "google_safe_browsing" in selected_engines and observable["type"] in google_safe_browsing.SUPPORTED_OBSERVABLE_TYPES:
         result["google_safe_browsing"] = google_safe_browsing.query_google_safe_browsing(
             observable["value"],
             observable["type"],
@@ -284,42 +188,31 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
-    if "phishtank" in selected_engines and observable["type"] in ["FQDN", "URL"]:
+    if "phishtank" in selected_engines and observable["type"] in phishtank.SUPPORTED_OBSERVABLE_TYPES:
         result["phishtank"] = phishtank.query_phishtank(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
-    if "criminalip" in selected_engines and observable["type"] in [
-        "IPv4",
-        "IPv6",
-    ]:
+    if "criminalip" in selected_engines and observable["type"] in criminalip.SUPPORTED_OBSERVABLE_TYPES:
         result["criminalip"] = criminalip.run_criminal_ip_analysis(
             observable["value"],
             PROXIES,
             SSL_VERIFY,
         )
 
-    if "hudsonrock" in selected_engines and observable["type"] in [
-        "Email",
-        "FQDN",
-        "URL",
-    ]:
+    if "hudsonrock" in selected_engines and observable["type"] in hudsonrock.SUPPORTED_OBSERVABLE_TYPES:
         result["hudsonrock"] = hudsonrock.query_hudsonrock(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
-    if "google_dns" in selected_engines and observable["type"] in [
-        "IPv4",
-        "IPv6",
-        "FQDN",
-        "URL",
-    ]:
+    if "google_dns" in selected_engines and observable["type"] in google_dns.SUPPORTED_OBSERVABLE_TYPES:
         result["google_dns"] = google_dns.query_google_dns(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
 
-    # 2. Reverse DNS if possible, change observable type to IP if possible
-    if "reverse_dns" in selected_engines and observable["type"] in [
-        "IPv4",
-        "IPv6",
-        "FQDN",
-        "URL",
-        "BOGON",
-    ]:
+    """
+    2. Reverse DNS if possible, change observable type to IP if possible.
+    This is done to allow further enrichment with engines that require an only an IP address.
+    The other engines at the top use the original observable type and value.
+    e.g. IPquery only supports IPv4 and IPv6, so if the observable is a FQDN or URL,
+    it will not be enriched by IPquery, but if it is a reverse DNS result, it will be enriched.
+    This is a case of auto-pivoting, where the observable type is changed to IP.
+    """
+    if "reverse_dns" in selected_engines and observable["type"] in reverse_dns.SUPPORTED_OBSERVABLE_TYPES:
         reverse_dns_result = reverse_dns.reverse_dns(observable["value"], observable["type"])
         result["reverse_dns"] = reverse_dns_result
         if reverse_dns_result:
@@ -328,29 +221,34 @@ def perform_engine_queries(observable, selected_engines, result):
                 observable["type"] = "IPv4"
                 observable["value"] = reverse_dns_result["reverse_dns"][0]
 
-    if "ipquery" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "ipquery" in selected_engines and observable["type"] in ipquery.SUPPORTED_OBSERVABLE_TYPES:
         result["ipquery"] = ipquery.query_ipquery(observable["value"], PROXIES, SSL_VERIFY)
 
-    if "ipinfo" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "ipinfo" in selected_engines and observable["type"] in ipinfo.SUPPORTED_OBSERVABLE_TYPES:
         result["ipinfo"] = ipinfo.query_ipinfo(observable["value"], secrets.ipinfo, PROXIES, SSL_VERIFY)
 
-    if "abuseipdb" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "abuseipdb" in selected_engines and observable["type"] in abuseipdb.SUPPORTED_OBSERVABLE_TYPES:
         result["abuseipdb"] = abuseipdb.query_abuseipdb(observable["value"], secrets.abuseipdb, PROXIES, SSL_VERIFY)
 
-    if "spur" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "spur" in selected_engines and observable["type"] in spur_us_free.SUPPORTED_OBSERVABLE_TYPES:
         result["spur"] = spur_us_free.get_spur(observable["value"], PROXIES, SSL_VERIFY)
 
-    if "webscout" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "webscout" in selected_engines and observable["type"] in webscout.SUPPORTED_OBSERVABLE_TYPES:
         result["webscout"] = webscout.query_webscout(observable["value"], secrets.webscout, PROXIES, SSL_VERIFY)
 
-    if "shodan" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "shodan" in selected_engines and observable["type"] in shodan.SUPPORTED_OBSERVABLE_TYPES:
         result["shodan"] = shodan.query_shodan(observable["value"], secrets.shodan, PROXIES, SSL_VERIFY)
 
-    if "abusix" in selected_engines and observable["type"] in ["IPv4", "IPv6"]:
+    if "abusix" in selected_engines and observable["type"] in abusix.SUPPORTED_OBSERVABLE_TYPES:
         result["abusix"] = abusix.query_abusix(observable["value"])
-
+    
+    """
+    The chrome_extension engine retrieves the name of a Chrome or Edge extension
+    using its ID. It is a default behavior for the CHROME_EXTENSION type, so the user doesn't need to select it explicitly in the engines list.
+    The enrichment for this kind of observable is performed like the others engines at the top, the name is an exception.
+    """
     if observable["type"] == "CHROME_EXTENSION":
-        result["extension"] = extension.get_name_from_id(observable["value"], PROXIES, SSL_VERIFY)
+        result["extension"] = chrome_extension.get_name_from_id(observable["value"], PROXIES, SSL_VERIFY)
 
     # print("Results: ", result, file=sys.stderr)
     return result

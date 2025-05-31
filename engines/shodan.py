@@ -1,14 +1,19 @@
 import logging
-from typing import Any
 
 import requests
+from requests.exceptions import HTTPError, JSONDecodeError
 
 logger = logging.getLogger(__name__)
+
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "IPv4",
+    "IPv6",
+]
 
 
 def query_shodan(
     observable: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True
-) -> dict[str, Any] | None:
+) -> dict[str, list | str] | None:
     """
     Queries the Shodan API for information about a given observable (typically an IP).
 
@@ -40,19 +45,27 @@ def query_shodan(
             verify=ssl_verify,
             timeout=5,
         )
+
+        # Shodan returns 404 if the observable is not found
+        # We handle this case specifically to avoid raising an exception
+        if response.status_code == 404:
+            logger.info("Observable '%s' not found in Shodan.", observable)
+            return None
+
+        # Raise an exception for any other HTTP error
         response.raise_for_status()
 
         data: dict = response.json()
-        # Shodan returns a more comprehensive JSON; we just pick out key fields
-        data["link"] = f"https://www.shodan.io/host/{observable}"
+    except HTTPError as e:
+        logger.error(f"Error querying Shodan for {observable}: {e}")
+        return None
+    except JSONDecodeError as e:
+        logger.error(f"Error decoding JSON response from Shodan for {observable}: {e}")
+        return None
 
-        return {
-            "ports": data.get("ports", []),
-            "tags": data.get("tags", []),
-            "link": data["link"],
-        }
-
-    except Exception as e:
-        logger.error("Error querying Shodan for '%s': %s", observable, e, exc_info=True)
-
-    return None
+    # Shodan returns a more comprehensive JSON; we just pick out key fields
+    return {
+        "ports": data.get("ports", []),
+        "tags": data.get("tags", []),
+        "link": f"https://www.shodan.io/host/{observable}",
+    }

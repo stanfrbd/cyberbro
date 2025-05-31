@@ -6,6 +6,10 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "IPv4",
+    "IPv6",
+]
 
 def query_ipinfo(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """

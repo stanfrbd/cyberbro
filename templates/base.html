@@ -2,17 +2,18 @@
 <html lang="en">
 
 <head>
-{% block head %}
+{%- block head %}
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- <script defer src="{{ url_for('static', filename='toggle_dark_mode.js') }}"></script> -->
     <title>{% block title %}Cyberbro{% endblock title %}</title>
-{% endblock head %}
+{% endblock head -%}
 </head>
 
 <body>
     <div class="container">
+    {%- block content %}
         <button class="dark-mode-toggle" onclick="toggleDarkMode()">
             <img
                 id="darkModeIcon"
@@ -40,7 +41,7 @@
             />
         </a>
 
-    {% block content %}{% endblock content %}
+    {% endblock content %}
     </div>
 </body>
 
@@ -48,25 +49,20 @@
 
 </div>
 
-<footer class="footer">
-{% block footer %}
-    <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/history">History</a></li>
-            <li><a href="/stats">Statistics</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
-        </ul>
-    </nav>
-{% endblock footer %}
-</footer>
-
-</html>
-
-{% block postcontent %}
+    <footer class="footer">
+    {%- block footer %}
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/history">History</a></li>
+                <li><a href="/stats">Statistics</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+    {% endblock footer -%}
+    </footer>
 <script>
-
     const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
     const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
 
@@ -96,4 +92,6 @@
 
     applyDarkMode();
 </script>
-{% endblock postcontent %}
+</body>
+
+</html>

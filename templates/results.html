@@ -4,16 +4,23 @@
 
 {% block head %}
     {{ super() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
 
     <!-- Include jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    {# Only load the table javascript if a table will be presented #}
+    {%- if display_mode == "table" or analysis_results.results | length > 1 %}
     <!-- Include DataTables JS library -->
-    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script defer src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
     <!-- Include colReorder extension -->
-    <script src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
+    <script defer src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
+    <script defer src="{{ url_for('static', filename='filter_table.js') }}"></script>
+    {% endif -%}
 {% endblock head %}
 
 {% block content %}
+{{ super() }}
 
 <h1>{{ self.title() }}</h1>
 
@@ -28,7 +35,7 @@
     <button class="btn" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">Raw</button>
     <button class="btn" onclick="copyAsPlainText()">Copy as Plain Text</button>
     <button class="btn" onclick="copyAsDefanged()">Copy Defanged [.]</button>
-</div>
+</div><!-- form div -->
 
 <script>
     function fetchResults() {
@@ -47,35 +54,15 @@
 <p>Analysis duration: {{ analysis_results.analysis_duration_string }}</p>
 
     {% if display_mode == "table" or analysis_results.results | length > 1 %}
-        {% include "display_table.html" %}
+        {%- include "display_table.html" -%}
     {% elif analysis_results.results | length == 1 %}
-        {% include "display_cards.html" %}
+        {%- include "display_cards.html" %}
     {% endif %}
-
-</div>
-</div>
 
 <div class="end-of-cards">
 </div>
 
 <script>
-    $(document).ready(function () {
-        $('#resultsTable').DataTable({
-            // Enable column reordering
-            colReorder: true,
-            // Enable responsive
-            responsive: true,
-            // Disable search
-            searching: false,
-            // Disable paging
-            paging: false,
-            ordering: true,
-            info: false,
-            // show sorting icons in th
-            orderCellsTop: true
-        });
-    });
-
     // remove cards-results-container container if empty
     function checkCardsBasicInfo() {
         document.querySelectorAll('.cards-results-container').forEach(container => {
@@ -89,68 +76,3 @@
 </script>
 
 {% endblock content %}
-
-{% block postcontent %}
-<script>
-
-    function filterTable() {
-        const searchInput = document.getElementById("searchInput").value.toLowerCase();
-        const countryFilter = document.getElementById("countryFilter").value.toLowerCase();
-        const riskFilter = document.getElementById("riskFilter").value.toLowerCase();
-        const detectionFilter = document.getElementById("detectionFilter").value.toLowerCase();
-        const typeFilter = document.getElementById("typeFilter").value.toLowerCase();
-        const proxyVpnFilter = document.getElementById("proxyVpnFilter").value.toLowerCase();
-        const table = document.getElementById("resultsTable");
-        const tr = table.getElementsByTagName("tr");
-
-        for (let i = 1; i < tr.length; i++) {
-            let td = tr[i].getElementsByTagName("td");
-            let showRow = true;
-
-            if (searchInput) {
-                showRow = Array.from(td).some(cell => cell.innerText.toLowerCase().includes(searchInput));
-            }
-
-            if (showRow && countryFilter !== "all") {
-                const countrySpan = tr[i].querySelector(".country");
-                const country = countrySpan ? countrySpan.className.split("-")[1] : "";
-                showRow = country === countryFilter;
-            }
-
-            if (showRow && riskFilter !== "all") {
-                const riskClass = tr[i].classList.contains("high-risk") ? "high" : "low";
-                showRow = riskClass === riskFilter;
-            }
-
-            if (showRow && detectionFilter !== "all") {
-                const detectionClass = tr[i].classList.contains("high-detection") ? "high" : tr[i].classList.contains("clean-detection") ? "clean" : "low";
-                showRow = detectionClass === detectionFilter;
-            }
-
-            if (showRow && typeFilter !== "all") {
-                showRow = td[1].innerText.toLowerCase() === typeFilter;
-            }
-
-            // Spur or IP Quality Score
-            if (showRow && proxyVpnFilter !== "all") {
-                let anonymousResult = "";
-                anonymousResult = tr[i].innerText.toLowerCase();
-                showRow = anonymousResult.includes(proxyVpnFilter);
-            }
-
-            tr[i].style.display = showRow ? "" : "none";
-        }
-    }
-
-    function clearFilters() {
-        document.getElementById("searchInput").value = "";
-        document.getElementById("countryFilter").value = "all";
-        document.getElementById("riskFilter").value = "all";
-        document.getElementById("detectionFilter").value = "all";
-        document.getElementById("typeFilter").value = "all";
-        document.getElementById("proxyVpnFilter").value = "all";
-        filterTable();
-    }
-</script>
-{{ super() }}
-{% endblock postcontent %}

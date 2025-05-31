@@ -41,7 +41,11 @@
 Inspired by [Cybergordon](https://cybergordon.com/) and [IntelOwl](https://github.com/intelowlproject/IntelOwl).
 
 This project aims to provide a simple and efficient way to check the reputation of your observables using multiple services,
-without having to deploy a **complex** solution.
+without having to deploy a **complex** solution. Read the docs at https://docs.cyberbro.net/
+
+> [!TIP]
+> To build custom reports, use Cyberbro with your favorite **LLM** (Claude, OpenAI gpt-4o...) via **MCP** (Model Context Protocol) \
+> Checkout [Cyberbro MCP](https://github.com/stanfrbd/mcp-cyberbro) for more information.
 
 # Demo
 
@@ -55,34 +59,26 @@ without having to deploy a **complex** solution.
 
 # Features
 
-* **Effortless Input Handling**: Paste raw logs, IoCs, or fanged IoCs, and let our regex parser do the rest.
-* **Multi-Service Reputation Checks**: Verify observables (IP, hash, domain, URL, Chrome extension IDs) across multiple services like OpenCTI, VirusTotal, AbuseIPDB, IPInfo, Spur.us, MDE, Google Safe Browsing, Shodan, Abusix, Phishtank, ThreatFox, URLscan, Github, Google...
-* **Detailed Reports**: Generate comprehensive reports with advanced search and filter options.
-* **High Performance**: Leverage multithreading for faster processing.
-* **Automated Observable Pivoting**: Automatically pivot on domains, URL and IP addresses using reverse DNS and RDAP.
-* **Accurate Domain Info**: Retrieve precise domain information from ICANN RDAP (next generation whois).
-* **Abuse Contact Lookup**: Accurately find abuse contacts for IPs, URLs, and domains.
-* **Export Options**: Export results to CSV and **autofiltered well formatted** Excel files.
-* **MDE Integration**: Check if observables are flagged on your Microsoft Defender for Endpoint (MDE) tenant.
-* **CrowdStrike Integration**: Check if observables are flagged on your CrowdStrike tenant.
-* **OpenCTI Integration**: Get stats (number of incidents, indicators) from OpenCTI and the latest Indicator if available.
-* **Proxy Support**: Use a proxy if required.
-* **Data Storage**: Store results in a SQLite database.
-* **Grep.App**: Search for observables with Grep.App API (fast GitHub searches).
-* **Hudson Rock**: Check if an email / domain was part of a data breach or was victim of an infostealer.
-* **Analysis History**: Maintain a history of analyses with easy retrieval and search functionality.
-* **Graph view**: view your analysis as a graph (experimental).
+* **Easy Input**: Paste raw logs or IoCs—automatic parsing and extraction.
+* **Multi-Service Checks**: Reputation lookup for IPs, hashes, domains, URLs, and Chrome extension IDs across many threat intel services.
+* **Comprehensive Reports**: Advanced search, filtering, and export to CSV/Excel.
+* **Fast Processing**: Multithreaded for speed.
+* **Automated Pivoting**: Discover related domains, URLs, and IPs via reverse DNS and RDAP.
+* **Accurate Domain & Abuse Info**: ICANN RDAP and abuse contact lookups.
+* **Integrations**: Microsoft Defender for Endpoint, CrowdStrike, OpenCTI, Grep.App, Hudson Rock, and more.
+* **Proxy & Storage**: Proxy support and results stored in SQLite.
+* **History & Graphs**: Analysis history and experimental graph view.
+* **Cache**: Caching for faster repeat lookups (enabled at multi-engines level, not each engine).
 
-# What Cyberbro does that others don't
+# What Makes Cyberbro Unique
 
-* **Accessible to everyone** from beginners to experts. No gatekeeping here.
-* **Chrome extensions IDs lookup**: Retrieve the name of Chrome extensions from ID, and get CTI data about it.
-* **Lightweight & Easy Deployment**: Simple to set up and use.
-* **Advanced TLD Verification**: Uses `tldextract` to accurately extract root domains, helping RDAP lookups.
-* **Pragmatic Information Gathering**: Utilizes GitHub and Google indexed results to catch what other engines might miss.
-* **CTI Report Integration**: Leverages IoC.One for IoC-related **CTI reports** in HTML or PDF.
-* **EDR Integration**: Integrates with solutions like Microsoft Defender for Endpoint or CrowdStrike to check if observables were seen in YOUR environment.
-
+* **Beginner-Friendly**: Accessible for all skill levels.
+* **Chrome Extension ID Lookup**: Get extension names and CTI data from IDs.
+* **Lightweight Deployment**: Simple setup and use.
+* **Advanced TLD Extraction**: Accurate root domain detection for better lookups.
+* **Pragmatic Data Gathering**: Uses GitHub and Google to find overlooked IoCs.
+* **CTI Report Integration**: Fetches IoC-related reports from IoC.One.
+* **EDR Integration**: Checks observables against your own security tools (MDE, CrowdStrike).
 
 # Getting Started - TL;DR
 
@@ -143,7 +139,7 @@ cp secrets-sample.json secrets.json
 > To enable it, set `"config_page_enabled":true` in `secrets.json` or use `CONFIG_PAGE_ENABLED=true` as environment variable. \
 > **This is not recommended for public or team use, as it exposes your API keys.**
 
-See [Advanced options for deployment](https://github.com/stanfrbd/cyberbro/wiki/4.-Advanced-options-for-deployment) in the wiki to get all custom option.
+See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment) in the docs to get all custom option.
 
 # Launch the app
 
@@ -160,7 +156,7 @@ docker compose up # use -d to run in background and use --build to rebuild the i
 
 > Don't forget to edit the `secrets.json` before building the image.
 
-See [Advanced options for deployment](https://github.com/stanfrbd/cyberbro/wiki/4.-Advanced-options-for-deployment) in the wiki to get all Docker deployment options.
+See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment) in the docs to get all Docker deployment options.
 
 ## The old way
 
@@ -282,7 +278,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 ```
 
 > [!NOTE]
-> The [dedicated wiki page](https://github.com/stanfrbd/cyberbro/wiki/3.-API-usage-and-engine-names) gives all the names of usable engines.
+> The [dedicated docs page](https://docs.cyberbro.net/quick-start/API-usage-and-engine-names) gives all the names of usable engines.
 
 # API and third-party services
 
@@ -314,8 +310,8 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [WebScout](https://webscout.io/)
 
 > [!NOTE]
-> Any questions? Check the [wiki](https://github.com/stanfrbd/cyberbro/wiki) or raise an [issue](https://github.com/stanfrbd/cyberbro/issues/new) \
-> For the advanced config (tuning of `supervisord.conf` before deployment, selection of visible engines, change `/api/` prefix...), check the [dedicated wiki page](https://github.com/stanfrbd/cyberbro/wiki/4.-Advanced-options-for-deployment).
+> Any questions? Check the https://docs.cyberbro.net or raise an [issue](https://github.com/stanfrbd/cyberbro/issues/new) \
+> For the advanced config (tuning of `supervisord.conf` before deployment, selection of visible engines, change `/api/` prefix...), check the [dedicated docs page](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment).
 
 # Special thanks
 
@@ -323,7 +319,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 
 * [Florian PILLOT](https://github.com/Harukunnn) who reworked engines (refactoring and optimizations).
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
-* [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He improved code structure too.
+* [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase.
 
 Your contributions are greatly appreciated!
 

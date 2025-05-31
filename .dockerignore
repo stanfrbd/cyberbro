@@ -33,3 +33,12 @@ tests
 
 # Ignore CNAME file
 CNAME
+
+# ignore docs/
+docs/
+
+# Ignore site
+site/
+
+# Ignore site cache
+.cache/

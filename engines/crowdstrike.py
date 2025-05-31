@@ -7,6 +7,15 @@ from falconpy import APIHarnessV2
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "FQDN",
+    "IPv4",
+    "IPv6",
+    "MD5",
+    "SHA1",
+    "SHA256",
+    "URL",
+]
 
 def map_observable_type(observable_type: str) -> str:
     if observable_type in ["MD5", "SHA256", "SHA1"] or observable_type in [

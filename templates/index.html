@@ -2,7 +2,16 @@
 
 {% block title %}Cyberbro - Observable Analysis{% endblock title %}
 
+{%- set placholder_text -%}
+1.2.3.4
+example.com
+d41d8cd98f00b204e9800998ecf8427e
+chrome extension id
+Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fanged data [.] [dot] hxxp, etc.)"
+{%- endset -%}
+
 {% block content %}
+{{ super() }}
 <div id="startForm">
     <h1>DEMO - Cyberbro - Observable Analysis - All info is public!!!</h1>
 

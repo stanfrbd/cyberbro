@@ -5,6 +5,10 @@ import requests
 
 logger = logging.getLogger(__name__)
 
+SUPPORTED_OBSERVABLE_TYPES: list[str] = [
+    "IPv4",
+    "IPv6",
+]
 
 def query_abuseipdb(
     ip: str, api_key: str, proxies: Optional[dict[str, str]], ssl_verify: bool = True

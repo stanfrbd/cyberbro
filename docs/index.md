@@ -63,6 +63,12 @@
 
 ---
 
+## 🎉 Community
+
+- [They talk about Cyberbro](community/They-talk-about-Cyberbro.md)  
+
+---
+
 For more details, browse the sidebar or use the search.  
 If you need help, check the [Cyberbro GitHub repository](https://github.com/stanfrbd/cyberbro).
 

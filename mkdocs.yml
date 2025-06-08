@@ -28,6 +28,7 @@ theme:
     - navigation.top
     - navigation.sections
     - navigation.indexes
+    - navigation.footer
     - search.suggest
     - search.highlight
     - toc.follow
@@ -68,6 +69,8 @@ nav:
       - Contributions: contribute/Contributions.md
   - Troubleshooting:
       - Common Issues: troubleshooting/Common-Issues.md
+  - Community:
+      - They talk about Cyberbro: community/They-talk-about-Cyberbro.md
 extra:
   social:
     - icon: fontawesome/brands/github
@@ -101,3 +104,4 @@ plugins:
       type: timeago
   - git-authors:
       show_email_address: false
+      enabled_on_serve: false

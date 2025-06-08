@@ -11,17 +11,41 @@
         </thead>
         <tbody>
             {% for record in result.google_dns.Answer %}
+            {% if record.type_name in ['SPF', 'DMARC'] %}
             <tr>
                 <td>{{ record.type_name }}</td>
-                <td title="{{ record.data }}">{{ record.data[:50] }}{% if record.data | length > 50 %}...{% endif %}
+                <td>
+                    {% if record.present %}
+                    <strong>Present</strong><br>
+                    <span title="{{ record.data }}">{{ record.data[:50] }}{% if record.data and record.data|length > 50
+                        %}...{% endif %}</span>
+                    {% if record.parsed %}
+                    <br>
+                    <small>
+                        {% for k, v in record.parsed.items() %}
+                        <b>{{ k }}</b>: {{ v }}<br>
+                        {% endfor %}
+                    </small>
+                    {% endif %}
+                    {% else %}
+                    <span>No {{ record.type_name }} record found</span>
+                    {% endif %}
                 </td>
-                <td>{{ record.TTL }}</td>
+                <td>-</td>
             </tr>
+            {% else %}
+            <tr>
+                <td>{{ record.type_name }}</td>
+                <td title="{{ record.data }}">{{ record.data[:50] }}{% if record.data and record.data|length > 50
+                    %}...{% endif %}</td>
+                <td>{{ record.TTL if record.TTL is defined else '-' }}</td>
+            </tr>
+            {% endif %}
             {% endfor %}
         </tbody>
     </table>
     {% else %}
-    No DNS record found
+    No DNS records found
     {% endif %}
     {% else %}
     Not applicable

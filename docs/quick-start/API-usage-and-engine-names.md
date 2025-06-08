@@ -131,7 +131,7 @@ curl -X POST "http://localhost:5000/api/analyze" \
 ### Google DNS (common records)
 **Name**: `google_dns`  
 **Supports**: IP, domain, URL  
-**Explaination**: Checks Google common DNS records (A, AAAA, CNAME, NS, MX, TXT, PTR) for IP, domain, URL, free, no API key
+**Explaination**: Checks Google common DNS records (A, AAAA, CNAME, NS, MX, TXT - including SPF and DMARC, PTR) for IP, domain, URL, free, no API key
 
 ### Google Safe Browsing
 **Name**: `google_safe_browsing`  

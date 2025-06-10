@@ -17,6 +17,41 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
+def map_observable_type(observable_type: str) -> str:
+    """
+    Maps observable type to MISP attribute type.
+
+    Args:
+        observable_type (str): The observable type (e.g., "URL", "IPv4", "IPv6", "FQDN", "SHA256", "SHA1", "MD5").
+
+    Returns:
+        str: The corresponding MISP attribute type.
+    """
+    mapping = {
+        "URL": "url",
+        "IPv4": [
+            "ip-dst",
+            "ip-src",
+            "ip-src|port",
+            "ip-dst|port",
+            "domain|ip",
+        ],
+        "IPv6": [
+            "ip-dst",
+            "ip-src",
+            "ip-src|port",
+            "ip-dst|port",
+            "domain|ip",
+        ],
+        "FQDN": "domain",
+        "SHA256": "sha256",
+        "SHA1": "sha1",
+        "MD5": "md5",
+    }
+    return mapping.get(observable_type, "")
+
+
 def query_misp(
     observable: str,
     observable_type: str,
@@ -58,12 +93,11 @@ def query_misp(
         url = f"{misp_url}/attributes/restSearch"
         headers = {"Authorization": api_key, "Accept": "application/json", "Content-Type": "application/json"}
 
+        # map observable type to MISP attribute type
+        observable_type = map_observable_type(observable_type)
+
         # Prepare the search payload
-        payload = {
-            "returnFormat": "json",
-            "value": observable,
-            "type": observable_type.lower() if observable_type != "FQDN" else "domain",
-        }
+        payload = {"returnFormat": "json", "value": observable, "type": observable_type}
 
         response = requests.post(url, json=payload, headers=headers, proxies=proxies, verify=ssl_verify, timeout=5)
         response.raise_for_status()

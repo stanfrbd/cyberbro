@@ -604,6 +604,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cyberbro API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-analyze-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Analyze Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-check-analysis-status-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Check Analysis Status Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-retrieve-analysis-results-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Retrieve Analysis Results Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1717,6 +1750,39 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cyberbro API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-analyze-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Analyze Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-check-analysis-status-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Check Analysis Status Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-retrieve-analysis-results-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Retrieve Analysis Results Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2013,59 +2079,170 @@
 <li><code>/api/is_analysis_complete/&lt;analysis_id&gt;</code> - Check if the analysis is complete (JSON).</li>
 <li><code>/api/results/&lt;analysis_id&gt;</code> - Retrieve the results of a previous analysis (JSON).</li>
 </ul>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
+<hr />
+<h3 id="1-analyze-endpoint">1. Analyze Endpoint<a class="headerlink" href="#1-analyze-endpoint" title="Permanent link">&para;</a></h3>
+<p>Submit an observable (e.g., domain, IP, URL, hash) for analysis using one or more engines.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">cURL</label><label for="__tabbed_1_2">Python</label><label for="__tabbed_1_3">JavaScript</label><label for="__tabbed_1_4">HTTP</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;text&quot;: &quot;20minutes.fr&quot;,</span>
-<span class="s1">    &quot;engines&quot;: [&quot;reverse_dns&quot;, &quot;rdap&quot;]</span>
+<span class="s1">  &quot;text&quot;: &quot;20minutes.fr&quot;,</span>
+<span class="s1">  &quot;engines&quot;: [&quot;reverse_dns&quot;, &quot;rdap&quot;]</span>
 <span class="s1">  }&#39;</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;engines&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span> <span class="s2">&quot;rdap&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;Content-Type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">})</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/analyze</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5000</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;engines&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="highlight"><span class="filename">Example Response</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;analysis_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e88de647-b153-4904-91e5-8f5c79174854&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;link&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<hr />
+<h3 id="2-check-analysis-status-endpoint">2. Check Analysis Status Endpoint<a class="headerlink" href="#2-check-analysis-status-endpoint" title="Permanent link">&para;</a></h3>
+<p>Check if the analysis is complete by querying the status endpoint with the returned <code>analysis_id</code>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">cURL</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">JavaScript</label><label for="__tabbed_2_4">HTTP</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5000</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="highlight"><span class="filename">Example Response</span><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;complete&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<hr />
+<h3 id="3-retrieve-analysis-results-endpoint">3. Retrieve Analysis Results Endpoint<a class="headerlink" href="#3-retrieve-analysis-results-endpoint" title="Permanent link">&para;</a></h3>
+<p>Once the analysis is complete, retrieve the results using the <code>analysis_id</code>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:4"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">cURL</label><label for="__tabbed_3_2">Python</label><label for="__tabbed_3_3">JavaScript</label><label for="__tabbed_3_4">HTTP</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="p">[</span>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nf">GET</span> <span class="nn">/api/results/e88de647-b153-4904-91e5-8f5c79174854</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5000</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="highlight"><span class="filename">Example Response</span><pre><span></span><code><span class="p">[</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;observable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;rdap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;abuse_contact&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2001-07-11&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;expiration_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2028-01-08&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;link&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://rdap.nic.fr/domain/20minutes.fr&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;name_servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;ns-1271.awsdns-30.org&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ns-748.awsdns-29.net&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ns-16.awsdns-02.com&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;ns-1958.awsdns-52.co.uk&quot;</span>
-<span class="w">      </span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;registrant&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20 MINUTES FRANCE SAS&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;registrant_email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0d6621ed24c26f0d32e2c4f76b507da9-679847@contact.gandi.net&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;registrar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GANDI&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;update_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-11-18&quot;</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;reverse_dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;reverse_dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">        </span><span class="s2">&quot;13.249.9.82&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;13.249.9.92&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;13.249.9.83&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;13.249.9.129&quot;</span>
-<span class="w">      </span><span class="p">]</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;reversed_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FQDN&quot;</span>
+<span class="w">  </span><span class="nt">&quot;observable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;rdap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;abuse_contact&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2001-07-11&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;expiration_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2028-01-08&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;link&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://rdap.nic.fr/domain/20minutes.fr&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name_servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;ns-1271.awsdns-30.org&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;ns-748.awsdns-29.net&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;ns-16.awsdns-02.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;ns-1958.awsdns-52.co.uk&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registrant&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20 MINUTES FRANCE SAS&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registrant_email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0d6621ed24c26f0d32e2c4f76b507da9-679847@contact.gandi.net&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;registrar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GANDI&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;update_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-11-18&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;reverse_dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;reverse_dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;13.249.9.82&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;13.249.9.92&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;13.249.9.83&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;13.249.9.129&quot;</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;reversed_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FQDN&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
+<hr />
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Always check the analysis status before retrieving results to ensure the analysis is complete.<br />
+For more advanced usage, such as bypassing cache or customizing engine selection, refer to the sections below.</p>
+</div>
 <h2 id="note-about-caching-and-ignoring-cache">Note about caching and ignoring cache<a class="headerlink" href="#note-about-caching-and-ignoring-cache" title="Permanent link">&para;</a></h2>
 <ul>
 <li>
@@ -2075,7 +2252,10 @@
 <p>You can bypass caching for a specific request by including <code>"ignore_cache": true</code> in the data section of your request. Ignoring the cache will force the system to perform the analysis again. For example:</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:4"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">cURL</label><label for="__tabbed_4_2">Python</label><label for="__tabbed_4_3">JavaScript</label><label for="__tabbed_4_4">HTTP</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
 <span class="s1">    &quot;text&quot;: &quot;20minutes.fr&quot;,</span>
@@ -2083,6 +2263,51 @@
 <span class="s1">    &quot;ignore_cache&quot;: true</span>
 <span class="s1">  }&#39;</span>
 </code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;engines&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span> <span class="s2">&quot;rdap&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;ignore_cache&quot;</span><span class="p">:</span> <span class="kc">True</span>
+<span class="p">}</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="s2">&quot;Content-Type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+<span class="w">        </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nx">ignore_cache</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/analyze</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">localhost:5000</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+
+<span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20minutes.fr&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;engines&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;ignore_cache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <h2 id="list-of-usable-engines-and-their-description-just-like-in-the-html-page">List of usable engines and their description (just like in the HTML page)<a class="headerlink" href="#list-of-usable-engines-and-their-description-just-like-in-the-html-page" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -2214,7 +2439,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 8, 2025 09:48:48 UTC"><span class="timeago" datetime="2025-06-08T09:48:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 8, 2025 09:48:48 UTC">2025-06-08</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 12, 2025 14:36:42 UTC"><span class="timeago" datetime="2025-06-12T14:36:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 12, 2025 14:36:42 UTC">2025-06-12</span>
   </span>
 
     

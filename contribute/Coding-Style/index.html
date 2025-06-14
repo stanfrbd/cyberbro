@@ -1242,15 +1242,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#linting-rules" class="md-nav__link">
+  <a href="#linting-and-static-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      Linting Rules
+      Linting and Static Analysis
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="Linting and Static Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#exclusions" class="md-nav__link">
     <span class="md-ellipsis">
       Exclusions
@@ -1258,20 +1259,43 @@
   </a>
   
 </li>
+        
+          <li class="md-nav__item">
+  <a href="#security-scanning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Scanning
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#tools-and-configuration" class="md-nav__link">
+  <a href="#pre-commit-hooks" class="md-nav__link">
     <span class="md-ellipsis">
-      Tools and Configuration
+      Pre-Commit Hooks
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#pre-commit-configuration-work-in-progress" class="md-nav__link">
+  <a href="#setup-instructions" class="md-nav__link">
     <span class="md-ellipsis">
-      Pre-Commit Configuration - Work in Progress
+      Setup Instructions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
     </span>
   </a>
   
@@ -1506,15 +1530,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#linting-rules" class="md-nav__link">
+  <a href="#linting-and-static-analysis" class="md-nav__link">
     <span class="md-ellipsis">
-      Linting Rules
+      Linting and Static Analysis
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="Linting and Static Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#exclusions" class="md-nav__link">
     <span class="md-ellipsis">
       Exclusions
@@ -1522,20 +1547,43 @@
   </a>
   
 </li>
+        
+          <li class="md-nav__item">
+  <a href="#security-scanning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Scanning
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#tools-and-configuration" class="md-nav__link">
+  <a href="#pre-commit-hooks" class="md-nav__link">
     <span class="md-ellipsis">
-      Tools and Configuration
+      Pre-Commit Hooks
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#pre-commit-configuration-work-in-progress" class="md-nav__link">
+  <a href="#setup-instructions" class="md-nav__link">
     <span class="md-ellipsis">
-      Pre-Commit Configuration - Work in Progress
+      Setup Instructions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
     </span>
   </a>
   
@@ -1566,8 +1614,7 @@
 
 
 <h1 id="coding-style-policy">Coding Style Policy<a class="headerlink" href="#coding-style-policy" title="Permanent link">&para;</a></h1>
-<p>This document outlines the coding style guidelines for this project. 
-Adhering to these standards ensures consistency and readability across the codebase.</p>
+<p>This document outlines the coding style and quality guidelines for this project. Adhering to these standards ensures consistency, readability, and security across the codebase.</p>
 <h2 id="general-formatting">General Formatting<a class="headerlink" href="#general-formatting" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Line Length</strong>: Limit all lines to a maximum of 120 characters.</li>
@@ -1575,8 +1622,9 @@ Adhering to these standards ensures consistency and readability across the codeb
 <li><strong>String Quotes</strong>: Use double quotes (<code>"</code>) for all strings.</li>
 <li><strong>Line Endings</strong>: Use <code>LF</code> line endings for cross-platform compatibility.</li>
 </ul>
-<h2 id="linting-rules">Linting Rules<a class="headerlink" href="#linting-rules" title="Permanent link">&para;</a></h2>
-<p>The following linting rules are enforced to maintain code quality:</p>
+<p>Formatting is enforced to align with <a href="https://black.readthedocs.io/en/stable/">Black</a> conventions, including the use of spaces for indentation and double quotes for strings.</p>
+<h2 id="linting-and-static-analysis">Linting and Static Analysis<a class="headerlink" href="#linting-and-static-analysis" title="Permanent link">&para;</a></h2>
+<p>We use <a href="https://docs.astral.sh/ruff/">Ruff</a> as the primary linter, configured via <code>.ruff.toml</code>, to enforce the following rules:</p>
 <ul>
 <li><strong>Pycodestyle Errors (<code>E</code>)</strong>: Enforce PEP 8 style guidelines.</li>
 <li><strong>Pyflakes (<code>F</code>)</strong>: Detect unused imports, variables, and other common issues.</li>
@@ -1587,28 +1635,64 @@ Adhering to these standards ensures consistency and readability across the codeb
 <li><strong>PEP8-Naming (<code>N</code>)</strong>: Enforce consistent naming conventions.</li>
 <li><strong>Flake8-Pygments (<code>PGH</code>)</strong>: Highlight syntax issues.</li>
 <li><strong>Flake8-Pytest-Helper (<code>PTH</code>)</strong>: Enforce pytest-specific best practices.</li>
-<li><strong>Flake8-Return (<code>RET</code>)</strong>: Ensure consistent return statements.</li>
+<li><strong>Flake8-Return (<code>RET</code>)</strong>: Ensure consistent return statements (except <code>RET501</code> which is ignored).</li>
 <li><strong>Ruff-Specific Rules (<code>RUF</code>)</strong>: Additional rules specific to Ruff.</li>
 <li><strong>Flake8-Simplify (<code>SIM</code>)</strong>: Simplify redundant code patterns.</li>
 <li><strong>Flake8-Pyupgrade (<code>UP</code>)</strong>: Modernize Python syntax.</li>
 <li><strong>Flake8-2020 (<code>YTT</code>)</strong>: Handle Python 2/3 compatibility issues.</li>
 </ul>
-<h2 id="exclusions">Exclusions<a class="headerlink" href="#exclusions" title="Permanent link">&para;</a></h2>
-<p>The following directories are excluded from linting:</p>
+<h3 id="exclusions">Exclusions<a class="headerlink" href="#exclusions" title="Permanent link">&para;</a></h3>
+<p>The following directories are excluded from linting and static analysis:</p>
 <ul>
 <li><code>tests/**</code></li>
 <li><code>__pycache__/**</code></li>
+<li><code>docs/</code></li>
+<li><code>migrations/</code></li>
 </ul>
-<h2 id="tools-and-configuration">Tools and Configuration<a class="headerlink" href="#tools-and-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="security-scanning">Security Scanning<a class="headerlink" href="#security-scanning" title="Permanent link">&para;</a></h3>
+<p>We use <a href="https://bandit.readthedocs.io/en/latest/">Bandit</a> for static application security testing (SAST), configured via <code>.bandit.yml</code>. Bandit is set up to:</p>
 <ul>
-<li><strong>Ruff</strong>: Used as the primary linter to enforce the above rules.</li>
-<li><strong>Black</strong>: Formatting is aligned with Black's conventions, including the use of spaces for indentation and double quotes for strings.</li>
+<li>Skip specific tests: <code>B101</code> (assert_used), <code>B113</code> (request_without_timeout)</li>
+<li>Exclude directories: <code>tests/</code>, <code>docs/</code>, <code>migrations/</code></li>
+<li>Only scan <code>.py</code> files</li>
 </ul>
-<p>By following these guidelines, we'll try our best to make good and readable code.</p>
-<h2 id="pre-commit-configuration-work-in-progress">Pre-Commit Configuration - Work in Progress<a class="headerlink" href="#pre-commit-configuration-work-in-progress" title="Permanent link">&para;</a></h2>
-<p>Setting up a pre-commit hook to ensure Ruff checks are applied before committing code is currently on our to-do list.<br />
-We will provide the necessary <code>.pre-commit-config.yaml</code> configuration in the future. Once available, this configuration will help automatically run Ruff on staged files, preventing commits that violate the linting rules.</p>
-<p>To try: https://github.com/astral-sh/ruff-pre-commit</p>
+<h2 id="pre-commit-hooks">Pre-Commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Permanent link">&para;</a></h2>
+<p>Automated checks are enforced using <a href="https://pre-commit.com/">pre-commit</a>, configured in <code>.pre-commit-config.yaml</code>. The following hooks are enabled:</p>
+<ul>
+<li><strong>trailing-whitespace</strong>: Remove trailing whitespace</li>
+<li><strong>end-of-file-fixer</strong>: Ensure files end with a newline</li>
+<li><strong>check-yaml</strong>: Validate YAML files</li>
+<li><strong>ruff</strong>: Lint Python files with Ruff (auto-fix enabled)</li>
+<li><strong>ruff-format</strong>: Format Python files with Ruff</li>
+<li><strong>bandit</strong>: Run Bandit for security checks</li>
+</ul>
+<p>Some files and directories (e.g., <code>tests/</code>, <code>__version__.py</code>) are excluded from pre-commit checks.</p>
+<h2 id="setup-instructions">Setup Instructions<a class="headerlink" href="#setup-instructions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Install development dependencies:</strong></p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements-dev.txt
+</code></pre></div>
+</li>
+<li>
+<p><strong>Install pre-commit hooks:</strong></p>
+<div class="highlight"><pre><span></span><code>pre-commit<span class="w"> </span>install
+</code></pre></div>
+<p>This ensures that Ruff, Bandit, and other checks run automatically on staged files before each commit.</p>
+</li>
+<li>
+<p><strong>Run all pre-commit hooks manually (optional):</strong></p>
+<div class="highlight"><pre><span></span><code>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</code></pre></div>
+</li>
+</ol>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/astral-sh/ruff-pre-commit">Ruff pre-commit integration</a></li>
+<li><a href="https://bandit.readthedocs.io/en/latest/">Bandit documentation</a></li>
+<li><a href="https://pre-commit.com/">pre-commit documentation</a></li>
+</ul>
+<p>By following these guidelines and using the provided tooling, we ensure our codebase remains clean, consistent, and secure.</p>
 
 
 
@@ -1631,7 +1715,7 @@ We will provide the necessary <code>.pre-commit-config.yaml</code> configuration
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="May 26, 2025 14:39:02 UTC"><span class="timeago" datetime="2025-05-26T14:39:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="May 26, 2025 14:39:02 UTC">2025-05-26</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="June 14, 2025 17:39:56 UTC"><span class="timeago" datetime="2025-06-14T17:39:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="June 14, 2025 17:39:56 UTC">2025-06-14</span>
   </span>
 
     

@@ -17,6 +17,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def reverse_dns(observable: str, observable_type: str) -> Optional[dict[str, Any]]:
     """
     Perform a reverse DNS or standard DNS lookup on the given observable.

@@ -1,9 +1,9 @@
 # Use the official Python image from the Docker Hub, version 3.13-slim
 FROM python:3.13-slim
 
-# Update the package list and install Supervisor - git -nano, then clean up the apt cache
+# Update the package list and install supervisor and nano, then clean up the apt cache
 RUN apt-get update && \
-    apt-get install -y supervisor git nano && \
+    apt-get install -y supervisor nano && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container to /app
@@ -13,7 +13,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install the Python dependencies specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt --trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code from the host to the container
 COPY . .

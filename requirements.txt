@@ -10,12 +10,10 @@ pycountry
 fake_useragent
 bs4
 pydantic
-pytest
 querycontacts
 flask_sqlalchemy
 gunicorn
 ioc-fanger
 tldextract
 crowdstrike-falconpy
-# stanfrbd fork of googlesearch with Lynx user agent
-git+https://github.com/stanfrbd/googlesearch@lynx-user-agent
+googlesearch-python

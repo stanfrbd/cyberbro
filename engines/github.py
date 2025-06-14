@@ -16,6 +16,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def query_github(observable: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Perform a search query using Grep API, limited to 5 search results, restricted to GitHub domains.

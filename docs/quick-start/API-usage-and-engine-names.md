@@ -8,85 +8,263 @@
 * `/api/is_analysis_complete/<analysis_id>` - Check if the analysis is complete (JSON).
 * `/api/results/<analysis_id>` - Retrieve the results of a previous analysis (JSON).
 
-```bash
-curl -X POST "http://localhost:5000/api/analyze" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "20minutes.fr",
-    "engines": ["reverse_dns", "rdap"]
-  }'
-```
+---
 
-```json
+### 1. Analyze Endpoint
+
+Submit an observable (e.g., domain, IP, URL, hash) for analysis using one or more engines.
+
+=== "cURL"
+
+    ```bash title="Request"
+    curl -X POST "http://localhost:5000/api/analyze" \
+      -H "Content-Type: application/json" \
+      -d '{
+      "text": "20minutes.fr",
+      "engines": ["reverse_dns", "rdap"]
+      }'
+    ```
+
+=== "Python"
+
+    ```python title="Request"
+    import requests
+    import json
+
+    url = "http://localhost:5000/api/analyze"
+    headers = {"Content-Type": "application/json"}
+    data = {
+      "text": "20minutes.fr",
+      "engines": ["reverse_dns", "rdap"]
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    print(response.json())
+    ```
+
+=== "JavaScript"
+
+    ```javascript title="Request"
+    fetch("http://localhost:5000/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        text: "20minutes.fr",
+        engines: ["reverse_dns", "rdap"]
+      })
+    })
+    .then(response => response.json())
+    .then(data => console.log(data));
+    ```
+
+=== "HTTP"
+
+    ```http title="Request"
+    POST /api/analyze HTTP/1.1
+    Host: localhost:5000
+    Content-Type: application/json
+
+    {
+      "text": "20minutes.fr",
+      "engines": ["reverse_dns", "rdap"]
+    }
+    ```
+
+```json title="Example Response"
 {
   "analysis_id": "e88de647-b153-4904-91e5-8f5c79174854",
   "link": "/results/e88de647-b153-4904-91e5-8f5c79174854"
 }
 ```
 
-```bash
-curl "http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854"
-```
+---
 
-```json
+### 2. Check Analysis Status Endpoint
+
+Check if the analysis is complete by querying the status endpoint with the returned `analysis_id`.
+
+=== "cURL"
+
+    ```bash title="Request"
+    curl "http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854"
+    ```
+
+=== "Python"
+
+    ```python title="Request"
+    import requests
+
+    url = "http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854"
+    response = requests.get(url)
+    print(response.json())
+    ```
+
+=== "JavaScript"
+
+    ```javascript title="Request"
+    fetch("http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854")
+    .then(response => response.json())
+    .then(data => console.log(data));
+    ```
+
+=== "HTTP"
+
+    ```http title="Request"
+    GET /api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854 HTTP/1.1
+    Host: localhost:5000
+    ```
+
+```json title="Example Response"
 {
   "complete": true
 }
 ```
 
-```bash
-curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
-```
+---
 
-```json
+### 3. Retrieve Analysis Results Endpoint
+
+Once the analysis is complete, retrieve the results using the `analysis_id`.
+
+=== "cURL"
+
+    ```bash title="Request"
+    curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
+    ```
+
+=== "Python"
+
+    ```python title="Request"
+    import requests
+
+    url = "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
+    response = requests.get(url)
+    print(response.json())
+    ```
+
+=== "JavaScript"
+
+    ```javascript title="Request"
+    fetch("http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854")
+    .then(response => response.json())
+    .then(data => console.log(data));
+    ```
+
+=== "HTTP"
+
+    ```http title="Request"
+    GET /api/results/e88de647-b153-4904-91e5-8f5c79174854 HTTP/1.1
+    Host: localhost:5000
+    ```
+
+```json title="Example Response"
 [
   {
-    "observable": "20minutes.fr",
-    "rdap": {
-      "abuse_contact": "",
-      "creation_date": "2001-07-11",
-      "expiration_date": "2028-01-08",
-      "link": "https://rdap.nic.fr/domain/20minutes.fr",
-      "name_servers": [
-        "ns-1271.awsdns-30.org",
-        "ns-748.awsdns-29.net",
-        "ns-16.awsdns-02.com",
-        "ns-1958.awsdns-52.co.uk"
-      ],
-      "organization": "",
-      "registrant": "20 MINUTES FRANCE SAS",
-      "registrant_email": "0d6621ed24c26f0d32e2c4f76b507da9-679847@contact.gandi.net",
-      "registrar": "GANDI",
-      "update_date": "2024-11-18"
-    },
-    "reverse_dns": {
-      "reverse_dns": [
-        "13.249.9.82",
-        "13.249.9.92",
-        "13.249.9.83",
-        "13.249.9.129"
-      ]
-    },
-    "reversed_success": true,
-    "type": "FQDN"
+  "observable": "20minutes.fr",
+  "rdap": {
+    "abuse_contact": "",
+    "creation_date": "2001-07-11",
+    "expiration_date": "2028-01-08",
+    "link": "https://rdap.nic.fr/domain/20minutes.fr",
+    "name_servers": [
+    "ns-1271.awsdns-30.org",
+    "ns-748.awsdns-29.net",
+    "ns-16.awsdns-02.com",
+    "ns-1958.awsdns-52.co.uk"
+    ],
+    "organization": "",
+    "registrant": "20 MINUTES FRANCE SAS",
+    "registrant_email": "0d6621ed24c26f0d32e2c4f76b507da9-679847@contact.gandi.net",
+    "registrar": "GANDI",
+    "update_date": "2024-11-18"
+  },
+  "reverse_dns": {
+    "reverse_dns": [
+    "13.249.9.82",
+    "13.249.9.92",
+    "13.249.9.83",
+    "13.249.9.129"
+    ]
+  },
+  "reversed_success": true,
+  "type": "FQDN"
   }
 ]
 ```
+
+---
+
+!!! tip  
+    Always check the analysis status before retrieving results to ensure the analysis is complete.  
+    For more advanced usage, such as bypassing cache or customizing engine selection, refer to the sections below.
+
 
 ## Note about caching and ignoring cache
 * The API results are cached for 24 hours by default. You can change this by modifying the `api_cache_timeout` parameter in the `secrets.json` file or by setting the corresponding environment variable. Refer to this document for more details: [advanced options](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment).
 
 * You can bypass caching for a specific request by including `"ignore_cache": true` in the data section of your request. Ignoring the cache will force the system to perform the analysis again. For example:
 
-```bash
-curl -X POST "http://localhost:5000/api/analyze" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "20minutes.fr",
-    "engines": ["reverse_dns", "rdap"],
-    "ignore_cache": true
-  }'
-```
+
+=== "cURL"
+
+    ```bash title="Request with Cache Ignored"
+    curl -X POST "http://localhost:5000/api/analyze" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "text": "20minutes.fr",
+        "engines": ["reverse_dns", "rdap"],
+        "ignore_cache": true
+      }'
+    ```
+
+=== "Python"
+    
+    ```python title="Request with Cache Ignored"
+    import requests
+    import json
+    url = "http://localhost:5000/api/analyze"
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "text": "20minutes.fr",
+        "engines": ["reverse_dns", "rdap"],
+        "ignore_cache": True
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    print(response.json())
+    ```
+
+=== "JavaScript"
+
+    ```javascript title="Request with Cache Ignored"
+    fetch("http://localhost:5000/api/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            text: "20minutes.fr",
+            engines: ["reverse_dns", "rdap"],
+            ignore_cache: true
+        })
+    })
+    .then(response => response.json())
+    .then(data => console.log(data));
+    ```
+
+=== "HTTP"
+
+    ```http title="Request with Cache Ignored"
+    POST /api/analyze HTTP/1.1
+    Host: localhost:5000
+    Content-Type: application/json
+
+    {
+        "text": "20minutes.fr",
+        "engines": ["reverse_dns", "rdap"],
+        "ignore_cache": true
+    }
+    ```
 
 ## List of usable engines and their description (just like in the HTML page)
 

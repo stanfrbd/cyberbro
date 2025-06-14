@@ -17,6 +17,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def query_opencti(
     observable: str,
     api_key: str,

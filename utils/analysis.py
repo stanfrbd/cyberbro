@@ -179,7 +179,10 @@ def perform_engine_queries(observable, selected_engines, result):
             secrets.misp_url,
         )
 
-    if "google_safe_browsing" in selected_engines and observable["type"] in google_safe_browsing.SUPPORTED_OBSERVABLE_TYPES:
+    if (
+        "google_safe_browsing" in selected_engines
+        and observable["type"] in google_safe_browsing.SUPPORTED_OBSERVABLE_TYPES
+    ):
         result["google_safe_browsing"] = google_safe_browsing.query_google_safe_browsing(
             observable["value"],
             observable["type"],
@@ -241,11 +244,13 @@ def perform_engine_queries(observable, selected_engines, result):
 
     if "abusix" in selected_engines and observable["type"] in abusix.SUPPORTED_OBSERVABLE_TYPES:
         result["abusix"] = abusix.query_abusix(observable["value"])
-    
+
     """
     The chrome_extension engine retrieves the name of a Chrome or Edge extension
-    using its ID. It is a default behavior for the CHROME_EXTENSION type, so the user doesn't need to select it explicitly in the engines list.
-    The enrichment for this kind of observable is performed like the others engines at the top, the name is an exception.
+    using its ID. It is a default behavior for the CHROME_EXTENSION type,
+    so the user doesn't need to select it explicitly in the engines list.
+    The enrichment for this kind of observable is performed like the others engines at the top,
+    the extension name is an exception.
     """
     if observable["type"] == "CHROME_EXTENSION":
         result["extension"] = chrome_extension.get_name_from_id(observable["value"], PROXIES, SSL_VERIFY)

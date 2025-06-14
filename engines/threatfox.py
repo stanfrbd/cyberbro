@@ -13,6 +13,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def query_threatfox(
     observable: str,
     observable_type: str,

@@ -14,6 +14,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 
 ua = UserAgent()
 
+
 def get_spur(ip: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, str]]:
     """
     Retrieves information about the given IP address from the spur.us website.

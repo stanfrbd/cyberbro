@@ -10,6 +10,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "IPv6",
 ]
 
+
 def query_ipquery(ip: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Queries the IP information from the ipquery.io API.
@@ -37,7 +38,7 @@ def query_ipquery(ip: str, proxies: dict[str, str], ssl_verify: bool = True) -> 
     """
     try:
         url = f"https://api.ipquery.io/{ip}"
-        response = requests.get(url, proxies=proxies, verify=False, timeout=5)
+        response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=5)
         response.raise_for_status()
 
         data = response.json()

@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Optional
+
 import requests
 
 from utils.utils import identify_observable_type
@@ -25,6 +26,7 @@ dns_record_types = [
     # "SPF" and "DMARC" are logical types, not DNS types, so not included here
 ]
 
+
 def extract_domain(observable: str) -> str:
     if "://" in observable:
         domain = observable.split("/")[2]
@@ -32,6 +34,7 @@ def extract_domain(observable: str) -> str:
             domain = domain.split(":")[0]
         return domain
     return observable
+
 
 def parse_spf_record(txt: str) -> dict:
     fields = {}
@@ -43,6 +46,7 @@ def parse_spf_record(txt: str) -> dict:
             fields.setdefault("mechanisms", []).append(part)
     return fields
 
+
 def parse_dmarc_record(txt: str) -> dict:
     fields = {}
     for part in txt.split(";"):
@@ -50,6 +54,7 @@ def parse_dmarc_record(txt: str) -> dict:
             k, v = part.strip().split("=", 1)
             fields[k.strip()] = v.strip()
     return fields
+
 
 def query_dmarc(
     observable: str,
@@ -66,7 +71,7 @@ def query_dmarc(
         data = response.json()
 
         for answer in data.get("Answer", []):
-            txt = answer.get("data", "").replace('"', '').replace('; ', ';')
+            txt = answer.get("data", "").replace('"', "").replace("; ", ";")
             if txt.strip().lower().startswith("v=dmarc1"):
                 return {
                     "type_name": "DMARC",
@@ -87,6 +92,7 @@ def query_dmarc(
         logger.error("Error querying DMARC for '%s' (%s): %s", observable, observable_type, e, exc_info=True)
         return None
 
+
 def query_spf(
     observable: str,
     observable_type: str,
@@ -101,7 +107,7 @@ def query_spf(
         data = response.json()
 
         for answer in data.get("Answer", []):
-            txt = answer.get("data", "").replace('"', '')
+            txt = answer.get("data", "").replace('"', "")
             if txt.strip().lower().startswith("v=spf"):
                 return {
                     "type_name": "SPF",
@@ -121,6 +127,7 @@ def query_spf(
     except Exception as e:
         logger.error("Error querying SPF for '%s' (%s): %s", observable, observable_type, e, exc_info=True)
         return None
+
 
 def query_google_dns(
     observable: str, observable_type: str, proxies: Optional[dict[str, str]] = None, ssl_verify: bool = True

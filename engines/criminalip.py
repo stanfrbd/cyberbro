@@ -22,6 +22,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "IPv6",
 ]
 
+
 class OpenPort(BaseModel):
     port: int | None = None
     is_vulnerability: bool = False

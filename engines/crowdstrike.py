@@ -17,6 +17,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def map_observable_type(observable_type: str) -> str:
     if observable_type in ["MD5", "SHA256", "SHA1"] or observable_type in [
         "IPv4",

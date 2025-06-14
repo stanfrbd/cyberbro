@@ -1,61 +1,65 @@
 {% extends "base.html" %}
-{% block title %}Cyberbro - Analysis Statistics{% endblock title %}
+{% block title %}Cyberbro - Analysis Statistics - Last 30 days{% endblock title %}
 
 {% block head %}
 {{ super() }}
-    <style>
-        .dashboard {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
+<style>
+    .dashboard {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
 
-        .dashboard-small {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            padding-top: 20px;
-        }
+    .dashboard-small {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding-top: 20px;
+    }
 
-        .card p {
-            font-size: 1.7em;
-            text-align: center;
-            font-weight: bold;
-        }
-    </style>
+    .card p {
+        font-size: 1.7em;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
-    <h1>{{ self.title() }}</h1>
-    <div class="dashboard">
-        <div class="card">
-            <h3>Observables Types</h3>
-            <canvas id="observablesChart"></canvas>
-        </div>
-        <div class="card">
-            <h3>Observables</h3>
-            <canvas id="observablesRepartitionChart"></canvas>
-        </div>
-        <div class="card">
-            <h3>Engines</h3>
-            <canvas id="enginesChart"></canvas>
-        </div>
+<h1>{{ self.title() }}</h1>
+<div class="dashboard">
+    <div class="card">
+        <h3 title="Observable types - Last 30 days">Observables Types</h3>
+        <canvas id="observablesChart"></canvas>
     </div>
-    <div class="dashboard-small">
-        <div class="card small-card">
-            <h3>Total Analyses</h3>
-            <p>{{ stats.num_analyses }}</p>
-        </div>
-        <div class="card small-card">
-            <h3>Unique Observables</h3>
-            <p>{{ stats.num_unique_observables }}</p>
-        </div>
-        <div class="card small-card">
-            <h3>Used Engines</h3>
-            <p>{{ stats.num_unique_engines }}</p>
-        </div>
+    <div class="card">
+        <h3 title="Observables - Last 30 days">Observables</h3>
+        <canvas id="observablesRepartitionChart"></canvas>
     </div>
+    <div class="card">
+        <h3 title="Engines - Last 30 days">Engines</h3>
+        <canvas id="enginesChart"></canvas>
+    </div>
+</div>
+<div class="dashboard-small">
+    <div class="card small-card">
+        <h3 title="Total analyses from all time">Total Analyses</h3>
+        <p>{{ stats.total_analyses_count }}</p>
+    </div>
+    <div class="card small-card">
+        <h3 title="Total analyses - Last 30 days">Analyses</h3>
+        <p>{{ stats.last_30_days_analyses_count }}</p>
+    </div>
+    <div class="card small-card">
+        <h3 title="Number of unique observables - Last 30 days">Unique Observables</h3>
+        <p>{{ stats.unique_observables_count }}</p>
+    </div>
+    <div class="card small-card">
+        <h3 title="Number of used engines - Last 30 days">Used Engines</h3>
+        <p>{{ stats.unique_engines_count }}</p>
+    </div>
+</div>
 </div>
 <script>
     const observablesLabels = JSON.parse('{{ stats.observable_type_count.keys() | list | tojson | safe }}');

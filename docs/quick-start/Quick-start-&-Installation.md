@@ -2,7 +2,20 @@
 
 !!! tip
     If you are lazy, you need Docker.  
-    Do a `git clone` ; copy `secrets-sample.json` to `secrets.json` ; `docker compose up` then go to `localhost:5000`. Yep, that's it!
+    Do a `git clone` ; copy `secrets-sample.json` to `secrets.json` ; `docker compose up` then go to `localhost:5000`.  
+    Yep, that's it!
+
+<!-- termynal -->
+```console
+$ docker compose version
+Docker Compose version v2.5.0
+$ git clone https://github.com/stanfrbd/cyberbro
+$ cd cyberbro
+$ cp secrets-sample.json secrets.json
+$ docker compose up --build # use -d to run in background
+
+Go to http://127.0.0.1:5000/
+```
 
 ## Getting Started
 
@@ -158,7 +171,7 @@ pip install -r requirements.txt
 * Run the app with `gunicorn` (clean mode).
 
 ```bash
-gunicorn -b 0.0.0.0:5000 app:app
+gunicorn -b 0.0.0.0:5000 app:app --timeout 120
 ```
 
 * Run the app with in development mode.

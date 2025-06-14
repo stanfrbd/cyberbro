@@ -1,0 +1,17 @@
+# .bandit.yml
+# Bandit configuration file
+
+# List of tests to skip
+skips:
+  - B101  # assert_used
+  - B113  # request_without_timeout
+
+# Exclude directories
+exclude_dirs:
+  - tests
+  - docs
+  - migrations
+
+# Include only specific file extensions
+include:
+  - .py

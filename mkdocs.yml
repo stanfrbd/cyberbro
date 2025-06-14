@@ -88,15 +88,16 @@ markdown_extensions:
   - tables
   - attr_list
   - def_list
-  - pymdownx.superfences
   - pymdownx.details
-  - pymdownx.tabbed
   - pymdownx.emoji
   - pymdownx.tasklist
   - pymdownx.highlight
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.keys
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 plugins:
   - search
   - git-revision-date-localized:
@@ -105,3 +106,7 @@ plugins:
   - git-authors:
       show_email_address: false
       enabled_on_serve: false
+  - termynal:
+      prompt_literal_start:
+        - "$"
+        - ">"

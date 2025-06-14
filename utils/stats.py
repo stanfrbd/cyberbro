@@ -1,45 +1,51 @@
+from datetime import datetime
+
 from models.analysis_result import AnalysisResult, db
 
 
 def get_analysis_stats():
-    analyses = db.session.query(AnalysisResult).all()
-    num_analyses = len(analyses)
+    # Calculate the timestamp for 30 days ago
+    now = datetime.now().timestamp()
+    thirty_days_ago = now - 30 * 24 * 60 * 60
 
-    unique_observables = set()
-    unique_engines = set()
-    observable_type_count = {}
-    engine_count = {}
-    observable_count = {}
+    # Query: only analyses from the last 30 days, ordered by start_time desc, limit 1000
+    recent_analyses = (
+        db.session.query(AnalysisResult)
+        .filter(AnalysisResult.start_time >= thirty_days_ago)
+        .order_by(AnalysisResult.start_time.desc())
+        .limit(1000)
+        .all()
+    )
+    last_30_days_analyses_count = (
+        db.session.query(db.func.count(AnalysisResult.id)).filter(AnalysisResult.start_time >= thirty_days_ago).scalar()
+    )
+    total_analyses = db.session.query(db.func.count(AnalysisResult.id)).scalar()
+    observables_set = set()
+    engines_set = set()
+    observable_type_counter = {}
+    engine_counter = {}
+    observable_counter = {}
 
-    for analysis in analyses:
+    for analysis in recent_analyses:
         for result in analysis.results:
             observable = result.get("observable") if result else "Unknown"
             observable_type = result.get("type") if result else "Unknown"
-            unique_observables.add(observable)
-            if observable_type in observable_type_count:
-                observable_type_count[observable_type] += 1
-            else:
-                observable_type_count[observable_type] = 1
-
-            if observable in observable_count:
-                observable_count[observable] += 1
-            else:
-                observable_count[observable] = 1
+            observables_set.add(observable)
+            observable_type_counter[observable_type] = observable_type_counter.get(observable_type, 0) + 1
+            observable_counter[observable] = observable_counter.get(observable, 0) + 1
 
         for engine in analysis.selected_engines:
-            unique_engines.add(engine)
-            if engine in engine_count:
-                engine_count[engine] += 1
-            else:
-                engine_count[engine] = 1
+            engines_set.add(engine)
+            engine_counter[engine] = engine_counter.get(engine, 0) + 1
 
     return {
-        "num_analyses": num_analyses,
-        "num_unique_observables": len(unique_observables),
-        "unique_observables": list(unique_observables),
-        "num_unique_engines": len(unique_engines),
-        "unique_engines": list(unique_engines),
-        "observable_type_count": observable_type_count,
-        "engine_count": engine_count,
-        "observable_count": observable_count,
+        "total_analyses_count": total_analyses,
+        "last_30_days_analyses_count": last_30_days_analyses_count,
+        "unique_observables_count": len(observables_set),
+        "unique_observables": list(observables_set),
+        "unique_engines_count": len(engines_set),
+        "unique_engines": list(engines_set),
+        "observable_type_count": observable_type_counter,
+        "engine_count": engine_counter,
+        "observable_count": observable_counter,
     }

@@ -16,6 +16,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def query_virustotal(
     observable: str,
     observable_type: str,

@@ -19,6 +19,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
     "URL",
 ]
 
+
 def check_token_validity(token: str) -> bool:
     try:
         # Decode the token without verifying the signature to check its expiration
@@ -104,7 +105,7 @@ def query_microsoft_defender_for_endpoint(
     """
     try:
         jwt_token = read_token() or get_token(tenant_id, client_id, client_secret, proxies, ssl_verify)
-        if jwt_token == "invalid":
+        if "invalid" in jwt_token:
             logger.error("No valid token available for Microsoft Defender for Endpoint.")
             return None
 

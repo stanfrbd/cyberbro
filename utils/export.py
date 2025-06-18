@@ -165,6 +165,10 @@ def prepare_row(result, selected_engines):
         row["urlscan_count"] = urlscan_data.get("scan_count") if urlscan_data else None
         row["urlscan_top_domains"] = urlscan_data.get("top_domains") if urlscan_data else None
 
+    if "crtsh" in selected_engines:
+        crtsh_data = result.get("crtsh", {})
+        row["crtsh_top_domains"] = crtsh_data.get("top_domains") if crtsh_data else None
+
     if "mde" in selected_engines:
         mde_data = result.get("mde", {})
         row["mde_first_seen"] = mde_data.get("orgFirstSeen") if mde_data else None

@@ -1,0 +1,18 @@
+<div class="card">
+    <h3>crt.sh</h3>
+    <p><a href="{{ analysis_results.results[0].crtsh.link }}" target="_blank"><strong>details</strong></a></p>
+    {% if analysis_results.results[0].crtsh.scan_count == 0 %}
+        <p>Not Found</p>
+    {% else %}
+        <p><strong>
+            {% if analysis_results.results[0].type in ["FQDN", "URL"] %}
+                Top related domains:
+            {% endif %}
+        </strong></p>
+        <ul>
+        {% for domain in analysis_results.results[0].crtsh.top_domains %}
+            <li>{{ domain.domain }} ({{ domain.count }})</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</div>

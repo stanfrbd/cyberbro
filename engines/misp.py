@@ -44,7 +44,7 @@ def map_observable_type(observable_type: str) -> str:
             "ip-dst|port",
             "domain|ip",
         ],
-        "FQDN": "domain",
+        "FQDN": ["domain", "domain|ip", "hostname", "hostname|port"],
         "SHA256": "sha256",
         "SHA1": "sha1",
         "MD5": "md5",

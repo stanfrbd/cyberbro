@@ -171,6 +171,10 @@
             {% if "misp" in analysis_results.selected_engines %}
             <th>MISP</th>
             {% endif %}
+
+            {% if "crtsh" in analysis_results.selected_engines %}
+            <th>crt.sh</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>

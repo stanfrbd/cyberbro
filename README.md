@@ -287,6 +287,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Alienvault](https://otx.alienvault.com/)
 * [CriminalIP](https://www.criminalip.io/)
 * [CrowdStrike](https://www.crowdstrike.com/)
+* [crt.sh](https://crt.sh/)
 * [Github](https://github.com/)
 * [Google Safe Browsing](https://developers.google.com/safe-browsing)
 * [Google](https://google.com/)
@@ -320,6 +321,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Florian PILLOT](https://github.com/Harukunnn) who reworked engines (refactoring and optimizations).
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
 * [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase.
+* [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
 
 Your contributions are greatly appreciated!
 

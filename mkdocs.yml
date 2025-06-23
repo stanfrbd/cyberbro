@@ -110,3 +110,4 @@ plugins:
       prompt_literal_start:
         - "$"
         - ">"
+copyright: Copyright © 2024 - 2025 Stanislas MEDRANO (stanfrbd) - MIT License

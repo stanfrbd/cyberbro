@@ -116,5 +116,10 @@
         {% include "engine_layouts/alienvault_card.html" %}
         {% endif %}
     </div>
+    <div class="cards-results-container">
+        {% if analysis_results.results[0].crtsh %}
+        {% include "engine_layouts/crtsh_card.html" %}
+        {% endif %}
+    </div>
 
 </div><!-- cards-container -->

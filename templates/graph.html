@@ -363,6 +363,14 @@
                 });
             }
 
+            if (entry.crtsh?.top_domains) {
+                entry.crtsh.top_domains.forEach((domainEntry) => {
+                    const domain = domainEntry.domain;
+                    addNode(domain, domain, "domain", "https://crt.sh/sectigo_s.png");
+                    edges.push({ from: obs, to: domain, label: `Related domain (crt.sh)` });
+                });
+            }
+
             if (entry.github?.results) {
                 entry.github.results.forEach((githubEntry) => {
                     const githubTitle = githubEntry.title;

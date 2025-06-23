@@ -128,6 +128,12 @@ function formatResults(data) {
                 plainText += `  - ${domain.domain} (${domain.count})\n`;
             });
         }
+        if (result.crtsh && result.crtsh.scan_count > 0) {
+            plainText += `crt.sh: Scan Count: ${result.urlscan.scan_count}\n`;
+            result.crtsh.top_domains.forEach(domain => {
+                plainText += `  - ${domain.domain} (${domain.count})\n`;
+            });
+        }
         if (result.opencti && result.opencti.global_count > 0) {
             plainText += `OpenCTI:\n`;
             plainText += `  - Global Count: ${result.opencti.global_count}\n`;

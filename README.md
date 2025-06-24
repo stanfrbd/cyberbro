@@ -322,6 +322,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
 * [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase.
 * [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
+* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine.
 
 Your contributions are greatly appreciated!
 

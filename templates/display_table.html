@@ -317,6 +317,11 @@
             {% if "misp" in analysis_results.selected_engines %}
             {% include "engine_layouts/misp_table.html" %}
             {% endif %}
+
+            {% if "crtsh" in analysis_results.selected_engines %}
+            {% include "engine_layouts/crtsh_table.html" %}
+            {% endif %}
+
         </tr>
         {% endfor %}
     </tbody>

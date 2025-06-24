@@ -33,11 +33,6 @@ def query_crtsh(
               }
         None: If an error occurs.
     """
-    query_fields = {
-        "URL": "page.domain",
-        "FQDN": "page.domain"
-    }
-    query_field = query_fields.get(observable_type, "page.domain")
 
     try:
         # If observable is a URL, extract domain
@@ -45,9 +40,9 @@ def query_crtsh(
             domain_part = observable.split("/")[2].split(":")[0]
             observable = domain_part
 
-        url = f"https://crt.sh/?q={observable}&output=json"
+        url = f"https://crt.sh/json?q={observable}"
 
-        response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=10)
+        response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=20)
         response.raise_for_status()
 
         results = response.json()
@@ -55,7 +50,7 @@ def query_crtsh(
         for entry in results:
             domains = set()
 
-            common_name	= entry.get("common_name", None)
+            common_name = entry.get("common_name", None)
             if common_name is not None and len(common_name) != 0:
                 domains.add(common_name)
 
@@ -64,7 +59,7 @@ def query_crtsh(
                 for el in name_value.split("\n"):
                     if len(el) > 0:
                         domains.add(str(el).strip())
-            
+
             for domain in domains:
                 domain_count[domain] = domain_count.get(domain, 0) + 1
 

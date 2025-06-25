@@ -1,6 +1,8 @@
 name: Build and Publish arm64 Docker image on GitHub Container Registry
 on:
   push:
+    tags:
+      - 'v*'
     branches:
       - main
 

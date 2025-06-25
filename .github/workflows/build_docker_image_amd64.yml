@@ -1,6 +1,8 @@
 name: Build and Publish amd64 (default) Docker image on GitHub Container Registry
 on:
   push:
+    tags:
+      - 'v*'
     branches:
       - main
 

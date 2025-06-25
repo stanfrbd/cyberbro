@@ -280,6 +280,16 @@ function formatResults(data) {
                 }
             }
         }
+
+        if (result.crtsh && result.crtsh.top_domains && result.crtsh.top_domains.length > 0) {
+            plainText += `crt.sh:\n`;
+            result.crtsh.top_domains.forEach(domain => {
+                plainText += `  - ${domain.domain} (${domain.count})\n`;
+            });
+            if (result.crtsh.link) {
+                plainText += `  - Link: ${result.crtsh.link}\n`;
+            }
+        }
         plainText += '\n';
     });
 

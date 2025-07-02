@@ -165,4 +165,4 @@ def query_misp(
 
     except Exception as e:
         logger.error("Error querying MISP for '%s': %s", observable, e, exc_info=True)
-        return None
+    return None

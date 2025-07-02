@@ -195,8 +195,8 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 
 ---
 
-!!! tip  
-    Always check the analysis status before retrieving results to ensure the analysis is complete.  
+!!! tip
+    Always check the analysis status before retrieving results to ensure the analysis is complete.
     For more advanced usage, such as bypassing cache or customizing engine selection, refer to the sections below.
 
 
@@ -219,7 +219,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
     ```
 
 === "Python"
-    
+
     ```python title="Request with Cache Ignored"
     import requests
     import json
@@ -272,136 +272,136 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
     Use the property `name` for the API.
 
 ### Abusix
-**Name**: `abusix`  
-**Supports**: abuse, free_no_key  
+**Name**: `abusix`
+**Supports**: abuse, free_no_key
 **Explaination**: Checks abuse contact with Abusix for IP, reversed obtained IP for a given domain/URL, free, no API key
 
 ### Alienvault
-**Name**: `alienvault`   
-**Supports**: IP, free API key required  
+**Name**: `alienvault`
+**Supports**: IP, free API key required
 **Explaination**: Checks Alienvault for IP, domain, URL, hash, free API key required
 
 ### AbuseIPDB
-**Name**: `abuseipdb`  
-**Supports**: risk  
+**Name**: `abuseipdb`
+**Supports**: risk
 **Explaination**: Checks AbuseIPDB for IP, reversed obtained IP for a given domain/URL, free API key required
 
 ### CrowdStrike
-**Name**: `crowdstrike`  
-**Supports**: hash, IP, domain, URL  
+**Name**: `crowdstrike`
+**Supports**: hash, IP, domain, URL
 **Explaination**: Checks CrowdStrike for IP, domain, URL, hash, paid API key required with Flacon XDR and Falcon Intelligence licence
 
 ### CriminalIP
-**Name**: `criminalip`  
-**Supports**: IP, free or paid API key required  
+**Name**: `criminalip`
+**Supports**: IP, free or paid API key required
 **Explaination**: Checks CriminalIP for IP, reversed obtained IP for a given domain / URL, free or paid API key required
 
 ### crt.sh
-**Name**: `crtsh`  
-**Supports**: domain, URL, free_no_key  
+**Name**: `crtsh`
+**Supports**: domain, URL, free_no_key
 **Explaination**: Checks crt.sh for known subdomain names based on TLS certificates for a given domain / URL, free, no API key
 
 ### Github
-**Name**: `github`  
-**Supports**: domain, URL, IP, hash, free_no_key, scraping  
+**Name**: `github`
+**Supports**: domain, URL, IP, hash, free_no_key, scraping
 **Explaination**: Get Github grep.app API search results for all types of observable, free, no API key
 
 ### Google
-**Name**: `google`  
-**Supports**: domain, URL, IP, hash, free_no_key, scraping  
+**Name**: `google`
+**Supports**: domain, URL, IP, hash, free_no_key, scraping
 **Explaination**: Scraps Google search results for all types of observable, free, no API key
 
 ### Google DNS (common records)
-**Name**: `google_dns`  
-**Supports**: IP, domain, URL  
+**Name**: `google_dns`
+**Supports**: IP, domain, URL
 **Explaination**: Checks Google common DNS records (A, AAAA, CNAME, NS, MX, TXT - including SPF and DMARC, PTR) for IP, domain, URL, free, no API key
 
 ### Google Safe Browsing
-**Name**: `google_safe_browsing`  
-**Supports**: risk, domain, IP  
+**Name**: `google_safe_browsing`
+**Supports**: risk, domain, IP
 **Explaination**: Checks Google Safe Browsing, free API key required
 
 ### Hudson Rock
-**Name**: `hudsonrock`  
-**Supports**: domain, URL, email, free_no_key  
+**Name**: `hudsonrock`
+**Supports**: domain, URL, email, free_no_key
 **Explaination**: Searches Hudson Rocks results for domains, URL, Email, free, no API key
 
 ### Ioc.One (HTML)
-**Name**: `ioc_one_html`  
-**Supports**: domain, URL, IP, hash, scraping  
+**Name**: `ioc_one_html`
+**Supports**: domain, URL, IP, hash, scraping
 **Explaination**: Scraps (can be long) Ioc.One HTML search results for all types of observable, free, no API key
 
 ### Ioc.One (PDF)
-**Name**: `ioc_one_pdf`  
-**Supports**: domain, URL, IP, hash, scraping  
+**Name**: `ioc_one_pdf`
+**Supports**: domain, URL, IP, hash, scraping
 **Explaination**: Scraps (can be long) Ioc.One PDF search results for all types of observable, free, no API key
 
 ### IPinfo
-**Name**: `ipinfo`  
-**Supports**: IP  
+**Name**: `ipinfo`
+**Supports**: IP
 **Explaination**: Checks IPinfo for IP, reversed obtained IP for a given domain/URL, free API key required
 
 ### IPquery
-**Name**: `ipquery`  
-**Supports**: default, IP, risk, VPN, proxy, free_no_key  
+**Name**: `ipquery`
+**Supports**: default, IP, risk, VPN, proxy, free_no_key
 **Explaination**: Checks IPquery for IP, reversed obtained IP for a given domain/URL, free, no API key
 
 ### Microsoft Defender for Endpoint
-**Name**: `mde`    
-**Supports**: hash, IP, domain, URL  
+**Name**: `mde`
+**Supports**: hash, IP, domain, URL
 **Explaination**: Checks Microsoft Defender for Endpoint, paid API info on Azure required
 
 ### MISP
-**Name**: `misp`  
-**Supports**: IP, domain, URL, hash  
+**Name**: `misp`
+**Supports**: IP, domain, URL, hash
 **Explaination**: Checks MISP for IP, domain, URL, hash, free API key required
 
 ### OpenCTI
-**Name**: `opencti`  
-**Supports**: domain, URL, IP, hash  
+**Name**: `opencti`
+**Supports**: domain, URL, IP, hash
 **Explaination**: Searches OpenCTI results for all types of observable, API key required
 
 ### Phishtank
-**Name**: `phishtank`  
-**Supports**: risk, domain, URL, free_no_key  
+**Name**: `phishtank`
+**Supports**: risk, domain, URL, free_no_key
 **Explaination**: Checks Phishtank for domains, URL, free, no API key
 
 ### RDAP (ex Whois)
-**Name**: `rdap`  
-**Supports**: default, abuse, domain, free_no_key  
+**Name**: `rdap`
+**Supports**: default, abuse, domain, free_no_key
 **Explaination**: Checks RDAP (ex Whois) record for domain, URL, no API key required
 
 ### Reverse DNS
-**Name**: `reverse_dns`  
-**Supports**: default, domain, IP, abuse, free_no_key  
+**Name**: `reverse_dns`
+**Supports**: default, domain, IP, abuse, free_no_key
 **Explaination**: Performs a reverse DNS lookup for IP, domain, URL (on the Cyberbro machine)
 
 ### Shodan
-**Name**: `shodan`  
-**Supports**: ports, IP  
+**Name**: `shodan`
+**Supports**: ports, IP
 **Explaination**: Checks Shodan, reversed obtained IP for a given domain/URL, free API key required
 
 ### Spur.us
-**Name**: `spur`  
-**Supports**: VPN, proxy, free_no_key, scraping  
+**Name**: `spur`
+**Supports**: VPN, proxy, free_no_key, scraping
 **Explaination**: Scraps Spur.us for IP, reversed obtained IP for a given domain/URL, free, no API key
 
 ### ThreatFox
-**Name**: `threatfox`  
-**Supports**: IP, domain, URL, free_no_key  
-**Explaination**: Checks ThreatFox by Abuse.ch for IP, domains, URL, free, no API key
+**Name**: `threatfox`
+**Supports**: IP, domain, URL, free_no_key
+**Explaination**: Checks ThreatFox by Abuse.ch for IP, domains, URL, free API key required
 
 ### URLscan
-**Name**: `urlscan`  
-**Supports**: domain, URL, IP, hash, free_no_key  
+**Name**: `urlscan`
+**Supports**: domain, URL, IP, hash, free_no_key
 **Explaination**: Checks URLscan for all types of observable, free, no API key
 
 ### VirusTotal
-**Name**: `virustotal`   
-**Supports**: hash, risk, IP, domain, URL  
+**Name**: `virustotal`
+**Supports**: hash, risk, IP, domain, URL
 **Explaination**: Checks VirusTotal for IP, domain, URL, hash, free API key required
 
 ### WebScout
-**Name**: `webscout`  
-**Supports**: IP, free or paid API key required  
+**Name**: `webscout`
+**Supports**: IP, free or paid API key required
 **Explaination**: Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required

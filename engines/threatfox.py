@@ -17,6 +17,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 def query_threatfox(
     observable: str,
     observable_type: str,
+    api_key: str,
     proxies: dict[str, str],
     ssl_verify: bool = True,
 ) -> Optional[dict[str, Any]]:
@@ -46,8 +47,16 @@ def query_threatfox(
 
         url = "https://threatfox-api.abuse.ch/api/v1/"
         payload = {"query": "search_ioc", "search_term": observable}
+        headers = {"Auth-Key": api_key}
 
-        response = requests.post(url, data=json.dumps(payload), proxies=proxies, verify=ssl_verify, timeout=5)
+        response = requests.post(
+            url,
+            data=json.dumps(payload),
+            headers=headers,
+            proxies=proxies,
+            verify=ssl_verify,
+            timeout=5,
+        )
         response.raise_for_status()
 
         result = response.json()

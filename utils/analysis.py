@@ -167,12 +167,10 @@ def perform_engine_queries(observable, selected_engines, result):
         )
 
     if "alienvault" in selected_engines and observable["type"] in alienvault.SUPPORTED_OBSERVABLE_TYPES:
-        result["alienvault"] = alienvault.query_alienvault(
-            observable["value"],
-            observable["type"],
+        result["alienvault"] = alienvault.run_engine(
+            observable,
             PROXIES,
             SSL_VERIFY,
-            secrets.alienvault,
         )
 
     if "misp" in selected_engines and observable["type"] in misp.SUPPORTED_OBSERVABLE_TYPES:

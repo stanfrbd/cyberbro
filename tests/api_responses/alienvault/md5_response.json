@@ -1,0 +1,84 @@
+{
+  "sections": ["general", "analysis"],
+  "type": "md5",
+  "type_title": "FileHash-MD5",
+  "indicator": "1fd35d9dc2eb919088f4eb48ab18b5a8",
+  "validation": [],
+  "base_indicator": {
+    "id": 4084275658,
+    "indicator": "a9ffd8047677bc2612cc97596c0c2386817ce80d",
+    "type": "FileHash-SHA1",
+    "title": "",
+    "description": "",
+    "content": "",
+    "access_type": "public",
+    "access_reason": ""
+  },
+  "pulse_info": {
+    "count": 1,
+    "pulses": [
+      {
+        "id": "686b2966f904d473662ebd22",
+        "name": "malware",
+        "description": "",
+        "modified": "2025-07-07T03:51:15.250000",
+        "created": "2025-07-07T01:56:54.935000",
+        "tags": [],
+        "references": [],
+        "public": 1,
+        "adversary": "",
+        "targeted_countries": [],
+        "malware_families": [],
+        "attack_ids": [],
+        "industries": [],
+        "TLP": "white",
+        "cloned_from": null,
+        "export_count": 5,
+        "upvotes_count": 0,
+        "downvotes_count": 0,
+        "votes_count": 0,
+        "locked": false,
+        "pulse_source": "web",
+        "validator_count": 0,
+        "comment_count": 0,
+        "follower_count": 0,
+        "vote": 0,
+        "author": {
+          "username": "skocherhan",
+          "id": "249290",
+          "avatar_url": "/otxapi/users/avatar_image/media/avatars/user_249290/resized/80/avatar_3b9c358f36.png",
+          "is_subscribed": false,
+          "is_following": false
+        },
+        "indicator_type_counts": {
+          "hostname": 18,
+          "URL": 571,
+          "domain": 21,
+          "FileHash-MD5": 28,
+          "FileHash-SHA1": 25,
+          "FileHash-SHA256": 60,
+          "CVE": 1,
+          "IPv4": 220
+        },
+        "indicator_count": 944,
+        "is_author": false,
+        "is_subscribing": null,
+        "subscriber_count": 134,
+        "modified_text": "1 day ago ",
+        "is_modified": true,
+        "groups": [],
+        "in_group": false,
+        "threat_hunter_scannable": true,
+        "threat_hunter_has_agents": 1,
+        "related_indicator_type": "FileHash-SHA256",
+        "related_indicator_is_active": 1
+      }
+    ],
+    "references": [],
+    "related": {
+      "alienvault": { "adversary": [], "malware_families": [], "industries": [] },
+      "other": { "adversary": [], "malware_families": [], "industries": [] }
+    }
+  },
+  "false_positive": []
+}

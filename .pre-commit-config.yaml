@@ -4,7 +4,9 @@ repos:
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
+        types_or: [python, pyi]
       - id: end-of-file-fixer
+        types_or: [python, pyi]
       - id: check-yaml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -24,4 +26,5 @@ repos:
     rev: "1.8.3"
     hooks:
       - id: bandit
+        types_or: [python, pyi]
         args: ["-c", ".bandit.yml"]

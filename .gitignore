@@ -6,11 +6,13 @@ __pycache__/
 .venv
 *.csv
 *.db
-*.txt
 *.xlsx
 data/
 log*/
 secrets.json
-tests/
 site/
 .cache/
+# test files should be added with git add -f
+tests/
+# text files should be added with git add -f
+*.txt

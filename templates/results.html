@@ -3,20 +3,20 @@
 {% block title %}Cyberbro - Analysis Results{% endblock title %}
 
 {% block head %}
-    {{ super() }}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
 
-    <!-- Include jQuery -->
-    <script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<!-- Include jQuery -->
+<script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
-    {# Only load the table javascript if a table will be presented #}
-    {%- if display_mode == "table" or analysis_results.results | length > 1 %}
-    <!-- Include DataTables JS library -->
-    <script defer src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
-    <!-- Include colReorder extension -->
-    <script defer src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
-    <script defer src="{{ url_for('static', filename='filter_table.js') }}"></script>
-    {% endif -%}
+{# Only load the table javascript if a table will be presented #}
+{%- if display_mode == "table" or analysis_results.results | length > 1 %}
+<!-- Include DataTables JS library -->
+<script defer src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<!-- Include colReorder extension -->
+<script defer src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
+<script defer src="{{ url_for('static', filename='filter_table.js') }}"></script>
+{% endif -%}
 {% endblock head %}
 
 {% block content %}
@@ -26,8 +26,7 @@
 
 <button class="btn" onclick="location.href='/'">New Analysis</button>
 <div style="display: flex; gap: 10px; margin-left: 0;">
-    <form method="GET" action="/export/{{ analysis_results.id }}"
-        style="display: flex; gap: 10px; margin-left: 0;">
+    <form method="GET" action="/export/{{ analysis_results.id }}" style="display: flex; gap: 10px; margin-left: 0;">
         <button type="submit" name="format" value="csv" class="btn">Export to CSV</button>
         <button type="submit" name="format" value="excel" class="btn">Export to Excel</button>
     </form>
@@ -35,16 +34,18 @@
     <button class="btn" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">Raw</button>
     <button class="btn" onclick="copyAsPlainText()">Copy as Plain Text</button>
     <button class="btn" onclick="copyAsDefanged()">Copy Defanged [.]</button>
+    <button class="btn" onclick="exportToStixv2('{{ analysis_results.id }}')">Export to STIXv2</button>
+    <!-- <button class="btn" onclick="location.href='/export_to_stixv2/{{ analysis_results.id }}'">Export to STIXv2</button> -->
 </div><!-- form div -->
 
 <script>
     function fetchResults() {
         return fetch(`/{{ API_PREFIX }}/results/{{ analysis_results.id }}`)
-        .then(response => response.json())
-        .catch(err => {
-            console.error('Failed to fetch results: ', err);
-            throw err;
-        });
+            .then(response => response.json())
+            .catch(err => {
+                console.error('Failed to fetch results: ', err);
+                throw err;
+            });
     }
 </script>
 
@@ -53,11 +54,11 @@
 <p>Analysis start time: {{ analysis_results.start_time_string }}</p>
 <p>Analysis duration: {{ analysis_results.analysis_duration_string }}</p>
 
-    {% if display_mode == "table" or analysis_results.results | length > 1 %}
-        {%- include "display_table.html" -%}
-    {% elif analysis_results.results | length == 1 %}
-        {%- include "display_cards.html" %}
-    {% endif %}
+{% if display_mode == "table" or analysis_results.results | length > 1 %}
+{%- include "display_table.html" -%}
+{% elif analysis_results.results | length == 1 %}
+{%- include "display_cards.html" %}
+{% endif %}
 
 <div class="end-of-cards">
 </div>

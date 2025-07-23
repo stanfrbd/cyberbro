@@ -351,3 +351,122 @@ function copyAsDefanged() {
             console.error('Failed to copy defanged text: ', err);
         });
 }
+
+function exportToStixv2(analysis_id) {
+    // Fetch analysis results from API
+    fetch(`/api/results/${analysis_id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch analysis results');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Extract observables from data
+            const observables = extractObservables(data);
+
+            // Create features for new window
+            const width = 500;
+            const height = 600;
+            const left = (window.screen.width - width) / 2;
+            const top = (window.screen.height - height) / 2;
+            const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+            // Open a new window
+            const exportWindow = window.open('', 'stixExportWindow', features);
+
+            // Write HTML content to the new window
+            exportWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Export to STIX v2</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        h2 { margin-bottom: 20px; }
+                        .checkbox-item { margin-bottom: 8px; }
+                        input[type="text"] { width: 100%; padding: 5px; margin-bottom: 20px; }
+                        .button-container { display: flex; justify-content: space-between; margin-top: 20px; }
+                        button { padding: 8px 16px; cursor: pointer; }
+                    </style>
+                </head>
+                <body>
+                    <h2>Select Observables to Export as Indicators</h2>
+                    <div id="observables-container">
+                        ${observables.map(obs => `
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="observable_${obs.id}" value="${obs.value}" data-type="${obs.type}" checked>
+                                <label for="observable_${obs.id}">${obs.value} (${obs.type})</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <label for="stix_labels">Labels (comma separated):</label>
+                    <input type="text" id="stix_labels">
+                    
+                    <div class="button-container">
+                        <button id="cancel-btn">Cancel</button>
+                        <button id="export-btn">Export</button>
+                    </div>
+                    
+                    <script>
+                        document.getElementById('cancel-btn').addEventListener('click', function() {
+                            window.close();
+                        });
+                        
+                        document.getElementById('export-btn').addEventListener('click', function() {
+                            // Get selected observables
+                            const selectedObservables = [];
+                            ${observables.map(obs => `
+                                if (document.getElementById('observable_${obs.id}').checked) {
+                                    selectedObservables.push('${obs.value}');
+                                }
+                            `).join('')}
+                            
+                            // Get labels
+                            const labels = document.getElementById('stix_labels').value;
+                            
+                            // Build URL with parameters
+                            const url = '/export_to_stixv2/${analysis_id}?indicators=' + 
+                                encodeURIComponent(selectedObservables.join(',')) + 
+                                '&labels=' + encodeURIComponent(labels);
+                            
+                            // Navigate the opener window to the export URL
+                            window.opener.location.href = url;
+                            
+                            // Close this window
+                            window.close();
+                        });
+                    </script>
+                </body>
+                </html>
+            `);
+
+            exportWindow.document.close();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to fetch analysis results');
+        });
+}
+
+// Helper function to extract observables from analysis results
+function extractObservables(data) {
+    const observables = [];
+    let id = 0;
+
+    // Handle the array structure from the provided JSON
+    if (Array.isArray(data)) {
+        data.forEach(item => {
+            // Extract observable value and type directly from the top level
+            if (item.observable && item.type) {
+                observables.push({
+                    id: id++,
+                    value: item.observable,
+                    type: item.type
+                });
+            }
+        });
+    }
+    return observables;
+}

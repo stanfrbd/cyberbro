@@ -24,6 +24,7 @@ from utils.config import (
     save_secrets_to_file,
 )
 from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
+from utils.export_stixv2 import export_to_stixv2
 from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
@@ -257,6 +258,18 @@ def export(analysis_id):
     if format == "excel":
         return export_to_excel(data, timestamp)
     return jsonify({"error": "Invalid export format requested."}), 400
+
+
+@app.route("/export_to_stixv2/<analysis_id>")
+def export_to_stixv2_func(analysis_id):
+    """Export the analysis results to STIX v2 format."""
+    analysis_results = db.session.get(AnalysisResult, analysis_id)
+    specified_indicators = request.args.get("indicators", "").split(",")
+    specified_labels = request.args.get("labels", "").split(",")
+    if analysis_results:
+        data = analysis_results.results
+        return export_to_stixv2(data, specified_indicators=specified_indicators, specified_labels=specified_labels), 200
+    return jsonify({"error": "Analysis results not found."}), 404
 
 
 @app.route("/favicon.ico")

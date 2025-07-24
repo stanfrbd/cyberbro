@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="form-header">
+        <h1>Export to STIX v2</h1>
+        <p>Select the observables you want to export as indicators and add labels for them.</p>
+        <p>The others will be added as observables only.</p>
+    </div>
+
+    <div class="filters-container">
+        <button class="btn" onclick="location.href='/results/{{ analysis_results.id }}'">Go Back</button>
+        <button class="btn" onclick="selectAllObservables()">Select All</button>
+        <button class="btn" onclick="selectNone()">Select None</button>
+        <button class="btn" onclick="selectByType('IPv4')">IPv4 Addresses</button>
+        <button class="btn" onclick="selectByType('IPv6')">IPv6 Addresses</button>
+        <button class="btn" onclick="selectByType('MD5', 'SHA1', 'SHA256')">Hashes</button>
+        <button class="btn" onclick="selectByType('URL')">URLs</button>
+        <button class="btn" onclick="selectByType('FQDN')">Domains</button>
+        <button class="btn" onclick="selectByType('Email')">Emails</button>
+        <button class="btn" onclick="selectByType('CHROME_EXTENSION')">Chrome Extensions</button>
+    </div>
+
+    <form action="/export_to_stixv2/{{ analysis_results.id }}" method="post">
+        <div class="observable-list">
+            <h2>Observables</h2>
+            <table class="observable-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-header"></th>
+                        <th class="type-header">Type</th>
+                        <th class="value-header">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in analysis_results.results %}
+                    <tr class="observable-item" data-type="{{ result.type }}">
+                        <td class="checkbox-container">
+                            <input type="checkbox" name="indicators" value="{{ result.observable }}"
+                                id="indicator-{{ loop.index }}" checked>
+                        </td>
+                        <td class="observable-type">{{ result.type }}</td>
+                        <td class="observable-value" title="{{ result.observable }}">
+                            <label for="indicator-{{ loop.index }}">
+                                {{ result.observable[:64] }}{% if result.observable|length > 64 %}...{% endif %}
+                            </label>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="labels-section">
+            <h2>Labels</h2>
+            <p>Add labels to be included with all indicators (comma-separated)</p>
+            <input type="text" name="labels" class="labels-input" placeholder="malicious-activity, apt, ransomware">
+            <p class="help-text">Common labels: malicious-activity, suspicious, reconnaissance, benign, apt,
+                campaign</p>
+        </div>
+
+        <div class="submit-container">
+            <button type="submit" class="btn">Export to STIX v2</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .filters-container {
+        margin-bottom: 20px;
+    }
+
+    .filters-container .btn {
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+
+    .observable-list {
+        margin-top: 20px;
+    }
+
+    .observable-table {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .observable-item {
+        display: table-row;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .observable-item:nth-child(even) {
+        background-color: rgba(241, 241, 241, 0.5);
+    }
+
+    body.dark-mode .observable-item:nth-child(even) {
+        background-color: rgba(43, 58, 71, 0.5);
+    }
+
+    .checkbox-container,
+    .observable-type,
+    .observable-value {
+        display: table-cell;
+        padding: 10px;
+        vertical-align: middle;
+    }
+
+    .checkbox-container {
+        width: 40px;
+    }
+
+    .observable-type {
+        width: 120px;
+        font-weight: bold;
+    }
+
+    .observable-value {
+        word-break: break-all;
+    }
+
+    .labels-section {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: var(--background-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+    }
+
+    body.dark-mode .labels-section {
+        background-color: var(--dark-background-color);
+        border-color: var(--dark-border-color);
+    }
+
+    .labels-input {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+    }
+
+    body.dark-mode .labels-input {
+        background-color: #2b3a47;
+        color: var(--dark-text-color);
+        border-color: var(--dark-border-color);
+    }
+
+    .help-text {
+        font-size: 0.9em;
+        color: var(--text-color);
+        margin-top: 5px;
+    }
+
+    body.dark-mode .help-text {
+        color: var(--dark-text-color);
+    }
+
+    .submit-container {
+        margin-top: 20px;
+        text-align: center;
+    }
+</style>
+
+<script>
+    function selectAllObservables() {
+        document.querySelectorAll('input[name="indicators"]').forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    }
+
+    function selectNone() {
+        document.querySelectorAll('input[name="indicators"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+
+    function selectByType(...types) {
+        // First uncheck all
+        document.querySelectorAll('input[name="indicators"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+
+        // Then check only those that match the specified type(s)
+        types.forEach(type => {
+            document.querySelectorAll(`.observable-item[data-type="${type}"] input[name="indicators"]`).forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+    }
+</script>
+{% endblock %}

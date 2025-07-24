@@ -71,53 +71,69 @@ def build_external_references(item: Dict[str, Any]) -> List[Dict[str, str]]:
     external_references = []
 
     # Add VirusTotal references
-    if vt := item.get("virustotal"):
-        if vt_link := vt.get("link"):
-            external_references.append(
-                {
-                    "source_name": "VirusTotal",
-                    "url": vt_link,
-                    "description": f"{vt.get('detection_ratio', 'Unknown')} detections on VirusTotal",
-                }
-            )
-
-    # Add AlienVault references
-    if av := item.get("alienvault"):
-        # Add AlienVault pulses
-        if pulses := av.get("pulses"):
-            for pulse in pulses:
-                if "title" in pulse and "url" in pulse:
-                    url = pulse["url"]
-                    if url and isinstance(url, str) and url.startswith(("http://", "https://")):
-                        external_references.append(
-                            {
-                                "source_name": "AlienVault Pulse",
-                                "url": url,
-                                "description": pulse.get("title", ""),
-                            }
-                        )
-
-    # Add GitHub references
-    if gh := item.get("github", {}).get("results"):
-        for repo in gh:
-            if "title" in repo and "url" in repo:
+    try:
+        vt = item.get("virustotal")
+        if vt is not None and isinstance(vt, dict):
+            if vt_link := vt.get("link"):
                 external_references.append(
                     {
-                        "source_name": "GitHub Repository",
-                        "url": repo["url"],
-                        "description": f"Observed in {repo.get('title', '')} Github Repo",
+                        "source_name": "VirusTotal",
+                        "url": vt_link,
+                        "description": f"{vt.get('detection_ratio', 'Unknown')} detections on VirusTotal",
                     }
                 )
+    except Exception as e:
+        logger.error(f"Failed to retrieve VirusTotal data: {str(e)}")
+
+    # Add AlienVault references
+    try:
+        av = item.get("alienvault")
+        if av is not None and isinstance(av, dict):
+            # Add AlienVault pulses
+            if pulses := av.get("pulses"):
+                for pulse in pulses:
+                    if "title" in pulse and "url" in pulse:
+                        url = pulse["url"]
+                        if url and isinstance(url, str) and url.startswith(("http://", "https://")):
+                            external_references.append(
+                                {
+                                    "source_name": "AlienVault Pulse",
+                                    "url": url,
+                                    "description": pulse.get("title", ""),
+                                }
+                            )
+    except Exception as e:
+        logger.error(f"Failed to retrieve AlienVault data: {str(e)}")
+
+    # Add GitHub references
+    try:
+        gh = item.get("github")
+        if gh is not None and isinstance(gh, dict) and "results" in gh:
+            gh = item.get("github", {}).get("results", [])
+            for repo in gh:
+                if "title" in repo and "url" in repo:
+                    external_references.append(
+                        {
+                            "source_name": "GitHub Repository",
+                            "url": repo["url"],
+                            "description": f"Observed in {repo.get('title', '')} Github Repo",
+                        }
+                    )
+    except Exception as e:
+        logger.error(f"Failed to retrieve GitHub data: {str(e)}")
 
     # Add extension references
-    if ext := item.get("extension"):
-        external_references.append(
-            {
-                "source_name": "Browser Extension",
-                "url": ext["url"],
-                "description": f"Browser Extension: {ext.get('name', 'Unknown')}",
-            }
-        )
+    try:
+        if ext := item.get("extension"):
+            external_references.append(
+                {
+                    "source_name": "Browser Extension",
+                    "url": ext["url"],
+                    "description": f"Browser Extension: {ext.get('name', 'Unknown')}",
+                }
+            )
+    except Exception as e:
+        logger.error(f"Failed to retrieve extension data: {str(e)}")
 
     return external_references if external_references else None
 
@@ -196,36 +212,38 @@ def create_stix_bundle(
         objects.append(relationship)
 
         # Process threat actors
-        if adversaries := item.get("alienvault", {}).get("adversary", []):
-            for adversary in adversaries:
-                actor = ThreatActor(id=f"threat-actor--{uuid.uuid4()}", name=adversary, labels=["threat-actor"])
-                objects.append(actor)
+        alienvault = item.get("alienvault")
+        if alienvault is not None and isinstance(alienvault, dict):
+            if adversaries := alienvault.get("adversary", []):
+                for adversary in adversaries:
+                    actor = ThreatActor(id=f"threat-actor--{uuid.uuid4()}", name=adversary, labels=["threat-actor"])
+                    objects.append(actor)
 
-                # Relate actor to indicator
-                actor_rel = Relationship(
-                    id=f"relationship--{uuid.uuid4()}",
-                    relationship_type="indicates",
-                    source_ref=indicator.id,
-                    target_ref=actor.id,
-                )
-                objects.append(actor_rel)
+                    # Relate actor to indicator
+                    actor_rel = Relationship(
+                        id=f"relationship--{uuid.uuid4()}",
+                        relationship_type="indicates",
+                        source_ref=indicator.id,
+                        target_ref=actor.id,
+                    )
+                    objects.append(actor_rel)
 
-        # Process malware families
-        if malware_families := item.get("alienvault", {}).get("malware_families", []):
-            for malware_family in malware_families:
-                malware_obj = Malware(
-                    id=f"malware--{uuid.uuid4()}", name=malware_family, is_family=True, labels=["malware"]
-                )
-                objects.append(malware_obj)
+            # Process malware families
+            if malware_families := item.get("alienvault", {}).get("malware_families", []):
+                for malware_family in malware_families:
+                    malware_obj = Malware(
+                        id=f"malware--{uuid.uuid4()}", name=malware_family, is_family=True, labels=["malware"]
+                    )
+                    objects.append(malware_obj)
 
-                # Relate malware to indicator
-                malware_rel = Relationship(
-                    id=f"relationship--{uuid.uuid4()}",
-                    relationship_type="indicates",
-                    source_ref=indicator.id,
-                    target_ref=malware_obj.id,
-                )
-                objects.append(malware_rel)
+                    # Relate malware to indicator
+                    malware_rel = Relationship(
+                        id=f"relationship--{uuid.uuid4()}",
+                        relationship_type="indicates",
+                        source_ref=indicator.id,
+                        target_ref=malware_obj.id,
+                    )
+                    objects.append(malware_rel)
 
     logger.info(f"Created bundle with {len(objects)} STIX objects including {valid_indicators_count} indicators")
     return Bundle(objects=objects)

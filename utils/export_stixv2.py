@@ -74,14 +74,16 @@ def build_external_references(item: Dict[str, Any]) -> List[Dict[str, str]]:
     try:
         vt = item.get("virustotal")
         if vt is not None and isinstance(vt, dict):
-            if vt_link := vt.get("link"):
-                external_references.append(
-                    {
-                        "source_name": "VirusTotal",
-                        "url": vt_link,
-                        "description": f"{vt.get('detection_ratio', 'Unknown')} detections on VirusTotal",
-                    }
-                )
+            # Ignore VirusTotal data if malicious count is undetected
+            if vt.get("total_malicious") > 0:
+                if vt_link := vt.get("link"):
+                    external_references.append(
+                        {
+                            "source_name": "VirusTotal",
+                            "url": vt_link,
+                            "description": f"{vt.get('detection_ratio', 'Unknown')} detections on VirusTotal",
+                        }
+                    )
     except Exception as e:
         logger.error(f"Failed to retrieve VirusTotal data: {str(e)}")
 
@@ -144,10 +146,10 @@ def create_stix_bundle(
     """Create a STIX bundle from the provided data"""
     identity = Identity(
         id=f"identity--{uuid.uuid4()}",
-        name="CyberBro",
+        name="Cyberbro",
         identity_class="organization",
         description="Cyberbro is an Open Source IoC enrichment tool",
-        external_references=[{"source_name": "GitHub", "url": "https://github.com/stanfrbd/cyberbro"}],
+        contact_information="https://github.com/standfrbd/cyberbro",
         object_marking_refs=[TLP_WHITE],
     )
 
@@ -186,7 +188,13 @@ def create_stix_bundle(
 
         pattern = pattern_func(observable)
 
-        labels = specified_labels if specified_labels else ["cyberbro"]
+        # Ensure 'cyberbro' label is always included
+        if specified_labels:
+            labels = specified_labels.copy()
+            if "cyberbro" not in labels:
+                labels.append("cyberbro")
+        else:
+            labels = ["cyberbro"]
 
         # Create indicator
         indicator = Indicator(

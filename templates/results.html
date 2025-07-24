@@ -34,8 +34,8 @@
     <button class="btn" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">Raw</button>
     <button class="btn" onclick="copyAsPlainText()">Copy as Plain Text</button>
     <button class="btn" onclick="copyAsDefanged()">Copy Defanged [.]</button>
-    <button class="btn" onclick="exportToStixv2('{{ analysis_results.id }}')">Export to STIXv2</button>
-    <!-- <button class="btn" onclick="location.href='/export_to_stixv2/{{ analysis_results.id }}'">Export to STIXv2</button> -->
+    <button class="btn" onclick="window.open('/export_to_stixv2_form/{{ analysis_results.id }}', '_blank')">Export to
+        STIXv2</button>
 </div><!-- form div -->
 
 <script>

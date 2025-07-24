@@ -260,16 +260,28 @@ def export(analysis_id):
     return jsonify({"error": "Invalid export format requested."}), 400
 
 
-@app.route("/export_to_stixv2/<analysis_id>")
-def export_to_stixv2_func(analysis_id):
+@app.route("/export_to_stixv2/<analysis_id>", methods=["POST"])
+def export_to_stixv2_backend(analysis_id):
     """Export the analysis results to STIX v2 format."""
     analysis_results = db.session.get(AnalysisResult, analysis_id)
-    specified_indicators = request.args.get("indicators", "").split(",")
-    specified_labels = request.args.get("labels", "").split(",")
+    # Get form data and ensure it's converted to lists
+    specified_indicators = request.form.getlist("indicators") or []
+    # Get labels from form data, split by comma and strip whitespace
+    labels_str = request.form.get("labels", "")
+    specified_labels = [label.strip() for label in labels_str.split(",") if label.strip()] if labels_str else []
     if analysis_results:
         data = analysis_results.results
         return export_to_stixv2(data, specified_indicators=specified_indicators, specified_labels=specified_labels), 200
     return jsonify({"error": "Analysis results not found."}), 404
+
+
+@app.route("/export_to_stixv2_form/<analysis_id>", methods=["GET"])
+def export_stix_form(analysis_id):
+    """Render the STIX v2 export form."""
+    analysis_results = db.session.get(AnalysisResult, analysis_id)
+    if analysis_results:
+        return render_template("export_to_stixv2_form.html", analysis_results=analysis_results)
+    return render_template("404.html"), 404
 
 
 @app.route("/favicon.ico")

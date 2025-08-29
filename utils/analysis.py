@@ -25,7 +25,7 @@ from engines import (
     rdap,
     reverse_dns,
     shodan,
-    spur_us_free,
+    spur_us,
     threatfox,
     urlscan,
     virustotal,
@@ -237,8 +237,8 @@ def perform_engine_queries(observable, selected_engines, result):
     if "abuseipdb" in selected_engines and observable["type"] in abuseipdb.SUPPORTED_OBSERVABLE_TYPES:
         result["abuseipdb"] = abuseipdb.query_abuseipdb(observable["value"], secrets.abuseipdb, PROXIES, SSL_VERIFY)
 
-    if "spur" in selected_engines and observable["type"] in spur_us_free.SUPPORTED_OBSERVABLE_TYPES:
-        result["spur"] = spur_us_free.get_spur(observable["value"], PROXIES, SSL_VERIFY)
+    if "spur" in selected_engines and observable["type"] in spur_us.SUPPORTED_OBSERVABLE_TYPES:
+        result["spur"] = spur_us.query_spur_us(observable["value"], PROXIES, SSL_VERIFY, secrets.spur_us)
 
     if "webscout" in selected_engines and observable["type"] in webscout.SUPPORTED_OBSERVABLE_TYPES:
         result["webscout"] = webscout.query_webscout(observable["value"], secrets.webscout, PROXIES, SSL_VERIFY)

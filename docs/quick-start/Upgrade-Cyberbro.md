@@ -7,7 +7,7 @@
 * `git pull`
 * `docker compose up --build --force-recreate -d`
 !!! warning
-    Be careful that your `secrets.json` is up to date.
+    Be careful that your `secrets.json` / `.env` is up to date.
 
 ## Using the image from GitHub packages
 
@@ -22,7 +22,7 @@ docker-compose up -d --pull always --force-recreate
 ```
 
 !!! warning
-    Be careful that your environment variables and your custom `docker compose` file are up to date.
+    Be careful that your environment variables / `.env` and your custom `docker compose` file are up to date.
 
 # Without docker
 

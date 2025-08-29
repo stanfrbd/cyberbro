@@ -4,7 +4,8 @@
     All variables from `secrets.json` can be converted to **environment variables** (uppercase).
 
 !!! note
-    You can add these environment variables in a `docker-compose-custom.yml`. If you don't specify proxy, no proxy will be used.
+    You can add these environment variables in a `docker-compose-custom.yml` or just a `docker-compose-custom.yml` with a `.env`.  
+    If you don't specify proxy, no proxy will be used.
 
 Here is a list of all available environment variables that can be used with examples:
 
@@ -20,6 +21,7 @@ MDE_CLIENT_SECRET=api_key_here
 MISP_URL=https://misp.local
 MISP_API_KEY=api_key_here
 SHODAN=api_key_here
+SPUR_US=api_key_here
 THREATFOX=api_key_here
 OPENCTI_API_KEY=api_key_here
 OPENCTI_URL=https://demo.opencti.io
@@ -59,15 +61,57 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=production
-      - VIRUSTOTAL=api_key_here
-      - ABUSEIPDB=api_key_here
-      - GUI_ENABLED_ENGINES=reverse_dns,rdap,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,phishtank
-      - API_CACHE_TIMEOUT=1800
+      - ABUSEIPDB=${ABUSEIPDB}
+      - ALIENVAULT=${ALIENVAULT}
+      - CRIMINALIP_API_KEY=${CRIMINALIP_API_KEY}
+      - CROWDSTRIKE_CLIENT_ID=${CROWDSTRIKE_CLIENT_ID}
+      - CROWDSTRIKE_CLIENT_SECRET=${CROWDSTRIKE_CLIENT_SECRET}
+      - CROWDSTRIKE_FALCON_BASE_URL=${CROWDSTRIKE_FALCON_BASE_URL}
+      - GOOGLE_SAFE_BROWSING=${GOOGLE_SAFE_BROWSING}
+      - IPINFO=${IPINFO}
+      - MDE_CLIENT_ID=${MDE_CLIENT_ID}
+      - MDE_CLIENT_SECRET=${MDE_CLIENT_SECRET}
+      - MDE_TENANT_ID=${MDE_TENANT_ID}
+      - MISP_API_KEY=${MISP_API_KEY}
+      - MISP_URL=${MISP_URL}
+      - OPENCTI_API_KEY=${OPENCTI_API_KEY}
+      - OPENCTI_URL=${OPENCTI_URL}
+      - SHODAN=${SHODAN}
+      - SPUR_US=${SPUR_US}
+      - THREATFOX=${THREATFOX}
+      - VIRUSTOTAL=${VIRUSTOTAL}
+      - WEBSCOUT=${WEBSCOUT}
+      - CONFIG_PAGE_ENABLED=${CONFIG_PAGE_ENABLED}
+      - SSL_VERIFY=${SSL_VERIFY}
+      - PROXY_URL=${PROXY_URL}
+      - GUI_CACHE_TIMEOUT=${GUI_CACHE_TIMEOUT1800}
+      - API_CACHE_TIMEOUT=${API_CACHE_TIMEOUT86400}
+      - GUI_ENABLED_ENGINES=${GUI_ENABLED_ENGINES}
+      - SUPERVISORD_WORKERS_COUNT=${SUPERVISORD_WORKERS_COUNT}
+      - SUPERVISORD_THREADS_COUNT=${SUPERVISORD_THREADS_COUNT}
+      - SUPERVISORD_TIMEOUT=${SUPERVISORD_TIMEOUT}
+      - API_PREFIX=${API_PREFIX}
+      - MAX_FORM_MEMORY_SIZE=${MAX_FORM_MEMORY_SIZE}
     restart: always
     volumes:
       - ./data:/app/data
       - ./logs:/var/log/cyberbro
 ```
+
+Example of `.env` file (note: no `"` in environment variables)
+
+```
+VIRUSTOTAL=api_key_here
+ABUSEIPDB=api_key_here
+GUI_ENABLED_ENGINES=reverse_dns,rdap,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,phishtank
+API_CACHE_TIMEOUT=1800
+```
+
+**You can use the file `.env.sample` as a template to create your own `.env` file.**
+
+!!! danger
+    Make sure you use either `secrets.json` or `.env` file for your deployment, not both.  
+    This may lead to unexpected behavior as the application will try to read both files and may override some values.
 
 !!! note
     `./data:/app/data`: This maps the `data` directory on your host machine to the `/app/data` directory inside the container. This is mandatory for persisting the database `results.db` that is used by Cyberbro.  

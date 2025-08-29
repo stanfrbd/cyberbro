@@ -125,6 +125,7 @@ cp secrets-sample.json secrets.json
     "opencti_url": "https://demo.opencti.io",
     "proxy_url": "",
     "shodan": "token_here",
+    "spur_us": "token_here",
     "threatfox": "token_here",
     "virustotal": "token_here",
     "webscout": "token_here"

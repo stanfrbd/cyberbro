@@ -41,3 +41,9 @@ For more details on volume mappings and other advanced deployment options, see t
 ## Where is the database?
 
 By default, the database used by Cyberbro is stored in the `data` directory inside the Docker container at `/app/data/results.db`, which is mapped to the `data` directory in the Cyberbro folder on your host machine. You can configure the database storage location by changing the volume mapping in your Docker configuration to point to a different directory if needed.
+
+## My API keys seem to be ignored or not stored
+
+!!! danger
+    Make sure you use either `secrets.json` or `.env` file for your deployment, not both.  
+    This may lead to unexpected behavior as the application will try to read both files and may override some values.

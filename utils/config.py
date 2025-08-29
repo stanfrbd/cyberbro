@@ -38,6 +38,7 @@ class Secrets:
     opencti_url: str = ""
     proxy_url: str = ""
     shodan: str = ""
+    spur_us: str = ""
     threatfox: str = ""
     ssl_verify: bool = True
     virustotal: str = ""

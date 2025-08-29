@@ -51,14 +51,14 @@ def query_github(observable: str, proxies: dict[str, str], ssl_verify: bool = Tr
         search_results = []
         seen_repos = set()
         for hit in data["hits"]["hits"]:
-            repo_name = hit["repo"]["raw"]
+            repo_name = hit["repo"]
             if repo_name not in seen_repos:
                 seen_repos.add(repo_name)
                 search_results.append(
                     {
                         "title": repo_name,
-                        "url": f"https://github.com/{repo_name}/blob/{hit['branch']['raw']}/{hit['path']['raw']}",
-                        "description": hit["path"]["raw"],
+                        "url": f"https://github.com/{repo_name}/blob/{hit['branch']}/{hit['path']}",
+                        "description": hit["path"],
                     }
                 )
             if len(search_results) >= 5:

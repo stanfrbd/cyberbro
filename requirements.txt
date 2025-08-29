@@ -7,8 +7,6 @@ jwt
 openpyxl
 dnspython
 pycountry
-fake_useragent
-bs4
 pydantic
 querycontacts
 flask_sqlalchemy

@@ -8,7 +8,7 @@
 5. Then go to http://127.0.0.1:5000 and use Cyberbro.
 
 ### The container cyberbro is not running
-1. Edit `secrets.json` with the updated values.
+1. Edit `secrets.json` / `.env` with the updated values.
 2. ```docker compose up --build --force-recreate -d```
 3. Then go to http://127.0.0.1:5000 and use Cyberbro.
 

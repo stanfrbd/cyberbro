@@ -9,10 +9,12 @@ __pycache__/
 *.xlsx
 data/
 log*/
-secrets.json
 site/
 .cache/
 # test files should be added with git add -f
 tests/
 # text files should be added with git add -f
 *.txt
+# Sensitive files
+secrets.json
+.env

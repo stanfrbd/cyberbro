@@ -51,6 +51,7 @@ MDE_TENANT_ID=api_key_here
 MDE_CLIENT_ID=api_key_here
 MDE_CLIENT_SECRET=api_key_here
 SHODAN=api_key_here
+SPUR_US=api_key_here
 OPENCTI_API_KEY=api_key_here
 OPENCTI_URL=https://demo.opencti.io
 CROWDSTRIKE_CLIENT_ID=client_id_here

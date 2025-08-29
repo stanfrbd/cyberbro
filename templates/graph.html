@@ -175,7 +175,7 @@
                 // Check if the provider has an IP address
                 if (entry[provider]?.ip) {
                     // Check for IP address with Spur.us data
-                    if (entry.spur?.tunnels && entry.spur.tunnels !== "Not anonymous") {
+                    if (entry.spur?.tunnels && entry.spur.tunnels !== "Not anonymous" && entry.spur.tunnels !== "Unknown - Behind Captcha") {
                         const tunnels = entry.spur.tunnels;
                         if (entry.type === "FQDN" || entry.type === "URL") {
                             if (entry.reverse_dns?.reverse_dns) {

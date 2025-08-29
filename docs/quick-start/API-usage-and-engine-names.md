@@ -383,8 +383,8 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 
 ### Spur.us
 **Name**: `spur`  
-**Supports**: VPN, proxy, free_no_key, scraping  
-**Explaination**: Scraps Spur.us for IP, reversed obtained IP for a given domain/URL, free, no API key
+**Supports**: VPN, proxy, paid API key required  
+**Explaination**: Checks Spur.us for IP, reversed obtained IP for a given domain/URL, paid API key required
 
 ### ThreatFox
 **Name**: `threatfox`  

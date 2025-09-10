@@ -37,6 +37,7 @@
    content: '';
    position: absolute;
    top: 15px;
+   left: unset;
    right: 15px;
    display: inline-block;
    width: 15px;

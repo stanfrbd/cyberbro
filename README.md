@@ -325,6 +325,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase.
 * [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
 * [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine.
+* [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 
 Your contributions are greatly appreciated!
 

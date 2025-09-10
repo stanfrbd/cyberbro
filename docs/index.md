@@ -45,6 +45,7 @@
 - [Get MISP API Key](api-keys/Get-MISP-API-key.md)
 - [Get OpenCTI API Key](api-keys/Get-OpenCTI-API-key.md)
 - [Get Shodan API Key](api-keys/Get-Shodan-API-key.md)
+- [Get Spur.us API Key](api-keys/Get-Spur-Us-API-key.md)
 - [Get ThreatFox API Key](api-keys/Get-ThreatFox-API-key.md)
 - [Get VirusTotal API Key](api-keys/Get-VirusTotal-API-key.md)
 - [Get WebScout API Key](api-keys/Get-WebScout-API-key.md)

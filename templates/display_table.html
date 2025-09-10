@@ -183,7 +183,8 @@
         <tr class="high-risk">
             {% elif result.virustotal and (result.virustotal.total_malicious > 10 or result.virustotal.community_score <
                 -10) %} <tr class="high-risk high-detection">
-                {% elif result.spur and result.spur.tunnels not in ['Not anonymous', 'Non applicable'] %}
+                {% elif result.spur and result.spur.tunnels not in
+                ['Unknown - Behind Captcha', 'Not anonymous', 'Non applicable'] %}
         <tr class="warning-row">
             {% elif result.ipquery and (result.ipquery.is_proxy or result.ipquery.is_vpn or result.ipquery.is_tor) %}
         <tr class="warning-row">

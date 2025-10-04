@@ -14,5 +14,3 @@ gunicorn
 ioc-fanger
 tldextract
 crowdstrike-falconpy
-# stanfrbd version of googlesearch
-git+https://github.com/stanfrbd/googlesearch@search-fix

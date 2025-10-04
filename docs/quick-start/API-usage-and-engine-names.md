@@ -309,7 +309,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ### Google
 **Name**: `google`  
 **Supports**: domain, URL, IP, hash, free_no_key, scraping  
-**Explaination**: Scraps Google search results for all types of observable, free, no API key
+**Explaination**: Scraps Google search results via Mullvad's Leta service for all types of observable, free, no API key
 
 ### Google DNS (common records)
 **Name**: `google_dns`  

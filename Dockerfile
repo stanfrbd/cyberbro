@@ -3,7 +3,7 @@ FROM python:3.13-slim
 
 # Update the package list and install supervisor and nano, then clean up the apt cache
 RUN apt-get update && \
-    apt-get install -y supervisor nano git && \
+    apt-get install -y supervisor nano && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container to /app

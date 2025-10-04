@@ -27,7 +27,7 @@ from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
 from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
-VERSION: str = "v0.9.2"
+VERSION: str = "v0.9.3"
 
 
 class InvalidCachefileError(Exception):

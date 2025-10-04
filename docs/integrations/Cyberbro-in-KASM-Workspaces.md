@@ -2,7 +2,7 @@
 
 !!! info
     Kasm Workspaces is a docker container streaming platform for delivering browser-based access to desktops, applications, and web services.  
-    See more on: [https://hub.docker.com/u/kasmweb](https://hub.docker.com/u/kasmweb) for the other images provided.
+    Link of Cyberbro KASM version (official image from KASM): [https://hub.docker.com/r/kasmweb/cyberbro](https://hub.docker.com/r/kasmweb/cyberbro)
 
 ## Demo
 
@@ -10,24 +10,18 @@
 
 ## Installation
 
-### Images for Cyberbro on DockerHub are built regularly
+### Images for Cyberbro on DockerHub are built regularly by KASM team (and we thank them for that!)
 
-* Link: https://hub.docker.com/r/stanfrbd/cyberbro
-
-### Configuration of the Workspace in KASM
-
-```
-Cores: default
-Memory: default
-Docker Registry: https://index.docker.io/v1/
-Docker image: stanfrbd/cyberbro:latest
-Thumnail URL: https://pbs.twimg.com/profile_images/1865474886505742336/Dzn6HiOA_400x400.jpg
-Categories: Security
-```
+* Link: [https://hub.docker.com/r/kasmweb/cyberbro](https://hub.docker.com/r/kasmweb/cyberbro)
+* See more on: [https://hub.docker.com/u/kasmweb](https://hub.docker.com/u/kasmweb) for the other images provided by KASM team.
 
 ### Example of config in the KASM GUI
 
-![image](https://github.com/user-attachments/assets/ae362f5e-c96b-4677-a1c0-4cadfb5b5148)
+You can use the tags: 
+
+<img width="226" height="305" alt="image" src="https://github.com/user-attachments/assets/bb77942e-63e9-4021-b0b5-aa63f6da6cd7" />
+
+- `1.18.0` (available soon)
 
 ![image](https://github.com/user-attachments/assets/f6ffb648-e161-4c59-9359-51183b0b0ca0)
 

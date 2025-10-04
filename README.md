@@ -302,6 +302,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Ioc.One](https://ioc.one/)
 * [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
 * [MISP](https://www.misp-project.org/)
+* [Mullvad Leta](https://leta.mullvad.net/)
 * [OpenCTI](https://www.opencti.io/)
 * [OpenRDAP](https://openrdap.org/api)
 * [Phishtank](https://www.phishtank.com/)

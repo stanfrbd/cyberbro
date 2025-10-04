@@ -14,3 +14,4 @@ gunicorn
 ioc-fanger
 tldextract
 crowdstrike-falconpy
+beautifulsoup4

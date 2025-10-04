@@ -9,14 +9,11 @@ RUN apt-get update && \
 # Set the working directory inside the container to /app
 WORKDIR /app
 
-# Copy the requirements.txt file from the host to the container
-COPY requirements.txt .
+# Copy the application code from the host to the container
+COPY . .
 
 # Install the Python dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application code from the host to the container
-COPY . .
 
 # Expose port 5000 to allow external access to the application
 EXPOSE 5000

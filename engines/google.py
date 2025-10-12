@@ -1,6 +1,5 @@
 import logging
 from typing import Any, Optional
-from urllib import parse as urlparse
 import requests
 from bs4 import BeautifulSoup
 import json
@@ -20,7 +19,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 ]
 
 
-def query_google(observable: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
+def query_google(observable: str, observable_type: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Perform a Google search query via Mullvad's Leta service and parse the results.
 
@@ -40,7 +39,10 @@ def query_google(observable: str, proxies: dict[str, str], ssl_verify: bool = Tr
     """
     try:
 
-        query = f'%22{urlparse.quote(observable)}%22'  # Add proper URL encoding for quotes
+        if observable_type in ["IPv4", "IPv6"]:
+            query = observable  # No quotes needed for IP addresses - else 403
+        else:
+            query = f'%22{observable}%22'  # Add dorking quotes for other types
         url = f"https://leta.mullvad.net/search?q={query}&engine=google"  # Use the encoded query
         logger.info("Fetching URL: %s", url)
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
@@ -85,7 +87,7 @@ def query_google(observable: str, proxies: dict[str, str], ssl_verify: bool = Tr
             except (json.JSONDecodeError, KeyError) as e:
                 logger.error("Error extracting data: %s", e, exc_info=True)
         else:
-            logger.warning("No 'items' array found in the script tags.")
+            logger.warning(f"No 'items' array found in the script tags for query \"{query}\": {response.text}")
 
     except Exception as e:
         logger.error("Error while querying Google for '%s': %s", observable, e, exc_info=True)

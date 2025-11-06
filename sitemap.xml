@@ -2,114 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.cyberbro.net/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-AbuseIPDB-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-AlienVault-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-Crowdstrike-API-Credentials/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.cyberbro.net/api-keys/Get-DFIR-IRIS-API-key/</loc>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-Google-Safe-Browing-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-IPinfo-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-MDE-%28Microsoft-Defender-for-Endpoint%29-API-credentials/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-MISP-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-OpenCTI-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-Shodan-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-Spur-Us-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-ThreatFox-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-VirusTotal-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/api-keys/Get-WebScout-API-key/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/community/They-talk-about-Cyberbro/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/contribute/Coding-Style/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/contribute/Contributions/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/contribute/Documentation/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/integrations/Cyberbro-browser-extension/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/integrations/Cyberbro-in-KASM-Workspaces/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/integrations/Reverse-Proxy-configuration-%E2%80%90-Caddy/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/integrations/Use-Cyberbro-MCP-for-LLM/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/quick-start/API-usage-and-engine-names/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/quick-start/Quick-start-%26-Installation/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/quick-start/Reload-secrets-and-configuration/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/quick-start/Upgrade-Cyberbro/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
     <url>
          <loc>https://docs.cyberbro.net/troubleshooting/Common-Issues/</loc>
-         <lastmod>2025-10-12</lastmod>
+         <lastmod>2025-11-06</lastmod>
     </url>
 </urlset>

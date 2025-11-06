@@ -23,6 +23,8 @@ services:
       - MISP_URL=${MISP_URL:-}
       - OPENCTI_API_KEY=${OPENCTI_API_KEY:-}
       - OPENCTI_URL=${OPENCTI_URL:-}
+      - DFIR_IRIS_API_KEY=${DFIR_IRIS_API_KEY:-}
+      - DFIR_IRIS_URL=${DFIR_IRIS_URL:-}
       - SHODAN=${SHODAN:-}
       - SPUR_US=${SPUR_US:-}
       - THREATFOX=${THREATFOX:-}

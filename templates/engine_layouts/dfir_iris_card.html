@@ -1,0 +1,13 @@
+<div class="card">
+    <h3>DFIR-IRIS</h3>
+    {% if analysis_results.results[0].dfir_iris.reports == 0 %}
+    <p>Not Found</p>
+    {% else %}
+    <strong>Total count:</strong> {{ analysis_results.results[0].dfir_iris.reports }}<br/>
+    <ul>
+        {% for link in analysis_results.results[0].dfir_iris.links %}
+        <li><a href="{{ link }}">{{ link }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>

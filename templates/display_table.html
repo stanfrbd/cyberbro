@@ -144,6 +144,10 @@
             <th>OpenCTI</th>
             {% endif %}
 
+            {% if "dfir_iris" in analysis_results.selected_engines %}
+            <th>DFIR-IRIS</th>
+            {% endif %}
+
             {% if "hudsonrock" in analysis_results.selected_engines %}
             <th>Hudson Rock</th>
             {% endif %}
@@ -289,6 +293,10 @@
 
             {% if "opencti" in analysis_results.selected_engines %}
             {% include "engine_layouts/opencti_table.html" %}
+            {% endif %}
+
+            {% if "dfir_iris" in analysis_results.selected_engines %}
+            {% include "engine_layouts/dfir_iris_table.html" %}
             {% endif %}
 
             {% if "hudsonrock" in analysis_results.selected_engines %}

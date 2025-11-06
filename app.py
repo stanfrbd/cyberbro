@@ -27,7 +27,7 @@ from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
 from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
-VERSION: str = "v0.9.4"
+VERSION: str = "v0.9.5"
 
 
 class InvalidCachefileError(Exception):
@@ -347,6 +347,8 @@ def update_config():
         )
         secrets.webscout = request.form.get("webscout", secrets.webscout)
         secrets.threatfox = request.form.get("threatfox", secrets.threatfox)
+        secrets.dfir_iris_api_key = request.form.get("dfir_iris_api_key", secrets.dfir_iris_api_key)
+        secrets.dfir_iris_url = request.form.get("dfir_iris_url", secrets.dfir_iris_url)
 
         # Apply the GUI_ENABLED_ENGINES configuration directly to the GUI to avoid restarting the app
         updated_gui_enabled_engines: str = request.form.get("gui_enabled_engines", "")

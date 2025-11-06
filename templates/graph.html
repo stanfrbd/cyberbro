@@ -435,6 +435,22 @@
                 });
             }
 
+            if (entry.dfir_iris?.links) {
+                const indicatorName = "DFIR-IRIS";
+                addNode(
+                    indicatorName,
+                    indicatorName,
+                    "dfir_iris_indicator",
+                    "https://img.icons8.com/officexs/32/fire-element.png",
+                );
+                edges.push({
+                    from: obs,
+                    to: indicatorName,
+                    label: `DFIR-IRIS indicator`,
+                });
+
+            }
+
             if (entry.virustotal && entry.virustotal.total_malicious > 0) {
                 const vtNodeLabel = "VT flagged";
                 addNode(

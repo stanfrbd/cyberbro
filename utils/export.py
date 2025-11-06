@@ -181,6 +181,11 @@ def prepare_row(result, selected_engines):
         row["opencti_global_count"] = opencti_data.get("global_count") if opencti_data else None
         row["opencti_last_seen"] = opencti_data.get("latest_created_at") if opencti_data else None
 
+    if "dfir_iris" in selected_engines:
+        dfir_iris_data = result.get("dfir_iris", {})
+        row["dfir_iris_total_count"] = dfir_iris_data.get("reports") if dfir_iris_data else None
+        row["dfir_iris_link"] = dfir_iris_data.get("links") if dfir_iris_data else None
+
     if "misp" in selected_engines:
         misp_data = result.get("misp", {})
         row["misp_count"] = misp_data.get("count") if misp_data else None

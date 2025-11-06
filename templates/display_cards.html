@@ -106,6 +106,12 @@
     </div>
 
     <div class="cards-results-container">
+        {% if analysis_results.results[0].dfir_iris %}
+        {% include "engine_layouts/dfir_iris_card.html" %}
+        {% endif %}
+    </div>
+
+    <div class="cards-results-container">
         {% if analysis_results.results[0].hudsonrock %}
         {% include "engine_layouts/hudsonrock_card.html" %}
         {% endif %}

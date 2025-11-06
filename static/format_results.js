@@ -154,6 +154,10 @@ function formatResults(data) {
             }
         }
 
+        if (result.dfir_iris && result.dfir_iris.reports > 0) {
+            plainText += `DFIR-IRIS: Total Count: ${result.dfir_iris.reports}\n`;
+        }
+
         if (result.misp && result.misp.count > 0) {
             plainText += `MISP:\n`;
             plainText += `  - Count: ${result.misp.count}\n`;

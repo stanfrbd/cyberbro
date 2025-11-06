@@ -10,6 +10,7 @@ from engines import (
     criminalip,
     crowdstrike,
     crtsh,
+    dfir_iris,
     github,
     google,
     google_dns,
@@ -148,6 +149,16 @@ def perform_engine_queries(observable, selected_engines, result):
             observable["value"],
             secrets.opencti_api_key,
             secrets.opencti_url,
+            PROXIES,
+            SSL_VERIFY,
+        )
+
+    if "dfir_iris" in selected_engines and observable["type"] in dfir_iris.SUPPORTED_OBSERVABLE_TYPES:
+        result["dfir_iris"] = dfir_iris.query_dfir_iris(
+            observable["value"],
+            observable["type"],
+            secrets.dfir_iris_api_key,
+            secrets.dfir_iris_url,
             PROXIES,
             SSL_VERIFY,
         )

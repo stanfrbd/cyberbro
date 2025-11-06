@@ -301,10 +301,15 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: domain, URL, free_no_key  
 **Explaination**: Checks crt.sh for known subdomain names based on TLS certificates for a given domain / URL, free, no API key
 
+### DFIR-IRIS  
+**Name**: `dfir_iris`  
+**Supports** : domain,URL,IP,hash, free API key required  
+**Explanation**: Searches DFIR-IRIS globally across all cases for indicators, free, API key required.  
+
 ### Github  
 **Name**: `github`  
-**Supports**: domain, URL, IP, hash, free_no_key, scraping
-**Explaination**: Get Github grep.app API search results for all types of observable, free, no API key
+**Supports**: domain, URL, IP, hash, free_no_key, scraping  
+**Explaination**: Get Github grep.app API search results for all types of observable, free, no API key  
 
 ### Google
 **Name**: `google`  

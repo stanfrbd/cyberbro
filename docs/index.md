@@ -39,6 +39,7 @@
 - [Get AbuseIPDB API Key](api-keys/Get-AbuseIPDB-API-key.md)
 - [Get AlienVault API Key](api-keys/Get-AlienVault-API-key.md)
 - [Get Crowdstrike API Credentials](api-keys/Get-Crowdstrike-API-Credentials.md)
+- [Get DFIR-Iris API Key](api-keys/Get-DFIR-IRIS-API-key.md)
 - [Get Google Safe Browsing API Key](api-keys/Get-Google-Safe-Browing-API-key.md)
 - [Get IPinfo API Key](api-keys/Get-IPinfo-API-key.md)
 - [Get MDE (Microsoft Defender for Endpoint) API Credentials](api-keys/Get-MDE-(Microsoft-Defender-for-Endpoint)-API-credentials.md)
@@ -75,3 +76,4 @@ For more details, browse the sidebar or use the search.
 If you need help, check the [Cyberbro GitHub repository](https://github.com/stanfrbd/cyberbro).
 
 Happy analyzing!
+

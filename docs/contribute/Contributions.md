@@ -17,6 +17,8 @@ For details on contributing, community standards, and licensing, see:
 * Make sure the engine is added in `display_cards.html` and `display_table.html`.
 * Make sure the engine is in the GUI form `index.html` with relevant description - alphabetic order.
 * Make sure the engine is usable in the graph view in `graph.html`.
-* Make sure any API key or configuration needed for the engine is added to `secrets.json`.
+* Make sure any API key or configuration needed for the engine is added to `secrets.json` and `.env.sample`.
 * Make sure the engine is documented in `docs/api-keys/Get-Engine-API-Key.md` if relevant.
+* Make sure to add the link to the API key guide in `docs/index.md` if relevant.
+* Make sure to add the page to the sidebar in `mkdocs.yml`.
 * Make sure the engine is documented in `docs/quick-start/API-usage-and-engine-names.md`.

@@ -19,9 +19,9 @@
 
 You can use the tags: 
 
-<img width="226" height="305" alt="image" src="https://github.com/user-attachments/assets/bb77942e-63e9-4021-b0b5-aa63f6da6cd7" />
+<img width="239" height="439" alt="image" src="https://github.com/user-attachments/assets/282d8fa2-fe42-4731-9744-708ea37d1830" />
 
-- `1.18.0` (available soon)
+- `1.18.0` and later matching your version.
 
 ![image](https://github.com/user-attachments/assets/f6ffb648-e161-4c59-9359-51183b0b0ca0)
 
@@ -51,6 +51,8 @@ OPENCTI_URL=https://demo.opencti.io
 CROWDSTRIKE_CLIENT_ID=client_id_here
 CROWDSTRIKE_CLIENT_SECRET=client_secret_here
 CROWDSTRIKE_FALCON_BASE_URL=https://falcon.crowdstrike.com
+DFIR_IRIS_URL=https://dfir-iris.local
+DFIR_IRIS_API_KEY=token_here
 WEBSCOUT=token_here
 API_PREFIX=my_api
 MAX_FORM_MEMORY_SIZE=1048576

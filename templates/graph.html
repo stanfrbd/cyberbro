@@ -133,10 +133,15 @@
             const providers = ["ipinfo", "ipquery", "webscout"];
             providers.forEach((provider) => {
                 if (entry[provider]?.asn) {
-                    const asn =
-                        provider === "ipquery"
-                            ? `${entry[provider].asn} ${entry[provider].isp}`
-                            : String(entry[provider].asn);
+                    let asn = String(entry[provider].asn || "");
+
+                    if (provider === "ipquery" && entry[provider]?.isp) {
+                        asn = `${asn} ${entry[provider].isp}`.trim();
+                    }
+
+                    if (provider === "webscout" && entry[provider]?.as_org) {
+                        asn = `${asn} ${entry[provider].as_org}`.trim();
+                    }
                     if (entry.type === "FQDN" || entry.type === "URL") {
                         if (entry.reverse_dns?.reverse_dns) {
                             if (

@@ -63,6 +63,7 @@ def query_spur_us(
             return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
 
     except Exception as e:
-        logger.error("Error querying spur.us for IP '%s': %s", ip, e, exc_info=True)
+        logger.error("Error querying spur.us for IP '%s': %s - Check API key settings", ip, e, exc_info=True)
+        return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
 
     return None

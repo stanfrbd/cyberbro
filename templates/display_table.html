@@ -205,8 +205,6 @@
             result.webscout.network_provider_services | map('lower') or result.webscout.is_proxy or
             result.webscout.is_tor or result.webscout.is_vpn) %}
         <tr class="warning-row">
-            {% elif result.webscout and result.webscout.risk_score > 50 %}
-        <tr class="high-risk">
             {% elif result.virustotal and result.virustotal.community_score > 100 %}
         <tr class="clean-detection">
             {% endif %}

@@ -4,10 +4,6 @@
     <strong>IP:</strong> {{ result.webscout.ip }}<br />
     {% endif %}
 
-    {% if result.webscout.risk_score %}
-    <strong>Risk Score:</strong> {{ result.webscout.risk_score }}<br />
-    {% endif %}
-
     {% if result.webscout.country_name %}
     <strong>Country:</strong><span class="country country-{{result.webscout.country_name | lower}}">
         {{result.webscout.country_name}}</span> <span

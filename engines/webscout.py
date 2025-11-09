@@ -15,40 +15,8 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 
 def query_webscout(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
-    Queries the IP information from the webscout.io API.
-
-    Args:
-        ip (str): The IP address to query.
-        api_key (str): The API key for webscout.io.
-        proxies (dict): Dictionary containing proxy settings.
-
-    Returns:
-        dict: A dictionary containing extracted information:
-            {
-                "ip": ...,
-                "risk_score": ...,
-                "location": "country_name, region",
-                "country_code": ...,
-                "country_name": ...,
-                "hostnames": ...,
-                "domains_on_ip": ...,
-                "operator": ...,
-                "network_type": ...,
-                "network_provider": ...,
-                "network_service": ...,
-                "network_service_region": ...,
-                "network_provider_services": ...,
-                "behavior": ...,
-                "as_org": ...,
-                "asn": ...,
-                "provider_description": ...,
-                "operator_description": ...,
-                "network_risk_score": ...,
-                "network_range": ...,
-                "is_private": ...,
-                "open_ports": ...
-            }
-        None: If an error occurs or 'status' key isn't 'success'.
+    Queries the IP information from the webscout.io API and adapts parsing to the new API schema.
+    Keeps the original return fields for compatibility and adds a few new relevant fields when available.
     """
     try:
         # rate limit
@@ -58,58 +26,109 @@ def query_webscout(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: b
         response.raise_for_status()
 
         data = response.json()
+        logger.debug("webscout response for %s: %s", ip, data)
+
         if data.get("status") == "success":
-            ip_resp = data["data"].get("ip", "Unknown")
-            risk_score = data["data"].get("risk_score", "Unknown")
-            location = data["data"].get("location", {})
-            country_code = location.get("country_iso", "Unknown")
-            city = location.get("city", "Unknown")
-            # Attempt to resolve country name
+            d = data.get("data", {})
+
+            # Basic IP & location
+            ip_resp = d.get("ip", ip)
+            location = d.get("location", {}) or {}
+            country_code = location.get("country_iso", "Unknown") or "Unknown"
+            city = location.get("city", "Unknown") or "Unknown"
+            # Resolve country name
             try:
                 country_obj = pycountry.countries.get(alpha_2=country_code)
                 country_name = country_obj.name if country_obj else "Unknown"
             except Exception:
                 country_name = "Unknown"
-            hostnames = data["data"].get("hostnames", [])
-            domains_on_ip = data["data"].get("domains_on_ip", "Unknown")
-            network = data["data"].get("network", {})
-            network_type = network.get("type", "Unknown")
-            network_service = network.get("service", "Unknown")
-            network_service_region = network.get("region", "Unknown")
-            network_risk_score = network.get("risk_score", "Unknown")
-            network_range = network.get("range", "Unknown")
+
+            # Hostnames
+            hostnames = d.get("hostnames")
+            if hostnames is None:
+                hostnames = []
+
+            # Network
+            network = d.get("network", {}) or {}
+            network_type = network.get("type", "") or ""
+            network_service = network.get("service", "") or ""
+            network_service_region = network.get("region", "") or ""
+            network_range = network.get("range", "Unknown") or "Unknown"
             is_private = network.get("private", False)
-            as_data = data["data"].get("as", {})
-            as_org = as_data.get("organization", "Unknown")
-            asn_list = as_data.get("as_numbers", [])
-            asn = ", ".join(map(str, asn_list)) if len(asn_list) > 1 else (asn_list[0] if asn_list else "Unknown")
-            company = data["data"].get("company", {})
-            network_provider = company.get("name", "Unknown")
-            network_provider_services = company.get("business", [])
-            description = company.get("description", "Unknown")
-            behavior_data = data["data"].get("behavior", {})
-            behavior = behavior_data.get("tags", [])
-            osint_data = data["data"].get("osint", {})
-            osint_tags = osint_data.get("tags", [])
-            behavior = behavior or []  # Ensure behavior is a list
-            osint_tags = osint_tags or []  # Ensure osint_tags is a list
-            if behavior or osint_tags:
-                behavior = list(set(behavior + osint_tags))  # Merge and remove duplicates
-            open_ports = behavior_data.get("open_ports", [])
-            anonymization = data["data"].get("anonymization", {})
-            is_vpn = anonymization.get("vpn", False)
-            is_proxy = anonymization.get("proxy", False)
-            is_tor = anonymization.get("tor", False)
-            anonymization_service = anonymization.get("service", "")
+
+            # AS
+            as_data = d.get("as", {}) or {}
+            as_org = as_data.get("organization", "Unknown") or "Unknown"
+            raw_as = as_data.get("as_number")
+            if raw_as:
+                as_number = "AS" + str(raw_as)
+            else:
+                as_number = "Unknown"
+
+            # Company / provider info
+            company = d.get("company", {}) or {}
+            network_provider = company.get("name", "Unknown") or "Unknown"
+            network_provider_services = company.get("business", []) or []
+            description = company.get("description", "Unknown") or "Unknown"
+
+            # Anonymization
+            anonymization = d.get("anonymization", {}) or {}
+            is_vpn = bool(anonymization.get("vpn", False))
+            is_proxy = bool(anonymization.get("proxy", False))
+            is_tor = bool(anonymization.get("tor", False))
+            # legacy single anonymization_service field: pick first service provider/display_name if present
+            anonymization_services_raw = anonymization.get("services", []) or []
+            anonymization_service = ""
+            if anonymization_services_raw:
+                first = anonymization_services_raw[0]
+                anonymization_service = first.get("provider") or first.get("display_name") or ""
+            # keep full list as a new field
+            anonymization_services = [
+                {
+                    "provider": s.get("provider"),
+                    "display_name": s.get("display_name"),
+                    "thumbnail_url": s.get("thumbnail_url"),
+                }
+                for s in anonymization_services_raw
+            ]
+
+            # OSINT / behavior / tags
+            # new schema has osint.services each with tags array; aggregate them for legacy "behavior"
+            osint = d.get("osint", {}) or {}
+            osint_services = osint.get("services", []) or []
+            osint_tags = []
+            for svc in osint_services:
+                tags = svc.get("tags", []) or []
+                osint_tags.extend(tags)
+            # remove duplicates
+            behavior = list(dict.fromkeys(osint_tags))
+            # keep top-level osint first/last seen as new fields
+            osint_first_seen = osint.get("first_seen")
+            osint_last_seen = osint.get("last_seen")
+
+            # Open ports - no longer present in example; keep for compatibility as empty list if missing
+            # previous implementation used behavior_data.get("open_ports", [])
+            open_ports = d.get("open_ports", []) or []
+
+            # Netflow - new useful fields
+            netflow = d.get("netflow", {}) or {}
+            has_netflow = bool(netflow.get("has_netflow", False))
+            netflow_days_seen = netflow.get("days_seen")
+            netflow_total_observation = netflow.get("total_observation")
+            netflow_last_seen = netflow.get("last_seen")
+
+            def _date_only(dt: Optional[str]) -> Optional[str]:
+                if isinstance(dt, str) and "T" in dt:
+                    return dt.split("T", 1)[0]
+                return dt
 
             return {
+                # original fields (kept for compatibility)
                 "ip": ip_resp,
-                "risk_score": risk_score,
                 "location": f"{country_name}, {city}",
                 "country_code": country_code,
                 "country_name": country_name,
                 "hostnames": hostnames,
-                "domains_on_ip": domains_on_ip,
                 "network_type": network_type,
                 "network_provider": network_provider,
                 "network_service": network_service,
@@ -117,9 +136,8 @@ def query_webscout(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: b
                 "network_provider_services": network_provider_services,
                 "behavior": behavior,
                 "as_org": as_org,
-                "asn": asn,
+                "asn": as_number,
                 "description": description,
-                "network_risk_score": network_risk_score,
                 "network_range": network_range,
                 "is_private": is_private,
                 "open_ports": open_ports,
@@ -127,6 +145,14 @@ def query_webscout(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: b
                 "is_proxy": is_proxy,
                 "is_tor": is_tor,
                 "anonymization_service": anonymization_service,
+                # new fields (added for relevance)
+                "anonymization_services": anonymization_services,
+                "osint_first_seen": _date_only(osint_first_seen),
+                "osint_last_seen": _date_only(osint_last_seen),
+                "has_netflow": has_netflow,
+                "netflow_days_seen": netflow_days_seen,
+                "netflow_total_observation": netflow_total_observation,
+                "netflow_last_seen": _date_only(netflow_last_seen),
             }
 
     except Exception as e:

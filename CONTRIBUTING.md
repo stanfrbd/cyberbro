@@ -30,6 +30,7 @@ Thank you for considering contributing to Cyberbro! This guide will help you get
 - Use Python 3.11 or later.  
 - Follow snake_case coding style
 - Keep dependencies minimal and document any new ones in `requirements.txt`.  
+- Verify any [checklist listed here](https://docs.cyberbro.net/contribute/Contributions/)
 
 ## Community Guidelines  
 - Be respectful and constructive in discussions.  

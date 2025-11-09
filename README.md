@@ -114,6 +114,8 @@ cp secrets-sample.json secrets.json
     "criminalip_api_key": "token_here",
     "crowdstrike_client_id": "client_id_here",
     "crowdstrike_client_secret": "client_secret_here",
+    "dfir_iris_api_key": "token_here",
+    "dfir_iris_url": "https://dfir-iris.local",
     "google_safe_browsing": "token_here",
     "ipinfo": "token_here",
     "mde_client_id": "client_id_here",
@@ -290,6 +292,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [CriminalIP](https://www.criminalip.io/)
 * [CrowdStrike](https://www.crowdstrike.com/)
 * [crt.sh](https://crt.sh/)
+* [DFIR Iris](https://www.dfir-iris.org/)
 * [Github](https://github.com/)
 * [Google Safe Browsing](https://developers.google.com/safe-browsing)
 * [Google](https://google.com/)
@@ -323,9 +326,9 @@ A huge thank you to all the amazing contributors who made pull requests and help
 
 * [Florian PILLOT](https://github.com/Harukunnn) who reworked engines (refactoring and optimizations).
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
-* [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase.
+* [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase, including CriminalIP. 
 * [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
-* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine.
+* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine and adding DFIR IRIS search.
 * [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 
 Your contributions are greatly appreciated!

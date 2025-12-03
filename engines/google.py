@@ -1,9 +1,7 @@
 import logging
 from typing import Any, Optional
 import requests
-from bs4 import BeautifulSoup
-import json
-import re
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -19,77 +17,79 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 ]
 
 
-def query_google(observable: str, observable_type: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
+def query_google(
+    observable: str,
+    google_cse_cx: str,
+    google_cse_key: str,
+    proxies: dict[str, str],
+    ssl_verify: bool = True,
+    dorks: str = "",
+) -> Optional[dict[str, Any]]:
     """
-    Perform a Google search query via Mullvad's Leta service and parse the results.
+    Perform a Google Custom Search (CSE) query and return results in the same shape as before.
 
-    Args:
-        observable (str): The search query.
-        proxies (dict): Dictionary containing proxy settings, e.g. {"http": "...", "https": "..."}.
+    dorks: optional prefix for the query (default empty). Example: 'site:example.com' or '""' if desired.
 
     Returns:
-        dict: A dictionary containing the search results under the key "results":
-            {
-                "results": [
-                    {"title": ..., "description": ..., "url": ...},
-                    ...
-                ]
-            }
-        None: If an error occurs (network, parsing, etc.).
+        {"results": [{"title": ..., "description": ..., "url": ...}, ...]} or None on error.
+        If the API returns an error payload or a non-2xx HTTP status, returns {"results":[{"error":"..."}]}.
     """
     try:
+        # Respect rate limit: sleep 500ms between requests (be conservative)
+        time.sleep(0.5)
 
-        if observable_type in ["IPv4", "IPv6"]:
-            query = observable  # No quotes needed for IP addresses - else 403
-        else:
-            query = f'%22{observable}%22'  # Add dorking quotes for other types
-        url = f"https://leta.mullvad.net/search?q={query}&engine=google"  # Use the encoded query
-        logger.info("Fetching URL: %s", url)
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
-        response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=5, headers=headers)
-        response.encoding = 'utf-8'  # Ensure proper decoding of response text
-        soup = BeautifulSoup(response.text, "html.parser")
+        dorks_prefix = dorks.strip()
+        if dorks_prefix:
+            dorks_prefix += " "
 
-        # Step 1: Find the <script> tag containing "items"
-        script_tags = soup.find_all("script")
-        target_script = None
-        for script in script_tags:
-            if script.string and "items:[" in script.string:
-                target_script = script.string
-                break
+        q = f'{dorks_prefix}"{observable}"'
 
-        # Step 2: Parse the JSON content directly
-        if target_script:
+        url = "https://www.googleapis.com/customsearch/v1"
+        params = {"key": google_cse_key, "cx": google_cse_cx, "q": q}
+
+        resp = requests.get(url, params=params, proxies=proxies, verify=ssl_verify, timeout=10)
+
+        # Try to parse JSON (if possible)
+        data = None
+        try:
+            data = resp.json()
+        except ValueError:
+            data = None
+
+        # If HTTP error or API returned an "error" payload, return that message in results
+        if resp.status_code >= 400 or (isinstance(data, dict) and "error" in data):
+            if isinstance(data, dict) and "error" in data:
+                # Try to extract a friendly message
+                err = data.get("error", {})
+                msg = err.get("message") or (err.get("errors", [{}])[0].get("message")) or str(err)
+            else:
+                msg = resp.text or resp.reason or f"HTTP {resp.status_code}"
+            logger.warning("Google CSE error for '%s': %s", observable, msg)
+            return {"results": [{"title": "API Error", "description": "Check Cyberbro logs for details", "url": ""}]}
+
+        # Ensure we have JSON data for successful responses
+        if data is None:
             try:
-                # Extract the JSON content from the script string
-                start_index = target_script.find("items:[")
-                end_index = target_script.find("],", start_index) + 1
-                items_raw = target_script[start_index + len("items:"):end_index].strip()
+                data = resp.json()
+            except ValueError:
+                logger.error("Expected JSON from Google CSE for '%s' but got none.", observable)
+                return None
 
-                # Add quotes around property names (title, snippet, link, favicon)
-                items_raw = re.sub(r'(?<!")\b(title|snippet|link|favicon)\b(?!")(?=\s*:)', r'"\1"', items_raw)
+        items = data.get("items", []) if isinstance(data, dict) else []
+        search_results = [
+            {
+                "title": item.get("title"),
+                "description": item.get("snippet"),
+                "url": item.get("link"),
+            }
+            for item in items
+        ]
 
-                # Load the JSON data
-                items_json = json.loads(f"{{\"items\":{items_raw}}}")["items"]
+        return {"results": search_results}
 
-                # Extract the results
-                search_results = [
-                    {
-                        "title": item.get("title"),
-                        "description": item.get("snippet"),
-                        "url": item.get("link"),
-                    }
-                    for item in items_json
-                ]
-
-                return {"results": search_results}
-
-            except (json.JSONDecodeError, KeyError) as e:
-                logger.error("Error extracting data: %s", e, exc_info=True)
-        else:
-            logger.warning(f"No 'items' array found in the script tags for query \"{query}\": {response.text}")
-
+    except requests.RequestException as e:
+        logger.error("Network error querying Google CSE for '%s': %s", observable, e, exc_info=True)
     except Exception as e:
-        logger.error("Error while querying Google for '%s': %s", observable, e, exc_info=True)
+        logger.error("Unexpected error querying Google CSE for '%s': %s", observable, e, exc_info=True)
 
     return None

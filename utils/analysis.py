@@ -114,7 +114,9 @@ def perform_engine_queries(observable, selected_engines, result):
         result["ioc_one_pdf"] = ioc_one.query_ioc_one_pdf(observable["value"], PROXIES, SSL_VERIFY)
 
     if "google" in selected_engines and observable["type"] in google.SUPPORTED_OBSERVABLE_TYPES:
-        result["google"] = google.query_google(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
+        result["google"] = google.query_google(
+            observable["value"], secrets.google_cse_cx, secrets.google_cse_key, PROXIES, SSL_VERIFY
+        )
 
     if "github" in selected_engines and observable["type"] in github.SUPPORTED_OBSERVABLE_TYPES:
         result["github"] = github.query_github(observable["value"], PROXIES, SSL_VERIFY)

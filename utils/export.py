@@ -1,9 +1,12 @@
+import logging
 import threading
 import time
 from pathlib import Path
 
 import pandas as pd
 from flask import send_file
+
+logger = logging.getLogger(__name__)
 
 
 def prepare_row(result, selected_engines):
@@ -297,8 +300,8 @@ def export_to_excel(data, timestamp):
                 try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.error("Error exporting to Excel, column %s, cell %s, '%s'", column, cell, e, exc_info=True)
             adjusted_width = max_length + 2
             worksheet.column_dimensions[column].width = adjusted_width
     response = send_file(excel_path, as_attachment=True)

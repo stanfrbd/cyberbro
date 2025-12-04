@@ -87,9 +87,7 @@ def test_successful_update(mock_cache_file):
         with patch("pathlib.Path.open", mock_open()):
             with patch("pathlib.Path.exists", return_value=True):
                 with patch("pathlib.Path.touch"):
-                    version = get_latest_version_from_updated_cache_file(
-                        mock_cache_file
-                    )
+                    version = get_latest_version_from_updated_cache_file(mock_cache_file)
                     assert version == "v1.1.0"
 
 
@@ -149,8 +147,6 @@ def test_cache_file_invalid():
         "app.get_latest_version_from_cache_file",
         side_effect=InvalidCachefileError("Cache invalid"),
     ):
-        with patch(
-            "app.get_latest_version_from_updated_cache_file", return_value="v1.1.0"
-        ):
+        with patch("app.get_latest_version_from_updated_cache_file", return_value="v1.1.0"):
             result = check_for_new_version("v1.0.0")
             assert result is True

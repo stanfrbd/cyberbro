@@ -50,6 +50,8 @@ cp secrets-sample.json secrets.json
     "crowdstrike_client_secret": "client_secret_here",
     "dfir_iris_api_key": "token_here",
     "dfir_iris_url": "https://dfir-iris.local",
+    "google_cse_cx": "cx_here",
+    "google_cse_key": "key_here",
     "google_safe_browsing": "token_here",
     "ipinfo": "token_here",
     "mde_client_id": "client_id_here",

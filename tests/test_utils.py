@@ -74,6 +74,4 @@ def test_extract_observables():
         {"value": "192.168.1.0", "type": "IPv4"},
     ]
     result = extract_observables(text)
-    assert all(
-        any(item == expected_item for item in result) for expected_item in expected
-    )
+    assert all(any(item == expected_item for item in result) for expected_item in expected)

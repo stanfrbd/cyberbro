@@ -60,10 +60,7 @@ def query_webscout(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: b
             as_data = d.get("as", {}) or {}
             as_org = as_data.get("organization", "Unknown") or "Unknown"
             raw_as = as_data.get("as_number")
-            if raw_as:
-                as_number = "AS" + str(raw_as)
-            else:
-                as_number = "Unknown"
+            as_number = "AS" + str(raw_as) if raw_as else "Unknown"
 
             # Company / provider info
             company = d.get("company", {}) or {}

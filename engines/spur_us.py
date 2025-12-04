@@ -51,16 +51,15 @@ def query_spur_us(
             data = response.json()
             tunnels_info = "Not anonymous"
 
-            if "tunnels" in data and data["tunnels"]:
+            if data.get("tunnels"):
                 for tunnel in data["tunnels"]:
                     if tunnel.get("operator"):
                         tunnels_info = tunnel["operator"]
                         break
 
             return {"link": spur_url, "tunnels": tunnels_info}
-        else:
-            # No API key, return link with Unknown tunnels
-            return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
+        # No API key, return link with Unknown tunnels
+        return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
 
     except Exception as e:
         logger.error("Error querying spur.us for IP '%s': %s - Check API key settings", ip, e, exc_info=True)

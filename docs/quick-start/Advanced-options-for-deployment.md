@@ -14,6 +14,8 @@ PROXY_URL=http://127.0.0.1:9000
 VIRUSTOTAL=api_key_here
 ABUSEIPDB=api_key_here
 IPINFO=api_key_here
+GOOGLE_CSE_KEY=api_key_here
+GOOGLE_CSE_CX=cx_here
 GOOGLE_SAFE_BROWSING=api_key_here
 MDE_TENANT_ID=api_key_here
 MDE_CLIENT_ID=api_key_here
@@ -71,6 +73,8 @@ services:
       - CROWDSTRIKE_FALCON_BASE_URL=${CROWDSTRIKE_FALCON_BASE_URL:-}
       - DFIR_IRIS_API_KEY=${DFIR_IRIS_API_KEY:-}
       - DFIR_IRIS_URL=${DFIR_IRIS_URL:-}
+      - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
+      - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
       - GOOGLE_SAFE_BROWSING=${GOOGLE_SAFE_BROWSING:-}
       - IPINFO=${IPINFO:-}
       - MDE_CLIENT_ID=${MDE_CLIENT_ID:-}

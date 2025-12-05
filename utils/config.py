@@ -31,6 +31,7 @@ class Secrets:
     google_safe_browsing: str = ""
     gui_cache_timeout: int = 1800
     gui_enabled_engines: list[str] = field(default_factory=list)
+    ipapi: str = ""
     ipinfo: str = ""
     max_form_memory_size: int = 1_048_576
     mde_client_id: str = ""
@@ -41,6 +42,8 @@ class Secrets:
     opencti_api_key: str = ""
     opencti_url: str = ""
     proxy_url: str = ""
+    rl_analyze_url: str = ""
+    rl_analyze_api_key: str = ""
     shodan: str = ""
     spur_us: str = ""
     threatfox: str = ""

@@ -1,0 +1,5 @@
+1. Go to [https://ipapi.is/](https://ipapi.is/)
+2. Sign up for a free account (if you don't have one already).
+3 Go to [https://ipapi.is/app/home](https://ipapi.is/app/home) and copy your API key.
+
+You can fill the `secrets.json` accordingly with the variable `ipapi` or the environment variable `IPAPI` in your custom docker-compose file.

@@ -17,6 +17,7 @@ from engines import (
     google_safe_browsing,
     hudsonrock,
     ioc_one,
+    ipapi,
     ipinfo,
     ipquery,
     microsoft_defender_for_endpoint,
@@ -25,6 +26,7 @@ from engines import (
     phishtank,
     rdap,
     reverse_dns,
+    reversinglabs_spectra_analyze,
     shodan,
     spur_us,
     threatfox,
@@ -165,6 +167,19 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
+    if (
+        "rl_analyze" in selected_engines
+        and observable["type"] in reversinglabs_spectra_analyze.SUPPORTED_OBSERVABLE_TYPES
+    ):
+        result["rl_analyze"] = reversinglabs_spectra_analyze.query_rl_analyze(
+            observable["value"],
+            observable["type"],
+            secrets.rl_analyze_api_key,
+            secrets.rl_analyze_url,
+            PROXIES,
+            SSL_VERIFY,
+        )
+
     if "threatfox" in selected_engines and observable["type"] in threatfox.SUPPORTED_OBSERVABLE_TYPES:
         result["threatfox"] = threatfox.query_threatfox(
             observable["value"], observable["type"], secrets.threatfox, PROXIES, SSL_VERIFY
@@ -240,6 +255,9 @@ def perform_engine_queries(observable, selected_engines, result):
             if observable["type"] in ["FQDN", "URL"]:
                 observable["type"] = "IPv4"
                 observable["value"] = reverse_dns_result["reverse_dns"][0]
+
+    if "ipapi" in selected_engines and observable["type"] in ipapi.SUPPORTED_OBSERVABLE_TYPES:
+        result["ipapi"] = ipapi.query_ipapi(observable["value"], secrets.ipapi, PROXIES, SSL_VERIFY)
 
     if "ipquery" in selected_engines and observable["type"] in ipquery.SUPPORTED_OBSERVABLE_TYPES:
         result["ipquery"] = ipquery.query_ipquery(observable["value"], PROXIES, SSL_VERIFY)

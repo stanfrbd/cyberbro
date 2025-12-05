@@ -116,7 +116,10 @@ cp secrets-sample.json secrets.json
     "crowdstrike_client_secret": "client_secret_here",
     "dfir_iris_api_key": "token_here",
     "dfir_iris_url": "https://dfir-iris.local",
+    "google_cse_cx": "cx_here",
+    "google_cse_key": "key_here",
     "google_safe_browsing": "token_here",
+    "ipapi": "token_here",
     "ipinfo": "token_here",
     "mde_client_id": "client_id_here",
     "mde_client_secret": "client_secret_here",
@@ -126,6 +129,8 @@ cp secrets-sample.json secrets.json
     "opencti_api_key": "token_here",
     "opencti_url": "https://demo.opencti.io",
     "proxy_url": "",
+    "rl_analyze_api_key": "token_here",
+    "rl_analyze_url": "https://spectra_analyse_url_here",
     "shodan": "token_here",
     "spur_us": "token_here",
     "threatfox": "token_here",
@@ -300,12 +305,12 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Grep.App](https://grep.app/)
 * [Hudson Rock](https://hudsonrock.com/)
 * [ICANN](https://lookup.icann.org/)
+* [IPapi](https://ipapi.is/)
 * [IPinfo](https://ipinfo.io/developers)
 * [IPquery](https://ipquery.gitbook.io/ipquery-docs)
 * [Ioc.One](https://ioc.one/)
 * [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
 * [MISP](https://www.misp-project.org/)
-* [Mullvad Leta](https://leta.mullvad.net/)
 * [OpenCTI](https://www.opencti.io/)
 * [OpenRDAP](https://openrdap.org/api)
 * [Phishtank](https://www.phishtank.com/)
@@ -313,6 +318,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Spur.us](https://spur.us/)
 * [ThreatFox](https://threatfox.abuse.ch/api/)
 * [URLscan](https://urlscan.io/)
+* [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [WebScout](https://webscout.io/)
 
@@ -328,7 +334,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
 * [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase, including CriminalIP. 
 * [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
-* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine and adding DFIR IRIS search.
+* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine, adding DFIR IRIS search and fixing Bandit issues.
 * [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 
 Your contributions are greatly appreciated!

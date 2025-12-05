@@ -84,6 +84,10 @@
             <th>AbuseIPDB</th>
             {% endif %}
 
+            {% if "ipapi" in analysis_results.selected_engines %}
+            <th>IPapi</th>
+            {% endif %}
+
             {% if "spur" in analysis_results.selected_engines %}
             <th>Spur.us</th>
             {% endif %}
@@ -148,6 +152,10 @@
             <th>DFIR-IRIS</th>
             {% endif %}
 
+            {% if "rl_analyze" in analysis_results.selected_engines %}
+            <th>Reversing Labs Spectra Analyze</th>
+            {% endif %}
+
             {% if "hudsonrock" in analysis_results.selected_engines %}
             <th>Hudson Rock</th>
             {% endif %}
@@ -201,6 +209,10 @@
             {% elif result.crowdstrike and result.crowdstrike.indicator_found and
             result.crowdstrike.malicious_confidence == 'high' %}
         <tr class="high-risk">
+            {% elif result.rl_analyze and result.rl_analyze.report_color == "red" %}
+        <tr class="high-risk high-detection">
+            {% elif result.rl_analyze and result.rl_analyze.report_color == "yellow" %}
+        <tr class="warning-row">
             {% elif result.webscout and ('vpn' in result.webscout.network_provider_services | map('lower') or 'proxy' in
             result.webscout.network_provider_services | map('lower') or result.webscout.is_proxy or
             result.webscout.is_tor or result.webscout.is_vpn) %}
@@ -231,6 +243,10 @@
 
             {% if "abuseipdb" in analysis_results.selected_engines %}
             {% include "engine_layouts/abuseipdb_table.html" %}
+            {% endif %}
+
+            {% if "ipapi" in analysis_results.selected_engines %}
+            {% include "engine_layouts/ipapi_table.html" %}
             {% endif %}
 
             {% if "spur" in analysis_results.selected_engines %}
@@ -295,6 +311,10 @@
 
             {% if "dfir_iris" in analysis_results.selected_engines %}
             {% include "engine_layouts/dfir_iris_table.html" %}
+            {% endif %}
+
+            {% if "rl_analyze" in analysis_results.selected_engines %}
+            {% include "engine_layouts/rl_analyze_table.html" %}
             {% endif %}
 
             {% if "hudsonrock" in analysis_results.selected_engines %}

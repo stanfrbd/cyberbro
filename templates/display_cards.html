@@ -43,6 +43,9 @@
         {% if analysis_results.results[0].webscout %}
         {% include "engine_layouts/webscout_card.html" %}
         {% endif %}
+        {% if analysis_results.results[0].ipapi %}
+        {% include "engine_layouts/ipapi_card.html" %}
+        {% endif %}
     </div>
 
     <div class="cards-results-container">
@@ -108,6 +111,12 @@
     <div class="cards-results-container">
         {% if analysis_results.results[0].dfir_iris %}
         {% include "engine_layouts/dfir_iris_card.html" %}
+        {% endif %}
+    </div>
+
+    <div class="cards-results-container">
+        {% if analysis_results.results[0].rl_analyze %}
+        {% include "engine_layouts/rl_analyze_card.html" %}
         {% endif %}
     </div>
 

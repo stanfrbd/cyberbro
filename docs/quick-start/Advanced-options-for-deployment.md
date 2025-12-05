@@ -12,7 +12,9 @@ Here is a list of all available environment variables that can be used with exam
 ```bash
 PROXY_URL=http://127.0.0.1:9000
 VIRUSTOTAL=api_key_here
+ALIENVAULT=api_key_here
 ABUSEIPDB=api_key_here
+IPAPI=api_key_here
 IPINFO=api_key_here
 GOOGLE_CSE_KEY=api_key_here
 GOOGLE_CSE_CX=cx_here
@@ -27,12 +29,15 @@ SPUR_US=api_key_here
 THREATFOX=api_key_here
 OPENCTI_API_KEY=api_key_here
 OPENCTI_URL=https://demo.opencti.io
+CRIMINALIP_API_KEY=api_key_here
 CROWDSTRIKE_CLIENT_ID=client_id_here
 CROWDSTRIKE_CLIENT_SECRET=client_secret_here
 CROWDSTRIKE_FALCON_BASE_URL=https://falcon.crowdstrike.com
 DFIR_IRIS_URL=https://dfir-iris.local
 DFIR_IRIS_API_KEY=token_here
 WEBSCOUT=token_here
+RL_ANALYZE_API_KEY=token_here
+RL_ANALYZE_URL=https://spectra_analyze_url_here
 SUPERVISORD_WORKERS_COUNT=4
 SUPERVISORD_THREADS_COUNT=4
 SUPERVISORD_TIMEOUT=200
@@ -76,6 +81,7 @@ services:
       - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
       - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
       - GOOGLE_SAFE_BROWSING=${GOOGLE_SAFE_BROWSING:-}
+      - IPAPI=${IPAPI:-}
       - IPINFO=${IPINFO:-}
       - MDE_CLIENT_ID=${MDE_CLIENT_ID:-}
       - MDE_CLIENT_SECRET=${MDE_CLIENT_SECRET:-}
@@ -84,6 +90,8 @@ services:
       - MISP_URL=${MISP_URL:-}
       - OPENCTI_API_KEY=${OPENCTI_API_KEY:-}
       - OPENCTI_URL=${OPENCTI_URL:-}
+      - RL_ANALYZE_API_KEY=${RL_ANALYZE_API_KEY:-}
+      - RL_ANALYZE_URL=${RL_ANALYZE_URL:-}
       - SHODAN=${SHODAN:-}
       - SPUR_US=${SPUR_US:-}
       - THREATFOX=${THREATFOX:-}

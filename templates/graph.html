@@ -130,7 +130,7 @@
 
             addNode(obs, obs, "observable", "https://img.icons8.com/officexs/32/goal.png");
 
-            const providers = ["ipinfo", "ipquery", "webscout"];
+            const providers = ["ipinfo", "ipquery", "webscout", "ipapi"];
             providers.forEach((provider) => {
                 if (entry[provider]?.asn) {
                     let asn = String(entry[provider].asn || "");
@@ -142,6 +142,11 @@
                     if (provider === "webscout" && entry[provider]?.as_org) {
                         asn = `${asn} ${entry[provider].as_org}`.trim();
                     }
+
+                    if (provider === "ipapi" && entry[provider]?.asn.org) {
+                        asn = `${entry[provider].asn.asn} ${entry[provider].asn.org}`.trim();
+                    }
+
                     if (entry.type === "FQDN" || entry.type === "URL") {
                         if (entry.reverse_dns?.reverse_dns) {
                             if (
@@ -158,12 +163,20 @@
                     }
                 }
 
-                if (entry[provider]?.country_code) {
+                if (entry[provider]?.country_code || (provider === "ipapi" && entry[provider]?.location?.country_code)) {
                     // Check to see if the provider already has a country name
-                    const country = entry[provider]?.country_name
-                        ? entry[provider].country_name
-                        : country_code_to_country_name(entry[provider].country_code);
-                    const countryCode = entry[provider].country_code.toLowerCase();
+                    let country, countryCode;
+
+                    if (provider === "ipapi" && entry[provider]?.location) {
+                        country = entry[provider].location.country || country_code_to_country_name(entry[provider].location.country_code);
+                        countryCode = entry[provider].location.country_code.toLowerCase();
+                    } else {
+                        country = entry[provider]?.country_name
+                            ? entry[provider].country_name
+                            : country_code_to_country_name(entry[provider].country_code);
+                        countryCode = entry[provider].country_code.toLowerCase();
+                    }
+
                     const flagUrl = `https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/flags/1x1/${countryCode}.svg`;
 
                     addNode(country, country, "country_name", flagUrl);
@@ -206,6 +219,39 @@
                             edges.push({ from: obs, to: tunnels, label: "Tunnel (Spur.us)" });
                         }
                     }
+                    // check for IP address with IPAPI data (add vpn provider name if applicable)
+                    if (entry.ipapi?.is_vpn && entry.ipapi?.vpn?.service) {
+                        const vpnService = entry.ipapi.vpn.service;
+                        if (entry.type === "FQDN" || entry.type === "URL") {
+                            if (entry.reverse_dns?.reverse_dns) {
+                                if (
+                                    entry[provider].ip &&
+                                    entry.reverse_dns.reverse_dns.includes(entry[provider].ip)
+                                ) {
+                                    addNode(
+                                        vpnService,
+                                        vpnService,
+                                        "vpn_service",
+                                        "https://img.icons8.com/officexs/32/lock.png",
+                                    );
+                                    edges.push({
+                                        from: entry[provider].ip,
+                                        to: vpnService,
+                                        label: "VPN Service (IPAPI)",
+                                    });
+                                }
+                            }
+                        } else {
+                            addNode(
+                                vpnService,
+                                vpnService,
+                                "vpn_service",
+                                "https://img.icons8.com/officexs/32/lock.png",
+                            );
+                            edges.push({ from: obs, to: vpnService, label: "VPN Service (IPAPI)" });
+                        }
+                    }
+
 
                     // Check for Abusix data
                     if (entry.abusix?.abuse) {
@@ -783,6 +829,25 @@
                         });
                     }
                 });
+            }
+
+            // Check for Reversing Labs Spectra Analyze events
+            if (entry.rl_analyze && entry.rl_analyze.reports > 0) {
+                const rlNodeLabel = "Reversing Labs Spectra Analyze observed";
+                addNode(
+                    rlNodeLabel,
+                    rlNodeLabel,
+                    "rl_analyze",
+                    "https://img.icons8.com/officexs/32/hacking.png"
+                );
+                let rlEdgeLabel = "";
+                if (entry.rl_analyze.malicious || entry.rl_analyze.suspicious) {
+                    rlEdgeLabel += `RL Verdict: ${entry.rl_analyze.malicious}/${entry.rl_analyze.suspicious}/${entry.rl_analyze.reports}`;
+                }
+                if (entry.rl_analyze.scanners) {
+                    rlEdgeLabel += `RL AV: ${entry.rl_analyze.scanners}/${entry.rl_analyze.reports}, ${entry.rl_analyze.classification}`;
+                }
+                edges.push({ from: obs, to: rlNodeLabel, label: rlEdgeLabel });
             }
 
             // Check for Chrome / Edge extension data

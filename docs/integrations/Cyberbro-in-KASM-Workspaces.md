@@ -33,37 +33,7 @@ You can use the tags:
 
 ### Cyberbro Configuration with optional environment variables
 
-Here is a list of all available environment variables that can be used with examples:
-
-```bash
-PROXY_URL=http://127.0.0.1:9000
-VIRUSTOTAL=api_key_here
-ABUSEIPDB=api_key_here
-IPINFO=api_key_here
-GOOGLE_CSE_KEY=api_key_here
-GOOGLE_CSE_CX=cx_here
-GOOGLE_SAFE_BROWSING=api_key_here
-MDE_TENANT_ID=api_key_here
-MDE_CLIENT_ID=api_key_here
-MDE_CLIENT_SECRET=api_key_here
-SHODAN=api_key_here
-SPUR_US=api_key_here
-OPENCTI_API_KEY=api_key_here
-OPENCTI_URL=https://demo.opencti.io
-CROWDSTRIKE_CLIENT_ID=client_id_here
-CROWDSTRIKE_CLIENT_SECRET=client_secret_here
-CROWDSTRIKE_FALCON_BASE_URL=https://falcon.crowdstrike.com
-DFIR_IRIS_URL=https://dfir-iris.local
-DFIR_IRIS_API_KEY=token_here
-WEBSCOUT=token_here
-API_PREFIX=my_api
-MAX_FORM_MEMORY_SIZE=1048576
-GUI_ENABLED_ENGINES=reverse_dns,rdap,hudsonrock,mde,shodan,opencti,virustotal
-CONFIG_PAGE_ENABLED=true
-SSL_VERIFY=true
-GUI_CACHE_TIMEOUT=1800
-API_CACHE_TIMEOUT=86400
-```
+All the environment variables are available in the [Cyberbro documentation](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment).
 
 > Note: if you set `GUI_ENABLED_ENGINES` to `""` then all engines will be enabled in the GUI.  
 > By default (even if the variable is not set or enabled), all **free engines** will be enabled in the GUI.

@@ -1,0 +1,47 @@
+<td>
+    {% if result.ipapi %}
+    <strong>IP: </strong>{{ result.ipapi.ip }}<br />
+
+    <div class="alert alert-warning">
+        {% if result.ipapi.is_vpn %}<span class="badge badge-danger">VPN</span>{% endif %}
+        {% if result.ipapi.is_tor %}<span class="badge badge-danger">TOR</span>{% endif %}
+        {% if result.ipapi.is_proxy %}<span class="badge badge-danger">PROXY</span>{% endif %}
+        {% if result.ipapi.is_abuser %}<span class="badge badge-danger">ABUSER</span>{% endif %}
+    </div>
+
+    <strong>Location: </strong>{{ result.ipapi.location.city }}, {{
+    result.ipapi.location.state }} ({{ result.ipapi.location.country
+    }})<br />
+    <strong>Country: </strong><span class="country country-{{ result.ipapi.location.country_code | lower }}">{{
+        result.ipapi.location.country }}</span>
+    <span class="fi fi-{{ result.ipapi.location.country_code | lower }}"></span><br />
+    <strong>ASN: </strong>{{ result.ipapi.asn.asn }} {{
+    result.ipapi.asn.org }}<br />
+    {% if result.ipapi.is_vpn %}
+    <strong>VPN Service: </strong><a href="{{ result.ipapi.vpn.url }}" target="_blank">{{
+        result.ipapi.vpn.service }}</a><br />
+    {% endif %}
+
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: bold;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+
+    {% else %}
+    Not applicable
+    {% endif %}
+</td>

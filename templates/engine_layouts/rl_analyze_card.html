@@ -1,0 +1,27 @@
+{% if analysis_results.results[0].rl_analyze %}
+  {% if analysis_results.results[0].rl_analyze.report_color == "red" %}
+    <div class="card high-risk" style="background-color: red;">
+  {% elif analysis_results.results[0].rl_analyze.report_color == "yellow" %}
+    <div class="card high-risk" style="background-color: yellow;">
+  {% else %}
+    <div class="card">
+  {% endif %}
+  <h3>Reversing Labs Spectra Analyze</h3>
+  {% if analysis_results.results[0].rl_analyze.reports == 0 %}
+    <p>Not Found</p>
+  {% elif analysis_results.results[0].rl_analyze.report_type == "network" %}
+      <strong>Verdict: </strong>{{ analysis_results.results[0].rl_analyze.malicious }}/{{ analysis_results.results[0].rl_analyze.suspicious }}/{{ analysis_results.results[0].rl_analyze.reports }} <i>(Malicious/Suspicious/Total)</i><br/>
+      {% if "total_files" in analysis_results.results[0].rl_analyze %}
+        <strong>Downloaded files: </strong>{{ analysis_results.results[0].rl_analyze.malicious_files }}/{{ analysis_results.results[0].rl_analyze.suspicious_files }}/{{ analysis_results.results[0].rl_analyze.total_files }} <i>(Malicious/Suspicious/Total)</i><br/>
+      {% endif %}
+      <strong>Threats: </strong>{{ analysis_results.results[0].rl_analyze.threats }}<br/>
+      <strong>Link:</strong> <a href="{{ analysis_results.results[0].rl_analyze.link }}">See on Reversing Labs Spectra Analyze</a><br/>
+  {% else %}
+      <strong>Verdict: </strong>{{ analysis_results.results[0].rl_analyze.classification }}<br/>
+      <strong>Risk score: </strong>{{ analysis_results.results[0].rl_analyze.riskscore }}<br/>
+      <strong>AV Scanners: </strong>{{ analysis_results.results[0].rl_analyze.scanners }}/{{ analysis_results.results[0].rl_analyze.reports }} <i>(AV Scanners/Total)</i><br/>
+      <strong>Threats: </strong>{{ analysis_results.results[0].rl_analyze.threats }}<br/>
+      <strong>Link: </strong><a href="{{ analysis_results.results[0].rl_analyze.link }}">See on Reversing Labs Spectra Analyze</a><br/>
+  {% endif %}
+  </div>
+{% endif %}

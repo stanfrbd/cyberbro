@@ -331,6 +331,7 @@ def update_config():
         secrets.proxy_url = request.form.get("proxy_url", secrets.proxy_url)
         secrets.virustotal = request.form.get("virustotal", secrets.virustotal)
         secrets.abuseipdb = request.form.get("abuseipdb", secrets.abuseipdb)
+        secrets.ipapi = request.form.get("ipapi", secrets.ipapi)
         secrets.ipinfo = request.form.get("ipinfo", secrets.ipinfo)
         secrets.google_cse_key = request.form.get("google_cse_key", secrets.google_cse_key)
         secrets.google_cse_cx = request.form.get("google_cse_cx", secrets.google_cse_cx)
@@ -352,6 +353,8 @@ def update_config():
         secrets.threatfox = request.form.get("threatfox", secrets.threatfox)
         secrets.dfir_iris_api_key = request.form.get("dfir_iris_api_key", secrets.dfir_iris_api_key)
         secrets.dfir_iris_url = request.form.get("dfir_iris_url", secrets.dfir_iris_url)
+        secrets.rl_analyze_api_key = request.form.get("rl_analyze_api_key", secrets.rl_analyze_api_key)
+        secrets.rl_analyze_url = request.form.get("rl_analyze_url", secrets.rl_analyze_url)
 
         # Apply the GUI_ENABLED_ENGINES configuration directly to the GUI to avoid restarting the app
         updated_gui_enabled_engines: str = request.form.get("gui_enabled_engines", "")

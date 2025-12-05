@@ -341,6 +341,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: domain, URL, IP, hash, scraping  
 **Explaination**: Scraps (can be long) Ioc.One PDF search results for all types of observable, free, no API key
 
+### IPapi
+**Name**: `ipapi`  
+**Supports**: IP, risk, VPN, proxy, free API key required  
+**Explaination**: Checks IPapi for IP, reversed obtained IP for a given domain/URL, free API key required
+
 ### IPinfo
 **Name**: `ipinfo`  
 **Supports**: IP  
@@ -380,6 +385,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `reverse_dns`  
 **Supports**: default, domain, IP, abuse, free_no_key  
 **Explaination**: Performs a reverse DNS lookup for IP, domain, URL (on the Cyberbro machine)
+
+### Reversing Labs Spectra Analyze
+**Name**: `rl_analyze`  
+**Supports**: domain, URL, IP, hash, paid API key required  
+**Explanation**: Looks up observables in the Reversing Labs Spectra Analyze service, paid API key required
 
 ### Shodan
 **Name**: `shodan`  

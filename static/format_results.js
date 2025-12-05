@@ -48,6 +48,14 @@ function formatResults(data) {
         if (result.ipinfo) {
             plainText += `IPinfo: Geolocation: ${result.ipinfo.geolocation}, Country: ${result.ipinfo.country_name}, ASN: ${result.ipinfo.asn}\n`;
         }
+        if (result.ipapi) {
+            plainText += `IPapi: IP: ${result.ipapi.ip}, Location: ${result.ipapi.location.city}, ${result.ipapi.location.state} (${result.ipapi.location.country}), Country: ${result.ipapi.location.country}, ASN: ${result.ipapi.asn.asn} ${result.ipapi.asn.org}\n`;
+            if (result.ipapi.is_vpn) plainText += `- VPN: ${result.ipapi.is_vpn}\n`;
+            if (result.ipapi.is_tor) plainText += `- TOR: ${result.ipapi.is_tor}\n`;
+            if (result.ipapi.is_proxy) plainText += `- PROXY: ${result.ipapi.is_proxy}\n`;
+            if (result.ipapi.is_abuser) plainText += `- ABUSER: ${result.ipapi.is_abuser}\n`;
+            if (result.ipapi.is_vpn && result.ipapi.vpn) plainText += `- VPN Service: ${result.ipapi.vpn.service}\n`;
+        }
         if (result.abuseipdb) {
             plainText += `AbuseIPDB: Reports: ${result.abuseipdb.reports}, Risk Score: ${result.abuseipdb.risk_score}\n`;
         }
@@ -293,6 +301,31 @@ function formatResults(data) {
             if (result.crtsh.link) {
                 plainText += `  - Link: ${result.crtsh.link}\n`;
             }
+        }
+
+        if (result.rl_analyze) {
+            plainText += `Reversing Labs Spectra Analyze:\n`;
+            if (result.rl_analyze.malicious) {
+                plainText += ` - Malicious verdict: ${result.rl_analyze.malicious}/${result.rl_analyze.reports}\n`;
+            }
+            if (result.rl_analyze.suspicious) {
+                plainText += `  - Suspicious verdict: ${result.rl_analyze.suspicious}/${result.rl_analyze.reports}\n`;
+            }
+            if (result.rl_analyze.total_files) {
+                if (result.rl_analyze.malicious_files) {
+                    plainText += `  - Malicious files: ${result.rl_analyze.malicious_files}/${result.rl_analyze.total_files}\n`;
+                }
+                if (result.rl_analyze.suspicious_files) {
+                    plainText += `  - Suspicious files: ${result.rl_analyze.suspicious_files}/${result.rl_analyze.total_files}\n`;
+                }
+            }
+            if (result.rl_analyze.threats && result.rl_analyze.threats.length > 0) {
+                plainText += `  - Threats:\n`;
+                result.rl_analyze.threats.forEach(threat => {
+                    plainText += `    - ${threat}\n`;
+                });
+            }
+            if (result.rl_analyze.link) plainText += `  - Link: ${result.rl_analyze.link}\n`;
         }
         plainText += '\n';
     });

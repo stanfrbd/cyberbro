@@ -24,3 +24,6 @@ sudo service caddy reload
 ```
 
 5. Access https://cyberbro.example.com (with an automatic Let's Encrypt certificate), that's great with `caddy`
+
+!!! warning
+    Make sure to set up proper filtering and security for your reverse proxy, especially if you are exposing Cyberbro to the internet (which is not recommended without proper security measures like WAF, external authentication tool... etc.).

@@ -1,0 +1,54 @@
+{% if analysis_results.results[0].ipapi.is_vpn or analysis_results.results[0].ipapi.is_tor or
+analysis_results.results[0].ipapi.is_proxy %}
+<div class="card warning-row" style="background-color: orange;">
+    {% else %}
+    <div class="card">
+        {% endif %}
+
+        <h3>IPapi</h3>
+        <p><strong>IP: </strong>{{ analysis_results.results[0].ipapi.ip }}</p>
+
+        {% if analysis_results.results[0].ipapi.is_vpn or analysis_results.results[0].ipapi.is_tor or
+        analysis_results.results[0].ipapi.is_proxy %}
+        <div class="alert alert-warning">
+            {% if analysis_results.results[0].ipapi.is_vpn %}<span class="badge badge-danger">VPN</span>{% endif %}
+            {% if analysis_results.results[0].ipapi.is_tor %}<span class="badge badge-danger">TOR</span>{% endif %}
+            {% if analysis_results.results[0].ipapi.is_proxy %}<span class="badge badge-danger">PROXY</span>{% endif
+            %}
+            {% if analysis_results.results[0].ipapi.is_abuser %}<span class="badge badge-danger">ABUSER</span>{%
+            endif %}
+        </div>
+        {% endif %}
+
+        <style>
+            .badge {
+                display: inline-block;
+                padding: 0.35em 0.65em;
+                font-size: 0.75em;
+                font-weight: bold;
+                line-height: 1;
+                text-align: center;
+                white-space: nowrap;
+                border-radius: 0.25rem;
+                margin-right: 0.25rem;
+            }
+
+            .badge-danger {
+                background-color: #dc3545;
+                color: white;
+            }
+        </style>
+
+        <p><strong>Location: </strong>{{ analysis_results.results[0].ipapi.location.city }}, {{
+            analysis_results.results[0].ipapi.location.state }} ({{
+            analysis_results.results[0].ipapi.location.country }})
+        </p>
+        <p><strong>Country: </strong>{{ analysis_results.results[0].ipapi.location.country }} <span
+                class="fi fi-{{ analysis_results.results[0].ipapi.location.country_code | lower }}"></span></p>
+        <p><strong>ASN: </strong>{{ analysis_results.results[0].ipapi.asn.asn }} {{
+            analysis_results.results[0].ipapi.asn.org }}</p>
+        {% if analysis_results.results[0].ipapi.is_vpn %}
+        <p><strong>VPN Service: </strong><a href="{{ analysis_results.results[0].ipapi.vpn.url }}" target="_blank">{{
+                analysis_results.results[0].ipapi.vpn.service }}</a></p>
+        {% endif %}
+    </div>

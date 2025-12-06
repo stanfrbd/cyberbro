@@ -17,7 +17,7 @@
     <span class="fi fi-{{ result.ipapi.location.country_code | lower }}"></span><br />
     <strong>ASN: </strong>{{ result.ipapi.asn.asn }} {{
     result.ipapi.asn.org }}<br />
-    {% if result.ipapi.is_vpn %}
+    {% if result.ipapi.is_vpn and result.ipapi.vpn and result.ipapi.vpn.url %}
     <strong>VPN Service: </strong><a href="{{ result.ipapi.vpn.url }}" target="_blank">{{
         result.ipapi.vpn.service }}</a><br />
     {% endif %}

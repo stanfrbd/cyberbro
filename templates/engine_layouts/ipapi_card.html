@@ -47,7 +47,9 @@ analysis_results.results[0].ipapi.is_proxy %}
                 class="fi fi-{{ analysis_results.results[0].ipapi.location.country_code | lower }}"></span></p>
         <p><strong>ASN: </strong>{{ analysis_results.results[0].ipapi.asn.asn }} {{
             analysis_results.results[0].ipapi.asn.org }}</p>
-        {% if analysis_results.results[0].ipapi.is_vpn %}
+        {% if analysis_results.results[0].ipapi.is_vpn and analysis_results.results[0].ipapi.vpn and
+        analysis_results.results[0].ipapi.vpn.url and
+        analysis_results.results[0].ipapi.vpn.service %}
         <p><strong>VPN Service: </strong><a href="{{ analysis_results.results[0].ipapi.vpn.url }}" target="_blank">{{
                 analysis_results.results[0].ipapi.vpn.service }}</a></p>
         {% endif %}

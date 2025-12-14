@@ -33,7 +33,9 @@ function filterTable() {
         }
 
         if (showRow && typeFilter !== "all") {
-            showRow = td[1].innerText.toLowerCase() === typeFilter;
+            const typeTd = tr[i].querySelector("td.observable-type");
+            const typeText = typeTd ? typeTd.innerText.toLowerCase() : "";
+            showRow = typeText === typeFilter;
         }
 
         // Spur or IP Quality Score

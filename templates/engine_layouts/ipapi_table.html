@@ -10,8 +10,7 @@
     </div>
 
     <strong>Location: </strong>{{ result.ipapi.location.city }}, {{
-    result.ipapi.location.state }} ({{ result.ipapi.location.country
-    }})<br />
+    result.ipapi.location.state }}<br />
     <strong>Country: </strong><span class="country country-{{ result.ipapi.location.country_code | lower }}">{{
         result.ipapi.location.country }}</span>
     <span class="fi fi-{{ result.ipapi.location.country_code | lower }}"></span><br />

@@ -224,7 +224,7 @@
             <td title="{{ result.observable }}">{{ result.observable[:64] }}{% if result.observable | length > 64
                 %}...{% endif %}</td>
 
-            <td>{{ result.type }}</td>
+            <td class="observable-type">{{ result.type }}</td>
             {% if "reverse_dns" in analysis_results.selected_engines %}
             {% include "engine_layouts/reverse_dns_table.html" %}
             {% endif %}

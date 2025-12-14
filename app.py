@@ -28,7 +28,7 @@ from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
 # Canonical version string displayed in the about page and used for update checks
-VERSION: str = "v0.9.8"
+VERSION: str = "v0.9.9"
 
 
 class InvalidCachefileError(Exception):

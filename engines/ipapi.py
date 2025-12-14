@@ -35,7 +35,10 @@ def query_ipapi(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool
         data = response.json()
         # Reformat ASN field to match other engines (e.g., "AS12345")
         if "ip" in data:
-            if "asn" in data and "asn" in data["asn"]:
+            # sometimes ASN info is missing, that leads to errors in GUI
+            if "asn" not in data or not data["asn"]:
+                data["asn"] = {"asn": "Unknown", "org": "Unknown"}
+            elif "asn" in data["asn"]:
                 data["asn"]["asn"] = f"AS{data['asn']['asn']}"
             return data
 

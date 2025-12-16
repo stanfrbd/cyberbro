@@ -74,12 +74,7 @@ class Secrets:
         field_type = self._get_field_type(name)
 
         # Convert string to list if needed
-        if (
-            hasattr(field_type, "__origin__")
-            and field_type.__origin__ is list
-            and isinstance(value, str)
-            and "," in value
-        ):
+        if hasattr(field_type, "__origin__") and field_type.__origin__ is list and isinstance(value, str) and "," in value:
             value = [item.strip() for item in value.split(",")]
 
         if field_type is int:

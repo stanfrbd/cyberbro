@@ -216,9 +216,7 @@ def prepare_row(result, selected_engines):
 
     if "hudsonrock" in selected_engines:
         hudsonrock_data = result.get("hudsonrock", {})
-        row["hr_total_corporate_services"] = (
-            hudsonrock_data.get("total_corporate_services") if hudsonrock_data else None
-        )
+        row["hr_total_corporate_services"] = hudsonrock_data.get("total_corporate_services") if hudsonrock_data else None
         row["hr_total_user_services"] = hudsonrock_data.get("total_user_services") if hudsonrock_data else None
         row["hr_total"] = hudsonrock_data.get("total") if hudsonrock_data else None
         row["hr_total_stealers"] = hudsonrock_data.get("totalStealers") if hudsonrock_data else None

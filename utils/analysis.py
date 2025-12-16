@@ -116,9 +116,7 @@ def perform_engine_queries(observable, selected_engines, result):
         result["ioc_one_pdf"] = ioc_one.query_ioc_one_pdf(observable["value"], PROXIES, SSL_VERIFY)
 
     if "google" in selected_engines and observable["type"] in google.SUPPORTED_OBSERVABLE_TYPES:
-        result["google"] = google.query_google(
-            observable["value"], secrets.google_cse_cx, secrets.google_cse_key, PROXIES, SSL_VERIFY
-        )
+        result["google"] = google.query_google(observable["value"], secrets.google_cse_cx, secrets.google_cse_key, PROXIES, SSL_VERIFY)
 
     if "github" in selected_engines and observable["type"] in github.SUPPORTED_OBSERVABLE_TYPES:
         result["github"] = github.query_github(observable["value"], PROXIES, SSL_VERIFY)
@@ -167,10 +165,7 @@ def perform_engine_queries(observable, selected_engines, result):
             SSL_VERIFY,
         )
 
-    if (
-        "rl_analyze" in selected_engines
-        and observable["type"] in reversinglabs_spectra_analyze.SUPPORTED_OBSERVABLE_TYPES
-    ):
+    if "rl_analyze" in selected_engines and observable["type"] in reversinglabs_spectra_analyze.SUPPORTED_OBSERVABLE_TYPES:
         result["rl_analyze"] = reversinglabs_spectra_analyze.query_rl_analyze(
             observable["value"],
             observable["type"],
@@ -181,9 +176,7 @@ def perform_engine_queries(observable, selected_engines, result):
         )
 
     if "threatfox" in selected_engines and observable["type"] in threatfox.SUPPORTED_OBSERVABLE_TYPES:
-        result["threatfox"] = threatfox.query_threatfox(
-            observable["value"], observable["type"], secrets.threatfox, PROXIES, SSL_VERIFY
-        )
+        result["threatfox"] = threatfox.query_threatfox(observable["value"], observable["type"], secrets.threatfox, PROXIES, SSL_VERIFY)
 
     if "virustotal" in selected_engines and observable["type"] in virustotal.SUPPORTED_OBSERVABLE_TYPES:
         result["virustotal"] = virustotal.query_virustotal(
@@ -211,10 +204,7 @@ def perform_engine_queries(observable, selected_engines, result):
             secrets.misp_url,
         )
 
-    if (
-        "google_safe_browsing" in selected_engines
-        and observable["type"] in google_safe_browsing.SUPPORTED_OBSERVABLE_TYPES
-    ):
+    if "google_safe_browsing" in selected_engines and observable["type"] in google_safe_browsing.SUPPORTED_OBSERVABLE_TYPES:
         result["google_safe_browsing"] = google_safe_browsing.query_google_safe_browsing(
             observable["value"],
             observable["type"],
@@ -314,9 +304,7 @@ def update_analysis_metadata(analysis_id, start_time, selected_engines, results)
         analysis_result.end_time = end_time
         analysis_result.end_time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
         analysis_result.analysis_duration = end_time - start_time
-        analysis_result.analysis_duration_string = (
-            f"{int((end_time - start_time) // 60)} minutes, {(end_time - start_time) % 60:.2f} seconds"
-        )
+        analysis_result.analysis_duration_string = f"{int((end_time - start_time) // 60)} minutes, {(end_time - start_time) % 60:.2f} seconds"
         analysis_result.results = results
         analysis_result.in_progress = False
         save_analysis_result(analysis_result)

@@ -9,16 +9,8 @@ def get_analysis_stats():
     thirty_days_ago = now - 30 * 24 * 60 * 60
 
     # Query: only analyses from the last 30 days, ordered by start_time desc, limit 1000
-    recent_analyses = (
-        db.session.query(AnalysisResult)
-        .filter(AnalysisResult.start_time >= thirty_days_ago)
-        .order_by(AnalysisResult.start_time.desc())
-        .limit(1000)
-        .all()
-    )
-    last_30_days_analyses_count = (
-        db.session.query(db.func.count(AnalysisResult.id)).filter(AnalysisResult.start_time >= thirty_days_ago).scalar()
-    )
+    recent_analyses = db.session.query(AnalysisResult).filter(AnalysisResult.start_time >= thirty_days_ago).order_by(AnalysisResult.start_time.desc()).limit(1000).all()
+    last_30_days_analyses_count = db.session.query(db.func.count(AnalysisResult.id)).filter(AnalysisResult.start_time >= thirty_days_ago).scalar()
     total_analyses = db.session.query(db.func.count(AnalysisResult.id)).scalar()
     observables_set = set()
     engines_set = set()

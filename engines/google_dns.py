@@ -129,9 +129,7 @@ def query_spf(
         return None
 
 
-def query_google_dns(
-    observable: str, observable_type: str, proxies: Optional[dict[str, str]] = None, ssl_verify: bool = True
-) -> Optional[dict[str, Any]]:
+def query_google_dns(observable: str, observable_type: str, proxies: Optional[dict[str, str]] = None, ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     try:
         if observable_type in ["IPv4", "IPv6"]:
             reverse_name = f"{observable}.in-addr.arpa"
@@ -140,9 +138,7 @@ def query_google_dns(
             response.raise_for_status()
             data = response.json()
             for answer in data.get("Answer", []):
-                answer["type_name"] = next(
-                    (record["type"] for record in dns_record_types if record["id"] == answer["type"]), "Unknown"
-                )
+                answer["type_name"] = next((record["type"] for record in dns_record_types if record["id"] == answer["type"]), "Unknown")
             return data
 
         if observable_type == "FQDN":

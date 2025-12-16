@@ -11,9 +11,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 ]
 
 
-def query_abuseipdb(
-    ip: str, api_key: str, proxies: Optional[dict[str, str]], ssl_verify: bool = True
-) -> Optional[dict[str, Any]]:
+def query_abuseipdb(ip: str, api_key: str, proxies: Optional[dict[str, str]], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
     """
     Queries the AbuseIPDB API for information about a given IP address.
 

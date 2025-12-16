@@ -11,9 +11,7 @@ SUPPORTED_OBSERVABLE_TYPES: list[str] = [
 ]
 
 
-def query_shodan(
-    observable: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True
-) -> dict[str, list | str] | None:
+def query_shodan(observable: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> dict[str, list | str] | None:
     """
     Queries the Shodan API for information about a given observable (typically an IP).
 

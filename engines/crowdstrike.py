@@ -43,9 +43,7 @@ def generate_ioc_id(observable: str, observable_type: str) -> str:
     return None
 
 
-def get_falcon_client(
-    client_id: str, client_secret: str, proxies: dict[str, str], ssl_verify: bool = True
-) -> APIHarnessV2:
+def get_falcon_client(client_id: str, client_secret: str, proxies: dict[str, str], ssl_verify: bool = True) -> APIHarnessV2:
     return APIHarnessV2(
         client_id=client_id,
         client_secret=client_secret,
@@ -131,12 +129,8 @@ def query_crowdstrike(
         result.update(
             {
                 "indicator_found": True,
-                "published_date": datetime.fromtimestamp(resource.get("published_date", 0), tz=timezone.utc).strftime(
-                    "%Y-%m-%d"
-                ),
-                "last_updated": datetime.fromtimestamp(resource.get("last_updated", 0), tz=timezone.utc).strftime(
-                    "%Y-%m-%d"
-                ),
+                "published_date": datetime.fromtimestamp(resource.get("published_date", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
+                "last_updated": datetime.fromtimestamp(resource.get("last_updated", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
                 "actors": resource.get("actors", []),
                 "malicious_confidence": resource.get("malicious_confidence", ""),
                 "threat_types": resource.get("threat_types", []),

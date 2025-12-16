@@ -110,10 +110,7 @@ class SuspiciousInfoReport(BaseModel):
     def _validate_report(self) -> Self:
         # If the status is anything other than 2xx, raise an error
         if not 199 < self.status < 300:
-            raise ValueError(
-                f"Unable to generate Suspicious Info Report for IP: {self.ip}. Status Code: {self.status}"
-                f"{self.model_dump_json()}"
-            )
+            raise ValueError(f"Unable to generate Suspicious Info Report for IP: {self.ip}. Status Code: {self.status}{self.model_dump_json()}")
         return self
 
 
@@ -162,9 +159,7 @@ def get_suspicious_info_report(
     return suspcious_info_report
 
 
-def run_criminal_ip_analysis(
-    observable: str, proxies: dict[str, str] | None = None, ssl_verify: bool = True
-) -> dict | None:
+def run_criminal_ip_analysis(observable: str, proxies: dict[str, str] | None = None, ssl_verify: bool = True) -> dict | None:
     """Perform Criminal IP analysis."""
 
     api_key: str = retrieve_api_key()

@@ -55,19 +55,13 @@ def query_hudsonrock(
                 if section in data:
                     for key in ["all_urls", "clients_urls", "employees_urls"]:
                         if key in data[section]:
-                            data[section][key] = [
-                                entry for entry in data[section][key] if "url" not in entry or "••" not in entry["url"]
-                            ]
+                            data[section][key] = [entry for entry in data[section][key] if "url" not in entry or "••" not in entry["url"]]
                 if section == "stats":
                     for key in ["clients_urls", "employees_urls"]:
                         if key in data[section]:
                             data[section][key] = [url for url in data[section][key] if "••" not in url]
                 if "thirdPartyDomains" in data:
-                    data["thirdPartyDomains"] = [
-                        entry
-                        for entry in data["thirdPartyDomains"]
-                        if "domain" in entry and entry["domain"] is not None and "••" not in entry["domain"]
-                    ]
+                    data["thirdPartyDomains"] = [entry for entry in data["thirdPartyDomains"] if "domain" in entry and entry["domain"] is not None and "••" not in entry["domain"]]
         return data
 
     except Exception as e:

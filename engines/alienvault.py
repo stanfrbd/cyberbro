@@ -91,9 +91,7 @@ def get_endpoint(artifact: str, observable_type: str) -> str | None:
     return endpoint_map.get(observable_type)
 
 
-def query_alienvault(
-    observable_dict: dict, api_key: str, proxies: dict[str, str] | None = None, ssl_verify: bool = True
-) -> dict:
+def query_alienvault(observable_dict: dict, api_key: str, proxies: dict[str, str] | None = None, ssl_verify: bool = True) -> dict:
     artifact: str = observable_dict["value"]
 
     # If it's a URL, extract the domain portion for searching
@@ -142,21 +140,9 @@ def parse_alienvault_response(result: dict) -> dict:
     but we want to preserve case for the report.
     """
     report_malware_families: list[str] = []
-    report_malware_families.extend(
-        [
-            family
-            for family in otx_report.pulse_info.related.alienvault.malware_families
-            if family.lower() not in map(str.lower, report_malware_families)
-        ]
-    )
+    report_malware_families.extend([family for family in otx_report.pulse_info.related.alienvault.malware_families if family.lower() not in map(str.lower, report_malware_families)])
 
-    report_malware_families.extend(
-        [
-            family
-            for family in otx_report.pulse_info.related.other.malware_families
-            if family.lower() not in map(str.lower, report_malware_families)
-        ]
-    )
+    report_malware_families.extend([family for family in otx_report.pulse_info.related.other.malware_families if family.lower() not in map(str.lower, report_malware_families)])
 
     """
     Adversary
@@ -190,13 +176,7 @@ def parse_alienvault_response(result: dict) -> dict:
         pulse_data.append({"title": pulse.name, "url": pulse_url})
 
         # Add the pulse malware_family to the set
-        report_malware_families.extend(
-            [
-                family.display_name
-                for family in pulse.malware_families
-                if family.display_name.lower() not in map(str.lower, report_malware_families)
-            ]
-        )
+        report_malware_families.extend([family.display_name for family in pulse.malware_families if family.display_name.lower() not in map(str.lower, report_malware_families)])
 
         if pulse.adversary:
             adversary.add(pulse.adversary)

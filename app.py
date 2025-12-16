@@ -291,13 +291,7 @@ def request_entity_too_large(e):
 @app.route("/history")
 def history():
     """Render the history page."""
-    analysis_results = (
-        db.session.query(AnalysisResult)
-        .filter(AnalysisResult.results != [])
-        .order_by(AnalysisResult.end_time.desc())
-        .limit(60)
-        .all()
-    )
+    analysis_results = db.session.query(AnalysisResult).filter(AnalysisResult.results != []).order_by(AnalysisResult.end_time.desc()).limit(60).all()
     return render_template("history.html", analysis_results=analysis_results)
 
 
@@ -343,12 +337,8 @@ def update_config():
         secrets.opencti_api_key = request.form.get("opencti_api_key", secrets.opencti_api_key)
         secrets.opencti_url = request.form.get("opencti_url", secrets.opencti_url)
         secrets.crowdstrike_client_id = request.form.get("crowdstrike_client_id", secrets.crowdstrike_client_id)
-        secrets.crowdstrike_client_secret = request.form.get(
-            "crowdstrike_client_secret", secrets.crowdstrike_client_secret
-        )
-        secrets.crowdstrike_falcon_base_url = request.form.get(
-            "crowdstrike_falcon_base_url", secrets.crowdstrike_falcon_base_url
-        )
+        secrets.crowdstrike_client_secret = request.form.get("crowdstrike_client_secret", secrets.crowdstrike_client_secret)
+        secrets.crowdstrike_falcon_base_url = request.form.get("crowdstrike_falcon_base_url", secrets.crowdstrike_falcon_base_url)
         secrets.webscout = request.form.get("webscout", secrets.webscout)
         secrets.threatfox = request.form.get("threatfox", secrets.threatfox)
         secrets.dfir_iris_api_key = request.form.get("dfir_iris_api_key", secrets.dfir_iris_api_key)

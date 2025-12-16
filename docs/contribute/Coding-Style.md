@@ -4,7 +4,7 @@ This document outlines the coding style and quality guidelines for this project.
 
 ## General Formatting
 
-- **Line Length**: Limit all lines to a maximum of 120 characters.
+- **Line Length**: Limit all lines to a maximum of 188 characters.
 - **Indentation**: Use 4 spaces per indentation level. Tabs are not allowed.
 - **String Quotes**: Use double quotes (`"`) for all strings.
 - **Line Endings**: Use `LF` line endings for cross-platform compatibility.

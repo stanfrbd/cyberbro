@@ -376,6 +376,30 @@ label {
 /* ============================================
    TABLES
    ============================================ */
+.table-container {
+    position: relative;
+    transition: all var(--transition-base);
+}
+
+.table-container.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--background-color);
+    z-index: var(--z-modal);
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    animation: fadeIn var(--transition-fast);
+}
+
+body.dark-mode .table-container.fullscreen {
+    background-color: var(--dark-background-color);
+}
+
 .table-wrapper {
     width: 100%;
     overflow-x: auto;

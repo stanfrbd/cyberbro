@@ -1,3 +1,12 @@
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+    <h3 style="margin: 0;">Results Table</h3>
+    <button class="btn btn-outline btn-icon" onclick="toggleTableFullscreen()" id="fullscreenBtn">
+        <span>⛶</span>
+        <span>Expand Table</span>
+    </button>
+</div>
+
+<div id="tableContainer" class="table-container">
 <div class="filters-container">
     <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
 
@@ -355,3 +364,33 @@
     </tbody>
 </table>
 </div><!-- table-wrapper -->
+</div><!-- table-container -->
+
+<script>
+function toggleTableFullscreen() {
+    const container = document.getElementById('tableContainer');
+    const btn = document.getElementById('fullscreenBtn');
+
+    if (container.classList.contains('fullscreen')) {
+        // Exit fullscreen
+        container.classList.remove('fullscreen');
+        btn.innerHTML = '<span>⛶</span><span>Expand Table</span>';
+        document.body.style.overflow = '';
+    } else {
+        // Enter fullscreen
+        container.classList.add('fullscreen');
+        btn.innerHTML = '<span>⛶</span><span>Exit Fullscreen</span>';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// ESC key to exit fullscreen
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const container = document.getElementById('tableContainer');
+        if (container && container.classList.contains('fullscreen')) {
+            toggleTableFullscreen();
+        }
+    }
+});
+</script>

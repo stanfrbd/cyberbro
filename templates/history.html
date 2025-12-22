@@ -48,6 +48,7 @@
 
 <h1>Cyberbro - Last 60 Analyses</h1>
 <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
+<div class="table-wrapper">
 <table id="historyTable">
     <thead>
         <tr>
@@ -89,4 +90,5 @@
         {% endfor %}
     </tbody>
 </table>
+</div><!-- table-wrapper -->
 {% endblock content %}

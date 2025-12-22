@@ -442,34 +442,37 @@ tr:hover {
 /* Table Status Classes */
 .high-risk,
 .high-detection {
-    background-color: var(--danger-color);
-    color: white;
+    background-color: #dc3545 !important;
+    color: white !important;
     font-weight: 600;
 }
 
 .clean-detection {
-    background-color: var(--success-color);
-    color: white;
+    background-color: #28a745 !important;
+    color: white !important;
     font-weight: 600;
 }
 
 .warning-row {
-    background-color: var(--warning-color);
-    color: #000;
+    background-color: #ffc107 !important;
+    color: #000 !important;
     font-weight: 600;
 }
 
 .high-risk:hover,
 .high-detection:hover {
-    background-color: rgba(220, 53, 69, 0.8);
+    background-color: rgba(220, 53, 69, 0.85) !important;
+    color: white !important;
 }
 
 .clean-detection:hover {
-    background-color: rgba(40, 167, 69, 0.8);
+    background-color: rgba(40, 167, 69, 0.85) !important;
+    color: white !important;
 }
 
 .warning-row:hover {
-    background-color: rgba(255, 193, 7, 0.8);
+    background-color: rgba(255, 193, 7, 0.85) !important;
+    color: #000 !important;
 }
 
 /* Value indicators */
@@ -853,6 +856,200 @@ body.dark-mode .github-logo:hover {
 
 .skip-to-main:focus {
     top: 0;
+}
+
+/* ============================================
+   MODERN BUTTON GROUPS & DROPDOWNS
+   ============================================ */
+.button-group {
+    display: inline-flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-icon svg,
+.btn-icon img {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+body.dark-mode .btn-outline {
+    color: var(--primary-light);
+    border-color: var(--primary-light);
+}
+
+body.dark-mode .btn-outline:hover {
+    background-color: var(--primary-light);
+    color: var(--dark-background-color);
+}
+
+/* ============================================
+   ENGINE SELECTION CARDS
+   ============================================ */
+.engines-grid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    margin: var(--spacing-lg) 0;
+}
+
+@media (max-width: 767px) {
+    .engines-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.engine-card {
+    background-color: var(--surface-color);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.engine-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.engine-card.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.engine-card input[type="checkbox"] {
+    margin: 0;
+}
+
+.engine-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.engine-info {
+    flex: 1;
+}
+
+.engine-info h4 {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.engine-info p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+body.dark-mode .engine-card {
+    background-color: var(--dark-surface-color);
+    border-color: var(--dark-border-color);
+}
+
+body.dark-mode .engine-card.selected {
+    background-color: rgba(77, 163, 255, 0.1);
+}
+
+body.dark-mode .engine-info h4 {
+    color: var(--dark-text-color);
+}
+
+body.dark-mode .engine-info p {
+    color: var(--dark-text-secondary);
+}
+
+/* Filter chips/tabs */
+.filter-tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin: var(--spacing-lg) 0;
+}
+
+.filter-tab {
+    padding: 0.5rem 1rem;
+    background-color: var(--surface-color);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-tab:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.filter-tab.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+body.dark-mode .filter-tab {
+    background-color: var(--dark-surface-color);
+    border-color: var(--dark-border-color);
+}
+
+body.dark-mode .filter-tab:hover {
+    border-color: var(--primary-light);
+    background-color: rgba(77, 163, 255, 0.1);
 }
 
 /* ============================================

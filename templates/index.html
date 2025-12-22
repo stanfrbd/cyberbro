@@ -94,36 +94,36 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             };
 
             const allEngines = [
-                { name: "abuseipdb", label: "AbuseIPDB", supports: "risk", checked: false, description: "IP reputation & abuse reports" },
-                { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, description: "Abuse contact lookup (free)" },
-                { name: "alienvault", label: "Alienvault", supports: "hash ip domain url", checked: false, description: "Threat intelligence platform" },
-                { name: "criminalip", label: "Criminal IP", supports: "ip", checked: false, description: "Attack surface & threat hunting" },
-                { name: "crowdstrike", label: "CrowdStrike", supports: "hash ip domain url", checked: false, description: "Advanced threat detection" },
-                { name: "crtsh", label: "crt.sh", supports: "domain url free_no_key", checked: false, description: "Certificate transparency logs" },
-                { name: "dfir_iris", label: "DFIR-IRIS", supports: "domain url ip hash extension", checked: false, description: "Incident response platform" },
-                { name: "github", label: "Github", supports: "domain url ip hash extension free_no_key scraping", checked: false, description: "Code search via grep.app" },
-                { name: "google", label: "Google", supports: "domain url ip hash extension", checked: false, description: "Google Custom Search results" },
-                { name: "google_dns", label: "Google DNS", supports: "domain url ip free_no_key", checked: false, description: "Common DNS records lookup" },
-                { name: "google_safe_browsing", label: "Safe Browsing", supports: "risk domain ip", checked: false, description: "Google's threat detection" },
-                { name: "ioc_one_html", label: "Ioc.One (HTML)", supports: "domain url ip hash extension scraping", checked: false, description: "HTML threat reports search" },
-                { name: "ioc_one_pdf", label: "Ioc.One (PDF)", supports: "domain url ip hash extension scraping", checked: false, description: "PDF threat reports search" },
-                { name: "hudsonrock", label: "Hudson Rock", supports: "domain url email free_no_key", checked: false, description: "Infostealer leak database" },
-                { name: "ipapi", label: "IPapi", supports: "ip vpn proxy risk free_no_key", checked: false, description: "IP geolocation & proxy detection" },
-                { name: "ipinfo", label: "IPinfo", supports: "ip", checked: false, description: "IP address information" },
-                { name: "ipquery", label: "IPquery", supports: "default ip risk vpn proxy free_no_key", checked: true, description: "IP intelligence (default, free)" },
-                { name: "mde", label: "Microsoft Defender", supports: "hash ip domain url", checked: false, description: "Enterprise endpoint security" },
-                { name: "misp", label: "MISP", supports: "domain url ip hash extension", checked: false, description: "Threat sharing platform" },
-                { name: "opencti", label: "OpenCTI", supports: "domain url ip hash extension", checked: false, description: "Cyber threat intelligence" },
-                { name: "phishtank", label: "Phishtank", supports: "risk domain url free_no_key", checked: false, description: "Phishing site verification" },
-                { name: "reverse_dns", label: "Reverse DNS", supports: "default domain ip abuse free_no_key", checked: true, description: "DNS lookup (default, free)" },
-                { name: "rdap", label: "RDAP", supports: "default abuse domain free_no_key", checked: true, description: "Domain registration data" },
-                { name: "rl_analyze", label: "ReversingLabs", supports: "domain url ip hash extension", checked: false, description: "File & threat analysis" },
-                { name: "shodan", label: "Shodan", supports: "ports ip", checked: false, description: "Internet-connected device search" },
-                { name: "spur", label: "Spur.us", supports: "vpn proxy ip", checked: false, description: "Anonymous proxy detection" },
-                { name: "threatfox", label: "ThreatFox", supports: "ip domain url", checked: false, description: "Malware IOC database" },
-                { name: "urlscan", label: "URLscan", supports: "domain url ip hash free_no_key", checked: false, description: "Website scanner & analyzer" },
-                { name: "virustotal", label: "VirusTotal", supports: "hash risk ip domain url", checked: false, description: "Multi-engine malware scanner" },
-                { name: "webscout", label: "WebScout", supports: "ip vpn proxy risk", checked: false, description: "IP reputation & risk scoring" },
+                { name: "abuseipdb", label: "AbuseIPDB", supports: "risk", checked: false, description: "IP reputation & abuse reports", tooltip: "Checks AbuseIPDB for IP, reversed obtained IP for a given domain / URL, free API key required" },
+                { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, description: "Abuse contact lookup (free)", tooltip: "Checks abuse contact with Abusix only for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                { name: "alienvault", label: "Alienvault", supports: "hash ip domain url", checked: false, description: "Threat intelligence platform", tooltip: "Checks Alienvault for IP, domain, URL, hash, free API key required" },
+                { name: "criminalip", label: "Criminal IP", supports: "ip", checked: false, description: "Attack surface & threat hunting", tooltip: "Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting, free, with paid upgrades available" },
+                { name: "crowdstrike", label: "CrowdStrike", supports: "hash ip domain url", checked: false, description: "Advanced threat detection", tooltip: "Checks CrowdStrike for IP, domain, URL, hash, paid API key required" },
+                { name: "crtsh", label: "crt.sh", supports: "domain url free_no_key", checked: false, description: "Certificate transparency logs", tooltip: "Checks crt.sh for subdomains using the certificate transparency logs given domain / URL, free, no API key" },
+                { name: "dfir_iris", label: "DFIR-IRIS", supports: "domain url ip hash extension", checked: false, description: "Incident response platform", tooltip: "Searches DFIR-IRIS results for all types of observable, API key required" },
+                { name: "github", label: "Github", supports: "domain url ip hash extension free_no_key scraping", checked: false, description: "Code search via grep.app", tooltip: "Get Github grep.app API search results for all types of observable, free, no API key" },
+                { name: "google", label: "Google", supports: "domain url ip hash extension", checked: false, description: "Google Custom Search results", tooltip: "Checks Google Custom Search Engine (CSE) API results for all types of observable, free API required" },
+                { name: "google_dns", label: "Google DNS", supports: "domain url ip free_no_key", checked: false, description: "Common DNS records lookup", tooltip: "Checks Google common DNS records (A, AAAA, CNAME, NS, MX, TXT - including SPF and DMARC, PTR) for IP, domain, URL, free, no API key" },
+                { name: "google_safe_browsing", label: "Safe Browsing", supports: "risk domain ip", checked: false, description: "Google's threat detection", tooltip: "Checks Google Safe Browsing, free API key required" },
+                { name: "ioc_one_html", label: "Ioc.One (HTML)", supports: "domain url ip hash extension scraping", checked: false, description: "HTML threat reports search", tooltip: "Scraps (can be long) Ioc.One HTML search results for all types of observable, free, no API key" },
+                { name: "ioc_one_pdf", label: "Ioc.One (PDF)", supports: "domain url ip hash extension scraping", checked: false, description: "PDF threat reports search", tooltip: "Scraps (can be long) Ioc.One PDF search results for all types of observable, free, no API key" },
+                { name: "hudsonrock", label: "Hudson Rock", supports: "domain url email free_no_key", checked: false, description: "Infostealer leak database", tooltip: "Searches Hudson Rock leak / infostealer results for domains, URL, Email, free, no API key" },
+                { name: "ipapi", label: "IPapi", supports: "ip vpn proxy risk free_no_key", checked: false, description: "IP geolocation & proxy detection", tooltip: "Checks IPapi for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                { name: "ipinfo", label: "IPinfo", supports: "ip", checked: false, description: "IP address information", tooltip: "Checks IPinfo for IP, reversed obtained IP for a given domain / URL, free API key required" },
+                { name: "ipquery", label: "IPquery", supports: "default ip risk vpn proxy free_no_key", checked: true, description: "IP intelligence (default, free)", tooltip: "Checks IPquery for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                { name: "mde", label: "Microsoft Defender", supports: "hash ip domain url", checked: false, description: "Enterprise endpoint security", tooltip: "Checks Microsoft Defender for Endpoint, paid API info on Azure required" },
+                { name: "misp", label: "MISP", supports: "domain url ip hash extension", checked: false, description: "Threat sharing platform", tooltip: "Searches MISP for all types of observable, API key required" },
+                { name: "opencti", label: "OpenCTI", supports: "domain url ip hash extension", checked: false, description: "Cyber threat intelligence", tooltip: "Searches OpenCTI results for all types of observable, API key required" },
+                { name: "phishtank", label: "Phishtank", supports: "risk domain url free_no_key", checked: false, description: "Phishing site verification", tooltip: "Checks Phishtank for domains, URL, free, no API key" },
+                { name: "reverse_dns", label: "Reverse DNS", supports: "default domain ip abuse free_no_key", checked: true, description: "DNS lookup (default, free)", tooltip: "Performs a reverse DNS lookup for IP, domain, URL (on your machine)" },
+                { name: "rdap", label: "RDAP", supports: "default abuse domain free_no_key", checked: true, description: "Domain registration data", tooltip: "Checks RDAP (ex Whois) record for domain, URL, no API key required" },
+                { name: "rl_analyze", label: "ReversingLabs", supports: "domain url ip hash extension", checked: false, description: "File & threat analysis", tooltip: "Searches Reversing Labs Spectra Analyze results for all types of observable, API key required" },
+                { name: "shodan", label: "Shodan", supports: "ports ip", checked: false, description: "Internet-connected device search", tooltip: "Checks Shodan, reversed obtained IP for a given domain / URL, free API key required" },
+                { name: "spur", label: "Spur.us", supports: "vpn proxy ip", checked: false, description: "Anonymous proxy detection", tooltip: "Checks Spur.us for IP, reversed obtained IP for a given domain / URL, paid API key required" },
+                { name: "threatfox", label: "ThreatFox", supports: "ip domain url", checked: false, description: "Malware IOC database", tooltip: "Checks ThreatFox by Abuse.ch for IP, domains, URL, free API key required" },
+                { name: "urlscan", label: "URLscan", supports: "domain url ip hash free_no_key", checked: false, description: "Website scanner & analyzer", tooltip: "Checks URLscan for IP, domains, URL, hash, free, no API key" },
+                { name: "virustotal", label: "VirusTotal", supports: "hash risk ip domain url", checked: false, description: "Multi-engine malware scanner", tooltip: "Checks VirusTotal for IP, domain, URL, hash, free API key required" },
+                { name: "webscout", label: "WebScout", supports: "ip vpn proxy risk", checked: false, description: "IP reputation & risk scoring", tooltip: "Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required" },
             ];
 
             const enginesToDisplay = GUI_ENABLED_ENGINES.length > 0
@@ -138,6 +138,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     const card = document.createElement('label');
                     card.className = 'engine-card';
                     card.dataset.supports = engine.supports;
+                    card.title = engine.tooltip; // Add hover tooltip with full description
 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';

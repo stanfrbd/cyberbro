@@ -262,6 +262,17 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             function saveSelection() {
                 const selectedEngines = Array.from(document.querySelectorAll('input[name="engines"]:checked')).map(checkbox => checkbox.value);
                 localStorage.setItem('selectedEngines', JSON.stringify(selectedEngines));
+
+                // Visual feedback
+                const saveBtn = document.getElementById('saveSelectionBtn');
+                const originalHTML = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<span>✅</span><span>Saved!</span>';
+                saveBtn.disabled = true;
+
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalHTML;
+                    saveBtn.disabled = false;
+                }, 1500);
             }
 
             function restoreSelection() {
@@ -284,7 +295,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 <span>🔍</span>
                 <span>Start Analysis</span>
             </button>
-            <button type="button" class="btn btn-outline btn-icon" onclick="saveSelection()">
+            <button type="button" id="saveSelectionBtn" class="btn btn-outline btn-icon" onclick="saveSelection()">
                 <span>💾</span>
                 <span>Save Selection</span>
             </button>

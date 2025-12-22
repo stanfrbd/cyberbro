@@ -1094,6 +1094,7 @@ body.dark-mode .engine-info p {
 body.dark-mode .filter-tab {
     background-color: var(--dark-surface-color);
     border-color: var(--dark-border-color);
+    color: var(--dark-text-color);
 }
 
 body.dark-mode .filter-tab:hover {

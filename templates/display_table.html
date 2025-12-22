@@ -1,9 +1,14 @@
 <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem;">
     <h3 style="margin: 0;">Results Table</h3>
-    <button class="btn btn-outline btn-icon" onclick="toggleTableFullscreen()" id="fullscreenBtn">
-        <span>⛶</span>
-        <span>Expand Table</span>
-    </button>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <span id="escapeHint" style="display: none; font-size: 0.875rem; color: var(--text-secondary); background: rgba(0, 123, 255, 0.1); padding: 0.25rem 0.75rem; border-radius: var(--radius-full);">
+            Press <kbd style="background: var(--surface-color); border: 1px solid var(--border-color); padding: 0.125rem 0.375rem; border-radius: var(--radius-sm); font-family: monospace;">ESC</kbd> to exit
+        </span>
+        <button class="btn btn-outline btn-icon" onclick="toggleTableFullscreen()" id="fullscreenBtn">
+            <span>⛶</span>
+            <span>Expand Table</span>
+        </button>
+    </div>
 </div>
 
 <div id="tableContainer" class="table-container">
@@ -370,16 +375,19 @@
 function toggleTableFullscreen() {
     const container = document.getElementById('tableContainer');
     const btn = document.getElementById('fullscreenBtn');
+    const hint = document.getElementById('escapeHint');
 
     if (container.classList.contains('fullscreen')) {
         // Exit fullscreen
         container.classList.remove('fullscreen');
         btn.innerHTML = '<span>⛶</span><span>Expand Table</span>';
+        hint.style.display = 'none';
         document.body.style.overflow = '';
     } else {
         // Enter fullscreen
         container.classList.add('fullscreen');
         btn.innerHTML = '<span>⛶</span><span>Exit Fullscreen</span>';
+        hint.style.display = 'inline-block';
         document.body.style.overflow = 'hidden';
     }
 }

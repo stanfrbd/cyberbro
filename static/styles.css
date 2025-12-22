@@ -103,7 +103,7 @@ body {
    ============================================ */
 .container {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: var(--spacing-md);
 }
@@ -111,13 +111,20 @@ body {
 /* Responsive container padding */
 @media (min-width: 768px) {
     .container {
-        padding: var(--spacing-lg);
+        padding: var(--spacing-md) var(--spacing-lg);
     }
 }
 
 @media (min-width: 1024px) {
     .container {
-        padding: var(--spacing-xl);
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+}
+
+@media (min-width: 1440px) {
+    .container {
+        max-width: 90%;
+        padding: var(--spacing-lg) var(--spacing-xl);
     }
 }
 
@@ -847,6 +854,21 @@ body.dark-mode .card p {
 
 body.dark-mode .github-logo:hover {
     background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Kbd styling */
+kbd {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    padding: 0.125rem 0.375rem;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: 0.875em;
+}
+
+body.dark-mode kbd {
+    background: var(--dark-surface-color);
+    border-color: var(--dark-border-color);
 }
 
 /* ============================================

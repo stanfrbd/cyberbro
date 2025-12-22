@@ -250,6 +250,9 @@ input[type="search"] {
 textarea {
     min-height: 120px;
     resize: vertical;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
 
 textarea:focus,

@@ -24,12 +24,8 @@
 
 <div style="margin-bottom: 2rem;">
     <!-- Header Section -->
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+    <div style="margin-bottom: 1rem;">
         <h1 style="margin: 0;">Analysis Results</h1>
-        <button class="btn btn-icon" onclick="location.href='/'">
-            <span>➕</span>
-            <span>New Analysis</span>
-        </button>
     </div>
 
     <!-- Metadata and Actions -->
@@ -45,6 +41,10 @@
 
         <!-- Action buttons -->
         <div class="button-group">
+            <button class="btn btn-icon btn-small" onclick="location.href='/'">
+                <span>➕</span>
+                <span>New Analysis</span>
+            </button>
             <!-- Export dropdown -->
             <div style="position: relative; display: inline-block;">
                 <button class="btn btn-secondary btn-icon btn-small" onclick="toggleDropdown('exportDropdown')" type="button">

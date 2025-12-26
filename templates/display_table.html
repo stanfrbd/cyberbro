@@ -77,6 +77,7 @@
 <table id="resultsTable">
     <thead>
         <tr>
+            <th style="width: 40px; text-align: center;">▼</th>
             <th>Observable</th>
             <th>Type</th>
             {% if "reverse_dns" in analysis_results.selected_engines %}
@@ -236,6 +237,9 @@
         <tr class="clean-detection">
             {% endif %}
 
+            <td style="text-align: center; cursor: pointer; user-select: none;" onclick="toggleRowExpansion(this)" class="row-toggle">
+                <span class="toggle-icon">›</span>
+            </td>
             <td title="{{ result.observable }}">{{ result.observable[:64] }}{% if result.observable | length > 64
                 %}...{% endif %}</td>
 
@@ -401,4 +405,65 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Toggle row expansion for vertical view
+function toggleRowExpansion(toggleCell) {
+    const row = toggleCell.parentElement;
+    const icon = toggleCell.querySelector('.toggle-icon');
+    const nextRow = row.nextElementSibling;
+
+    // Check if already expanded
+    if (nextRow && nextRow.classList.contains('expanded-row')) {
+        // Collapse
+        nextRow.remove();
+        icon.textContent = '›';
+        icon.style.transform = 'rotate(0deg)';
+        row.classList.remove('row-expanded');
+    } else {
+        // Expand
+        const cells = row.querySelectorAll('td:not(.row-toggle)');
+        const headers = document.querySelectorAll('#resultsTable thead th:not(:first-child)');
+
+        // Create expanded row
+        const expandedRow = document.createElement('tr');
+        expandedRow.classList.add('expanded-row');
+
+        // Copy row class (high-risk, warning, etc) to expanded row
+        if (row.classList.contains('high-risk')) expandedRow.classList.add('high-risk');
+        if (row.classList.contains('warning-row')) expandedRow.classList.add('warning-row');
+        if (row.classList.contains('clean-detection')) expandedRow.classList.add('clean-detection');
+        if (row.classList.contains('high-detection')) expandedRow.classList.add('high-detection');
+
+        const expandedCell = document.createElement('td');
+        expandedCell.colSpan = row.cells.length;
+        expandedCell.style.padding = '1.5rem';
+
+        // Build vertical layout
+        let content = '<div class="expanded-content">';
+        cells.forEach((cell, index) => {
+            if (headers[index]) {
+                const headerText = headers[index].textContent.trim();
+                const cellHTML = cell.innerHTML;
+                content += `
+                    <div class="expanded-item">
+                        <div class="expanded-label">${headerText}</div>
+                        <div class="expanded-value">${cellHTML}</div>
+                    </div>
+                `;
+            }
+        });
+        content += '</div>';
+
+        expandedCell.innerHTML = content;
+        expandedRow.appendChild(expandedCell);
+
+        // Insert after current row
+        row.parentNode.insertBefore(expandedRow, row.nextSibling);
+
+        // Update icon
+        icon.textContent = '›';
+        icon.style.transform = 'rotate(90deg)';
+        row.classList.add('row-expanded');
+    }
+}
 </script>

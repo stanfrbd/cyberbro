@@ -521,6 +521,83 @@ tr:hover {
     color: var(--text-secondary);
 }
 
+/* Expandable row styles */
+.row-toggle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.row-toggle:hover {
+    color: var(--primary-color);
+    background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.toggle-icon {
+    display: inline-block;
+    transition: transform var(--transition-fast);
+    font-weight: bold;
+}
+
+.expanded-row {
+    background-color: var(--background-color) !important;
+}
+
+.expanded-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+    .expanded-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+.expanded-item {
+    background-color: var(--surface-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.expanded-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.expanded-value {
+    color: var(--text-color);
+    word-wrap: break-word;
+}
+
+/* Dark mode for expanded rows */
+body.dark-mode .expanded-row {
+    background-color: var(--dark-background-color) !important;
+}
+
+body.dark-mode .expanded-item {
+    background-color: var(--dark-surface-color);
+    border-color: var(--dark-border-color);
+}
+
+body.dark-mode .expanded-label {
+    color: var(--dark-text-secondary);
+}
+
+body.dark-mode .expanded-value {
+    color: var(--dark-text-color);
+}
+
+body.dark-mode .row-toggle:hover {
+    color: var(--primary-light);
+}
+
 /* ============================================
    CARDS
    ============================================ */

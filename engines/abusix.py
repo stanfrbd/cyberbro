@@ -1,47 +1,43 @@
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 import querycontacts
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "IPv4",
-    "IPv6",
-]
 
+class AbusixEngine(BaseEngine):
+    @property
+    def name(self):
+        return "abusix"
 
-def query_abusix(observable: str) -> Optional[dict[str, str]]:
-    """
-    Queries the Abusix service for contact information related to the given observable.
+    @property
+    def supported_types(self):
+        return ["IPv4", "IPv6"]
 
-    Args:
-        observable (str): The observable (e.g., IP address, domain) to query.
+    @property
+    def execute_after_reverse_dns(self):
+        # IP-only engine, runs after potential IP pivot
+        return True
 
-    Returns:
-        dict: A dictionary with the key "abuse", containing the returned contact info
-              (e.g., abuse email address). For example:
-                  {
-                      "abuse": "abuse@example.com"
-                  }
-        None: If an error occurs or no contact information is found.
-    """
-    try:
-        results = querycontacts.ContactFinder().find(observable)
-        if not results:
-            logger.warning("No contact information returned for observable: %s", observable)
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, str]]:
+        try:
+            results = querycontacts.ContactFinder().find(observable_value)
+            if not results:
+                logger.warning("No contact information returned for observable: %s", observable_value)
+                return None
+
+            return {"abuse": results[0]}
+        except Exception as e:
+            logger.error(
+                "Error querying Abusix for observable '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
             return None
 
-        # We assume the first item in 'results' is the most relevant contact
-        return {"abuse": results[0]}
-
-    except Exception as e:
-        logger.error(
-            "Error querying Abusix for observable '%s': %s",
-            observable,
-            e,
-            exc_info=True,
-        )
-
-    # Return None if any error or unexpected scenario occurred
-    return None
+    def create_export_row(self, analysis_result: Any) -> dict:
+        return {"abusix_abuse": analysis_result.get("abuse") if analysis_result else None}

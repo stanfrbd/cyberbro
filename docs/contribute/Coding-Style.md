@@ -62,7 +62,7 @@ Some files and directories (e.g., `tests/`, `__version__.py`) are excluded from 
 
 ## Setup Instructions
 
-1. **Install development dependencies:**
+1. **Install development dependencies:** (make sure you have a venv activated)
 
     ```sh
     pip install -r requirements-dev.txt

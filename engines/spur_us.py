@@ -1,66 +1,64 @@
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "IPv4",
-    "IPv6",
-]
 
+class SpurUSEngine(BaseEngine):
+    @property
+    def name(self):
+        return "spur"
 
-def query_spur_us(ip: str, proxies: dict[str, str], ssl_verify: bool = True, api_key: Optional[str] = None) -> Optional[dict[str, str]]:
-    """
-    Retrieves information about the given IP address from the spur.us website or API.
+    @property
+    def supported_types(self):
+        return ["IPv4", "IPv6"]
 
-    Args:
-        ip (str): The IP address to retrieve information for.
-        proxies (dict): Dictionary of proxies for the request.
-        ssl_verify (bool): Whether to verify SSL certificates.
-        api_key (str, optional): API key for the spur.us API.
+    @property
+    def execute_after_reverse_dns(self):
+        return True  # IP-only engine
 
-    Returns:
-        dict: A dictionary containing the link to the spur.us context page and the anonymity status, e.g.:
-              {
-                  "link": "https://spur.us/context/<ip>",
-                  "tunnels": "NORD_VPN" (for example)
-              }
-        None: If an error occurs during the request or parsing process.
-    """
-    spur_url = f"https://spur.us/context/{ip}"
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        spur_url = f"https://spur.us/context/{observable_value}"
+        api_key = self.secrets.spur_us
 
-    try:
-        if api_key:
-            # Use API with token authentication
-            api_url = f"https://api.spur.us/v2/context/{ip}"
-            headers = {"Token": api_key}
+        try:
+            if api_key:
+                api_url = f"https://api.spur.us/v2/context/{observable_value}"
+                headers = {"Token": api_key}
 
-            response = requests.get(
-                api_url,
-                proxies=proxies,
-                verify=ssl_verify,
-                headers=headers,
-                timeout=5,
-            )
-            response.raise_for_status()
+                response = requests.get(
+                    api_url,
+                    proxies=self.proxies,
+                    verify=self.ssl_verify,
+                    headers=headers,
+                    timeout=5,
+                )
+                response.raise_for_status()
 
-            data = response.json()
-            tunnels_info = "Not anonymous"
+                data = response.json()
+                tunnels_info = "Not anonymous"
 
-            if data.get("tunnels"):
-                for tunnel in data["tunnels"]:
-                    if tunnel.get("operator"):
-                        tunnels_info = tunnel["operator"]
-                        break
+                if data.get("tunnels"):
+                    for tunnel in data["tunnels"]:
+                        if tunnel.get("operator"):
+                            tunnels_info = tunnel["operator"]
+                            break
 
-            return {"link": spur_url, "tunnels": tunnels_info}
-        # No API key, return link with Unknown tunnels
-        return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
+                return {"link": spur_url, "tunnels": tunnels_info, "data": data}
 
-    except Exception as e:
-        logger.error("Error querying spur.us for IP '%s': %s - Check API key settings", ip, e, exc_info=True)
-        return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
+            # No API key case (original logic)
+            return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
 
-    return None
+        except Exception as e:
+            logger.error("Error querying spur.us for IP '%s': %s", observable_value, e, exc_info=True)
+            return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {"spur_us_anon": None}
+
+        return {"spur_us_anon": analysis_result.get("tunnels")}

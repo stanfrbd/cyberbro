@@ -3,46 +3,84 @@ from typing import Any, Optional
 
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "IPv4",
-    "IPv6",
-]
 
+class IPAPIEngine(BaseEngine):
+    @property
+    def name(self):
+        return "ipapi"
 
-def query_ipapi(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
-    """
-    Queries the IP information from the ipapi.is API using POST for better security.
+    @property
+    def supported_types(self):
+        return ["IPv4", "IPv6"]
 
-    Args:
-        ip (str): The IP address to query.
-        api_key (str): API key for authentication.
-        proxies (dict): Dictionary containing proxy settings.
-        ssl_verify (bool): Whether to verify SSL certificates.
+    @property
+    def execute_after_reverse_dns(self):
+        return True  # IP-only engine
 
-    Returns:
-        dict: The raw API response containing all IP information.
-        None: If an error occurs.
-    """
-    try:
-        url = "https://api.ipapi.is"
-        headers = {"Content-Type": "application/json"}
-        data = {"q": ip, "key": api_key}
-        response = requests.post(url, json=data, headers=headers, proxies=proxies, verify=ssl_verify, timeout=5)
-        response.raise_for_status()
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        try:
+            url = "https://api.ipapi.is"
+            headers = {"Content-Type": "application/json"}
+            data = {"q": observable_value, "key": self.secrets.ipapi}
 
-        data = response.json()
-        # Reformat ASN field to match other engines (e.g., "AS12345")
-        if "ip" in data:
-            # sometimes ASN info is missing, that leads to errors in GUI
-            if "asn" not in data or not data["asn"]:
-                data["asn"] = {"asn": "Unknown", "org": "Unknown"}
-            elif "asn" in data["asn"]:
-                data["asn"]["asn"] = f"AS{data['asn']['asn']}"
-            return data
+            response = requests.post(url, json=data, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response.raise_for_status()
 
-    except Exception as e:
-        logger.error("Error querying ipapi for '%s': %s", ip, e, exc_info=True)
+            data = response.json()
+            if "ip" in data:
+                # Reformat ASN field as per original logic
+                if "asn" not in data or not data["asn"]:
+                    data["asn"] = {"asn": "Unknown", "org": "Unknown"}
+                elif "asn" in data["asn"]:
+                    data["asn"]["asn"] = f"AS{data['asn']['asn']}"
+                return data
 
-    return None
+        except Exception as e:
+            logger.error("Error querying ipapi for '%s': %s", observable_value, e, exc_info=True)
+
+        return None
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {
+                f"ipapi_{k}": None
+                for k in [
+                    "ip",
+                    "is_vpn",
+                    "is_tor",
+                    "is_proxy",
+                    "is_abuser",
+                    "city",
+                    "state",
+                    "country",
+                    "country_code",
+                    "asn",
+                    "org",
+                    "vpn_service",
+                    "vpn_url",
+                ]
+            }
+
+        location_data = analysis_result.get("location", {})
+        asn_data = analysis_result.get("asn", {})
+        vpn_data = analysis_result.get("vpn", {})
+
+        return {
+            "ipapi_ip": analysis_result.get("ip"),
+            "ipapi_is_vpn": analysis_result.get("is_vpn"),
+            "ipapi_is_tor": analysis_result.get("is_tor"),
+            "ipapi_is_proxy": analysis_result.get("is_proxy"),
+            "ipapi_is_abuser": analysis_result.get("is_abuser"),
+            "ipapi_city": location_data.get("city"),
+            "ipapi_state": location_data.get("state"),
+            "ipapi_country": location_data.get("country"),
+            "ipapi_country_code": location_data.get("country_code"),
+            "ipapi_asn": asn_data.get("asn"),
+            "ipapi_org": asn_data.get("org"),
+            "ipapi_vpn_service": vpn_data.get("service"),
+            "ipapi_vpn_url": vpn_data.get("url"),
+        }

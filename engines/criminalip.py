@@ -1,26 +1,16 @@
 import json
 import logging
 from enum import StrEnum
-from typing import Self
+from typing import Any, Optional, Self
 
 import requests
 from pydantic import BaseModel, Field, ValidationError, model_validator
 from requests.exceptions import HTTPError
 
+from models.base_engine import BaseEngine
 from utils.config import Secrets, get_config
 
-"""
-Criminal IP API integration for retrieving suspicious information about IP addresses.
-
-API info for Suspicious Info Report aavailable at https://www.criminalip.io/developer/api/get-v2-ip-suspicious-info
-"""
-
 logger = logging.getLogger(__name__)
-
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "IPv4",
-    "IPv6",
-]
 
 
 class OpenPort(BaseModel):
@@ -117,6 +107,9 @@ class SuspiciousInfoReport(BaseModel):
 base_url: str = "https://api.criminalip.io"
 
 
+# --- Original Helper Functions (Preserved) ---
+
+
 def retrieve_api_key() -> str:
     """Retrieve the API key from the secrets config."""
 
@@ -159,27 +152,55 @@ def get_suspicious_info_report(
     return suspcious_info_report
 
 
-def run_criminal_ip_analysis(observable: str, proxies: dict[str, str] | None = None, ssl_verify: bool = True) -> dict | None:
-    """Perform Criminal IP analysis."""
+# --- New Engine Class Implementation ---
 
-    api_key: str = retrieve_api_key()
 
-    if not api_key:
-        logger.error("API key for CriminalIP engine is not configured.")
-        return None
+class CriminalIPEngine(BaseEngine):
+    @property
+    def name(self):
+        return "criminalip"
 
-    if not observable:
-        logger.error("No observable provided to CriminalIP engine.")
-        return None
+    @property
+    def supported_types(self):
+        return ["IPv4", "IPv6"]
 
-    report: SuspiciousInfoReport | None = get_suspicious_info_report(api_key, observable, proxies, ssl_verify)
+    @property
+    def execute_after_reverse_dns(self):
+        # IP-only engine, runs after potential IP pivot
+        return True
 
-    if not report:
-        logger.error("Failed to retrieve the report.")
-        return None
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict]:
+        """Perform Criminal IP analysis using the preserved helper/models."""
 
-    return json.loads(report.model_dump_json())
+        api_key: str = self.secrets.criminalip_api_key
 
+        if not api_key:
+            logger.error("API key for CriminalIP engine is not configured.")
+            return None
+
+        report: SuspiciousInfoReport | None = get_suspicious_info_report(api_key, observable_value, self.proxies, self.ssl_verify)
+
+        if not report:
+            logger.error("Failed to retrieve the CriminalIP report.")
+            return None
+
+        # Convert the Pydantic model to a standard dict for the rest of the app
+        return json.loads(report.model_dump_json())
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {"cip_score_inbound": None, "cip_score_outbound": None, "cip_abuse_count": None}
+
+        score = analysis_result.get("score", {})
+
+        return {
+            "cip_score_inbound": score.get("inbound"),
+            "cip_score_outbound": score.get("outbound"),
+            "cip_abuse_count": analysis_result.get("abuse_record_count"),
+        }
+
+
+# --- Main Block for Testing (Preserved) ---
 
 if __name__ == "__main__":
     # Example usage

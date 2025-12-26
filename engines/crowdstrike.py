@@ -3,151 +3,116 @@ from datetime import datetime, timezone
 from typing import Any, Optional
 from urllib.parse import urljoin
 
-from falconpy import APIHarnessV2
+from falconpy import APIHarnessV2  # Assuming falconpy is installed
+
+from models.base_engine import BaseEngine
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "FQDN",
-    "IPv4",
-    "IPv6",
-    "MD5",
-    "SHA1",
-    "SHA256",
-    "URL",
-]
 
+class CrowdstrikeEngine(BaseEngine):
+    @property
+    def name(self):
+        return "crowdstrike"
 
-def map_observable_type(observable_type: str) -> str:
-    if observable_type in ["MD5", "SHA256", "SHA1"] or observable_type in [
-        "IPv4",
-        "IPv6",
-    ]:
-        return observable_type.lower()
-    if observable_type in ["FQDN", "URL"]:
-        return "domain"
-    return None
+    @property
+    def supported_types(self):
+        return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
+    def _map_observable_type(self, observable_type: str) -> str:
+        if observable_type in ["MD5", "SHA256", "SHA1"] or observable_type in ["IPv4", "IPv6"]:
+            return observable_type.lower()
+        if observable_type in ["FQDN", "URL"]:
+            return "domain"
+        return None
 
-def generate_ioc_id(observable: str, observable_type: str) -> str:
-    if observable_type == "domain":
-        return f"domain_{observable}"
-    if observable_type in ["ipv4", "ipv6"]:
-        return f"ip_address_{observable}"
-    if observable_type == "md5":
-        return f"hash_md5_{observable}"
-    if observable_type == "sha256":
-        return f"hash_sha256_{observable}"
-    if observable_type == "sha1":
-        return f"hash_sha1_{observable}"
-    return None
+    def _generate_ioc_id(self, observable: str, observable_type: str) -> str:
+        if observable_type == "domain":
+            return f"domain_{observable}"
+        if observable_type in ["ipv4", "ipv6"]:
+            return f"ip_address_{observable}"
+        if observable_type == "md5":
+            return f"hash_md5_{observable}"
+        if observable_type == "sha256":
+            return f"hash_sha256_{observable}"
+        if observable_type == "sha1":
+            return f"hash_sha1_{observable}"
+        return None
 
+    def _get_falcon_client(self) -> APIHarnessV2:
+        return APIHarnessV2(
+            client_id=self.secrets.crowdstrike_client_id,
+            client_secret=self.secrets.crowdstrike_client_secret,
+            proxy=self.proxies,
+            user_agent="cyberbro",
+            ssl_verify=self.ssl_verify,
+            timeout=5,
+        )
 
-def get_falcon_client(client_id: str, client_secret: str, proxies: dict[str, str], ssl_verify: bool = True) -> APIHarnessV2:
-    return APIHarnessV2(
-        client_id=client_id,
-        client_secret=client_secret,
-        proxy=proxies,
-        user_agent="cyberbro",
-        ssl_verify=ssl_verify,
-        timeout=5,
-    )
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        try:
+            falcon = self._get_falcon_client()
+            falcon_url = urljoin(self.secrets.crowdstrike_falcon_base_url, "/").rstrip("/")
 
+            observable = observable_value.split("/")[2].split(":")[0] if observable_type == "URL" else observable_value
 
-def query_crowdstrike(
-    observable: str,
-    observable_type: str,
-    client_id: str,
-    client_secret: str,
-    falcon_url: str = "https://falcon.crowdstrike.com",
-    ssl_verify: bool = True,
-    proxies: Optional[dict[str, str]] = None,
-) -> Optional[dict[str, Any]]:
-    """
-    Queries CrowdStrike Falcon for information about a given observable.
+            observable = observable.lower()
+            mapped_type = self._map_observable_type(observable_type)
 
-    Args:
-        observable (str): The observable to query.
-        observable_type (str): The type of the observable (e.g., 'URL', 'MD5', 'SHA1', 'SHA256').
-        client_id (str): The client ID for CrowdStrike API authentication.
-        client_secret (str): The client secret for CrowdStrike API authentication.
-        falcon_url (str): The base URL for the CrowdStrike Falcon API.
-        ssl_verify (bool): Whether to verify SSL certificates.
-        proxies (Dict[str, str]): Proxy settings for the API client.
+            # 1. Get device count
+            response = falcon.command("indicator_get_device_count_v1", type=mapped_type, value=observable)
+            device_count_result = {"device_count": 0}
+            if response["status_code"] == 200:
+                data = response["body"]["resources"][0]
+                device_count_result["device_count"] = data.get("device_count", 0)
 
-    Returns:
-        Optional[Dict[str, Any]]: A dictionary with the query results or None if an error occurs.
-    """
+            # 2. Get Intel Indicators
+            id_to_search = self._generate_ioc_id(observable, mapped_type)
+            request_body = {"ids": [id_to_search]}
+            response = falcon.command("GetIntelIndicatorEntities", body=request_body)
 
-    try:
-        falcon = get_falcon_client(client_id, client_secret, proxies, ssl_verify)
+            result = device_count_result
+            result["link"] = f"{falcon_url}/search/?term=_all%3A~%27{observable}%27"
 
-        # Ensure the URL is properly formatted
-        falcon_url = urljoin(falcon_url, "/").rstrip("/")
+            if response["status_code"] != 200 or not response["body"]["resources"]:
+                result.update({"indicator_found": False})
+                return result
 
-        if observable_type == "URL":
-            observable = observable.split("/")[2].split(":")[0]
-
-        observable = observable.lower()
-        observable_type = map_observable_type(observable_type)
-
-        response = falcon.command("indicator_get_device_count_v1", type=observable_type, value=observable)
-        logger.debug("Falcon response: %s", response)
-
-        if response["status_code"] != 200:
-            logger.debug("Indicator not found: %s", response["body"]["errors"][0]["message"])
-            result = {"device_count": 0}
-        else:
-            data = response["body"]["resources"][0]
-            result = {"device_count": data.get("device_count", 0)}
-
-        id_to_search = generate_ioc_id(observable, observable_type)
-        request_body = {"ids": [id_to_search]}
-
-        response = falcon.command("GetIntelIndicatorEntities", body=request_body)
-        logger.debug("GetIntelIndicatorEntities response: %s", response)
-
-        if response["status_code"] != 200 or not response["body"]["resources"]:
-            logger.debug("Indicator not found or error in response: %s", response)
+            resource = response["body"]["resources"][0]
             result.update(
                 {
-                    "indicator_found": False,
-                    "published_date": "",
-                    "last_updated": "",
-                    "actors": [],
-                    "malicious_confidence": "",
-                    "threat_types": [],
-                    "kill_chain": [],
-                    "malware_families": [],
-                    "vulnerabilities": [],
-                    "link": f"{falcon_url}/search/?term=_all%3A~%27{observable}%27",
+                    "indicator_found": True,
+                    "published_date": datetime.fromtimestamp(resource.get("published_date", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
+                    "last_updated": datetime.fromtimestamp(resource.get("last_updated", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
+                    "actors": resource.get("actors", []),
+                    "malicious_confidence": resource.get("malicious_confidence", ""),
+                    "threat_types": resource.get("threat_types", []),
+                    "kill_chain": resource.get("kill_chains", []),
+                    "malware_families": resource.get("malware_families", []),
+                    "vulnerabilities": resource.get("vulnerabilities", []),
                 }
             )
             return result
 
-        resource = response["body"]["resources"][0]
-        result.update(
-            {
-                "indicator_found": True,
-                "published_date": datetime.fromtimestamp(resource.get("published_date", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
-                "last_updated": datetime.fromtimestamp(resource.get("last_updated", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
-                "actors": resource.get("actors", []),
-                "malicious_confidence": resource.get("malicious_confidence", ""),
-                "threat_types": resource.get("threat_types", []),
-                "kill_chain": resource.get("kill_chains", []),
-                "malware_families": resource.get("malware_families", []),
-                "vulnerabilities": resource.get("vulnerabilities", []),
-                "link": f"{falcon_url}/search/?term=_all%3A~%27{observable}%27",
-            }
-        )
+        except Exception as e:
+            logger.error(
+                "Error querying CrowdStrike Falcon for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
+            return None
 
-        return result
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {f"cs_{k}": None for k in ["device_count", "actor", "confidence", "threat_types", "malwares", "kill_chain", "vulns"]}
 
-    except Exception as e:
-        logger.error(
-            "Error querying CrowdStrike Falcon for '%s': %s",
-            observable,
-            e,
-            exc_info=True,
-        )
-        return None
+        return {
+            "cs_device_count": analysis_result.get("device_count"),
+            "cs_actor": ", ".join(analysis_result.get("actors", [])),
+            "cs_confidence": analysis_result.get("malicious_confidence"),
+            "cs_threat_types": ", ".join(analysis_result.get("threat_types", [])),
+            "cs_malwares": ", ".join(analysis_result.get("malware_families", [])),
+            "cs_kill_chain": ", ".join(analysis_result.get("kill_chain", [])),
+            "cs_vulns": ", ".join(analysis_result.get("vulnerabilities", [])),
+        }

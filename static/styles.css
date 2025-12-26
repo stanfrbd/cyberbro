@@ -450,9 +450,6 @@ th {
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
 }
 
 @media (min-width: 768px) {

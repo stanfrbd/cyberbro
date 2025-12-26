@@ -53,7 +53,7 @@
                     <span style="font-size: 0.7em;">▼</span>
                 </button>
                 <div id="exportDropdown" class="dropdown-menu" style="display: none;">
-                    <form method="GET" action="/export/{{ analysis_results.id }}">
+                    <form id="exportForm" method="GET" action="/export/{{ analysis_results.id }}">
                         <button type="submit" name="format" value="csv" class="dropdown-item">
                             <span>📄</span> Download CSV
                         </button>

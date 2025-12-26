@@ -9,7 +9,11 @@
 
 {% block content %}
 {{ super() }}
-<h1>{{ self.title() }}</h1>
+<div class="page-header">
+    <h1>Graph Analysis</h1>
+    <p>Interactive visualization of observable relationships (experimental)</p>
+</div>
+
 <button class="btn" onclick="window.location.href='/results/{{ analysis_id }}'">Go Back</button>
 <button class="btn" onclick="toggleFullScreen()">Full Screen</button>
 <button class="btn" id="layoutButton" onclick="switchLayout()">Switch to Circular</button>

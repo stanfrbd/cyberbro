@@ -333,6 +333,30 @@ function formatResults(data) {
     return plainText
 }
 
+function showToast(message, type = 'success') {
+    // Remove existing toast
+    const existingToast = document.querySelector('.copy-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = `copy-toast copy-toast-${type}`;
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove after delay
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2000);
+}
+
 function copyAsPlainText() {
     fetchResults()
         .then(data => {
@@ -340,20 +364,11 @@ function copyAsPlainText() {
             return navigator.clipboard.writeText(plainText);
         })
         .then(() => {
-            const copyButton = document.querySelector('.btn[onclick="copyAsPlainText()"]');
-            const initialBackgroundColor = copyButton.style.backgroundColor;
-            const initialTextContent = copyButton.textContent;
-
-            copyButton.style.backgroundColor = 'green';
-            copyButton.textContent = 'Copied!';
-
-            setTimeout(() => {
-                copyButton.style.backgroundColor = initialBackgroundColor;
-                copyButton.textContent = initialTextContent;
-            }, 1000);
+            showToast('Plain text copied to clipboard!');
         })
         .catch(err => {
             console.error('Failed to copy text: ', err);
+            showToast('Failed to copy', 'error');
         });
 }
 
@@ -372,19 +387,32 @@ function copyAsDefanged() {
             return navigator.clipboard.writeText(defangedText);
         })
         .then(() => {
-            const copyButton = document.querySelector('.btn[onclick="copyAsDefanged()"]');
-            const initialBackgroundColor = copyButton.style.backgroundColor;
-            const initialTextContent = copyButton.textContent;
-
-            copyButton.style.backgroundColor = 'green';
-            copyButton.textContent = 'Defanged and Copied!';
-
-            setTimeout(() => {
-                copyButton.style.backgroundColor = initialBackgroundColor;
-                copyButton.textContent = initialTextContent;
-            }, 1000);
+            showToast('Defanged text copied to clipboard!');
         })
         .catch(err => {
             console.error('Failed to copy defanged text: ', err);
+            showToast('Failed to copy', 'error');
         });
 }
+
+// Handle export form submission to show toast
+document.addEventListener('DOMContentLoaded', function() {
+    const exportForm = document.getElementById('exportForm');
+    if (exportForm) {
+        exportForm.addEventListener('submit', function(e) {
+            const submitter = e.submitter || document.activeElement;
+            const format = submitter.value;
+
+            if (format === 'csv') {
+                showToast('CSV download started!');
+            } else if (format === 'excel') {
+                showToast('Excel download started!');
+            }
+
+            // Close dropdown if closeAllDropdowns function exists
+            if (typeof closeAllDropdowns === 'function') {
+                closeAllDropdowns();
+            }
+        });
+    }
+});

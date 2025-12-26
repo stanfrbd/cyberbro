@@ -70,7 +70,11 @@
 
 {% block content %}
 {{ super() }}
-<h1>{{ self.title() }}</h1>
+<div class="page-header">
+    <h1>Analysis Statistics</h1>
+    <p>Overview of your analysis activity over the last 30 days</p>
+</div>
+
 <div class="dashboard">
     <div class="card">
         <h3 title="Observable types - Last 30 days">Observables Types</h3>

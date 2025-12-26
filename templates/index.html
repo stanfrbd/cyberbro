@@ -13,18 +13,21 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
 {% block content %}
 {{ super() }}
 <div id="startForm">
-    <h1>{{ self.title() }}</h1>
+    <div class="page-header">
+        <h1>Observable Analysis</h1>
+        <p>Analyze IPs, domains, URLs, hashes, and other observables</p>
+    </div>
 
     {% if new_version_available %}
     {% include "upgrade_notification.html" %}
     {% endif %}
 
     <form id="analyzeForm" method="POST" action="/analyze">
-        <label for="observables">Paste your observables here</label><br /><br />
-        <textarea name="observables" placeholder="{{ placholder_text }}" required></textarea>
-        <br />
+        <label for="observables">Paste your observables here</label>
+        <textarea name="observables" placeholder="{{ placholder_text }}" required
+            style="margin-top: var(--spacing-sm); min-height: 150px; width: 100%; max-width: 100%; box-sizing: border-box;"></textarea>
 
-        <h3>Select Analysis Engines</h3>
+        <h3 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-sm);">Select Analysis Engines</h3>
 
         <!-- Filter tabs -->
         <div class="filter-tabs">
@@ -146,7 +149,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     checkbox.value = engine.name;
                     checkbox.checked = engine.checked;
 
-                    checkbox.addEventListener('change', function() {
+                    checkbox.addEventListener('change', function () {
                         updateCardState(card, this.checked);
                     });
 
@@ -290,7 +293,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             document.addEventListener('DOMContentLoaded', restoreSelection);
         </script>
 
-        <div class="button-group" style="margin-top: 2rem;">
+        <div class="button-group" style="margin-top: var(--spacing-md);">
             <button type="submit" class="btn btn-icon">
                 <span>🔍</span>
                 <span>Start Analysis</span>

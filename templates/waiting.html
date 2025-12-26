@@ -2,108 +2,103 @@
 <html lang="en">
 
 <head>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
-    <title>Analysis in Progress</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cyberbro - Analysis in Progress">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Analysis in Progress - Cyberbro</title>
     <style>
-        :root {
-            --primary-color: #007bff;
-            --primary-hover-color: #0056b3;
-            --background-color: #f8f9fa;
-            --text-color: #343a40;
-            --border-color: #ced4da;
-            --border-radius: 5px;
-            --dark-background-color: #1e2a36;
-            --dark-text-color: #d1d1d1;
-            --dark-border-color: #3a4b5a;
-            --dark-primary-color: #3a4b5a;
-            --dark-primary-hover-color: #4b5c6d;
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            /* Center align all text */
-            margin-top: 100px;
-            /* Move content down */
-            background-color: var(--background-color);
-            /* Light background */
-            color: var(--text-color);
-            /* Dark text color */
+        .waiting-container {
+            max-width: 500px;
+            padding: var(--spacing-xl);
         }
 
         .loader {
-            border: 16px solid #f3f3f3;
-            /* Light grey */
-            border-top: 16px solid var(--primary-color);
-            /* Primary color */
+            border: 8px solid var(--border-color);
+            border-top: 8px solid var(--primary-color);
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 2s linear infinite;
-            /* Spin animation */
-            margin: auto;
+            width: 80px;
+            height: 80px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--spacing-lg);
+        }
+
+        body.dark-mode .loader {
+            border-color: var(--dark-border-color);
+            border-top-color: var(--primary-light);
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .dark-mode {
-            background-color: var(--dark-background-color);
-            /* Dark background */
-            color: var(--dark-text-color);
-            /* Light text color */
-        }
-
-        .light-mode {
-            background-color: var(--background-color);
-            /* Light background */
+        .waiting-text {
+            font-size: 1.25rem;
             color: var(--text-color);
-            /* Dark text color */
+            margin: 0;
+        }
+
+        body.dark-mode .waiting-text {
+            color: var(--dark-text-color);
+        }
+
+        .waiting-subtext {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: var(--spacing-sm);
+        }
+
+        body.dark-mode .waiting-subtext {
+            color: var(--dark-text-secondary);
         }
     </style>
 </head>
 
 <body>
-    <div class="loader"></div>
-    <p>Analysis in progress, please wait...</p>
+    <div class="waiting-container">
+        <div class="loader"></div>
+        <p class="waiting-text">Analysis in Progress</p>
+        <p class="waiting-subtext">This may take a few moments...</p>
+    </div>
 
     <script>
+        // Function to apply dark mode if enabled
+        function applyDarkMode() {
+            const savedMode = localStorage.getItem("darkMode");
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedMode === "true" || (savedMode === null && prefersDark)) {
+                document.body.classList.add("dark-mode");
+            }
+        }
+
         // Function to check if the analysis is complete
         function checkResults() {
-            fetch('{{ API_PREFIX }}/is_analysis_complete/{{ analysis_id }}') // Check if analysis is complete
+            fetch('{{ API_PREFIX }}/is_analysis_complete/{{ analysis_id }}')
                 .then(response => response.json())
                 .then(data => {
                     if (data.complete) {
-                        window.location.href = '/results/{{ analysis_id }}'; // Redirect to results page if complete
+                        window.location.href = '/results/{{ analysis_id }}';
                     } else {
-                        setTimeout(checkResults, 1000); // Check again in 1 seconds if not complete
+                        setTimeout(checkResults, 1000);
                     }
                 })
-                .catch(error => console.error('Error:', error)); // Log any errors
-        }
-
-        // Function to apply dark mode if enabled
-        function applyDarkMode() {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark-mode");
-                document.body.classList.remove("light-mode");
-            } else {
-                document.body.classList.add("light-mode");
-                document.body.classList.remove("dark-mode");
-            }
+                .catch(error => console.error('Error:', error));
         }
 
         // Call the functions on page load
         applyDarkMode();
-        checkResults(); // Start checking for results
+        checkResults();
     </script>
 </body>
 

@@ -4,79 +4,83 @@ from typing import Any, Optional
 import pycountry
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "IPv4",
-    "IPv6",
-]
 
+class IPInfoEngine(BaseEngine):
+    @property
+    def name(self):
+        return "ipinfo"
 
-def query_ipinfo(ip: str, api_key: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
-    """
-    Queries the IP information from the ipinfo.io API.
+    @property
+    def supported_types(self):
+        return ["IPv4", "IPv6"]
 
-    Args:
-        ip (str): The IP address to query.
-        api_key (str): The API key for ipinfo.io.
-        proxies (dict): Dictionary containing proxy settings.
+    @property
+    def execute_after_reverse_dns(self):
+        return True  # IP-only engine
 
-    Returns:
-        dict: A dictionary containing extracted information:
-            {
-                "ip": ...,
-                "geolocation": "city, region",
-                "country_code": ...,
-                "country_name": ...,
-                "hostname": ...,
-                "asn": ...,
-                "link": "https://ipinfo.io/..."
-            }
-        None: If an error occurs or 'ip' key isn't in the response.
-    """
-    try:
-        url = f"https://ipinfo.io/{ip}/json?token={api_key}"
-        response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=5)
-        response.raise_for_status()
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        try:
+            url = f"https://ipinfo.io/{observable_value}/json?token={self.secrets.ipinfo}"
+            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response.raise_for_status()
 
-        data = response.json()
-        if "bogon" in data:
-            return {
-                "ip": ip,
-                "geolocation": "",
-                "country_code": "",
-                "country_name": "",
-                "hostname": "Private IP",
-                "asn": "BOGON",
-                "link": f"https://ipinfo.io/{ip}",
-            }
+            data = response.json()
 
-        if "ip" in data:
-            ip_resp = data.get("ip", "Unknown")
-            hostname = data.get("hostname", "Unknown")
-            city = data.get("city", "Unknown")
-            region = data.get("region", "Unknown")
-            asn = data.get("org", "Unknown")
-            country_code = data.get("country", "Unknown")
+            # Handle bogon/private IPs explicitly
+            if "bogon" in data:
+                return {
+                    "ip": observable_value,
+                    "geolocation": "",
+                    "country_code": "",
+                    "country_name": "Bogon",
+                    "hostname": "Private IP",
+                    "asn": "BOGON",
+                    "link": f"https://ipinfo.io/{observable_value}",
+                }
 
-            # Attempt to resolve country name
-            try:
-                country_obj = pycountry.countries.get(alpha_2=country_code)
-                country_name = country_obj.name if country_obj else "Unknown"
-            except Exception:
-                country_name = "Unknown"
+            if "ip" in data:
+                ip_resp = data.get("ip", "Unknown")
+                city = data.get("city", "Unknown")
+                region = data.get("region", "Unknown")
+                asn_raw = data.get("org", "Unknown")
+                country_code = data.get("country", "Unknown")
 
-            return {
-                "ip": ip_resp,
-                "geolocation": f"{city}, {region}",
-                "country_code": country_code,
-                "country_name": country_name,
-                "hostname": hostname,
-                "asn": asn,
-                "link": f"https://ipinfo.io/{ip_resp}",
-            }
+                # Attempt to resolve country name
+                try:
+                    country_obj = pycountry.countries.get(alpha_2=country_code)
+                    country_name = country_obj.name if country_obj else "Unknown"
+                except Exception:
+                    country_name = "Unknown"
 
-    except Exception as e:
-        logger.error("Error querying ipinfo for '%s': %s", ip, e, exc_info=True)
+                return {
+                    "ip": ip_resp,
+                    "geolocation": f"{city}, {region}",
+                    "country_code": country_code,
+                    "country_name": country_name,
+                    "hostname": data.get("hostname", "Unknown"),
+                    "asn": asn_raw,  # Keep raw string for parsing in export logic
+                    "link": f"https://ipinfo.io/{ip_resp}",
+                }
 
-    return None
+        except Exception as e:
+            logger.error("Error querying ipinfo for '%s': %s", observable_value, e, exc_info=True)
+
+        return None
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {f"ipinfo_{k}": None for k in ["cn", "country", "geo", "asn", "org"]}
+
+        asn_data = analysis_result.get("asn").split(" ", 1) if analysis_result.get("asn") else []
+
+        return {
+            "ipinfo_cn": analysis_result.get("country_code"),
+            "ipinfo_country": analysis_result.get("country_name"),
+            "ipinfo_geo": analysis_result.get("geolocation"),
+            "ipinfo_asn": asn_data[0] if len(asn_data) > 0 else None,
+            "ipinfo_org": asn_data[1] if len(asn_data) > 1 else None,
+        }

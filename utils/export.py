@@ -6,264 +6,37 @@ from pathlib import Path
 import pandas as pd
 from flask import send_file
 
+from engines import get_engine_instances
+from utils.config import get_config
+
 logger = logging.getLogger(__name__)
+
+# We need access to the engine instances to format the rows.
+# In a real app, you might inject this.
+secrets = get_config()
+LOADED_ENGINES = get_engine_instances(secrets, {"http": secrets.proxy_url}, secrets.ssl_verify)
 
 
 def prepare_row(result, selected_engines):
-    """
-    Prepares a dictionary (row) with data extracted from the result dictionary
-    based on the selected engines.
-
-    Args:
-        result (dict): A dictionary containing various data sources and their
-            respective information.
-        selected_engines (list): A list of strings representing the selected
-            engines to include in the row.
-
-    Returns:
-        dict: A dictionary containing the prepared row with data from the
-            result dictionary based on the selected engines.
-    """
-    rev_dns_data = result.get("reverse_dns", {})
-    ipinfo_data = result.get("ipinfo", {})
-    abuseipdb_data = result.get("abuseipdb", {})
-
     row = {"observable": result.get("observable"), "type": result.get("type")}
 
-    # Will be at the end of the report if there are other observable types
+    # Standard Engines
+    for engine_name in selected_engines:
+        engine = LOADED_ENGINES.get(engine_name)
+        if engine:
+            engine_data = result.get(engine_name)
+            # Delegate formatting to the engine itself
+            row.update(engine.create_export_row(engine_data))
+
+    # Handle Chrome Extension specifically if it's not a standard engine yet
     if result.get("type") == "CHROME_EXTENSION":
         extension_data = result.get("extension")
         row["extension_name"] = extension_data.get("name") if extension_data else None
-
-    if "reverse_dns" in selected_engines:
-        row["rev_dns"] = result.get("reversed_success") if rev_dns_data else None
-        row["dns_lookup"] = rev_dns_data.get("reverse_dns") if rev_dns_data else None
-
-    if "google_dns" in selected_engines:
-        google_dns_data = result.get("google_dns", {})
-        # google_dns_data is expected to have an "Answer" key with a list of records
-        if google_dns_data and "Answer" in google_dns_data:
-            # Group answers by type_name
-            dns_records = {}
-            for answer in google_dns_data["Answer"]:
-                type_name = answer.get("type_name", "").lower()
-                if type_name:
-                    dns_records.setdefault(type_name, []).append(answer.get("data"))
-            # Flatten lists or join as comma-separated strings
-            row["google_dns_a"] = ", ".join(dns_records.get("a", [])) if "a" in dns_records else None
-            row["google_dns_aaaa"] = ", ".join(dns_records.get("aaaa", [])) if "aaaa" in dns_records else None
-            row["google_dns_cname"] = ", ".join(dns_records.get("cname", [])) if "cname" in dns_records else None
-            row["google_dns_mx"] = ", ".join(dns_records.get("mx", [])) if "mx" in dns_records else None
-            row["google_dns_txt"] = ", ".join(dns_records.get("txt", [])) if "txt" in dns_records else None
-            row["google_dns_ptr"] = ", ".join(dns_records.get("ptr", [])) if "ptr" in dns_records else None
-            row["google_dns_ns"] = ", ".join(dns_records.get("ns", [])) if "ns" in dns_records else None
-            row["google_dns_soa"] = ", ".join(dns_records.get("soa", [])) if "soa" in dns_records else None
-        else:
-            row["google_dns_a"] = None
-            row["google_dns_aaaa"] = None
-            row["google_dns_cname"] = None
-            row["google_dns_mx"] = None
-            row["google_dns_txt"] = None
-            row["google_dns_ptr"] = None
-            row["google_dns_ns"] = None
-            row["google_dns_soa"] = None
-
-    if "ipquery" in selected_engines:
-        ipquery_data = result.get("ipquery", {})
-        row["ipq_cn"] = ipquery_data.get("country_code") if ipquery_data else None
-        row["ipq_country"] = ipquery_data.get("country_name") if ipquery_data else None
-        row["ipq_geo"] = ipquery_data.get("geolocation") if ipquery_data else None
-        row["ipq_asn"] = ipquery_data.get("asn") if ipquery_data else None
-        row["ipq_isp"] = ipquery_data.get("isp") if ipquery_data else None
-        row["ipq_vpn"] = ipquery_data.get("is_vpn") if ipquery_data else None
-        row["ipq_tor"] = ipquery_data.get("is_tor") if ipquery_data else None
-        row["ipq_proxy"] = ipquery_data.get("is_proxy") if ipquery_data else None
-
-    if "ipapi" in selected_engines:
-        ipapi_data = result.get("ipapi", {})
-        row["ipapi_ip"] = ipapi_data.get("ip") if ipapi_data else None
-        row["ipapi_is_vpn"] = ipapi_data.get("is_vpn") if ipapi_data else None
-        row["ipapi_is_tor"] = ipapi_data.get("is_tor") if ipapi_data else None
-        row["ipapi_is_proxy"] = ipapi_data.get("is_proxy") if ipapi_data else None
-        row["ipapi_is_abuser"] = ipapi_data.get("is_abuser") if ipapi_data else None
-        location_data = ipapi_data.get("location", {}) if ipapi_data else {}
-        row["ipapi_city"] = location_data.get("city") if location_data else None
-        row["ipapi_state"] = location_data.get("state") if location_data else None
-        row["ipapi_country"] = location_data.get("country") if location_data else None
-        row["ipapi_country_code"] = location_data.get("country_code") if location_data else None
-        asn_data = ipapi_data.get("asn", {}) if ipapi_data else {}
-        row["ipapi_asn"] = asn_data.get("asn") if asn_data else None
-        row["ipapi_org"] = asn_data.get("org") if asn_data else None
-        vpn_data = ipapi_data.get("vpn", {}) if ipapi_data else {}
-        row["ipapi_vpn_service"] = vpn_data.get("service") if vpn_data else None
-        row["ipapi_vpn_url"] = vpn_data.get("url") if vpn_data else None
-
-    if "ipinfo" in selected_engines:
-        row["ipinfo_cn"] = ipinfo_data.get("country_code") if ipinfo_data else None
-        row["ipinfo_country"] = ipinfo_data.get("country_name") if ipinfo_data else None
-        row["ipinfo_geo"] = ipinfo_data.get("geolocation") if ipinfo_data else None
-        asn_data = ipinfo_data.get("asn").split(" ", 1) if ipinfo_data.get("asn") else []
-        row["ipinfo_asn"] = asn_data[0] if len(asn_data) > 0 else None
-        row["ipinfo_org"] = asn_data[1] if len(asn_data) > 1 else None
-
-    if "abuseipdb" in selected_engines:
-        row["a_ipdb_reports"] = abuseipdb_data.get("reports") if abuseipdb_data else None
-        row["a_ipdb_risk"] = abuseipdb_data.get("risk_score") if abuseipdb_data else None
-
-    if "rdap" in selected_engines:
-        rdap_data = result.get("rdap", {})
-        row["rdap_abuse"] = rdap_data.get("abuse_contact") if rdap_data else None
-        row["rdap_registrar"] = rdap_data.get("registrar") if rdap_data else None
-        row["rdap_org"] = rdap_data.get("organization") if rdap_data else None
-        row["rdap_registrant"] = rdap_data.get("registrant") if rdap_data else None
-        row["rdap_registrant_email"] = rdap_data.get("registrant_email") if rdap_data else None
-        row["rdap_ns"] = rdap_data.get("name_servers") if rdap_data else None
-        row["rdap_creation"] = rdap_data.get("creation_date") if rdap_data else None
-        row["rdap_expiration"] = rdap_data.get("expiration_date") if rdap_data else None
-        row["rdap_update"] = rdap_data.get("update_date") if rdap_data else None
-
-    if "abusix" in selected_engines:
-        abusix_data = result.get("abusix", {})
-        row["abusix_abuse"] = abusix_data.get("abuse") if abusix_data else None
-
-    if "threatfox" in selected_engines:
-        threatfox_data = result.get("threatfox", {})
-        row["tf_count"] = threatfox_data.get("count") if threatfox_data else None
-        row["tf_malware"] = threatfox_data.get("malware_printable") if threatfox_data else None
-
-    if "virustotal" in selected_engines:
-        virustotal_data = result.get("virustotal", {})
-        row["vt_detect"] = virustotal_data.get("detection_ratio") if virustotal_data else None
-        row["vt_nb_detect"] = virustotal_data.get("total_malicious") if virustotal_data else None
-        row["vt_community"] = virustotal_data.get("community_score") if virustotal_data else None
-
-    if "alienvault" in selected_engines:
-        alienvault_data = result.get("alienvault", {})
-        row["alienvault_pulses"] = alienvault_data.get("count") if alienvault_data else None
-        row["alienvault_malwares"] = alienvault_data.get("malware_families") if alienvault_data else None
-        row["alienvault_adversary"] = alienvault_data.get("adversary") if alienvault_data else None
-
-    if "spur" in selected_engines:
-        spur_data = result.get("spur", {})
-        row["spur_us_anon"] = spur_data.get("tunnels") if spur_data else None
-
-    if "webscout" in selected_engines:
-        webscout_data = result.get("webscout", {})
-        row["ws_risk"] = webscout_data.get("risk_score") if webscout_data else None
-        row["ws_is_proxy"] = webscout_data.get("is_proxy") if webscout_data else None
-        row["ws_is_tor"] = webscout_data.get("is_tor") if webscout_data else None
-        row["ws_is_vpn"] = webscout_data.get("is_vpn") if webscout_data else None
-        row["ws_cn"] = webscout_data.get("country_code") if webscout_data else None
-        row["ws_country"] = webscout_data.get("country_name") if webscout_data else None
-        row["ws_location"] = webscout_data.get("location") if webscout_data else None
-        row["ws_hostnames"] = webscout_data.get("hostnames") if webscout_data else None
-        row["ws_domains_on_ip"] = webscout_data.get("domains_on_ip") if webscout_data else None
-        row["ws_network_type"] = webscout_data.get("network_type") if webscout_data else None
-        row["ws_network_provider"] = webscout_data.get("network_provider") if webscout_data else None
-        row["ws_network_service"] = webscout_data.get("network_service") if webscout_data else None
-        row["ws_network_service_region"] = webscout_data.get("network_service_region") if webscout_data else None
-        row["ws_network_provider_services"] = webscout_data.get("network_provider_services") if webscout_data else None
-        row["ws_behavior"] = webscout_data.get("behavior") if webscout_data else None
-        row["ws_as_org"] = webscout_data.get("as_org") if webscout_data else None
-        row["ws_asn"] = webscout_data.get("asn") if webscout_data else None
-        row["ws_desc"] = webscout_data.get("description") if webscout_data else None
-
-    if "google_safe_browsing" in selected_engines:
-        google_safe_browsing_data = result.get("google_safe_browsing", {})
-        row["gsb_threat"] = google_safe_browsing_data.get("threat_found") if google_safe_browsing_data else None
-
-    if "shodan" in selected_engines:
-        shodan_data = result.get("shodan", {})
-        row["shodan_ports"] = shodan_data.get("ports") if shodan_data else None
-
-    if "phishtank" in selected_engines:
-        phishtank_data = result.get("phishtank", {})
-        row["phishtank_in_db"] = phishtank_data.get("in_database") if phishtank_data else None
-        row["phishtank_verified"] = phishtank_data.get("verified") if phishtank_data else None
-        row["phishtank_valid"] = phishtank_data.get("valid") if phishtank_data else None
-
-    if "urlscan" in selected_engines:
-        urlscan_data = result.get("urlscan", {})
-        row["urlscan_count"] = urlscan_data.get("scan_count") if urlscan_data else None
-        row["urlscan_top_domains"] = urlscan_data.get("top_domains") if urlscan_data else None
-
-    if "crtsh" in selected_engines:
-        crtsh_data = result.get("crtsh", {})
-        row["crtsh_top_domains"] = crtsh_data.get("top_domains") if crtsh_data else None
-
-    if "mde" in selected_engines:
-        mde_data = result.get("mde", {})
-        row["mde_first_seen"] = mde_data.get("orgFirstSeen") if mde_data else None
-        row["mde_last_seen"] = mde_data.get("orgLastSeen") if mde_data else None
-        row["mde_org_prevalence"] = mde_data.get("orgPrevalence") if mde_data else None
-
-    if "opencti" in selected_engines:
-        opencti_data = result.get("opencti", {})
-        row["opencti_entity_counts"] = opencti_data.get("entity_counts") if opencti_data else None
-        row["opencti_global_count"] = opencti_data.get("global_count") if opencti_data else None
-        row["opencti_last_seen"] = opencti_data.get("latest_created_at") if opencti_data else None
-
-    if "dfir_iris" in selected_engines:
-        dfir_iris_data = result.get("dfir_iris", {})
-        row["dfir_iris_total_count"] = dfir_iris_data.get("reports") if dfir_iris_data else None
-        row["dfir_iris_link"] = dfir_iris_data.get("links") if dfir_iris_data else None
-
-    if "misp" in selected_engines:
-        misp_data = result.get("misp", {})
-        row["misp_count"] = misp_data.get("count") if misp_data else None
-        row["misp_first_seen"] = misp_data.get("first_seen") if misp_data else None
-        row["misp_last_seen"] = misp_data.get("last_seen") if misp_data else None
-
-    if "hudsonrock" in selected_engines:
-        hudsonrock_data = result.get("hudsonrock", {})
-        row["hr_total_corporate_services"] = hudsonrock_data.get("total_corporate_services") if hudsonrock_data else None
-        row["hr_total_user_services"] = hudsonrock_data.get("total_user_services") if hudsonrock_data else None
-        row["hr_total"] = hudsonrock_data.get("total") if hudsonrock_data else None
-        row["hr_total_stealers"] = hudsonrock_data.get("totalStealers") if hudsonrock_data else None
-        row["hr_employees"] = hudsonrock_data.get("employees") if hudsonrock_data else None
-        row["hr_users"] = hudsonrock_data.get("users") if hudsonrock_data else None
-        row["hr_third_parties"] = hudsonrock_data.get("third_parties") if hudsonrock_data else None
-        row["hr_stealer_families"] = hudsonrock_data.get("stealerFamilies") if hudsonrock_data else None
-
-    if "crowdstrike" in selected_engines:
-        crowdstrike_data = result.get("crowdstrike", {})
-        row["cs_device_count"] = crowdstrike_data.get("device_count") if crowdstrike_data else None
-        row["cs_actor"] = crowdstrike_data.get("actors") if crowdstrike_data else None
-        row["cs_confidence"] = crowdstrike_data.get("malicious_confidence") if crowdstrike_data else None
-        row["cs_threat_types"] = crowdstrike_data.get("threat_types") if crowdstrike_data else None
-        row["cs_malwares"] = crowdstrike_data.get("malware_families") if crowdstrike_data else None
-        row["cs_kill_chain"] = crowdstrike_data.get("kill_chain") if crowdstrike_data else None
-        row["cs_vulns"] = crowdstrike_data.get("vulnerabilities") if crowdstrike_data else None
-
-    if "rl_analyze" in selected_engines:
-        rl_analyze_data = result.get("rl_analyze", {})
-        row["rl_analyze_total_count"] = rl_analyze_data.get("reports") if rl_analyze_data else None
-        row["rl_analyze_malicious"] = rl_analyze_data.get("malicious") if rl_analyze_data else None
-        row["rl_analyze_suspicious"] = rl_analyze_data.get("suspicious") if rl_analyze_data else None
-        row["rl_analyze_total_files"] = rl_analyze_data.get("total_files") if rl_analyze_data else None
-        row["rl_analyze_malicious_files"] = rl_analyze_data.get("malicious_files") if rl_analyze_data else None
-        row["rl_analyze_suspicious_files"] = rl_analyze_data.get("suspicious_files") if rl_analyze_data else None
-        row["rl_analyze_av_scanners"] = rl_analyze_data.get("scanners") if rl_analyze_data else None
-        row["rl_analyze_threats"] = rl_analyze_data.get("threats") if rl_analyze_data else None
-        row["rl_analyze_riskscore"] = rl_analyze_data.get("riskscore") if rl_analyze_data else None
-        row["rl_analyze_link"] = rl_analyze_data.get("link") if rl_analyze_data else None
 
     return row
 
 
 def prepare_data_for_export(analysis_results):
-    """
-    Prepares data for export based on the analysis results.
-
-    Args:
-        analysis_results (AnalysisResults): An object containing the results of
-            the analysis and the selected engines.
-
-        list: A list of rows, where each row is prepared based on the analysis results
-            and selected engines.
-        list: A list of rows, where each row is prepared based on the analysis results
-            and selected engines.
-    """
     data = []
     for result in analysis_results.results:
         row = prepare_row(result, analysis_results.selected_engines)
@@ -271,57 +44,21 @@ def prepare_data_for_export(analysis_results):
     return data
 
 
+# ... (Keep the rest of the export_to_csv / export_to_excel functions exactly as they were) ...
 def export_to_csv(data, timestamp):
-    """
-    Exports the given data to a CSV file and sends it as an attachment.
-
-    Args:
-        data (list or dict): The data to be exported to CSV.
-        It should be in a format that can be converted to a pandas DataFrame.
-        timestamp (str): A timestamp string to be used in the CSV file name.
-
-    Returns:
-        Response: A Flask response object that sends the CSV file as an attachment.
-
-    The CSV file is named using the provided timestamp and is deleted 10 seconds after being sent.
-    """
     df = pd.DataFrame(data)
     csv_path = f"{timestamp}_analysis_result.csv"
     df.to_csv(csv_path, index=False, sep=";")
-    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)).start()
     threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)).start()
     return send_file(csv_path, as_attachment=True)
 
 
 def export_to_excel(data, timestamp):
-    """
-    Exports the given data to an Excel file with a timestamp in the filename.
-
-    Args:
-        data (list of dict): The data to be exported, where each dictionary represents a row.
-        timestamp (str): A string representing the timestamp to be included in the filename.
-
-    Returns:
-        Response: A Flask response object to send the file as an attachment.
-
-    The function performs the following steps:
-    1. Converts the data into a pandas DataFrame.
-    2. Creates an Excel file with the given timestamp in the filename.
-    3. Writes the DataFrame to the Excel file with the sheet name 'Results'.
-    4. Applies auto-filter to the worksheet.
-    5. Adjusts the width of each column based on the maximum length of the values in that column.
-    6. Sends the file as an attachment in the response.
-    7. Starts a background thread to delete the file after 10 seconds.
-
-    Note:
-        This function requires the 'pandas', 'openpyxl', 'flask', 'threading', 'time', and 'os' modules.
-    """
     df = pd.DataFrame(data)
     excel_path = f"{timestamp}_analysis_result.xlsx"
     with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Results")
         worksheet = writer.sheets["Results"]
-        (max_row, max_col) = df.shape
         worksheet.auto_filter.ref = worksheet.dimensions
         for col in worksheet.columns:
             max_length = 0
@@ -332,8 +69,7 @@ def export_to_excel(data, timestamp):
                         max_length = len(str(cell.value))
                 except Exception as e:
                     logger.error("Error exporting to Excel, column %s, cell %s, '%s'", column, cell, e, exc_info=True)
-            adjusted_width = max_length + 2
-            worksheet.column_dimensions[column].width = adjusted_width
+            worksheet.column_dimensions[column].width = max_length + 2
     response = send_file(excel_path, as_attachment=True)
     threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(excel_path,)).start()
     return response

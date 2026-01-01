@@ -3,10 +3,18 @@
 
 <head>
 {%- block head %}
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Cyberbro - Observable Analysis Tool for threat intelligence and security research">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://img.icons8.com">
+    <link rel="preconnect" href="https://upload.wikimedia.org">
+
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- <script defer src="{{ url_for('static', filename='toggle_dark_mode.js') }}"></script> -->
+
     <title>{% block title %}Cyberbro{% endblock title %}</title>
 {% endblock head -%}
 </head>
@@ -62,36 +70,7 @@
         </nav>
     {% endblock footer -%}
     </footer>
-<script>
-    const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
-    const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
-
-    function toggleDarkMode() {
-        document.body.classList.toggle("dark-mode");
-        localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-        updateDarkModeIcon();
-    }
-
-    function updateDarkModeIcon() {
-        const darkModeIcon = document.getElementById("darkModeIcon");
-        if (document.body.classList.contains("dark-mode")) {
-            darkModeIcon.src = sunIcon;
-            darkModeIcon.alt = "Light Mode";
-        } else {
-            darkModeIcon.src = moonIcon;
-            darkModeIcon.alt = "Dark Mode";
-        }
-    }
-
-    function applyDarkMode() {
-        if (localStorage.getItem("darkMode") === "true") {
-            document.body.classList.add("dark-mode");
-        }
-        updateDarkModeIcon();
-    }
-
-    applyDarkMode();
-</script>
+<script src="{{ url_for('static', filename='dark-mode.js') }}"></script>
 </body>
 
 </html>

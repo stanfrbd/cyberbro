@@ -4,53 +4,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 Internal Server Error</title>
+    <meta name="description" content="Cyberbro - Internal Server Error">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>500 Internal Server Error - Cyberbro</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             text-align: center;
-            padding: 50px;
         }
 
-        .container {
+        .error-container {
             max-width: 600px;
-            margin: 0 auto;
+            padding: var(--spacing-xl);
         }
 
-        h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
+        .error-code {
+            font-size: 6rem;
+            font-weight: 700;
+            color: var(--danger-color);
+            margin: 0;
+            line-height: 1;
         }
 
-        p {
-            font-size: 18px;
-            margin-bottom: 30px;
+        .error-title {
+            font-size: 2rem;
+            margin: var(--spacing-md) 0;
+            color: var(--text-color);
         }
 
-        a {
-            color: #007BFF;
-            text-decoration: none;
+        body.dark-mode .error-title {
+            color: var(--dark-text-color);
         }
 
-        a:hover {
-            text-decoration: underline;
+        .error-message {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        body.dark-mode .error-message {
+            color: var(--dark-text-secondary);
+        }
+
+        .error-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>500</h1>
-        <p>Internal Server Error</p>
-        <p>Sorry, something went wrong on our end. Please try again later.</p>
-        <p><a href="/">Go back to Home</a></p>
-        <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="github-logo">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub Logo"
-                width="40" height="40" class="github-logo">
-        </a>
+    <div class="error-container">
+        <h1 class="error-code">500</h1>
+        <h2 class="error-title">Internal Server Error</h2>
+        <p class="error-message">Sorry, something went wrong on our end. Please try again later.</p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-icon">
+                <span>🏠</span>
+                <span>Go to Home</span>
+            </a>
+            <a href="https://github.com/stanfrbd/cyberbro" target="_blank" class="btn btn-outline btn-icon">
+                <span>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="GitHub" width="16" height="16">
+                </span>
+                <span>GitHub</span>
+            </a>
+        </div>
     </div>
+
+    <script>
+        // Apply dark mode if enabled
+        function applyDarkMode() {
+            const savedMode = localStorage.getItem("darkMode");
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedMode === "true" || (savedMode === null && prefersDark)) {
+                document.body.classList.add("dark-mode");
+            }
+        }
+
+        applyDarkMode();
+    </script>
 </body>
 
 </html>

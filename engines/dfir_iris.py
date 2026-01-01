@@ -4,80 +4,63 @@ from typing import Any, Optional
 
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "BOGON",
-    "FQDN",
-    "IPv4",
-    "IPv6",
-    "MD5",
-    "SHA1",
-    "SHA256",
-    "URL",
-]
 
+class DFIRIrisEngine(BaseEngine):
+    @property
+    def name(self):
+        return "dfir_iris"
 
-def query_dfir_iris(
-    observable: str,
-    observable_type: str,
-    dfir_iris_api_key: str,
-    dfir_iris_url: str,
-    proxies: dict[str, str],
-    ssl_verify: bool = True,
-) -> Optional[dict[str, Any]]:
-    """
-    Queries the DFIR-IRIS API for information about a given observable (IP, domain, URL, or file hash).
+    @property
+    def supported_types(self):
+        return ["BOGON", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    Args:
-        observable (str): The IoC to query (IPv4, IPv6, domain, URL, or file hash).
-        observable_type (str): What type of IOC, (IPv4, IPv6, FQDN, MD5, SHA1, SHA256, URL)
-        dfir_iris_api_key (str): DFIR_IRIS API key.
-        dfir_iris_url (str): DFIR_IRIS url.
-        proxies (dict): Dictionary of proxies.
-        ssl_verify (bool): Whether to verify SSL certificates.
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        dfir_iris_api_key = self.secrets.dfir_iris_api_key
+        dfir_iris_url = self.secrets.dfir_iris_url
 
-    Returns:
-        dict: A dictionary with number of cases with the indicator, and the case id links, for example:
-            {
-                "reports": 3,
-                "links": ["https://dfir_iris_url/case/ioc?cid=3","https://dfir_iris_url/case/ioc?cid=4"]
-            }
-        None: If any error occurs.
-    """
+        # Use selective wildcards to match ioc
+        if observable_type in ("IPv4", "IPv6", "MD5", "SHA1", "SHA256", "BOGON"):
+            body = {"search_value": f"%{observable_value}", "search_type": "ioc"}
+        elif observable_type in ("FQDN", "URL"):
+            body = {"search_value": f"{observable_value}%", "search_type": "ioc"}
+        else:
+            body = {"search_value": f"{observable_value}", "search_type": "ioc"}
 
-    # Use selective wildcards to match ioc
-    if observable_type in ("IPv4", "IPv6", "MD5", "SHA1", "SHA256", "BOGON"):
-        body = {"search_value": f"%{observable}", "search_type": "ioc"}
-    elif observable_type in ("FQDN", "URL"):
-        body = {"search_value": f"{observable}%", "search_type": "ioc"}
-    else:
-        body = {"search_value": f"{observable}", "search_type": "ioc"}
+        try:
+            url = f"{dfir_iris_url}/search?cid=1"
+            headers = {"Authorization": f"Bearer {dfir_iris_api_key}", "Content-Type": "application/json"}
+            payload = json.dumps(body)
+            # NOTE: Original code uses proxies=None here, keeping that behavior.
+            response = requests.post(url, headers=headers, data=payload, proxies=None, verify=self.ssl_verify, timeout=5)
+            response.raise_for_status()
 
-    try:
-        url = f"{dfir_iris_url}/search?cid=1"
-        headers = {"Authorization": f"Bearer {dfir_iris_api_key}", "Content-Type": "application/json"}
-        payload = json.dumps(body)
-        response = requests.post(url, headers=headers, data=payload, proxies=None, verify=ssl_verify, timeout=5)
-        response.raise_for_status()
+            data = response.json()
+            if "data" not in data or not data["data"]:
+                return None
 
-        data = response.json()
-        if "data" not in data:
-            logger.warning("DFIR-IRIS response has no 'data' key. Full response: %s", data)
-            return None
-
-        if len(data["data"]) > 0:
             links = []
             for i in data["data"]:
                 case_id = i["case_id"]
                 link = f"{dfir_iris_url}/case/ioc?cid={case_id}"
                 links.append(link)
 
-            return {"reports": len(set(links)), "links": sorted(set(links))}  # Return unique case id's
+            unique_links = sorted(set(links))
+            return {"reports": len(unique_links), "links": unique_links}
 
-        return None
+        except Exception as e:
+            logger.error("Error querying DFIR-IRIS for '%s': %s", observable_value, e, exc_info=True)
+            return None
 
-    except Exception as e:
-        logger.error("Error querying DFIR-IRIS for '%s': %s", observable, e, exc_info=True)
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {"dfir_iris_total_count": None, "dfir_iris_link": None}
 
-    return None
+        links_str = ", ".join(analysis_result.get("links", []))
+        return {
+            "dfir_iris_total_count": analysis_result.get("reports"),
+            "dfir_iris_link": links_str if links_str else None,
+        }

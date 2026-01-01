@@ -5,164 +5,115 @@ from urllib.parse import quote
 
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "FQDN",
-    "IPv4",
-    "IPv6",
-    "MD5",
-    "SHA1",
-    "SHA256",
-    "URL",
-]
 
+class MISPEngine(BaseEngine):
+    @property
+    def name(self):
+        return "misp"
 
-def map_observable_type(observable_type: str) -> str:
-    """
-    Maps observable type to MISP attribute type.
+    @property
+    def supported_types(self):
+        return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    Args:
-        observable_type (str): The observable type (e.g., "URL", "IPv4", "IPv6", "FQDN", "SHA256", "SHA1", "MD5").
+    def _map_observable_type(self, observable_type: str) -> str:
+        mapping = {
+            "URL": "url",
+            "IPv4": ["ip-dst", "ip-src", "ip-src|port", "ip-dst|port", "domain|ip"],
+            "IPv6": ["ip-dst", "ip-src", "ip-src|port", "ip-dst|port", "domain|ip"],
+            "FQDN": ["domain", "domain|ip", "hostname", "hostname|port"],
+            "SHA256": "sha256",
+            "SHA1": "sha1",
+            "MD5": "md5",
+        }
+        return mapping.get(observable_type, "")
 
-    Returns:
-        str: The corresponding MISP attribute type.
-    """
-    mapping = {
-        "URL": "url",
-        "IPv4": [
-            "ip-dst",
-            "ip-src",
-            "ip-src|port",
-            "ip-dst|port",
-            "domain|ip",
-        ],
-        "IPv6": [
-            "ip-dst",
-            "ip-src",
-            "ip-src|port",
-            "ip-dst|port",
-            "domain|ip",
-        ],
-        "FQDN": ["domain", "domain|ip", "hostname", "hostname|port"],
-        "SHA256": "sha256",
-        "SHA1": "sha1",
-        "MD5": "md5",
-    }
-    return mapping.get(observable_type, "")
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        api_key = self.secrets.misp_api_key
+        misp_url = self.secrets.misp_url
 
+        try:
+            if not api_key or not misp_url:
+                logger.error("MISP API key or URL is required")
+                return None
 
-def query_misp(
-    observable: str,
-    observable_type: str,
-    proxies: dict[str, str],
-    ssl_verify: bool = True,
-    api_key: str = "",
-    misp_url: str = "",
-) -> Optional[dict[str, Any]]:
-    """
-    Queries the MISP API for information about a given observable (URL, IP, domain, hash).
+            misp_url = misp_url.rstrip("/")
+            url = f"{misp_url}/attributes/restSearch"
+            headers = {"Authorization": api_key, "Accept": "application/json", "Content-Type": "application/json"}
 
-    Args:
-        observable (str): The observable to search for (e.g., URL, IP address, domain, hash).
-        observable_type (str): The type of the observable
-        (e.g., "URL", "IPv4", "IPv6", "FQDN", "SHA256", "SHA1", "MD5").
-        proxies (dict): A dictionary of proxies to use for the request.
-        ssl_verify (bool): Whether to verify SSL certificates.
-        api_key (str): MISP API key (required).
-        misp_url (str): Base URL of the MISP instance.
+            misp_type = self._map_observable_type(observable_type)
+            if not misp_type:
+                logger.error("Unsupported observable type for MISP: %s", observable_type)
+                return None
 
-    Returns:
-        dict: A dictionary with "count" (int), "events" (list), "link" (str), "first_seen" (str), and "last_seen" (str).
-        None: If an error occurs or API key is missing.
-    """
-    try:
-        if not api_key:
-            logger.error("MISP API key is required")
-            return None
+            payload = {"returnFormat": "json", "value": observable_value, "type": misp_type}
 
-        # Ensure the URL is properly formatted
-        misp_url = misp_url.rstrip("/")
+            response = requests.post(url, json=payload, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response.raise_for_status()
 
-        # Validate observable type
-        if observable_type not in ["IPv4", "IPv6", "FQDN", "SHA256", "SHA1", "MD5", "URL"]:
-            logger.error("Unsupported observable type: %s", observable_type)
-            return None
+            result = response.json()
+            attributes = result.get("response", {}).get("Attribute", [])
 
-        # Prepare the search endpoint
-        url = f"{misp_url}/attributes/restSearch"
-        headers = {"Authorization": api_key, "Accept": "application/json", "Content-Type": "application/json"}
-
-        # map observable type to MISP attribute type
-        observable_type = map_observable_type(observable_type)
-
-        # Prepare the search payload
-        payload = {"returnFormat": "json", "value": observable, "type": observable_type}
-
-        response = requests.post(url, json=payload, headers=headers, proxies=proxies, verify=ssl_verify, timeout=5)
-        response.raise_for_status()
-
-        result = response.json()
-
-        attributes = result.get("response", {}).get("Attribute", [])
-
-        event_data = []
-        seen_event_ids = set()  # Track unique event IDs
-        first_seen = None
-        last_seen = None
-
-        count = 0
-
-        if isinstance(attributes, list):
-            for attribute in attributes:
-                # Update first_seen and last_seen and make sure to iterate on all attributes
-                timestamp = attribute.get("timestamp")
-                if timestamp:
-                    if first_seen is None or timestamp < first_seen:
-                        first_seen = timestamp
-                    if last_seen is None or timestamp > last_seen:
-                        last_seen = timestamp
-
-                event = attribute.get("Event", {})
-                event_id = event.get("id")
-                event_title = event.get("info", "Unknown")
-                event_url = f"{misp_url}/events/view/{event_id}" if event_id else None
-
-                # Skip if this event ID has already been seen
-                if event_id in seen_event_ids:
-                    continue
-
-                # Add to seen event IDs and include in output
-                seen_event_ids.add(event_id)
-                event_data.append({"title": event_title, "url": event_url, "timestamp": timestamp})
-
-                # Sort events by timestamp in descending order (most recent first)
-                event_data.sort(key=lambda x: x["timestamp"], reverse=True)
-
-                # Keep only the 5 most recent events to display in Cyberbro
-                event_data = event_data[:5]
-
-                count = len(attributes)
-        else:
+            event_data = []
+            seen_event_ids = set()
+            first_seen = None
+            last_seen = None
             count = 0
 
-        link = f"{misp_url}/attributes/index?value={quote(observable)}"
+            if isinstance(attributes, list):
+                for attribute in attributes:
+                    timestamp = attribute.get("timestamp")
+                    if timestamp:
+                        if first_seen is None or int(timestamp) < int(first_seen):
+                            first_seen = timestamp
+                        if last_seen is None or int(timestamp) > int(last_seen):
+                            last_seen = timestamp
 
-        # Convert first_seen and last_seen to human-readable format (YYYY-MM-DD)
+                    event = attribute.get("Event", {})
+                    event_id = event.get("id")
 
-        if first_seen:
-            first_seen = datetime.fromtimestamp(int(first_seen), tz=timezone.utc).strftime("%Y-%m-%d")
-        if last_seen:
-            last_seen = datetime.fromtimestamp(int(last_seen), tz=timezone.utc).strftime("%Y-%m-%d")
+                    if event_id in seen_event_ids:
+                        continue
+
+                    seen_event_ids.add(event_id)
+                    event_title = event.get("info", "Unknown")
+                    event_url = f"{misp_url}/events/view/{event_id}" if event_id else None
+
+                    event_data.append({"title": event_title, "url": event_url, "timestamp": timestamp})
+
+                    count = len(attributes)  # Total attributes count
+
+                event_data.sort(key=lambda x: x["timestamp"], reverse=True)
+                event_data = event_data[:5]  # Keep only 5 most recent events
+
+            link = f"{misp_url}/attributes/index?value={quote(observable_value)}"
+
+            if first_seen:
+                first_seen = datetime.fromtimestamp(int(first_seen), tz=timezone.utc).strftime("%Y-%m-%d")
+            if last_seen:
+                last_seen = datetime.fromtimestamp(int(last_seen), tz=timezone.utc).strftime("%Y-%m-%d")
+
+            return {
+                "count": count,
+                "events": event_data,
+                "link": link,
+                "first_seen": first_seen,
+                "last_seen": last_seen,
+            }
+
+        except Exception as e:
+            logger.error("Error querying MISP for '%s': %s", observable_value, e, exc_info=True)
+            return None
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {f"misp_{k}": None for k in ["count", "first_seen", "last_seen"]}
 
         return {
-            "count": count,
-            "events": event_data,
-            "link": link,
-            "first_seen": first_seen,
-            "last_seen": last_seen,
+            "misp_count": analysis_result.get("count"),
+            "misp_first_seen": analysis_result.get("first_seen"),
+            "misp_last_seen": analysis_result.get("last_seen"),
         }
-
-    except Exception as e:
-        logger.error("Error querying MISP for '%s': %s", observable, e, exc_info=True)
-    return None

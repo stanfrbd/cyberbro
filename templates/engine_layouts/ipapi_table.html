@@ -11,7 +11,7 @@
 
     <strong>Location: </strong>{{ result.ipapi.location.city }}, {{
     result.ipapi.location.state }}<br />
-    <strong>Country: </strong><span class="country country-{{ result.ipapi.location.country_code | lower }}">{{
+    <strong>Country: </strong><span class="country country-{{ result.ipapi.location.country | lower }}">{{
         result.ipapi.location.country }}</span>
     <span class="fi fi-{{ result.ipapi.location.country_code | lower }}"></span><br />
     <strong>ASN: </strong>{{ result.ipapi.asn.asn }} {{

@@ -1,3 +1,17 @@
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+    <h3 style="margin: 0;">Results Table</h3>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <span id="escapeHint" style="display: none; font-size: 0.875rem; color: var(--text-secondary); background: rgba(0, 123, 255, 0.1); padding: 0.25rem 0.75rem; border-radius: var(--radius-full);">
+            Press <kbd style="background: var(--surface-color); border: 1px solid var(--border-color); padding: 0.125rem 0.375rem; border-radius: var(--radius-sm); font-family: monospace;">ESC</kbd> to exit
+        </span>
+        <button class="btn btn-outline btn-icon" onclick="toggleTableFullscreen()" id="fullscreenBtn">
+            <span>⛶</span>
+            <span>Expand Table</span>
+        </button>
+    </div>
+</div>
+
+<div id="tableContainer" class="table-container">
 <div class="filters-container">
     <input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
 
@@ -18,7 +32,7 @@
         {% for result in analysis_results.results %}
         {% if (result.ipinfo and result.ipinfo.country_name not in countries) or (result.ipquery and
         result.ipquery.country_name not in countries) or (result.webscout and result.webscout.country_name not in
-        countries) %}
+        countries) or (result.ipapi and result.ipapi.location.country not in countries) %}
         {% if result.ipinfo and result.ipinfo.country_name not in countries %}
         {% set _ = countries.append(result.ipinfo.country_name) %}
         <option value="{{ result.ipinfo.country_name | lower }}">{{ result.ipinfo.country_name }}</option>
@@ -32,6 +46,11 @@
         {% if result.webscout and result.webscout.country_name not in countries %}
         {% set _ = countries.append(result.webscout.country_name) %}
         <option value="{{ result.webscout.country_name | lower }}">{{ result.webscout.country_name }}</option>
+        {% endif %}
+
+        {% if result.ipapi and result.ipapi.location.country not in countries %}
+        {% set _ = countries.append(result.ipapi.location.country) %}
+        <option value="{{ result.ipapi.location.country | lower }}">{{ result.ipapi.location.country }}</option>
         {% endif %}
         {% endif %}
         {% endfor %}
@@ -59,9 +78,11 @@
     <button class="btn" onclick="clearFilters()">Clear Filters</button>
 </div><!-- filters-container -->
 
+<div class="table-wrapper">
 <table id="resultsTable">
     <thead>
         <tr>
+            <th style="width: 40px; text-align: center;">▼</th>
             <th>Observable</th>
             <th>Type</th>
             {% if "reverse_dns" in analysis_results.selected_engines %}
@@ -221,6 +242,9 @@
         <tr class="clean-detection">
             {% endif %}
 
+            <td style="text-align: center; cursor: pointer; user-select: none;" onclick="toggleRowExpansion(this)" class="row-toggle">
+                <span class="toggle-icon">›</span>
+            </td>
             <td title="{{ result.observable }}">{{ result.observable[:64] }}{% if result.observable | length > 64
                 %}...{% endif %}</td>
 
@@ -353,3 +377,10 @@
         {% endfor %}
     </tbody>
 </table>
+</div><!-- table-wrapper -->
+</div><!-- table-container -->
+
+<!-- Table Enhancement Scripts -->
+<script src="{{ url_for('static', filename='table-fullscreen.js') }}"></script>
+<script src="{{ url_for('static', filename='table-row-expansion.js') }}"></script>
+<script src="{{ url_for('static', filename='table-quick-copy.js') }}"></script>

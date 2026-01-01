@@ -4,104 +4,93 @@ from typing import Any, Optional
 import requests
 from bs4 import BeautifulSoup
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "CHROME_EXTENSION",
-    "FQDN",
-    "IPv4",
-    "IPv6",
-    "MD5",
-    "SHA1",
-    "SHA256",
-    "URL",
-]
+BASE_SUPPORTED_TYPES = ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
 
-def query_ioc_one_html(observable: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
-    """
-    Perform a deep search query on ioc.one (HTML).
+class IOCOneHTMLEngine(BaseEngine):
+    @property
+    def name(self):
+        return "ioc_one_html"
 
-    Args:
-        observable (str): The search query.
-        proxies (dict): Dictionary containing proxy settings.
+    @property
+    def supported_types(self):
+        return BASE_SUPPORTED_TYPES
 
-    Returns:
-        dict: A dictionary with keys "results" (list of dict) and "link" (str):
-            {
-                "results": [
-                    {"header": ..., "title": ..., "source": ...},
-                    ...
-                ],
-                "link": "https://ioc.one/..."
-            }
-        None: If any error occurs.
-    """
-    try:
-        url = f"https://ioc.one/auth/deep_search?search={observable}"
-        response = requests.get(
-            url,
-            proxies=proxies,
-            verify=ssl_verify,
-            headers={"User-Agent": "cyberbro"},
-            timeout=5,
-        )
-        response.raise_for_status()
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        try:
+            url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+            response = requests.get(
+                url,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                headers={"User-Agent": "cyberbro"},
+                timeout=5,
+            )
+            response.raise_for_status()
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        cards = soup.find_all("div", class_="card box-shadow my-1")
+            soup = BeautifulSoup(response.text, "html.parser")
+            cards = soup.find_all("div", class_="card box-shadow my-1")
 
-        search_results: list[dict[str, str]] = []
-        for card in cards[:5]:
-            header = card.find("div", class_="card-header").get_text(strip=True)
-            title = card.find("h5", class_="card-title").get_text(strip=True)
-            source = card.find("a", class_="btn border btn-primary m-1", target="_blank")["href"]
-            search_results.append({"header": header, "title": title, "source": source})
+            search_results: list[dict[str, str]] = []
+            for card in cards[:5]:
+                header = card.find("div", class_="card-header").get_text(strip=True)
+                title = card.find("h5", class_="card-title").get_text(strip=True)
+                source = card.find("a", class_="btn border btn-primary m-1", target="_blank")["href"]
+                search_results.append({"header": header, "title": title, "source": source})
 
-        return {"results": search_results, "link": url}
+            return {"results": search_results, "link": url, "count": len(search_results)}
 
-    except Exception as e:
-        logger.error("Error querying ioc.one (HTML) for '%s': %s", observable, e, exc_info=True)
+        except Exception as e:
+            logger.error("Error querying ioc.one (HTML) for '%s': %s", observable_value, e, exc_info=True)
+            return None
 
-    return None
+    def create_export_row(self, analysis_result: Any) -> dict:
+        # Since original export fields are missing, provide a count
+        return {"ioc_one_html_count": analysis_result.get("count") if analysis_result else None}
 
 
-def query_ioc_one_pdf(observable: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
-    """
-    Perform a deep search query on ioc.one (PDF).
+class IOCOnePDFEngine(BaseEngine):
+    @property
+    def name(self):
+        return "ioc_one_pdf"
 
-    Args:
-        observable (str): The search query.
-        proxies (dict): Dictionary containing proxy settings.
+    @property
+    def supported_types(self):
+        return BASE_SUPPORTED_TYPES
 
-    Returns:
-        dict: A dictionary with keys "results" (list of dict) and "link" (str).
-        None: If any error occurs.
-    """
-    try:
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable}"
-        response = requests.get(
-            url,
-            proxies=proxies,
-            verify=ssl_verify,
-            headers={"User-Agent": "cyberbro"},
-            timeout=5,
-        )
-        response.raise_for_status()
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        try:
+            url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+            response = requests.get(
+                url,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                headers={"User-Agent": "cyberbro"},
+                timeout=5,
+            )
+            response.raise_for_status()
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        cards = soup.find_all("div", class_="card box-shadow my-1")
+            soup = BeautifulSoup(response.text, "html.parser")
+            cards = soup.find_all("div", class_="card box-shadow my-1")
 
-        search_results = []
-        for card in cards[:5]:
-            header = card.find("div", class_="card-header").get_text(strip=True)
-            title = card.find("h5", class_="card-title").get_text(strip=True)
-            source = card.find("a", class_="btn border btn-primary mx-1", target="_blank")["href"]
-            search_results.append({"header": header, "title": title, "source": source})
+            search_results = []
+            for card in cards[:5]:
+                header = card.find("div", class_="card-header").get_text(strip=True)
+                title = card.find("h5", class_="card-title").get_text(strip=True)
+                # Note the difference in class name for the source link from the HTML engine
+                source = card.find("a", class_="btn border btn-primary mx-1", target="_blank")["href"]
+                search_results.append({"header": header, "title": title, "source": source})
 
-        return {"results": search_results, "link": url}
+            return {"results": search_results, "link": url, "count": len(search_results)}
 
-    except Exception as e:
-        logger.error("Error querying ioc.one (PDF) for '%s': %s", observable, e, exc_info=True)
+        except Exception as e:
+            logger.error("Error querying ioc.one (PDF) for '%s': %s", observable_value, e, exc_info=True)
+            return None
 
-    return None
+    def create_export_row(self, analysis_result: Any) -> dict:
+        # Since original export fields are missing, provide a count
+        return {"ioc_one_pdf_count": analysis_result.get("count") if analysis_result else None}

@@ -4,20 +4,32 @@
 
 {% block content %}
 {{ super() }}
-<h1>{{ self.title() }}</h1>
-    <p>
-        Cyberbro aims to provide a simple and efficient way to check the reputation of your observables using
-        multiple threat intelligence services, <br/>without having to deploy a complex solution.<br/><br/>
-        This application is inspired by <a href="https://cybergordon.com/" target="_blank">CyberGordon</a> and <a
-            href="https://intelowlproject.github.io/" target="_blank">IntelOwl</a>. <br/><br/>
+<div class="page-header">
+    <h1>About Cyberbro</h1>
+    <p>Simple and efficient observable reputation checking</p>
+</div>
 
-        Cyberbro is built using Python and Flask.
-    </p>
+<div class="cards-container">
+    <div class="card">
+        <h3>About Cyberbro</h3>
+        <p>
+            Cyberbro aims to provide a simple and efficient way to check the reputation of your observables using
+            multiple threat intelligence services, without having to deploy a complex solution.
+        </p>
+        <p>
+            This application is inspired by <a href="https://cybergordon.com/" target="_blank">CyberGordon</a> and <a
+                href="https://intelowlproject.github.io/" target="_blank">IntelOwl</a>.
+        </p>
+        <p>
+            Cyberbro is built using Python and Flask.
+        </p>
+    </div>
+</div>
 
+<div class="card" style="margin-bottom: var(--spacing-xl);">
     <h2>Features</h2>
-    <ul>
-        <li>Handles various input types: paste raw logs, IoCs, fanged IoCs, and they will be parsed using regex.
-        </li>
+    <ul style="list-style-position: inside; padding-left: 0;">
+        <li>Handles various input types: paste raw logs, IoCs, fanged IoCs, and they will be parsed using regex.</li>
         <li>Checks if an observable (IP, hash, domain, URL) is malicious using services like VirusTotal, AbuseIPDB,
             IPInfo, Spur.us, IP Quality Score, MDE, Google Safe Browsing, Shodan, Abusix, Phishtank, and more.</li>
         <li>Generates comprehensive reports with search and filter features (type, country, risk, detection,
@@ -31,39 +43,11 @@
             tenant).</li>
         <li>Supports proxy usage if needed.</li>
     </ul>
+</div>
 
-    <p>Cyberbro <strong>{{ version }}</strong></p>
-        <p>For more information, visit the <a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub repository</a>.</p>
-    </div>
+<div class="card">
+    <p style="margin: 0; font-weight: 600;">Cyberbro <strong>{{ version }}</strong></p>
+    <p style="margin-top: var(--spacing-sm);">For more information, visit the <a href="https://github.com/stanfrbd/cyberbro" target="_blank">GitHub repository</a>.</p>
+</div>
 
-    <script>
-        const moonIcon = "https://img.icons8.com/ios-filled/50/ffffff/moon-symbol.png";
-        const sunIcon = "https://img.icons8.com/ios-filled/50/ffffff/sun.png";
-
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
-            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-            updateDarkModeIcon();
-        }
-
-        function updateDarkModeIcon() {
-            const darkModeIcon = document.getElementById("darkModeIcon");
-            if (document.body.classList.contains("dark-mode")) {
-                darkModeIcon.src = sunIcon;
-                darkModeIcon.alt = "Light Mode";
-            } else {
-                darkModeIcon.src = moonIcon;
-                darkModeIcon.alt = "Dark Mode";
-            }
-        }
-
-        function applyDarkMode() {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark-mode");
-            }
-            updateDarkModeIcon();
-        }
-
-        applyDarkMode();
-    </script>
 {% endblock content %}

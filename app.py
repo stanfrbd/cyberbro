@@ -18,17 +18,23 @@ from models.analysis_result import AnalysisResult, db
 from utils.analysis import check_analysis_in_progress, perform_analysis
 from utils.config import (
     BASE_DIR,
-    SECRETS_FILE,
     Secrets,
     get_config,
-    save_secrets_to_file,
 )
+from utils.config_update import process_config_update
 from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
+from utils.history import (
+    apply_search_filter,
+    apply_time_range_filter,
+    calculate_pagination_metadata,
+    filter_by_observable,
+    validate_history_params,
+)
 from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
 # Canonical version string displayed in the about page and used for update checks
-VERSION: str = "v0.9.9"
+VERSION: str = "v0.10.0"
 
 
 class InvalidCachefileError(Exception):
@@ -290,9 +296,48 @@ def request_entity_too_large(e):
 
 @app.route("/history")
 def history():
-    """Render the history page."""
-    analysis_results = db.session.query(AnalysisResult).filter(AnalysisResult.results != []).order_by(AnalysisResult.end_time.desc()).limit(60).all()
-    return render_template("history.html", analysis_results=analysis_results)
+    """Render the history page with pagination and search."""
+    # Get and validate parameters
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 20, type=int)
+    search_query = request.args.get("search", "", type=str).strip()
+    search_type = request.args.get("search_type", "observable", type=str)
+    time_range = request.args.get("time_range", "7d", type=str)
+
+    page, per_page, search_type, time_range = validate_history_params(page, per_page, search_type, time_range)
+
+    # Calculate offset
+    offset = (page - 1) * per_page
+
+    # Build base query
+    base_query = db.session.query(AnalysisResult).filter(AnalysisResult.results != [])
+    base_query = apply_time_range_filter(base_query, time_range)
+    base_query = apply_search_filter(base_query, search_query, search_type)
+
+    # Handle observable search separately (requires in-memory filtering)
+    if search_query and search_type == "observable":
+        all_results = base_query.order_by(AnalysisResult.end_time.desc()).all()
+        filtered_results = filter_by_observable(all_results, search_query)
+        total_count = len(filtered_results)
+        analysis_results = filtered_results[offset : offset + per_page]
+    else:
+        total_count = base_query.count()
+        analysis_results = base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
+
+    # Calculate pagination metadata
+    pagination = calculate_pagination_metadata(page, per_page, total_count)
+
+    return render_template(
+        "history.html",
+        analysis_results=analysis_results,
+        page=page,
+        per_page=per_page,
+        total_count=total_count,
+        search_query=search_query,
+        search_type=search_type,
+        time_range=time_range,
+        **pagination,
+    )
 
 
 @app.route("/stats")
@@ -321,45 +366,16 @@ def update_config():
     """Update config from the form data"""
     if not app.config.get("CONFIG_PAGE_ENABLED", False):
         return jsonify({"message": "Configuration update is disabled."}), 403
-    try:
-        secrets.proxy_url = request.form.get("proxy_url", secrets.proxy_url)
-        secrets.virustotal = request.form.get("virustotal", secrets.virustotal)
-        secrets.abuseipdb = request.form.get("abuseipdb", secrets.abuseipdb)
-        secrets.ipapi = request.form.get("ipapi", secrets.ipapi)
-        secrets.ipinfo = request.form.get("ipinfo", secrets.ipinfo)
-        secrets.google_cse_key = request.form.get("google_cse_key", secrets.google_cse_key)
-        secrets.google_cse_cx = request.form.get("google_cse_cx", secrets.google_cse_cx)
-        secrets.google_safe_browsing = request.form.get("google_safe_browsing", secrets.google_safe_browsing)
-        secrets.mde_tenant_id = request.form.get("mde_tenant_id", secrets.mde_tenant_id)
-        secrets.mde_client_id = request.form.get("mde_client_id", secrets.mde_client_id)
-        secrets.mde_client_secret = request.form.get("mde_client_secret", secrets.mde_client_secret)
-        secrets.shodan = request.form.get("shodan", secrets.shodan)
-        secrets.opencti_api_key = request.form.get("opencti_api_key", secrets.opencti_api_key)
-        secrets.opencti_url = request.form.get("opencti_url", secrets.opencti_url)
-        secrets.crowdstrike_client_id = request.form.get("crowdstrike_client_id", secrets.crowdstrike_client_id)
-        secrets.crowdstrike_client_secret = request.form.get("crowdstrike_client_secret", secrets.crowdstrike_client_secret)
-        secrets.crowdstrike_falcon_base_url = request.form.get("crowdstrike_falcon_base_url", secrets.crowdstrike_falcon_base_url)
-        secrets.webscout = request.form.get("webscout", secrets.webscout)
-        secrets.threatfox = request.form.get("threatfox", secrets.threatfox)
-        secrets.dfir_iris_api_key = request.form.get("dfir_iris_api_key", secrets.dfir_iris_api_key)
-        secrets.dfir_iris_url = request.form.get("dfir_iris_url", secrets.dfir_iris_url)
-        secrets.rl_analyze_api_key = request.form.get("rl_analyze_api_key", secrets.rl_analyze_api_key)
-        secrets.rl_analyze_url = request.form.get("rl_analyze_url", secrets.rl_analyze_url)
 
-        # Apply the GUI_ENABLED_ENGINES configuration directly to the GUI to avoid restarting the app
-        updated_gui_enabled_engines: str = request.form.get("gui_enabled_engines", "")
-        if updated_gui_enabled_engines:
-            global GUI_ENABLED_ENGINES
-            secrets.gui_enabled_engines = [engine.strip().lower() for engine in updated_gui_enabled_engines.split(",")]
-            GUI_ENABLED_ENGINES = secrets.gui_enabled_engines
+    # Process the configuration update
+    response_data, status_code = process_config_update(secrets, request)
 
-        # Save the secrets to the secrets.json file
-        save_secrets_to_file(secrets, SECRETS_FILE)
+    # Update global GUI_ENABLED_ENGINES if engines were updated
+    if response_data.get("updated_engines"):
+        global GUI_ENABLED_ENGINES
+        GUI_ENABLED_ENGINES = response_data["updated_engines"]
 
-        message = "Configuration updated successfully."
-    except Exception as e:
-        message = f"An error occurred while updating the configuration. {e}"
-    return jsonify({"message": message})
+    return jsonify({"message": response_data["message"]}), status_code
 
 
 @app.route(f"/{API_PREFIX}/results/<analysis_id>", methods=["GET"])

@@ -5,29 +5,76 @@
 {{ super() }}
 <style>
     .dashboard {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    @media (min-width: 1024px) {
+        .dashboard {
+            grid-template-columns: repeat(3, 1fr);
+        }
     }
 
     .dashboard-small {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        padding-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
     }
 
-    .card p {
-        font-size: 1.7em;
+    @media (min-width: 768px) {
+        .dashboard-small {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .dashboard-small {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    .dashboard .card {
+        min-height: 350px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard .card canvas {
+        flex: 1;
+    }
+
+    .dashboard-small .card {
         text-align: center;
-        font-weight: bold;
+    }
+
+    .dashboard-small .card p {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: var(--spacing-lg) 0;
+        color: var(--primary-color);
+    }
+
+    body.dark-mode .dashboard-small .card p {
+        color: var(--primary-light);
+    }
+
+    .dashboard-small .card h3 {
+        font-size: 0.9rem;
+        margin-bottom: var(--spacing-sm);
     }
 </style>
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
-<h1>{{ self.title() }}</h1>
+<div class="page-header">
+    <h1>Analysis Statistics</h1>
+    <p>Overview of your analysis activity over the last 30 days</p>
+</div>
+
 <div class="dashboard">
     <div class="card">
         <h3 title="Observable types - Last 30 days">Observables Types</h3>
@@ -60,7 +107,7 @@
         <p>{{ stats.unique_engines_count }}</p>
     </div>
 </div>
-</div>
+
 <script>
     const observablesLabels = JSON.parse('{{ stats.observable_type_count.keys() | list | tojson | safe }}');
     const observablesData = JSON.parse('{{ stats.observable_type_count.values() | list | tojson | safe }}');

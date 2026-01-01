@@ -2,91 +2,166 @@
 
 {% block title %}Cyberbro - Analysis History{% endblock title %}
 
+{% block head %}
+    {{ super() }}
+    <script defer src="{{ url_for('static', filename='history.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='pagination.js') }}"></script>
+{% endblock head %}
+
 {% block content %}
+{{ super() }}
 
-<script>
-    function filterTable() {
-        const searchInput = document.getElementById("searchInput").value.toLowerCase();
+<!-- Header Section -->
+<div style="margin-bottom: 2rem;">
+    <div style="margin-bottom: 1rem;">
+        <h1 style="margin: 0;">Analysis History</h1>
+    </div>
 
-        const table = document.getElementById("historyTable");
-        const tr = table.getElementsByTagName("tr");
+    <!-- Metadata and Controls -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-secondary); align-items: center;">
+            <span style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-weight: 600;">
+                {{ total_count }} Total Analysis{{ 'es' if total_count != 1 else '' }}
+            </span>
+            <span id="pageInfo">Showing {{ (page - 1) * per_page + 1 }}-{{ [page * per_page, total_count]|min }} of {{ total_count }}</span>
+        </div>
 
-        for (let i = 1; i < tr.length; i++) {
-            let td = tr[i].getElementsByTagName("td");
-            let showRow = true;
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <label for="timeRangeSelect" style="font-size: 0.875rem; color: var(--text-secondary);">Time range:</label>
+                <select id="timeRangeSelect" class="filter-select" style="width: auto; min-width: 120px;">
+                    <option value="7d" {% if time_range == '7d' %}selected{% endif %}>Last 7 days</option>
+                    <option value="30d" {% if time_range == '30d' %}selected{% endif %}>Last 30 days</option>
+                    <option value="all" {% if time_range == 'all' %}selected{% endif %}>All time ⚠️</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <label for="perPageSelect" style="font-size: 0.875rem; color: var(--text-secondary);">Items per page:</label>
+                <select id="perPageSelect" class="filter-select" style="width: auto; min-width: 80px;">
+                    <option value="10">10</option>
+                    <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
-            const observablesInAnalysis = tr[i].querySelector("#observables-in-analysis");
-            if (observablesInAnalysis) {
-                observablesInAnalysis.innerText = observablesInAnalysis.title;
-            }
+    <!-- Search Bar -->
+    <div style="margin-bottom: 1rem;">
+        {% if time_range == 'all' %}
+        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+            <span style="background: rgba(255, 193, 7, 0.1); color: #f57c00; padding: 0.375rem 0.75rem; border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 500;">
+                ⚠️ Searching all time - this may be slow for large databases
+            </span>
+        </div>
+        {% endif %}
 
-            const enginesInAnalysis = tr[i].querySelector("#engines-in-analysis");
-            if (enginesInAnalysis) {
-                enginesInAnalysis.innerText = enginesInAnalysis.title;
-            }
+        {% if search_query %}
+        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem;">
+            <span style="background: rgba(0, 123, 255, 0.1); color: var(--primary-color); padding: 0.375rem 0.75rem; border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 500;">
+                🔍 Searching {{ search_type|title }}: "{{ search_query }}"
+            </span>
+            <button onclick="clearSearch()" class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.875rem; min-height: auto;">
+                Clear
+            </button>
+        </div>
+        {% endif %}
 
-            if (searchInput) {
-                showRow = Array.from(td).some(cell =>
-                    cell.innerText.toLowerCase().includes(searchInput) ||
-                    (cell.querySelector('p') && cell.querySelector('p').title.toLowerCase().includes(searchInput))
-                );
-            }
+        <div style="display: flex; gap: 0.5rem; max-width: 700px;">
+            <select id="searchTypeSelect" class="filter-select" style="width: auto; min-width: 140px;">
+                <option value="observable" {% if search_type == 'observable' %}selected{% endif %}>Observable</option>
+                <option value="engine" {% if search_type == 'engine' %}selected{% endif %}>Engine</option>
+                <option value="id" {% if search_type == 'id' %}selected{% endif %}>Analysis ID</option>
+            </select>
+            <div style="position: relative; flex: 1;">
+                <input type="text"
+                       id="searchInput"
+                       class="filter-input"
+                       onkeyup="filterTable()"
+                       placeholder="🔍 Type to filter, press Enter to search..."
+                       value="{{ search_query }}"
+                       style="width: 100%; padding-left: 1rem;">
+            </div>
+            <button onclick="searchDatabase()" id="searchAllBtn" class="btn btn-outline" title="Search entire database (Enter)">
+                Search All
+            </button>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; margin-bottom: 0;">
+            💡 Tip: Type to filter visible rows instantly, or press <kbd style="background: var(--surface-color); border: 1px solid var(--border-color); padding: 0.125rem 0.375rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.75rem;">Enter</kbd> to search entire database
+        </p>
+    </div>
+</div>
+<!-- History Table -->
+<div class="table-wrapper" style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-color);">
+    <table id="historyTable" style="margin: 0;">
+        <thead>
+            <tr>
+                <th style="width: 180px;">📅 Date</th>
+                <th style="width: 280px;">🔑 Analysis ID</th>
+                <th>🎯 Observables</th>
+                <th style="width: 100px; text-align: center;">📊 Count</th>
+                <th style="width: 200px;">⚙️ Engines</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for analysis in analysis_results %}
+            <tr style="cursor: pointer;" onclick="window.location.href='/results/{{ analysis.id }}'">
+                <td style="font-size: 0.875rem; color: var(--text-secondary);">
+                    {{ analysis.end_time_string }}
+                </td>
+                <td>
+                    <a href="/results/{{ analysis.id }}"
+                       style="font-family: monospace; font-size: 0.875rem; text-decoration: none; color: var(--primary-color); font-weight: 500;"
+                       onclick="event.stopPropagation();">
+                        {{ analysis.id }}
+                    </a>
+                </td>
+                <td>
+                    <p class="observables-in-analysis"
+                       title="{{ analysis.results|map(attribute='observable')|join(', ') }}"
+                       style="margin: 0; font-size: 0.875rem;">
+                        {% set observables = analysis.results|map(attribute='observable')|list %}
+                        {% set display_observables = observables[:3] %}
+                        {% set display_text = display_observables|join(', ') %}
+                        {% if display_text|length > 80 %}
+                        {{ display_text[:80] }}...
+                        {% else %}
+                        {{ display_text }}
+                        {% endif %}
+                        {% if observables|length > 3 %} <span style="color: var(--text-secondary);">+{{ observables|length - 3 }} more</span>{% endif %}
+                    </p>
+                </td>
+                <td style="text-align: center;">
+                    <span style="background: rgba(0, 123, 255, 0.1); color: var(--primary-color); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.875rem;">
+                        {{ analysis.results|length }}
+                    </span>
+                </td>
+                <td>
+                    <p class="engines-in-analysis"
+                       title="{{ analysis.selected_engines|join(', ') }}"
+                       style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">
+                        {% for engine in analysis.selected_engines[:2] %}
+                        {{ engine }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                        {% if analysis.selected_engines|length > 2 %} <span style="color: var(--text-muted);">+{{ analysis.selected_engines|length - 2 }}</span>{% endif %}
+                    </p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-            // replace the text matching the search input with a highlighted version, just with a replacement, not a regexp search, and just for p, not other elements
-            if (searchInput) {
-                Array.from(td).forEach(cell => {
-                    if (cell.querySelector('p')) {
-                        cell.querySelector('p').innerHTML = cell.querySelector('p').title.replace(new RegExp(searchInput, 'gi'), match => `<span style="background-color: yellow;">${match}</span>`);
-                    }
-                });
-            }
+<!-- Pagination Controls -->
+<div id="paginationContainer"
+     class="pagination-container"
+     data-current-page="{{ page }}"
+     data-total-pages="{{ total_pages }}"
+     data-per-page="{{ per_page }}"
+     data-total-count="{{ total_count }}"
+     style="margin-top: 2rem;">
+    <div id="paginationButtons" class="pagination-buttons"></div>
+</div>
 
-            tr[i].style.display = showRow ? "" : "none";
-        }
-    }
-</script>
-
-<h1>Cyberbro - Last 60 Analyses</h1>
-<input type="text" id="searchInput" class="filter-input" onkeyup="filterTable()" placeholder="Search...">
-<table id="historyTable">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Analysis ID</th>
-            <th>Observables</th>
-            <th>Results</th>
-            <th>Engines</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for analysis in analysis_results %}
-        <tr>
-            <td>{{ analysis.end_time_string }}</td>
-            <td><a href="/results/{{ analysis.id }}">{{ analysis.id }}</a></td>
-            <td>
-                <p id="observables-in-analysis" title="{{ analysis.results|map(attribute='observable')|join(', ') }}">
-                    {% set observables = analysis.results|map(attribute='observable')|list %}
-                    {% set display_observables = observables[:3] %}
-                    {% set display_text = display_observables|join(', ') %}
-                    {% if display_text|length > 150 %}
-                    {{ display_text[:80] }}...
-                    {% else %}
-                    {{ display_text }}
-                    {% endif %}
-                    {% if observables|length > 3 %}...{% endif %}
-                </p>
-            </td>
-            <td>{{ analysis.results|length }}</td>
-            <td>
-                <p id="engines-in-analysis" title="{{ analysis.selected_engines|join(', ') }}">
-                    {% for engine in analysis.selected_engines[:3] %}
-                    {{ engine }}{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                    {% if analysis.selected_engines|length > 3 %}...{% endif %}
-                </p>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock content %}

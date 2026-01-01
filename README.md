@@ -27,7 +27,10 @@
     <img src="https://img.shields.io/github/license/stanfrbd/cyberbro" alt="License">
   </a>
   <a href="https://github.com/stanfrbd/cyberbro/actions/workflows/jobs.yml">
-    <img src="https://github.com/stanfrbd/cyberbro/actions/workflows/jobs.yml/badge.svg" alt="example branch parameter">
+    <img src="https://github.com/stanfrbd/cyberbro/actions/workflows/jobs.yml/badge.svg" alt="build and test badge">
+  </a>
+  <a href="https://github.com/stanfrbd/cyberbro/actions/workflows/pre-commit-validation.yml">
+    <img src="https://github.com/stanfrbd/cyberbro/actions/workflows/pre-commit-validation.yml/badge.svg" alt="pre-commit validation badge">
   </a>
   <a href="https://www.python.org/">
     <img src="https://img.shields.io/badge/Python-3.13-blue?logo=python" alt="Python">

@@ -1,80 +1,77 @@
 import logging
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import quote
 
 import requests
 from pydantic import ValidationError
 
 from models.alienvault_datamodel import OTXReport, Pulse
-from utils.config import QueryError, Secrets, get_config
+from models.base_engine import BaseEngine
+from utils.config import QueryError
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "FQDN",
-    "IPv4",
-    "IPv6",
-    "MD5",
-    "SHA1",
-    "SHA256",
-    "URL",
-]
 
-NAME: str = "alienvault"
-LABEL: str = "Alientvault"
-SUPPORTS: list[str] = ["hash", "IP", "domain", "url", "risk"]
-DESCRIPTION: str = "Checks Alienvault for IP, domain, URL, hash"
-COST: str = "Free"
-API_KEY_REQUIRED: bool = True
+class AlienVaultEngine(BaseEngine):
+    @property
+    def name(self):
+        return "alienvault"
+
+    @property
+    def supported_types(self):
+        return [
+            "FQDN",
+            "IPv4",
+            "IPv6",
+            "MD5",
+            "SHA1",
+            "SHA256",
+            "URL",
+        ]
+
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        """
+        Queries the OTX AlienVault API for information about a given observable.
+        Reuses the original maintainer's logic for querying and parsing.
+        """
+        api_key: str = self.secrets.alienvault
+        if not api_key:
+            logger.error("OTX AlienVault API key is required")
+            return None
+
+        # Prepare the dictionary expected by the original helper functions
+        observable_dict = {"value": observable_value, "type": observable_type}
+
+        try:
+            # Reuse the existing query logic
+            result: dict = query_alienvault(observable_dict, api_key, self.proxies, self.ssl_verify)
+
+            # Reuse the existing parsing logic
+            report: dict = parse_alienvault_response(result)
+            return report
+
+        except QueryError:
+            logger.warning("Error retrieving or parsing report from AlienVault")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error in AlienVault engine: {e}")
+            return None
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {"alienvault_pulses": None, "alienvault_malwares": None, "alienvault_adversary": None}
+
+        malware_families = ", ".join(analysis_result.get("malware_families", []))
+        adversaries = ", ".join(analysis_result.get("adversary", []))
+
+        return {
+            "alienvault_pulses": analysis_result.get("count"),
+            "alienvault_malwares": malware_families if malware_families else None,
+            "alienvault_adversary": adversaries if adversaries else None,
+        }
 
 
-def run_engine(
-    observable_dict: dict,
-    proxies: dict[str, str] | None = None,
-    ssl_verify: bool = True,
-) -> dict[str, Any] | None:
-    """
-    Queries the OTX AlienVault API for information about a given observable (URL, IP, domain, hash).
-
-    Args:
-        observable_dict (dict): The observable mapping which contains:
-        - value (str): The observable to search for (e.g., URL, IP address, domain, hash).
-        - type (str): The type of the observable
-            (e.g., "URL", "IPv4", "IPv6", "FQDN", "SHA256", "SHA1", "MD5").
-        proxies (dict): A dictionary of proxies to use for the request.
-        ssl_verify (bool): Whether to verify SSL certificates.
-        api_key (str): OTX AlienVault API key (required).
-
-    Returns:
-        dict: A dictionary with "count" (int), "pulses" (list),
-        "malware_families" (list), "adversary" (list), and "link" (str). For example:
-              {
-                  "count": 2,
-                  "pulses": [
-                      {"title": "Malware Campaign", "url": "https://example.com/report"},
-                      {"title": "Phishing Alert", "url": None}
-                  ],
-                  "malware_families": ["Emotet"],
-                  "adversary": ["Scattered Spider"],
-                  "link": "https://otx.alienvault.com/browse/global/pulses?q=<observable>"
-              }
-        None: If an error occurs or API key is missing.
-    """
-
-    secrets: Secrets = get_config()
-    api_key: str = secrets.alienvault
-    if not api_key:
-        logger.error("OTX AlienVault API key is required")
-        return None
-
-    try:
-        result: dict = query_alienvault(observable_dict, api_key, proxies, ssl_verify)
-        report: dict = parse_alienvault_response(result)
-    except QueryError:
-        logger.warning("Error retrieving or parsing report from AlienVault")
-        return None
-
-    return report
+# --- Original Maintainer's Code / Helper Functions (Preserved) ---
 
 
 def get_endpoint(artifact: str, observable_type: str) -> str | None:
@@ -129,15 +126,9 @@ def parse_alienvault_response(result: dict) -> dict:
     Malware Families
 
     OTX includes `malware_families` in three different locations:
-    - Pulse
-        - This is a MalwareFamily object, described in the alienvault_datamodel
-    - Related.Alienvault
-        - This is a string
-    - Related.Other
-        - This is a string
-
-    Comparing families in a case insensitive way helps prevent duplicated entries,
-    but we want to preserve case for the report.
+    - Pulse (MalwareFamily object)
+    - Related.Alienvault (string)
+    - Related.Other (string)
     """
     report_malware_families: list[str] = []
     report_malware_families.extend([family for family in otx_report.pulse_info.related.alienvault.malware_families if family.lower() not in map(str.lower, report_malware_families)])
@@ -146,9 +137,6 @@ def parse_alienvault_response(result: dict) -> dict:
 
     """
     Adversary
-
-    OTX returns an adversary string in three locations, same as malware_families
-    But all of them are only strings. :-)
     """
     adversary: set[str] = set(otx_report.pulse_info.related.alienvault.adversary)
 

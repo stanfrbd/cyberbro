@@ -17,41 +17,160 @@
     <script defer src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
     <script defer src="{{ url_for('static', filename='filter_table.js') }}"></script>
     {% endif -%}
+
+    <!-- Results page scripts -->
+    <script defer src="{{ url_for('static', filename='results-dropdowns.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='format_results.js') }}"></script>
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
 
-<h1>{{ self.title() }}</h1>
+<div style="margin-bottom: 2rem;">
+    <!-- Header Section -->
+    <div style="margin-bottom: 1rem;">
+        <h1 style="margin: 0;">Analysis Results</h1>
+    </div>
 
-<button class="btn" onclick="location.href='/'">New Analysis</button>
-<div style="display: flex; gap: 10px; margin-left: 0;">
-    <form method="GET" action="/export/{{ analysis_results.id }}"
-        style="display: flex; gap: 10px; margin-left: 0;">
-        <button type="submit" name="format" value="csv" class="btn">Export to CSV</button>
-        <button type="submit" name="format" value="excel" class="btn">Export to Excel</button>
-    </form>
-    <button class="btn" onclick="location.href='/graph/{{ analysis_results.id }}'">Graph (experimental)</button>
-    <button class="btn" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">Raw</button>
-    <button class="btn" onclick="copyAsPlainText()">Copy as Plain Text</button>
-    <button class="btn" onclick="copyAsDefanged()">Copy Defanged [.]</button>
-</div><!-- form div -->
+    <!-- Metadata and Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <!-- Metadata badges -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-secondary); align-items: center;">
+            <span>📅 {{ analysis_results.start_time_string }}</span>
+            <span>⏱️ {{ analysis_results.analysis_duration_string }}</span>
+            <span style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-weight: 600;">
+                {{ analysis_results.results | length }} Observable{{ 's' if analysis_results.results | length != 1 else '' }}
+            </span>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="button-group">
+            <button class="btn btn-icon btn-small" onclick="location.href='/'">
+                <span>➕</span>
+                <span>New Analysis</span>
+            </button>
+            <!-- Export dropdown -->
+            <div style="position: relative; display: inline-block;">
+                <button class="btn btn-secondary btn-icon btn-small" onclick="toggleDropdown('exportDropdown')" type="button">
+                    <span>📥</span>
+                    <span>Export</span>
+                    <span style="font-size: 0.7em;">▼</span>
+                </button>
+                <div id="exportDropdown" class="dropdown-menu" style="display: none;">
+                    <form id="exportForm" method="GET" action="/export/{{ analysis_results.id }}">
+                        <button type="submit" name="format" value="csv" class="dropdown-item">
+                            <span>📄</span> Download CSV
+                        </button>
+                        <button type="submit" name="format" value="excel" class="dropdown-item">
+                            <span>📊</span> Download Excel
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Copy dropdown -->
+            <div style="position: relative; display: inline-block;">
+                <button class="btn btn-outline btn-icon btn-small" onclick="toggleDropdown('copyDropdown')" type="button">
+                    <span>📋</span>
+                    <span>Copy</span>
+                    <span style="font-size: 0.7em;">▼</span>
+                </button>
+                <div id="copyDropdown" class="dropdown-menu" style="display: none;">
+                    <button onclick="copyAsPlainText(); closeAllDropdowns();" class="dropdown-item">
+                        <span>📝</span> Plain Text
+                    </button>
+                    <button onclick="copyAsDefanged(); closeAllDropdowns();" class="dropdown-item">
+                        <span>🔒</span> Defanged [.]
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-outline btn-icon btn-small" onclick="location.href='/graph/{{ analysis_results.id }}'">
+                <span>🕸️</span>
+                <span>Graph</span>
+            </button>
+
+            <button class="btn btn-outline btn-icon btn-small" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">
+                <span>🔗</span>
+                <span>JSON</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.5rem;
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        min-width: 200px;
+        z-index: var(--z-dropdown);
+        overflow: hidden;
+    }
+
+    .dropdown-menu form {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: none;
+        border: none;
+        border-radius: 0;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        font-size: 0.875rem;
+        color: var(--text-color);
+        transition: background-color var(--transition-fast);
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        transform: none;
+        box-shadow: none;
+    }
+
+    .dropdown-item span:first-child {
+        font-size: 1.125rem;
+    }
+
+    body.dark-mode .dropdown-menu {
+        background: var(--dark-surface-color);
+        border-color: var(--dark-border-color);
+    }
+
+    body.dark-mode .dropdown-item {
+        color: var(--dark-text-color);
+    }
+
+    body.dark-mode .dropdown-item:hover {
+        background-color: rgba(77, 163, 255, 0.15);
+    }
+</style>
 
 <script>
-    function fetchResults() {
+    // Set up fetchResults function for this specific analysis
+    fetchResults = function() {
         return fetch(`/{{ API_PREFIX }}/results/{{ analysis_results.id }}`)
         .then(response => response.json())
         .catch(err => {
             console.error('Failed to fetch results: ', err);
             throw err;
         });
-    }
+    };
 </script>
-
-<script type="text/javascript" src="{{ url_for('static', filename='format_results.js') }}"></script>
-
-<p>Analysis start time: {{ analysis_results.start_time_string }}</p>
-<p>Analysis duration: {{ analysis_results.analysis_duration_string }}</p>
 
     {% if display_mode == "table" or analysis_results.results | length > 1 %}
         {%- include "display_table.html" -%}

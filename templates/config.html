@@ -3,67 +3,88 @@
 
 {% block content %}
 {{ super() }}
-<h1>{{ self.title() }}</h1>
+<div class="page-header">
+    <h1>Configuration</h1>
+    <p>Manage your API keys and settings</p>
+</div>
 
 <form id="configForm">
-    <table>
-        <thead>
-            <tr>
-                <th>Type</th>
-                <th>Value</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for key, value in secrets.items() %}
-            <tr>
-                {% if key not in ["gui_enabled_engines", "api_prefix", "config_page_enabled", "ssl_verify"] and not key.startswith("supervisor") %}
-                    <td style="width: 15%;">
-                        <label class="secrets_key" for="secret_{{ key }}">{{ key }}</label>
-                    </td>
-                    <td style="width:50%">
-                        <input class="secrets_value" type="password" id="secret_{{ key }}" name="{{ key }}"
-                            value="{{ value }}" readonly>
-                    </td>
-                    <td style="width: 15%">
-                        <button type="button" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">✏️</button>
-                        <button type="button" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value }}', 'password')"
-                            style="display:none;">
-                            ❌
-                        </button>
-                        <button type="button" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'password')"
-                            style="display:none;">
-                            ✅
-                        </button>
-                    </td>
-                {% endif %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Configuration Key</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for key, value in secrets.items() %}
+                <tr>
+                    {% if key not in ["gui_enabled_engines", "api_prefix", "config_page_enabled", "ssl_verify"] and not key.startswith("supervisor") %}
+                        <td style="width: 20%; font-weight: 500;">
+                            <label class="secrets_key" for="secret_{{ key }}" style="margin: 0; cursor: default;">{{ key }}</label>
+                        </td>
+                        <td style="width: 60%;">
+                            <input class="secrets_value" type="password" id="secret_{{ key }}" name="{{ key }}"
+                                value="{{ value }}" readonly style="width: 100%; border: none; background: transparent; padding: 0; color: var(--text-color);">
+                        </td>
+                        <td style="width: 20%; text-align: center;">
+                            <button type="button" class="btn btn-outline btn-icon btn-small" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">
+                                <span>✏️</span>
+                                <span>Edit</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-icon btn-small" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value }}', 'password')"
+                                style="display:none;">
+                                <span>❌</span>
+                                <span>Cancel</span>
+                            </button>
+                            <button type="button" class="btn btn-success btn-icon btn-small" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'password')"
+                                style="display:none;">
+                                <span>✅</span>
+                                <span>Save</span>
+                            </button>
+                        </td>
+                    {% endif %}
 
-                {% if key == 'gui_enabled_engines' %}
-                    <td style="width: 15%;">
-                        <label class="secrets_key" for="secret_{{ key }}">{{ key }} (separated by ",") - when empty, all engines are enabled.</label>
-                    </td>
-                    <td style="width: 50%;">
-                        <input class="enabled_engines_value" type="text" id="secret_{{ key }}" name="{{ key }}"
-                            value="{{ value | join(',') }}" readonly>
-                    </td>
-                    <td style="width: 15%">
-                        <button type="button" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">✏️</button>
-                        <button type="button" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value | join(',') }}', 'text')"
-                            style="display:none;">
-                            ❌
-                        </button>
-                        <button type="button" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'text')"
-                            style="display:none;">
-                            ✅
-                        </button>
-                    </td>
-                {% endif %}
+                    {% if key == 'gui_enabled_engines' %}
+                        <td style="width: 20%; font-weight: 500;">
+                            <label class="secrets_key" for="secret_{{ key }}" style="margin: 0; cursor: default;">{{ key }}</label>
+                            <br><small style="color: var(--text-secondary); font-weight: 400;">(comma-separated, empty = all enabled)</small>
+                        </td>
+                        <td style="width: 60%;">
+                            <input class="enabled_engines_value" type="text" id="secret_{{ key }}" name="{{ key }}"
+                                value="{{ value | join(',') }}" readonly style="width: 100%; border: none; background: transparent; padding: 0; color: var(--text-color);">
+                        </td>
+                        <td style="width: 20%; text-align: center;">
+                            <button type="button" class="btn btn-outline btn-icon btn-small" id="edit_{{ key }}" onclick="editSecret('{{ key }}')">
+                                <span>✏️</span>
+                                <span>Edit</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-icon btn-small" id="cancel_{{ key }}" onclick="cancelEdit('{{ key }}', '{{ value | join(',') }}', 'text')"
+                                style="display:none;">
+                                <span>❌</span>
+                                <span>Cancel</span>
+                            </button>
+                            <button type="button" class="btn btn-success btn-icon btn-small" id="validate_{{ key }}" onclick="validateEdit('{{ key }}', 'text')"
+                                style="display:none;">
+                                <span>✅</span>
+                                <span>Save</span>
+                            </button>
+                        </td>
+                    {% endif %}
 
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <button type="submit" class="btn save" style="margin-bottom: 20px;">Save</button>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top: var(--spacing-lg);">
+        <button type="submit" class="btn btn-icon">
+            <span>💾</span>
+            <span>Save Configuration</span>
+        </button>
+    </div>
 </form>
 
 <div id="toast" class="toast"></div>
@@ -73,6 +94,12 @@
             input.type = 'text';
             input.readOnly = false;
             input.dataset.originalValue = input.value;
+            input.style.border = '1px solid var(--border-color)';
+            input.style.padding = '0.5rem';
+            input.style.borderRadius = 'var(--radius-sm)';
+            input.style.background = 'var(--surface-color)';
+            input.style.color = 'var(--text-color)';
+            input.focus();
             document.getElementById('cancel_' + key).style.display = 'inline';
             document.getElementById('validate_' + key).style.display = 'inline';
             document.getElementById('edit_' + key).style.display = 'none';
@@ -83,6 +110,10 @@
             input.value = input.dataset.originalValue;
             input.type = input_type;
             input.readOnly = true;
+            input.style.border = 'none';
+            input.style.padding = '0';
+            input.style.background = 'transparent';
+            input.style.color = 'var(--text-color)';
             document.getElementById('cancel_' + key).style.display = 'none';
             document.getElementById('validate_' + key).style.display = 'none';
             document.getElementById('edit_' + key).style.display = 'inline';
@@ -91,6 +122,10 @@
         function validateEdit(key, input_type) {
             const input = document.getElementById('secret_' + key);
             input.readOnly = true;
+            input.style.border = 'none';
+            input.style.padding = '0';
+            input.style.background = 'transparent';
+            input.style.color = 'var(--text-color)';
             document.getElementById('cancel_' + key).style.display = 'none';
             document.getElementById('validate_' + key).style.display = 'none';
             document.getElementById('edit_' + key).style.display = 'inline';

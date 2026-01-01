@@ -1,140 +1,110 @@
-<div class="cards-container">
-
-    <div class="cards-results-container">
-        <div class="card">
-            <h3 title="{{ analysis_results.results[0].observable }}">{{
+<div class="cards-results-container">
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h3 style="margin: 0; flex: 1;" title="{{ analysis_results.results[0].observable }}">{{
                 analysis_results.results[0].observable[:64] }}{% if analysis_results.results[0].observable |
                 length > 80 %}...{% endif %}</h3>
-            <p>{{ analysis_results.results[0].type }}</p>
+            <button class="copy-btn" onclick="copySingleObservable()" title="Copy to clipboard">📋</button>
         </div>
-        {% if analysis_results.results[0].reverse_dns and analysis_results.results[0].reverse_dns.reverse_dns %}
-        {% include "engine_layouts/reverse_dns_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].virustotal %}
-        {% include "engine_layouts/virustotal_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].extension %}
-        {% include "engine_layouts/extension_card.html" %}
-        {% endif %}
+        <p style="margin-top: 0.5rem;">{{ analysis_results.results[0].type }}</p>
     </div>
+    {% if analysis_results.results[0].reverse_dns and analysis_results.results[0].reverse_dns.reverse_dns %}
+    {% include "engine_layouts/reverse_dns_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].virustotal %}
+    {% include "engine_layouts/virustotal_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].extension %}
+    {% include "engine_layouts/extension_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].rdap %}
+    {% include "engine_layouts/rdap_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].ipquery %}
+    {% include "engine_layouts/ipquery_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].ipinfo %}
+    {% include "engine_layouts/ipinfo_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].abusix %}
+    {% include "engine_layouts/abusix_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].abuseipdb %}
+    {% include "engine_layouts/abuseipdb_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].spur %}
+    {% include "engine_layouts/spur_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].webscout %}
+    {% include "engine_layouts/webscout_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].ipapi %}
+    {% include "engine_layouts/ipapi_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].urlscan %}
+    {% include "engine_layouts/urlscan_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].google_dns %}
+    {% include "engine_layouts/google_dns_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].mde %}
+    {% include "engine_layouts/mde_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].crowdstrike %}
+    {% include "engine_layouts/crowdstrike_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].threatfox %}
+    {% include "engine_layouts/threatfox_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].phishtank %}
+    {% include "engine_layouts/phishtank_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].google_safe_browsing %}
+    {% include "engine_layouts/google_safe_browsing_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].shodan %}
+    {% include "engine_layouts/shodan_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].google %}
+    {% include "engine_layouts/google_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].github %}
+    {% include "engine_layouts/github_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].ioc_one_html %}
+    {% include "engine_layouts/ioc_one_html_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].ioc_one_pdf %}
+    {% include "engine_layouts/ioc_one_pdf_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].opencti %}
+    {% include "engine_layouts/opencti_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].misp %}
+    {% include "engine_layouts/misp_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].dfir_iris %}
+    {% include "engine_layouts/dfir_iris_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].rl_analyze %}
+    {% include "engine_layouts/rl_analyze_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].hudsonrock %}
+    {% include "engine_layouts/hudsonrock_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].criminalip %}
+    {% include "engine_layouts/criminalip_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].alienvault %}
+    {% include "engine_layouts/alienvault_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].crtsh %}
+    {% include "engine_layouts/crtsh_card.html" %}
+    {% endif %}
+</div><!-- cards-results-container -->
 
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].rdap %}
-        {% include "engine_layouts/rdap_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].ipquery %}
-        {% include "engine_layouts/ipquery_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].ipinfo %}
-        {% include "engine_layouts/ipinfo_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].abusix %}
-        {% include "engine_layouts/abusix_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].abuseipdb %}
-        {% include "engine_layouts/abuseipdb_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].spur %}
-        {% include "engine_layouts/spur_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].webscout %}
-        {% include "engine_layouts/webscout_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].ipapi %}
-        {% include "engine_layouts/ipapi_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].urlscan %}
-        {% include "engine_layouts/urlscan_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].google_dns %}
-        {% include "engine_layouts/google_dns_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].mde %}
-        {% include "engine_layouts/mde_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].crowdstrike %}
-        {% include "engine_layouts/crowdstrike_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].threatfox %}
-        {% include "engine_layouts/threatfox_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].phishtank %}
-        {% include "engine_layouts/phishtank_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].google_safe_browsing %}
-        {% include "engine_layouts/google_safe_browsing_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].shodan %}
-        {% include "engine_layouts/shodan_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].google %}
-        {% include "engine_layouts/google_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].github %}
-        {% include "engine_layouts/github_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].ioc_one_html %}
-        {% include "engine_layouts/ioc_one_html_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].ioc_one_pdf %}
-        {% include "engine_layouts/ioc_one_pdf_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].opencti %}
-        {% include "engine_layouts/opencti_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].misp %}
-        {% include "engine_layouts/misp_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].dfir_iris %}
-        {% include "engine_layouts/dfir_iris_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].rl_analyze %}
-        {% include "engine_layouts/rl_analyze_card.html" %}
-        {% endif %}
-    </div>
-
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].hudsonrock %}
-        {% include "engine_layouts/hudsonrock_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].criminalip %}
-        {% include "engine_layouts/criminalip_card.html" %}
-        {% endif %}
-        {% if analysis_results.results[0].alienvault %}
-        {% include "engine_layouts/alienvault_card.html" %}
-        {% endif %}
-    </div>
-    <div class="cards-results-container">
-        {% if analysis_results.results[0].crtsh %}
-        {% include "engine_layouts/crtsh_card.html" %}
-        {% endif %}
-    </div>
-
-</div><!-- cards-container -->
+<script src="{{ url_for('static', filename='single-observable-copy.js') }}"></script>
+<script>
+    // Initialize with the observable value
+    initSingleObservableCopy("{{ analysis_results.results[0].observable }}");
+</script>

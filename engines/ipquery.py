@@ -3,74 +3,66 @@ from typing import Any, Optional
 
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "IPv4",
-    "IPv6",
-]
 
+class IPQueryEngine(BaseEngine):
+    @property
+    def name(self):
+        return "ipquery"
 
-def query_ipquery(ip: str, proxies: dict[str, str], ssl_verify: bool = True) -> Optional[dict[str, Any]]:
-    """
-    Queries the IP information from the ipquery.io API.
+    @property
+    def supported_types(self):
+        return ["IPv4", "IPv6"]
 
-    Args:
-        ip (str): The IP address to query.
-        proxies (dict): Dictionary containing proxy settings.
+    @property
+    def execute_after_reverse_dns(self):
+        return True  # IP-only engine
 
-    Returns:
-        dict: A dictionary containing extracted information:
-            {
-                "ip": ...,
-                "geolocation": "city, region",
-                "country_code": ...,
-                "country_name": ...,
-                "isp": ...,
-                "asn": ...,
-                "is_vpn": ...,
-                "is_tor": ...,
-                "is_proxy": ...,
-                "risk_score": ...,
-                "link": ...
-            }
-        None: If an error occurs or 'ip' key isn't in the response.
-    """
-    try:
-        url = f"https://api.ipquery.io/{ip}"
-        response = requests.get(url, proxies=proxies, verify=ssl_verify, timeout=5)
-        response.raise_for_status()
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        try:
+            url = f"https://api.ipquery.io/{observable_value}"
+            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response.raise_for_status()
 
-        data = response.json()
-        if "ip" in data:
-            ip_resp = data.get("ip", "Unknown")
-            city = data.get("location", {}).get("city", "Unknown")
-            region = data.get("location", {}).get("state", "Unknown")
-            country_code = data.get("location", {}).get("country_code", "Unknown")
-            country_name = data.get("location", {}).get("country", "Unknown")
-            isp = data.get("isp", {}).get("isp", "Unknown")
-            asn = data.get("isp", {}).get("asn", "Unknown")
+            data = response.json()
+            if "ip" in data:
+                location = data.get("location", {})
+                isp_data = data.get("isp", {})
+                risk_data = data.get("risk", {})
 
-            is_vpn = data.get("risk", {}).get("is_vpn", False)
-            is_tor = data.get("risk", {}).get("is_tor", False)
-            is_proxy = data.get("risk", {}).get("is_proxy", False)
-            risk_score = data.get("risk", {}).get("risk_score", "Unknown")
+                return {
+                    "ip": data.get("ip", "Unknown"),
+                    "geolocation": f"{location.get('city', 'Unknown')}, {location.get('state', 'Unknown')}",
+                    "country_code": location.get("country_code", "Unknown"),
+                    "country_name": location.get("country", "Unknown"),
+                    "isp": isp_data.get("isp", "Unknown"),
+                    "asn": isp_data.get("asn", "Unknown"),
+                    "is_vpn": risk_data.get("is_vpn", False),
+                    "is_tor": risk_data.get("is_tor", False),
+                    "is_proxy": risk_data.get("is_proxy", False),
+                    "risk_score": risk_data.get("risk_score", "Unknown"),
+                    "link": f"https://api.ipquery.io/{observable_value}",
+                }
 
-            return {
-                "ip": ip_resp,
-                "geolocation": f"{city}, {region}",
-                "country_code": country_code,
-                "country_name": country_name,
-                "isp": isp,
-                "asn": asn,
-                "is_vpn": is_vpn,
-                "is_tor": is_tor,
-                "is_proxy": is_proxy,
-                "risk_score": risk_score,
-                "link": f"https://api.ipquery.io/{ip_resp}",
-            }
+        except Exception as e:
+            logger.error("Error querying ipquery for '%s': %s", observable_value, e, exc_info=True)
 
-    except Exception as e:
-        logger.error("Error querying ipquery for '%s': %s", ip, e, exc_info=True)
+        return None
 
-    return None
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {f"ipq_{k}": None for k in ["cn", "country", "geo", "asn", "isp", "vpn", "tor", "proxy"]}
+
+        return {
+            "ipq_cn": analysis_result.get("country_code"),
+            "ipq_country": analysis_result.get("country_name"),
+            "ipq_geo": analysis_result.get("geolocation"),
+            "ipq_asn": analysis_result.get("asn"),
+            "ipq_isp": analysis_result.get("isp"),
+            "ipq_vpn": analysis_result.get("is_vpn"),
+            "ipq_tor": analysis_result.get("is_tor"),
+            "ipq_proxy": analysis_result.get("is_proxy"),
+        }

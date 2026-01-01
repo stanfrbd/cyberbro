@@ -5,65 +5,64 @@ from urllib.parse import urlparse
 
 import requests
 
+from models.base_engine import BaseEngine
+
 logger = logging.getLogger(__name__)
 
-SUPPORTED_OBSERVABLE_TYPES: list[str] = [
-    "FQDN",
-    "URL",
-]
 
+class PhishTankEngine(BaseEngine):
+    @property
+    def name(self):
+        return "phishtank"
 
-def query_phishtank(
-    observable: str,
-    observable_type: str,
-    proxies: dict[str, str],
-    ssl_verify: bool = True,
-) -> Optional[dict[str, Any]]:
-    """
-    Query the PhishTank API to check if a given observable is a known phishing URL.
-    Uses the user-agent "phishtank/IntelOwl" for the request since IntelOwl is allowed by PhishTank.
+    @property
+    def supported_types(self):
+        return ["FQDN", "URL"]
 
-    Args:
-        observable (str): The observable to be checked (e.g., URL or FQDN).
-        observable_type (str): The type of the observable (e.g., "URL", "FQDN").
-        proxies (dict): Dictionary of proxies to be used for the request.
+    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+        headers = {"User-Agent": "phishtank/Cyberbro"}
+        observable_to_analyze = observable_value
 
-    Returns:
-        dict: The results from the PhishTank API if the request is successful.
-        None: If any exception or error occurs during the request.
-    """
-    headers = {"User-Agent": "phishtank/Cyberbro"}
-    observable_to_analyze = observable
+        if observable_type == "FQDN":
+            observable_to_analyze = f"http://{observable_value}"
 
-    if observable_type == "FQDN":
-        observable_to_analyze = f"http://{observable}"
-    parsed = urlparse(observable_to_analyze)
-    if not parsed.path:
-        observable_to_analyze += "/"
+        # Ensure URL has a path (e.g., adds / to http://domain.com)
+        parsed = urlparse(observable_to_analyze)
+        if not parsed.path:
+            observable_to_analyze += "/"
 
-    data = {
-        "url": base64.b64encode(observable_to_analyze.encode("utf-8")),
-        "format": "json",
-    }
+        data = {
+            "url": base64.b64encode(observable_to_analyze.encode("utf-8")),
+            "format": "json",
+        }
 
-    try:
-        response = requests.post(
-            "https://checkurl.phishtank.com/checkurl/",
-            data=data,
-            headers=headers,
-            proxies=proxies,
-            verify=ssl_verify,
-            timeout=5,
-        )
-        response.raise_for_status()
-        json_data = response.json()
+        try:
+            response = requests.post(
+                "https://checkurl.phishtank.com/checkurl/",
+                data=data,
+                headers=headers,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
+            response.raise_for_status()
+            json_data = response.json()
 
-        if "results" in json_data:
-            logger.debug("PhishTank response: %s", json_data["results"])
-            return json_data["results"]
-        logger.warning("PhishTank response has no 'results' key: %s", json_data)
+            if "results" in json_data:
+                return json_data["results"]
 
-    except Exception as e:
-        logger.error("Error querying PhishTank for '%s': %s", observable, e, exc_info=True)
+        except Exception as e:
+            logger.error("Error querying PhishTank for '%s': %s", observable_value, e, exc_info=True)
 
-    return None
+        return None
+
+    def create_export_row(self, analysis_result: Any) -> dict:
+        if not analysis_result:
+            return {f"phishtank_{k}": None for k in ["in_db", "verified", "valid"]}
+
+        # The API returns an inner 'results' key which holds the actual data
+        return {
+            "phishtank_in_db": analysis_result.get("in_database"),
+            "phishtank_verified": analysis_result.get("verified"),
+            "phishtank_valid": analysis_result.get("valid"),
+        }

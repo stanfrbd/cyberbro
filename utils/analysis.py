@@ -2,42 +2,14 @@ import queue
 import threading
 import time
 
-from engines import (
-    abuseipdb,
-    abusix,
-    alienvault,
-    chrome_extension,
-    criminalip,
-    crowdstrike,
-    crtsh,
-    dfir_iris,
-    github,
-    google,
-    google_dns,
-    google_safe_browsing,
-    hudsonrock,
-    ioc_one,
-    ipapi,
-    ipinfo,
-    ipquery,
-    microsoft_defender_for_endpoint,
-    misp,
-    opencti,
-    phishtank,
-    rdap,
-    reverse_dns,
-    reversinglabs_spectra_analyze,
-    shodan,
-    spur_us,
-    threatfox,
-    urlscan,
-    virustotal,
-    webscout,
-)
+# --- NEW DYNAMIC ENGINE IMPORTS ---
+from engines import get_engine_instances
 from models.analysis_result import AnalysisResult
 from utils.config import Secrets, get_config
 from utils.database import get_analysis_result, save_analysis_result
 from utils.utils import is_bogon
+
+# ----------------------------------
 
 # Read the secrets from the config file
 secrets: Secrets = get_config()
@@ -45,6 +17,9 @@ secrets: Secrets = get_config()
 PROXIES: dict[str, str] = {"http": secrets.proxy_url, "https": secrets.proxy_url}
 
 SSL_VERIFY: bool = secrets.ssl_verify
+
+# Initialize ALL engine instances once on startup
+LOADED_ENGINES = get_engine_instances(secrets, PROXIES, SSL_VERIFY)
 
 
 def perform_analysis(app, observables, selected_engines, analysis_id):
@@ -85,203 +60,66 @@ def perform_analysis(app, observables, selected_engines, analysis_id):
 
 
 def analyze_observable(observable, index, selected_engines, result_queue):
-    result = initialize_result(observable)
-    result = perform_engine_queries(observable, selected_engines, result)
-    result_queue.put((index, result))
-
-
-def initialize_result(observable):
-    return {
+    result = {
         "observable": observable["value"],
         "type": observable["type"],
         "reversed_success": False,
     }
 
-
-def perform_engine_queries(observable, selected_engines, result):
-    # 1. Check if IP is private
+    # 1. Global check: Bogon
     if observable["type"] in ["IPv4", "IPv6"] and is_bogon(observable["value"]):
         observable["type"] = "BOGON"
 
-    if "urlscan" in selected_engines and observable["type"] in urlscan.SUPPORTED_OBSERVABLE_TYPES:
-        result["urlscan"] = urlscan.query_urlscan(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
+    # Identify and filter requested engine instances
+    active_instances = []
+    for name in selected_engines:
+        if name in LOADED_ENGINES:
+            active_instances.append(LOADED_ENGINES[name])
 
-    if "crtsh" in selected_engines and observable["type"] in crtsh.SUPPORTED_OBSERVABLE_TYPES:
-        result["crtsh"] = crtsh.query_crtsh(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
-
-    if "ioc_one_html" in selected_engines and observable["type"] in ioc_one.SUPPORTED_OBSERVABLE_TYPES:
-        result["ioc_one_html"] = ioc_one.query_ioc_one_html(observable["value"], PROXIES, SSL_VERIFY)
-
-    if "ioc_one_pdf" in selected_engines and observable["type"] in ioc_one.SUPPORTED_OBSERVABLE_TYPES:
-        result["ioc_one_pdf"] = ioc_one.query_ioc_one_pdf(observable["value"], PROXIES, SSL_VERIFY)
-
-    if "google" in selected_engines and observable["type"] in google.SUPPORTED_OBSERVABLE_TYPES:
-        result["google"] = google.query_google(observable["value"], secrets.google_cse_cx, secrets.google_cse_key, PROXIES, SSL_VERIFY)
-
-    if "github" in selected_engines and observable["type"] in github.SUPPORTED_OBSERVABLE_TYPES:
-        result["github"] = github.query_github(observable["value"], PROXIES, SSL_VERIFY)
-
-    if "rdap" in selected_engines and observable["type"] in rdap.SUPPORTED_OBSERVABLE_TYPES:
-        result["rdap"] = rdap.query_openrdap(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
-
-    if "mde" in selected_engines and observable["type"] in microsoft_defender_for_endpoint.SUPPORTED_OBSERVABLE_TYPES:
-        result["mde"] = microsoft_defender_for_endpoint.query_microsoft_defender_for_endpoint(
-            observable["value"],
-            observable["type"],
-            secrets.mde_tenant_id,
-            secrets.mde_client_id,
-            secrets.mde_client_secret,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "crowdstrike" in selected_engines and observable["type"] in crowdstrike.SUPPORTED_OBSERVABLE_TYPES:
-        result["crowdstrike"] = crowdstrike.query_crowdstrike(
-            observable["value"],
-            observable["type"],
-            secrets.crowdstrike_client_id,
-            secrets.crowdstrike_client_secret,
-            secrets.crowdstrike_falcon_base_url,
-            SSL_VERIFY,
-            PROXIES,
-        )
-
-    if "opencti" in selected_engines and observable["type"] in opencti.SUPPORTED_OBSERVABLE_TYPES:
-        result["opencti"] = opencti.query_opencti(
-            observable["value"],
-            secrets.opencti_api_key,
-            secrets.opencti_url,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "dfir_iris" in selected_engines and observable["type"] in dfir_iris.SUPPORTED_OBSERVABLE_TYPES:
-        result["dfir_iris"] = dfir_iris.query_dfir_iris(
-            observable["value"],
-            observable["type"],
-            secrets.dfir_iris_api_key,
-            secrets.dfir_iris_url,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "rl_analyze" in selected_engines and observable["type"] in reversinglabs_spectra_analyze.SUPPORTED_OBSERVABLE_TYPES:
-        result["rl_analyze"] = reversinglabs_spectra_analyze.query_rl_analyze(
-            observable["value"],
-            observable["type"],
-            secrets.rl_analyze_api_key,
-            secrets.rl_analyze_url,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "threatfox" in selected_engines and observable["type"] in threatfox.SUPPORTED_OBSERVABLE_TYPES:
-        result["threatfox"] = threatfox.query_threatfox(observable["value"], observable["type"], secrets.threatfox, PROXIES, SSL_VERIFY)
-
-    if "virustotal" in selected_engines and observable["type"] in virustotal.SUPPORTED_OBSERVABLE_TYPES:
-        result["virustotal"] = virustotal.query_virustotal(
-            observable["value"],
-            observable["type"],
-            secrets.virustotal,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "alienvault" in selected_engines and observable["type"] in alienvault.SUPPORTED_OBSERVABLE_TYPES:
-        result["alienvault"] = alienvault.run_engine(
-            observable,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "misp" in selected_engines and observable["type"] in misp.SUPPORTED_OBSERVABLE_TYPES:
-        result["misp"] = misp.query_misp(
-            observable["value"],
-            observable["type"],
-            PROXIES,
-            SSL_VERIFY,
-            secrets.misp_api_key,
-            secrets.misp_url,
-        )
-
-    if "google_safe_browsing" in selected_engines and observable["type"] in google_safe_browsing.SUPPORTED_OBSERVABLE_TYPES:
-        result["google_safe_browsing"] = google_safe_browsing.query_google_safe_browsing(
-            observable["value"],
-            observable["type"],
-            secrets.google_safe_browsing,
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "phishtank" in selected_engines and observable["type"] in phishtank.SUPPORTED_OBSERVABLE_TYPES:
-        result["phishtank"] = phishtank.query_phishtank(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
-
-    if "criminalip" in selected_engines and observable["type"] in criminalip.SUPPORTED_OBSERVABLE_TYPES:
-        result["criminalip"] = criminalip.run_criminal_ip_analysis(
-            observable["value"],
-            PROXIES,
-            SSL_VERIFY,
-        )
-
-    if "hudsonrock" in selected_engines and observable["type"] in hudsonrock.SUPPORTED_OBSERVABLE_TYPES:
-        result["hudsonrock"] = hudsonrock.query_hudsonrock(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
-
-    if "google_dns" in selected_engines and observable["type"] in google_dns.SUPPORTED_OBSERVABLE_TYPES:
-        result["google_dns"] = google_dns.query_google_dns(observable["value"], observable["type"], PROXIES, SSL_VERIFY)
-
-    """
-    2. Reverse DNS if possible, change observable type to IP if possible.
-    This is done to allow further enrichment with engines that require an only an IP address.
-    The other engines at the top use the original observable type and value.
-    e.g. IPquery only supports IPv4 and IPv6, so if the observable is a FQDN or URL,
-    it will not be enriched by IPquery, but if it is a reverse DNS result, it will be enriched.
-    This is a case of auto-pivoting, where the observable type is changed to IP.
-    """
-    if "reverse_dns" in selected_engines and observable["type"] in reverse_dns.SUPPORTED_OBSERVABLE_TYPES:
-        reverse_dns_result = reverse_dns.reverse_dns(observable["value"], observable["type"])
-        result["reverse_dns"] = reverse_dns_result
-        if reverse_dns_result:
-            result["reversed_success"] = True
-            if observable["type"] in ["FQDN", "URL"]:
-                observable["type"] = "IPv4"
-                observable["value"] = reverse_dns_result["reverse_dns"][0]
-
-    if "ipapi" in selected_engines and observable["type"] in ipapi.SUPPORTED_OBSERVABLE_TYPES:
-        result["ipapi"] = ipapi.query_ipapi(observable["value"], secrets.ipapi, PROXIES, SSL_VERIFY)
-
-    if "ipquery" in selected_engines and observable["type"] in ipquery.SUPPORTED_OBSERVABLE_TYPES:
-        result["ipquery"] = ipquery.query_ipquery(observable["value"], PROXIES, SSL_VERIFY)
-
-    if "ipinfo" in selected_engines and observable["type"] in ipinfo.SUPPORTED_OBSERVABLE_TYPES:
-        result["ipinfo"] = ipinfo.query_ipinfo(observable["value"], secrets.ipinfo, PROXIES, SSL_VERIFY)
-
-    if "abuseipdb" in selected_engines and observable["type"] in abuseipdb.SUPPORTED_OBSERVABLE_TYPES:
-        result["abuseipdb"] = abuseipdb.query_abuseipdb(observable["value"], secrets.abuseipdb, PROXIES, SSL_VERIFY)
-
-    if "spur" in selected_engines and observable["type"] in spur_us.SUPPORTED_OBSERVABLE_TYPES:
-        result["spur"] = spur_us.query_spur_us(observable["value"], PROXIES, SSL_VERIFY, secrets.spur_us)
-
-    if "webscout" in selected_engines and observable["type"] in webscout.SUPPORTED_OBSERVABLE_TYPES:
-        result["webscout"] = webscout.query_webscout(observable["value"], secrets.webscout, PROXIES, SSL_VERIFY)
-
-    if "shodan" in selected_engines and observable["type"] in shodan.SUPPORTED_OBSERVABLE_TYPES:
-        result["shodan"] = shodan.query_shodan(observable["value"], secrets.shodan, PROXIES, SSL_VERIFY)
-
-    if "abusix" in selected_engines and observable["type"] in abusix.SUPPORTED_OBSERVABLE_TYPES:
-        result["abusix"] = abusix.query_abusix(observable["value"])
-
-    """
-    The chrome_extension engine retrieves the name of a Chrome or Edge extension
-    using its ID. It is a default behavior for the CHROME_EXTENSION type,
-    so the user doesn't need to select it explicitly in the engines list.
-    The enrichment for this kind of observable is performed like the others engines at the top,
-    the extension name is an exception.
-    """
+    # 1.5. Special handler: Chrome Extension (always runs if type matches)
     if observable["type"] == "CHROME_EXTENSION":
-        result["extension"] = chrome_extension.get_name_from_id(observable["value"], PROXIES, SSL_VERIFY)
+        engine = LOADED_ENGINES.get("chrome_extension")
+        if engine:
+            # Note: The original logic uses "extension" as the key, overriding the engine's name
+            result["extension"] = engine.analyze(observable["value"], observable["type"])
 
-    # print("Results: ", result, file=sys.stderr)
-    return result
+    # 2. Phase 1: Pre-Pivot Engines (Standard lookups that don't need reverse DNS result)
+    for engine in active_instances:
+        if not engine.execute_after_reverse_dns and not engine.is_pivot_engine and engine.name != "chrome_extension":
+            run_engine(engine, observable, result)
+
+    # 3. Phase 2: Pivot (Reverse DNS)
+    # The pivot engine runs and can modify the observable in place (observable["type"]/observable["value"])
+    pivot_engines = [e for e in active_instances if e.is_pivot_engine and e.name == "reverse_dns"]
+    for engine in pivot_engines:
+        analysis_data = run_engine(engine, observable, result)
+
+        # Specific Pivot Logic for Reverse DNS
+        if analysis_data:
+            result["reversed_success"] = True
+            reverse_dns_results = analysis_data.get("reverse_dns")
+
+            # Check if auto-pivoting should occur
+            if reverse_dns_results and observable["type"] in ["FQDN", "URL"]:
+                # Pivot: change observable type to IPv4 and use the first IP found.
+                observable["type"] = "IPv4"
+                observable["value"] = reverse_dns_results[0]
+
+    # 4. Phase 3: Post-Pivot Engines (IP-only engines that benefit from pivot)
+    for engine in active_instances:
+        if engine.execute_after_reverse_dns and not engine.is_pivot_engine and engine.name != "chrome_extension":
+            run_engine(engine, observable, result)
+
+    result_queue.put((index, result))
+
+
+def run_engine(engine, observable, result_dict):
+    """Helper to run a single engine instance and store its result."""
+    if observable["type"] in engine.supported_types:
+        data = engine.analyze(observable["value"], observable["type"])
+        result_dict[engine.name] = data
+        return data
+    return None
 
 
 def collect_results_from_queue(result_queue, num_observables):

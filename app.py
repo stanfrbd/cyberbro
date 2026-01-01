@@ -24,10 +24,8 @@ from utils.config import (
 from utils.config_update import process_config_update
 from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
 from utils.history import (
-    apply_search_filter,
     apply_time_range_filter,
     calculate_pagination_metadata,
-    filter_by_observable,
     validate_history_params,
 )
 from utils.stats import get_analysis_stats
@@ -296,33 +294,29 @@ def request_entity_too_large(e):
 
 @app.route("/history")
 def history():
-    """Render the history page with pagination and search."""
+    """Render the history page with pagination (no search, restricted to 7d/30d)."""
     # Get and validate parameters
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 20, type=int)
-    search_query = request.args.get("search", "", type=str).strip()
-    search_type = request.args.get("search_type", "observable", type=str)
     time_range = request.args.get("time_range", "7d", type=str)
 
-    page, per_page, search_type, time_range = validate_history_params(page, per_page, search_type, time_range)
+    # Validate and restrict time_range to only 7d or 30d
+    if time_range not in ["7d", "30d"]:
+        time_range = "7d"
+
+    # Validate page and per_page
+    page, per_page, _, _ = validate_history_params(page, per_page, "observable", time_range)
 
     # Calculate offset
     offset = (page - 1) * per_page
 
-    # Build base query
+    # Build base query (no search)
     base_query = db.session.query(AnalysisResult).filter(AnalysisResult.results != [])
     base_query = apply_time_range_filter(base_query, time_range)
-    base_query = apply_search_filter(base_query, search_query, search_type)
 
-    # Handle observable search separately (requires in-memory filtering)
-    if search_query and search_type == "observable":
-        all_results = base_query.order_by(AnalysisResult.end_time.desc()).all()
-        filtered_results = filter_by_observable(all_results, search_query)
-        total_count = len(filtered_results)
-        analysis_results = filtered_results[offset : offset + per_page]
-    else:
-        total_count = base_query.count()
-        analysis_results = base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
+    # Get results
+    total_count = base_query.count()
+    analysis_results = base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
 
     # Calculate pagination metadata
     pagination = calculate_pagination_metadata(page, per_page, total_count)
@@ -333,8 +327,6 @@ def history():
         page=page,
         per_page=per_page,
         total_count=total_count,
-        search_query=search_query,
-        search_type=search_type,
         time_range=time_range,
         **pagination,
     )

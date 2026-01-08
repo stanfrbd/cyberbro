@@ -3,28 +3,58 @@
 {% block title %}Cyberbro - Analysis Results{% endblock title %}
 
 {% block head %}
-    {{ super() }}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+{{ super() }}
+<meta name="api-prefix" content="{{ API_PREFIX }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
 
-    <!-- Include jQuery -->
-    <script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<!-- Include jQuery -->
+<script defer src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
-    {# Only load the table javascript if a table will be presented #}
-    {%- if display_mode == "table" or analysis_results.results | length > 1 %}
-    <!-- Include DataTables JS library -->
-    <script defer src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
-    <!-- Include colReorder extension -->
-    <script defer src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
-    <script defer src="{{ url_for('static', filename='filter_table.js') }}"></script>
-    {% endif -%}
+<!-- Monaco Editor (styles only, loader pulled dynamically in json-viewer.js) -->
+<link rel="stylesheet" data-name="vs/editor/editor.main"
+    href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
 
-    <!-- Results page scripts -->
-    <script defer src="{{ url_for('static', filename='results-dropdowns.js') }}"></script>
-    <script defer src="{{ url_for('static', filename='format_results.js') }}"></script>
+{# Only load the table javascript if a table will be presented #}
+{%- if display_mode == "table" or analysis_results.results | length > 1 %}
+<!-- Include DataTables JS library -->
+<script defer src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<!-- Include colReorder extension -->
+<script defer src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
+<script defer src="{{ url_for('static', filename='filter_table.js') }}"></script>
+{% endif -%}
+
+<!-- Results page scripts -->
+<script defer src="{{ url_for('static', filename='results-dropdowns.js') }}"></script>
+<script defer src="{{ url_for('static', filename='format_results.js') }}"></script>
+<script defer src="{{ url_for('static', filename='json-viewer.js') }}"></script>
 {% endblock head %}
 
 {% block content %}
 {{ super() }}
+
+<!-- Define fetchResults function for JSON viewer -->
+<script>
+    // Set up fetchResults function for this specific analysis
+    window.fetchResults = function () {
+        const analysisId = window.location.pathname.split('/').filter(x => x).pop();
+        const apiPrefix = document.querySelector('meta[name="api-prefix"]')?.content || 'api/v1';
+        const url = `/${apiPrefix}/results/${analysisId}`;
+
+        console.log('Fetching from URL:', url);
+
+        return fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .catch(err => {
+                console.error('Failed to fetch results from', url, ':', err);
+                throw err;
+            });
+    };
+</script>
 
 <div style="margin-bottom: 2rem;">
     <!-- Header Section -->
@@ -35,11 +65,14 @@
     <!-- Metadata and Actions -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <!-- Metadata badges -->
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-secondary); align-items: center;">
+        <div
+            style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-secondary); align-items: center;">
             <span>📅 {{ analysis_results.start_time_string }}</span>
             <span>⏱️ {{ analysis_results.analysis_duration_string }}</span>
-            <span style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-weight: 600;">
-                {{ analysis_results.results | length }} Observable{{ 's' if analysis_results.results | length != 1 else '' }}
+            <span
+                style="background: var(--primary-color); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-weight: 600;">
+                {{ analysis_results.results | length }} Observable{{ 's' if analysis_results.results | length != 1 else
+                '' }}
             </span>
         </div>
 
@@ -51,7 +84,8 @@
             </button>
             <!-- Export dropdown -->
             <div style="position: relative; display: inline-block;">
-                <button class="btn btn-secondary btn-icon btn-small" onclick="toggleDropdown('exportDropdown')" type="button">
+                <button class="btn btn-secondary btn-icon btn-small" onclick="toggleDropdown('exportDropdown')"
+                    type="button">
                     <span>📥</span>
                     <span>Export</span>
                     <span style="font-size: 0.7em;">▼</span>
@@ -70,7 +104,8 @@
 
             <!-- Copy dropdown -->
             <div style="position: relative; display: inline-block;">
-                <button class="btn btn-outline btn-icon btn-small" onclick="toggleDropdown('copyDropdown')" type="button">
+                <button class="btn btn-outline btn-icon btn-small" onclick="toggleDropdown('copyDropdown')"
+                    type="button">
                     <span>📋</span>
                     <span>Copy</span>
                     <span style="font-size: 0.7em;">▼</span>
@@ -85,12 +120,13 @@
                 </div>
             </div>
 
-            <button class="btn btn-outline btn-icon btn-small" onclick="location.href='/graph/{{ analysis_results.id }}'">
+            <button class="btn btn-outline btn-icon btn-small"
+                onclick="location.href='/graph/{{ analysis_results.id }}'">
                 <span>🕸️</span>
                 <span>Graph</span>
             </button>
 
-            <button class="btn btn-outline btn-icon btn-small" onclick="location.href='/{{ API_PREFIX }}/results/{{ analysis_results.id }}'">
+            <button class="btn btn-outline btn-icon btn-small" onclick="openJsonViewer()">
                 <span>🔗</span>
                 <span>JSON</span>
             </button>
@@ -158,25 +194,169 @@
     body.dark-mode .dropdown-item:hover {
         background-color: rgba(77, 163, 255, 0.15);
     }
+
+    /* JSON Viewer Modal Styles */
+    #jsonViewerModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #jsonViewerModal.active {
+        display: flex !important;
+        animation: fadeIn 0.2s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .json-viewer-container {
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        height: 90%;
+        max-width: 1400px;
+        background: var(--surface-color);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .json-viewer-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--surface-color);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .json-viewer-toolbar button {
+        padding: 0.5rem 1rem;
+        min-height: 38px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        background: var(--primary-color);
+        color: white;
+        border: 1px solid var(--primary-color);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-fast);
+        white-space: nowrap;
+    }
+
+    .json-viewer-toolbar button:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .json-viewer-toolbar button.secondary {
+        background: var(--surface-color);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .json-viewer-toolbar button.secondary:hover {
+        background: rgba(0, 123, 255, 0.08);
+    }
+
+    #jsonEditorContainer {
+        flex: 1;
+        overflow: hidden;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        min-height: 0;
+    }
+
+    /* Remove legacy search styling */
+
+    body.dark-mode #jsonViewerModal {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    body.dark-mode .json-viewer-container {
+        background: var(--dark-surface-color);
+        border: 1px solid var(--dark-border-color);
+    }
+
+    body.dark-mode .json-viewer-toolbar {
+        background: var(--dark-surface-color);
+        border-color: var(--dark-border-color);
+    }
+
+    body.dark-mode .json-viewer-search {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    body.dark-mode .json-viewer-search input {
+        background: var(--dark-surface-secondary);
+        border-color: var(--dark-border-color);
+        color: var(--dark-text-color);
+    }
+
+    body.dark-mode .json-viewer-search input::placeholder {
+        color: var(--dark-text-secondary);
+    }
+
+    .json-viewer-toolbar button.secondary {
+        background: var(--dark-surface-color);
+        color: var(--dark-text-color);
+        border-color: var(--dark-border-color);
+    }
+
+    .json-viewer-toolbar button.secondary:hover {
+        background: rgba(77, 163, 255, 0.15);
+    }
+
+    .json-search-status {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        padding: 0 0.5rem;
+        white-space: nowrap;
+    }
+
+    body.dark-mode .json-search-status {
+        color: var(--dark-text-secondary);
+    }
 </style>
 
-<script>
-    // Set up fetchResults function for this specific analysis
-    fetchResults = function() {
-        return fetch(`/{{ API_PREFIX }}/results/{{ analysis_results.id }}`)
-        .then(response => response.json())
-        .catch(err => {
-            console.error('Failed to fetch results: ', err);
-            throw err;
-        });
-    };
-</script>
-
-    {% if display_mode == "table" or analysis_results.results | length > 1 %}
-        {%- include "display_table.html" -%}
-    {% elif analysis_results.results | length == 1 %}
-        {%- include "display_cards.html" %}
-    {% endif %}
+{% if display_mode == "table" or analysis_results.results | length > 1 %}
+{%- include "display_table.html" -%}
+{% elif analysis_results.results | length == 1 %}
+{%- include "display_cards.html" %}
+{% endif %}
 
 <div class="end-of-cards">
 </div>
@@ -193,5 +373,37 @@
 
     checkCardsBasicInfo();
 </script>
+
+<!-- JSON Viewer Modal -->
+<div id="jsonViewerModal">
+    <div class="json-viewer-container">
+        <div class="json-viewer-toolbar">
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <strong>JSON Viewer</strong>
+                <span style="font-size:0.85rem; color: var(--text-secondary);">
+                    Use Ctrl/Cmd+F to search.
+                </span>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button onclick="expandAllJson()" title="Expand all JSON nodes">
+                    <span>➕</span> Expand All
+                </button>
+                <button onclick="collapseAllJson()" title="Collapse all JSON nodes">
+                    <span>➖</span> Collapse All
+                </button>
+                <button class="secondary" onclick="copyJsonToClipboard()" title="Copy JSON to clipboard">
+                    <span>📋</span> Copy
+                </button>
+                <button class="secondary" onclick="downloadJson()" title="Download JSON file">
+                    <span>💾</span> Download
+                </button>
+                <button class="secondary" onclick="closeJsonViewer()" title="Close JSON viewer">
+                    <span>✕</span> Close
+                </button>
+            </div>
+        </div>
+        <div id="jsonEditorContainer"></div>
+    </div>
+</div>
 
 {% endblock content %}

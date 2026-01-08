@@ -357,8 +357,25 @@ function showToast(message, type = 'success') {
     }, 2000);
 }
 
+function resolveFetchResults() {
+    if (typeof window.fetchResults === 'function') {
+        return window.fetchResults();
+    }
+
+    const analysisId = window.location.pathname.split('/').filter(x => x).pop();
+    const apiPrefix = document.querySelector('meta[name="api-prefix"]')?.content || 'api/v1';
+    const url = `/${apiPrefix}/results/${analysisId}`;
+
+    return fetch(url).then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    });
+}
+
 function copyAsPlainText() {
-    fetchResults()
+    resolveFetchResults()
         .then(data => {
             const plainText = formatResults(data);
             return navigator.clipboard.writeText(plainText);
@@ -380,7 +397,7 @@ function formatDefanged(plainText) {
 }
 
 function copyAsDefanged() {
-    fetchResults()
+    resolveFetchResults()
         .then(data => {
             const plainText = formatResults(data);
             const defangedText = formatDefanged(plainText);
@@ -396,10 +413,10 @@ function copyAsDefanged() {
 }
 
 // Handle export form submission to show toast
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const exportForm = document.getElementById('exportForm');
     if (exportForm) {
-        exportForm.addEventListener('submit', function(e) {
+        exportForm.addEventListener('submit', function (e) {
             const submitter = e.submitter || document.activeElement;
             const format = submitter.value;
 

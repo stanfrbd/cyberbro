@@ -343,7 +343,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 
 ### IPapi
 **Name**: `ipapi`  
-**Supports**: IP, risk, VPN, proxy, free API key required  
+**Supports**: default, IP, risk, VPN, proxy, free API key required  
 **Explaination**: Checks IPapi for IP, reversed obtained IP for a given domain/URL, free API key required
 
 ### IPinfo
@@ -353,7 +353,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 
 ### IPquery
 **Name**: `ipquery`  
-**Supports**: default, IP, risk, VPN, proxy, free_no_key  
+**Supports**: IP, risk, VPN, proxy, free_no_key  
 **Explaination**: Checks IPquery for IP, reversed obtained IP for a given domain/URL, free, no API key
 
 ### Microsoft Defender for Endpoint

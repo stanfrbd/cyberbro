@@ -1,0 +1,166 @@
+{
+    "sha1": "851daedd88a2a0aa9cbe37a8a837b2f8cfaf0f0b",
+    "base64": "aHR0cHM6Ly9kYXRhdHJhY2tlci5pZXRmLm9yZy9kb2MvaHRtbC9yZmMyNjA2",
+    "requested_url": "https://datatracker.ietf.org/doc/html/rfc2606",
+    "analysis": {
+        "first_analysis": "2025-12-26T21:42:43",
+        "analysis_history": [
+            {
+                "analysis_id": "176678536457d49d",
+                "analysis_time": "2025-12-26T21:42:43",
+                "http_response_code": 200,
+                "availability_status": "online",
+                "domain": "datatracker.ietf.org",
+                "serving_ip_address": "104.16.44.99"
+            }
+        ],
+        "last_analysis": {
+            "analysis_id": "176678536457d49d",
+            "analysis_time": "2025-12-26T21:42:43",
+            "http_response_code": 200,
+            "availability_status": "online",
+            "domain": "datatracker.ietf.org",
+            "serving_ip_address": "104.16.44.99"
+        },
+        "analysis_count": 1,
+        "statistics": {
+            "unknown": 1,
+            "suspicious": 0,
+            "malicious": 0,
+            "total": 1,
+            "goodware": 0
+        }
+    },
+    "third_party_reputations": {
+        "sources": [
+            {
+                "source": "0xSI_f33d",
+                "update_time": "2026-01-07T06:20:59",
+                "detection": "undetected"
+            },
+            {
+                "source": "adminus_labs",
+                "update_time": "2026-01-07T16:43:04",
+                "detection": "undetected"
+            },
+            {
+                "source": "apwg",
+                "update_time": "2026-01-07T14:20:10",
+                "detection": "undetected"
+            },
+            {
+                "source": "crdf",
+                "update_time": "2026-01-07T16:27:40",
+                "detection": "undetected"
+            },
+            {
+                "source": "cyradar",
+                "update_time": "2026-01-07T13:28:47",
+                "detection": "undetected"
+            },
+            {
+                "source": "cyren",
+                "update_time": "2026-01-07T14:08:42",
+                "detection": "undetected"
+            },
+            {
+                "source": "levelblue",
+                "update_time": "2026-01-07T04:20:00",
+                "detection": "undetected"
+            },
+            {
+                "source": "mrg",
+                "update_time": "2026-01-07T16:45:43",
+                "detection": "undetected"
+            },
+            {
+                "source": "mute",
+                "update_time": "2026-01-07T11:07:06",
+                "detection": "undetected"
+            },
+            {
+                "source": "netstar",
+                "update_time": "2026-01-07T16:36:14",
+                "detection": "undetected"
+            },
+            {
+                "source": "openphish",
+                "update_time": "2026-01-06T17:55:15",
+                "detection": "undetected"
+            },
+            {
+                "source": "osint",
+                "update_time": "2026-01-07T01:30:46",
+                "detection": "undetected"
+            },
+            {
+                "source": "phishing_database",
+                "update_time": "2026-01-07T10:12:06",
+                "detection": "undetected"
+            },
+            {
+                "source": "phishstats",
+                "update_time": "2026-01-06T23:46:54",
+                "detection": "undetected"
+            },
+            {
+                "source": "phishtank",
+                "update_time": "2026-01-07T11:21:04",
+                "detection": "undetected"
+            },
+            {
+                "source": "threatfox_abuse_ch",
+                "update_time": "2026-01-07T16:19:52",
+                "detection": "undetected"
+            },
+            {
+                "source": "urlhaus",
+                "update_time": "2026-01-07T10:42:43",
+                "detection": "undetected"
+            },
+            {
+                "source": "mnemonic",
+                "update_time": "2026-01-07T10:52:10",
+                "detection": "undetected"
+            },
+            {
+                "source": "alphamountain",
+                "update_time": "2025-05-28T21:59:32",
+                "detection": "clean",
+                "categories": [
+                    "information_technology",
+                    "business_economy"
+                ],
+                "detect_time": "2025-05-28T21:59:32"
+            },
+            {
+                "source": "forcepoint",
+                "update_time": "2025-05-28T21:59:32",
+                "detection": "undetected",
+                "categories": [
+                    "information_technology"
+                ],
+                "detect_time": "2025-05-28T21:59:32"
+            },
+            {
+                "source": "botvrij",
+                "update_time": "2026-01-07T02:24:57",
+                "detection": "undetected"
+            }
+        ],
+        "statistics": {
+            "total": 21,
+            "malicious": 0,
+            "clean": 1,
+            "suspicious": 0,
+            "undetected": 20
+        }
+    },
+    "last_seen": "2025-12-26T21:42:43",
+    "first_seen": "2025-12-26T21:42:43",
+    "classification": "unknown",
+    "categories": [
+        "information_technology",
+        "business_economy"
+    ]
+}

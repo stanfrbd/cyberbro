@@ -1,0 +1,121 @@
+{
+    "last_dns_records_time": null,
+    "last_seen": "2025-12-05T14:42:55",
+    "parent_domain": null,
+    "top_threats": [],
+    "last_dns_records": [],
+    "downloaded_files_statistics": {
+        "total": 0,
+        "unknown": 0,
+        "suspicious": 0,
+        "malicious": 0,
+        "goodware": 0
+    },
+    "third_party_reputations": {
+        "statistics": {
+            "malicious": 0,
+            "clean": 0,
+            "suspicious": 0,
+            "undetected": 13,
+            "total": 13
+        },
+        "sources": [
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T14:42:55",
+                "detect_time": null,
+                "categories": [],
+                "source": "adminus_labs"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T08:20:22",
+                "detect_time": null,
+                "categories": [],
+                "source": "threatfox_abuse_ch"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-03T23:29:46",
+                "detect_time": null,
+                "categories": [],
+                "source": "levelblue"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T05:57:42",
+                "detect_time": null,
+                "categories": [],
+                "source": "apwg"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T02:25:33",
+                "detect_time": null,
+                "categories": [],
+                "source": "botvrij"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T06:20:38",
+                "detect_time": null,
+                "categories": [],
+                "source": "0xSI_f33d"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T14:28:48",
+                "detect_time": null,
+                "categories": [],
+                "source": "crdf"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T01:30:21",
+                "detect_time": null,
+                "categories": [],
+                "source": "osint"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T13:51:28",
+                "detect_time": null,
+                "categories": [],
+                "source": "netstar"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T14:29:06",
+                "detect_time": null,
+                "categories": [],
+                "source": "phishing_database"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-05T13:28:19",
+                "detect_time": null,
+                "categories": [],
+                "source": "cyradar"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-06-04T12:42:20",
+                "detect_time": "2025-06-04T12:42:20",
+                "categories": [],
+                "source": "alphamountain"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-06-04T12:42:19",
+                "detect_time": "2025-06-04T12:42:19",
+                "categories": [
+                    "uncategorized"
+                ],
+                "source": "forcepoint"
+            }
+        ]
+    },
+    "modified_time": "2025-12-05T14:42:55",
+    "requested_domain": "kosmicband.com",
+    "certificates": null
+}

@@ -1,0 +1,28 @@
+{
+    "classification": "goodware",
+    "riskscore": 0,
+    "first_seen": "2013-12-31T00:02:51",
+    "last_seen": "2025-11-17T10:33:15",
+    "classification_result": null,
+    "classification_reason": "Certificate Validation",
+    "classification_origin": null,
+    "cloud_last_lookup": null,
+    "data_source": "CLOUD",
+    "sha1": "3a30948f8cd5655fede389d73b5fecd91251df4a",
+    "sha256": "c67c199595622dfbdc9e415c4a0ad6166eb49cbf74c6aac7bb3e958604d5ecb8",
+    "md5": "3749f52bb326ae96782b42dc0a97b4c1",
+    "av_scanners": {
+        "scanner_count": 29,
+        "scanner_match": 0,
+        "scanner_percent": 0.0,
+        "vendor_count": 20,
+        "vendor_match": 0,
+        "vendor_percent": 0.0,
+        "antivirus": {
+            "scanner_match": 0,
+            "scanner_count": 29,
+            "vendor_match": 0,
+            "vendor_count": 20
+        }
+    }
+}

@@ -44,7 +44,7 @@ class MDEEngine(BaseEngine):
 
     def _get_token(self) -> str:
         url = f"https://login.microsoftonline.com/{self.secrets.mde_tenant_id}/oauth2/token"
-        resource_app_id_uri = "https://api.securitycenter.microsoft.com"
+        resource_app_id_uri = "https://api.security.microsoft.com"
         body = {
             "resource": resource_app_id_uri,
             "client_id": self.secrets.mde_client_id,
@@ -83,18 +83,18 @@ class MDEEngine(BaseEngine):
             extracted_domain = None
 
             if observable_type in ["MD5", "SHA1", "SHA256"]:
-                url = f"https://api.securitycenter.microsoft.com/api/files/{observable}/stats"
-                file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{observable}"
+                url = f"https://api.security.microsoft.com/api/files/{observable}/stats"
+                file_info_url = f"https://api.security.microsoft.com/api/files/{observable}"
                 link = f"https://security.microsoft.com/file/{observable}"
             elif observable_type in ["IPv4", "IPv6", "BOGON"]:
-                url = f"https://api.securitycenter.microsoft.com/api/ips/{observable}/stats"
+                url = f"https://api.security.microsoft.com/api/ips/{observable}/stats"
                 link = f"https://security.microsoft.com/ip/{observable}/overview"
             elif observable_type == "FQDN":
-                url = f"https://api.securitycenter.microsoft.com/api/domains/{observable}/stats"
+                url = f"https://api.security.microsoft.com/api/domains/{observable}/stats"
                 link = f"https://security.microsoft.com/domains?urlDomain={observable}"
             elif observable_type == "URL":
                 extracted_domain = observable.split("/")[2].split(":")[0]
-                url = f"https://api.securitycenter.microsoft.com/api/domains/{extracted_domain}/stats"
+                url = f"https://api.security.microsoft.com/api/domains/{extracted_domain}/stats"
                 link = f"https://security.microsoft.com/url?url={observable}"
             else:
                 return None

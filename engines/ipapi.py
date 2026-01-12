@@ -25,7 +25,21 @@ class IPAPIEngine(BaseEngine):
         try:
             url = "https://api.ipapi.is"
             headers = {"Content-Type": "application/json"}
-            data = {"q": observable_value, "key": self.secrets.ipapi}
+            data = {"q": observable_value}
+
+            # Validate API key (should be non-empty and 20 characters)
+            if self.secrets.ipapi and len(self.secrets.ipapi) == 20:
+                # Use API key if it matches the expected length
+                data["key"] = self.secrets.ipapi
+            else:
+                # Don't use API key if it doesn't match the format
+                if self.secrets.ipapi:
+                    logger.warning("ipapi API key format is invalid, querying without API key for '%s'", observable_value)
+                else:
+                    logger.warning(
+                        "Be careful, you don't use API key for ipapi, rate limit can happen more often (query: '%s')",
+                        observable_value,
+                    )
 
             response = requests.post(url, json=data, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
             response.raise_for_status()

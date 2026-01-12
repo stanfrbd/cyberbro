@@ -105,6 +105,10 @@
             <th>AbuseIPDB</th>
             {% endif %}
 
+            {% if "bad_asn" in analysis_results.selected_engines %}
+            <th>Bad ASN Check</th>
+            {% endif %}
+
             {% if "ipapi" in analysis_results.selected_engines %}
             <th>IPapi</th>
             {% endif %}
@@ -267,6 +271,10 @@
 
             {% if "abuseipdb" in analysis_results.selected_engines %}
             {% include "engine_layouts/abuseipdb_table.html" %}
+            {% endif %}
+
+            {% if "bad_asn" in analysis_results.selected_engines %}
+            {% include "engine_layouts/bad_asn_table.html" %}
             {% endif %}
 
             {% if "ipapi" in analysis_results.selected_engines %}

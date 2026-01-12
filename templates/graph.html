@@ -15,7 +15,8 @@
 </div>
 
 <div class="graph-controls">
-    <button class="graph-control-btn" onclick="window.location.href='/results/{{ analysis_id }}'" title="Go back to results">
+    <button class="graph-control-btn" onclick="window.location.href='/results/{{ analysis_id }}'"
+        title="Go back to results">
         <span>←</span>
     </button>
     <button class="graph-control-btn" onclick="toggleFullScreen()" title="Toggle fullscreen">
@@ -471,6 +472,29 @@
                     addNode(malware, malware, "malware", "https://img.icons8.com/officexs/32/spam.png");
                     edges.push({ from: obs, to: malware, label: "Malware" });
                 });
+            }
+
+            if (entry.bad_asn) {
+                const badAsnData = entry.bad_asn;
+
+                // Only create node if ASN is malicious
+                if (badAsnData.status === "malicious") {
+                    const asnLabel = `Bad ASN: ${badAsnData.asn}`;
+                    const asnId = `bad_asn_${badAsnData.asn}`;
+
+                    addNode(
+                        asnId,
+                        asnLabel,
+                        "bad_asn",
+                        "https://img.icons8.com/officexs/32/cancel.png"
+                    );
+
+                    edges.push({
+                        from: obs,
+                        to: asnId,
+                        label: badAsnData.source || "Bad ASN"
+                    });
+                }
             }
 
             if (entry.urlscan?.top_domains) {
@@ -1035,6 +1059,7 @@
                 port: { color: { background: "#f5b041" } },
                 reverse_dns: { color: { background: "#d4a6ff" } },
                 malware: { color: { background: "#ffcccb" } },
+                bad_asn: { color: { background: "#ff4444" } },
             },
             physics: {
                 stabilization: false,

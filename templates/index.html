@@ -67,6 +67,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 'abuseipdb': '⚠️',
                 'abusix': '📧',
                 'alienvault': '🛡️',
+                'bad_asn': '🚫',
                 'criminalip': '🚔',
                 'crowdstrike': '⚡',
                 'crtsh': '🔐',
@@ -100,6 +101,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 { name: "abuseipdb", label: "AbuseIPDB", supports: "risk", checked: false, description: "IP reputation & abuse reports", tooltip: "Checks AbuseIPDB for IP, reversed obtained IP for a given domain / URL, free API key required" },
                 { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, description: "Abuse contact lookup (free)", tooltip: "Checks abuse contact with Abusix only for IP, reversed obtained IP for a given domain / URL, free, no API key" },
                 { name: "alienvault", label: "Alienvault", supports: "hash ip domain url", checked: false, description: "Threat intelligence platform", tooltip: "Checks Alienvault for IP, domain, URL, hash, free API key required" },
+                { name: "bad_asn", label: "Bad ASN Check", supports: "ip risk free_no_key", checked: false, description: "Malicious ASN detection (free)", tooltip: "Checks if IP's ASN is listed in Spamhaus ASNDROP or Brianhama Bad ASN databases. Requires ipapi, ipinfo, or ipquery engine. Free, no API key" },
                 { name: "criminalip", label: "Criminal IP", supports: "ip", checked: false, description: "Attack surface & threat hunting", tooltip: "Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting, free, with paid upgrades available" },
                 { name: "crowdstrike", label: "CrowdStrike", supports: "hash ip domain url", checked: false, description: "Advanced threat detection", tooltip: "Checks CrowdStrike for IP, domain, URL, hash, paid API key required" },
                 { name: "crtsh", label: "crt.sh", supports: "domain url free_no_key", checked: false, description: "Certificate transparency logs", tooltip: "Checks crt.sh for subdomains using the certificate transparency logs given domain / URL, free, no API key" },
@@ -287,6 +289,161 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     });
                 }
             }
+
+            // ========================================
+            // Engine Validation
+            // ========================================
+
+            /**
+             * Configuration for engine dependencies.
+             * Add new dependency checks here as needed.
+             */
+            const ENGINE_DEPENDENCIES = {
+                bad_asn: {
+                    providers: ['ipapi', 'ipinfo', 'ipquery', 'webscout'],
+                    defaultProvider: 'ipapi',
+                    message: {
+                        title: '⚠️ ASN Provider Required',
+                        body: 'You selected <strong>Bad ASN Check</strong> but no ASN provider is selected. Bad ASN requires an ASN provider to work properly.',
+                        providers: 'Please select one of: <strong>IPapi</strong>, <strong>IPinfo</strong>, <strong>IPquery</strong>, or <strong>WebScout</strong>.'
+                    }
+                }
+            };
+
+            /**
+             * Get list of currently selected engines.
+             * @returns {string[]} Array of selected engine names
+             */
+            function getSelectedEngines() {
+                return Array.from(document.querySelectorAll('input[name="engines"]:checked'))
+                    .map(checkbox => checkbox.value);
+            }
+
+            /**
+             * Check if an engine requires a provider that is not selected.
+             * @param {string} engineName - Name of the engine to check
+             * @param {string[]} selectedEngines - List of currently selected engines
+             * @returns {boolean} True if dependency is missing
+             */
+            function isMissingDependency(engineName, selectedEngines) {
+                const dependency = ENGINE_DEPENDENCIES[engineName];
+                if (!dependency) return false;
+
+                const hasEngine = selectedEngines.includes(engineName);
+                const hasProvider = dependency.providers.some(provider =>
+                    selectedEngines.includes(provider)
+                );
+
+                return hasEngine && !hasProvider;
+            }
+
+            /**
+             * Create a confirmation dialog overlay.
+             * @param {Object} config - Dialog configuration
+             * @returns {HTMLElement} The overlay element
+             */
+            function createConfirmationDialog(config) {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; ' +
+                    'background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+
+                const dialog = document.createElement('div');
+                dialog.style.cssText = 'background: var(--bg-color, white); padding: 30px; ' +
+                    'border-radius: 8px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+
+                dialog.innerHTML = `
+                    <h3 style="margin-top: 0; color: var(--text-color, #333);">${config.title}</h3>
+                    <p style="color: var(--text-color, #666); line-height: 1.6;">${config.body}</p>
+                    <p style="color: var(--text-color, #666); line-height: 1.6;">${config.providers}</p>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button id="confirmBtn" class="btn btn-icon" style="flex: 1;">
+                            <span>✅</span>
+                            <span>${config.confirmText}</span>
+                        </button>
+                        <button id="cancelBtn" class="btn btn-outline" style="flex: 1;">
+                            Cancel
+                        </button>
+                    </div>
+                `;
+
+                overlay.appendChild(dialog);
+                return overlay;
+            }
+
+            /**
+             * Enable an engine and update its visual state.
+             * @param {string} engineName - Name of the engine to enable
+             */
+            function enableEngine(engineName) {
+                const checkbox = document.querySelector(`input[name="engines"][value="${engineName}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const card = checkbox.closest('.engine-card');
+                    if (card) {
+                        updateCardState(card, true);
+                    }
+                }
+            }
+
+            /**
+             * Show dependency warning dialog and handle user response.
+             * @param {string} engineName - Name of the engine with missing dependency
+             * @param {Function} onConfirm - Callback when user confirms
+             */
+            function showDependencyWarning(engineName, onConfirm) {
+                const dependency = ENGINE_DEPENDENCIES[engineName];
+                const config = {
+                    ...dependency.message,
+                    confirmText: `Add ${dependency.defaultProvider.toUpperCase()} & Continue`
+                };
+
+                const overlay = createConfirmationDialog(config);
+                document.body.appendChild(overlay);
+
+                // Handle confirm
+                document.getElementById('confirmBtn').onclick = function () {
+                    enableEngine(dependency.defaultProvider);
+                    document.body.removeChild(overlay);
+                    onConfirm();
+                };
+
+                // Handle cancel
+                document.getElementById('cancelBtn').onclick = function () {
+                    document.body.removeChild(overlay);
+                };
+
+                // Close on overlay click
+                overlay.onclick = function (e) {
+                    if (e.target === overlay) {
+                        document.body.removeChild(overlay);
+                    }
+                };
+            }
+
+            /**
+             * Validate form submission for engine dependencies.
+             * @param {Event} event - Form submit event
+             * @returns {boolean} True if validation passed
+             */
+            function validateEngineSelection(event) {
+                const selectedEngines = getSelectedEngines();
+
+                // Check each engine for missing dependencies
+                for (const engineName in ENGINE_DEPENDENCIES) {
+                    if (isMissingDependency(engineName, selectedEngines)) {
+                        event.preventDefault();
+                        showDependencyWarning(engineName, function () {
+                            document.getElementById('analyzeForm').submit();
+                        });
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Attach validation to form
+            document.getElementById('analyzeForm').addEventListener('submit', validateEngineSelection);
 
             // Initialize
             renderEngines();

@@ -56,6 +56,14 @@ function formatResults(data) {
             if (result.ipapi.is_abuser) plainText += `- ABUSER: ${result.ipapi.is_abuser}\n`;
             if (result.ipapi.is_vpn && result.ipapi.vpn) plainText += `- VPN Service: ${result.ipapi.vpn.service}\n`;
         }
+        if (result.bad_asn) {
+            plainText += `Bad ASN Check: Status: ${result.bad_asn.status}, Risk Score: ${result.bad_asn.risk_score || 0}/100`;
+            if (result.bad_asn.asn) plainText += `, ASN: ${result.bad_asn.asn}`;
+            if (result.bad_asn.asn_org_name) plainText += ` (${result.bad_asn.asn_org_name})`;
+            plainText += `\n`;
+            if (result.bad_asn.source) plainText += `- Source: ${result.bad_asn.source}\n`;
+            if (result.bad_asn.details) plainText += `- Details: ${result.bad_asn.details}\n`;
+        }
         if (result.abuseipdb) {
             plainText += `AbuseIPDB: Reports: ${result.abuseipdb.reports}, Risk Score: ${result.abuseipdb.risk_score}\n`;
         }

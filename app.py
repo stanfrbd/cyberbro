@@ -97,6 +97,29 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+
+def initialize_background_services():
+    """
+    Initialize background services for the application.
+
+    This function starts daemon threads for long-running background tasks:
+    - Bad ASN database updater: Periodically updates malicious ASN lists from
+      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database).
+
+    These threads are marked as daemon threads, so they will automatically
+    terminate when the main application exits.
+    """
+    # Start Bad ASN background updater thread
+    # This maintains up-to-date lists of malicious ASNs for IP reputation checks
+    bad_asn_thread = threading.Thread(target=background_updater, daemon=True, name="BadASNUpdater")
+    bad_asn_thread.start()
+    logger.info("Bad ASN background updater thread started")
+
+
+# Initialize background services when the module is loaded
+# This ensures that the background services are started even when running with gunicorn
+initialize_background_services()
+
 PROXIES: dict[str, str] = {"https": secrets.proxy_url, "http": secrets.proxy_url}
 
 SSL_VERIFY: bool = secrets.ssl_verify
@@ -445,7 +468,4 @@ def initialize_background_services():
 
 
 if __name__ == "__main__":
-    # Initialize background services before starting the Flask app
-    initialize_background_services()
-
     app.run(port=5000, debug=False)

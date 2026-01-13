@@ -3,7 +3,7 @@ flask
 flask-cors
 flask-caching
 pandas
-jwt
+PyJWT
 openpyxl
 dnspython
 pycountry

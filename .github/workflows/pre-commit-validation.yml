@@ -2,6 +2,7 @@ name: pre-commit validation
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:

@@ -43,11 +43,11 @@ class RLAnalyzeEngine(BaseEngine):
         return endpoint_map.get(observable_type)
 
     def _parse_rl_response(self, result: dict, observable: str, observable_type: str, url: str) -> dict:
-        top_threats: list[str] = []
+        threats: list[str] = []
         ui_link = url + self._get_ui_endpoint(observable, observable_type)
 
         if observable_type in ["IPv4", "IPv6", "FQDN"]:
-            top_threats.extend([i.get("threat_name") for i in result.get("top_threats", [])])
+            threats.extend([i.get("threat_name") for i in result.get("top_threats", [])])
             total_files: int = result.get("downloaded_files_statistics", {}).get("total", 0)
             malicious_files: int = result.get("downloaded_files_statistics", {}).get("malicious", 0)
             suspicious_files: int = result.get("downloaded_files_statistics", {}).get("suspicious", 0)
@@ -73,13 +73,14 @@ class RLAnalyzeEngine(BaseEngine):
                     "total_files": total_files,
                     "malicious_files": malicious_files,
                     "suspicious_files": suspicious_files,
-                    "threats": top_threats,
+                    "threats": threats,
                     "link": ui_link,
                 }
 
         elif observable_type in ["URL"]:
-            top_threats.append(result.get("threat_name"))
-            top_threats.extend(result.get("categories", []))
+            threats.extend([i.get("threat_name") for i in result.get("analysis").get("top_threats", [])])
+            threats.append(result.get("threat_name"))
+            threats.extend(result.get("categories", []))
 
             reputation = result.get("third_party_reputations", {}).get("statistics", {})
             malicious: int = reputation.get("malicious", 0)
@@ -99,14 +100,14 @@ class RLAnalyzeEngine(BaseEngine):
                     "reports": total,
                     "malicious": malicious,
                     "suspicious": suspicious,
-                    "threats": top_threats,
+                    "threats": threats,
                     "link": ui_link,
                 }
 
         elif observable_type in ["MD5", "SHA1", "SHA256"]:
-            top_threats.append(result.get("classification"))
-            top_threats.append(result.get("classification_result"))
-            top_threats.append(result.get("classification_reason"))
+            threats.append(result.get("classification"))
+            threats.append(result.get("classification_result"))
+            threats.append(result.get("classification_reason"))
 
             classification: str = result.get("classification", "")
             riskscore: int = result.get("riskscore", 0)
@@ -129,7 +130,7 @@ class RLAnalyzeEngine(BaseEngine):
                     "scanners": scanners,
                     "classification": classification.upper(),
                     "riskscore": riskscore,
-                    "threats": top_threats,
+                    "threats": threats,
                     "link": ui_link,
                 }
 

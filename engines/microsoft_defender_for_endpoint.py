@@ -24,7 +24,10 @@ class MDEEngine(BaseEngine):
         try:
             decoded_token = jwt.decode(token, options={"verify_signature": False})
             exp = decoded_token.get("exp")
-            if exp and exp > time.time():
+            if exp is None:
+                logger.warning("MDE Token has no expiration claim.")
+                return False
+            if exp > time.time():
                 return True
             logger.warning("MDE Token has expired.")
             return False
@@ -85,17 +88,17 @@ class MDEEngine(BaseEngine):
             if observable_type in ["MD5", "SHA1", "SHA256"]:
                 url = f"https://api.securitycenter.microsoft.com/api/files/{observable}/stats"
                 file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{observable}"
-                link = f"https://securitycenter.microsoft.com/file/{observable}"
+                link = f"https://security.microsoft.com/file/{observable}"
             elif observable_type in ["IPv4", "IPv6", "BOGON"]:
                 url = f"https://api.securitycenter.microsoft.com/api/ips/{observable}/stats"
-                link = f"https://securitycenter.microsoft.com/ip/{observable}/overview"
+                link = f"https://security.microsoft.com/ip/{observable}/overview"
             elif observable_type == "FQDN":
                 url = f"https://api.securitycenter.microsoft.com/api/domains/{observable}/stats"
-                link = f"https://securitycenter.microsoft.com/domains?urlDomain={observable}"
+                link = f"https://security.microsoft.com/domains?urlDomain={observable}"
             elif observable_type == "URL":
                 extracted_domain = observable.split("/")[2].split(":")[0]
                 url = f"https://api.securitycenter.microsoft.com/api/domains/{extracted_domain}/stats"
-                link = f"https://securitycenter.microsoft.com/url?url={observable}"
+                link = f"https://security.microsoft.com/url?url={observable}"
             else:
                 return None
 

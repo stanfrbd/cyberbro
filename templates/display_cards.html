@@ -32,6 +32,9 @@
     {% if analysis_results.results[0].abuseipdb %}
     {% include "engine_layouts/abuseipdb_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].bad_asn %}
+    {% include "engine_layouts/bad_asn_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].spur %}
     {% include "engine_layouts/spur_card.html" %}
     {% endif %}

@@ -286,6 +286,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, free API key required  
 **Explaination**: Checks AbuseIPDB for IP, reversed obtained IP for a given domain/URL, free API key required
 
+### Bad ASN Check
+**Name**: `bad_asn`  
+**Supports**: IP, risk, free_no_key  
+**Explaination**: Malicious ASN detection (free, no API key). Checks if IP's ASN is listed in Spamhaus ASNDROP or Brianhama Bad ASN databases. Requires ipapi, ipinfo, or ipquery engine for ASN data
+
 ### CrowdStrike
 **Name**: `crowdstrike`  
 **Supports**: hash, IP, domain, URL  

@@ -1,3 +1,4 @@
+import inspect
 import queue
 import threading
 import time
@@ -106,8 +107,15 @@ def analyze_observable(observable, index, selected_engines, result_queue):
                 observable["value"] = reverse_dns_results[0]
 
     # 4. Phase 3: Post-Pivot Engines (IP-only engines that benefit from pivot)
+    # Run all engines except those that depend on other engine results
     for engine in active_instances:
-        if engine.execute_after_reverse_dns and not engine.is_pivot_engine and engine.name != "chrome_extension":
+        if engine.execute_after_reverse_dns and not engine.is_pivot_engine and engine.name != "chrome_extension" and engine.name != "bad_asn":
+            run_engine(engine, observable, result)
+
+    # 5. Phase 4: Dependent Engines (engines that need results from other engines)
+    # Run bad_asn last so it can access ASN data from ipapi, ipinfo, etc.
+    for engine in active_instances:
+        if engine.name == "bad_asn":
             run_engine(engine, observable, result)
 
     result_queue.put((index, result))
@@ -116,7 +124,10 @@ def analyze_observable(observable, index, selected_engines, result_queue):
 def run_engine(engine, observable, result_dict):
     """Helper to run a single engine instance and store its result."""
     if observable["type"] in engine.supported_types:
-        data = engine.analyze(observable["value"], observable["type"])
+        # Check if engine's analyze method accepts a context parameter
+        # (e.g., bad_asn engine needs access to results from other engines)
+        sig = inspect.signature(engine.analyze)
+        data = engine.analyze(observable["value"], observable["type"], context=result_dict) if "context" in sig.parameters else engine.analyze(observable["value"], observable["type"])
         result_dict[engine.name] = data
         return data
     return None

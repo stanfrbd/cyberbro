@@ -1,0 +1,132 @@
+{
+    "third_party_reputations": {
+        "statistics": {
+            "malicious": 2,
+            "clean": 1,
+            "suspicious": 0,
+            "undetected": 12,
+            "total": 15
+        },
+        "sources": [
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T04:20:00",
+                "detect_time": null,
+                "categories": [],
+                "source": "levelblue"
+            },
+            {
+                "detection": "malicious",
+                "update_time": "2026-01-07T13:28:47",
+                "detect_time": "2024-03-24T17:52:57",
+                "categories": [],
+                "source": "cyradar"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T12:26:40",
+                "detect_time": null,
+                "categories": [],
+                "source": "blocklist_de"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T01:30:46",
+                "detect_time": null,
+                "categories": [],
+                "source": "osint"
+            },
+            {
+                "detection": "malicious",
+                "update_time": "2026-01-07T09:00:05",
+                "detect_time": "2024-11-09T09:01:30",
+                "categories": [],
+                "source": "cyren"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-06T23:18:38",
+                "detect_time": null,
+                "categories": [],
+                "source": "asimily"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T15:27:46",
+                "detect_time": "2023-03-07T06:54:27",
+                "categories": [],
+                "source": "crdf"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T08:16:42",
+                "detect_time": null,
+                "categories": [],
+                "source": "criminalip"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T05:27:59",
+                "detect_time": null,
+                "categories": [],
+                "source": "feodotracker"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T15:13:04",
+                "detect_time": "2024-01-25T21:15:19",
+                "categories": [],
+                "source": "adminus_labs"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T09:24:03",
+                "detect_time": null,
+                "categories": [],
+                "source": "apwg"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T08:20:22",
+                "detect_time": "2023-06-05T07:20:18",
+                "categories": [],
+                "source": "threatfox_abuse_ch"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-09T11:41:32",
+                "detect_time": "2025-12-09T11:41:32",
+                "categories": [],
+                "source": "mnemonic"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2025-12-09T11:46:25",
+                "detect_time": "2025-12-09T11:46:25",
+                "categories": [
+                    "information_technology"
+                ],
+                "source": "forcepoint"
+            },
+            {
+                "detection": "clean",
+                "update_time": "2025-12-09T11:46:25",
+                "detect_time": "2025-12-09T11:46:25",
+                "categories": [
+                    "information_technology"
+                ],
+                "source": "alphamountain"
+            }
+        ]
+    },
+    "downloaded_files_statistics": {
+        "total": 1733,
+        "unknown": 0,
+        "suspicious": 0,
+        "malicious": 0,
+        "goodware": 1733
+    },
+    "top_threats": [],
+    "requested_ip": "1.1.1.1",
+    "modified_time": "2026-01-07T15:27:46"
+}

@@ -16,6 +16,7 @@ from flask_cors import CORS
 
 from models.analysis_result import AnalysisResult, db
 from utils.analysis import check_analysis_in_progress, perform_analysis
+from utils.bad_asn_manager import background_updater
 from utils.config import (
     BASE_DIR,
     Secrets,
@@ -34,7 +35,7 @@ from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
 # Canonical version string displayed in the about page and used for update checks
-VERSION: str = "v0.10.1"
+VERSION: str = "v0.10.2"
 
 
 class InvalidCachefileError(Exception):
@@ -97,6 +98,29 @@ db.init_app(app)
 # Create the database tables if they do not exist
 with app.app_context():
     db.create_all()
+
+
+def initialize_background_services():
+    """
+    Initialize background services for the application.
+
+    This function starts daemon threads for long-running background tasks:
+    - Bad ASN database updater: Periodically updates malicious ASN lists from
+      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database).
+
+    These threads are marked as daemon threads, so they will automatically
+    terminate when the main application exits.
+    """
+    # Start Bad ASN background updater thread
+    # This maintains up-to-date lists of malicious ASNs for IP reputation checks
+    bad_asn_thread = threading.Thread(target=background_updater, daemon=True, name="BadASNUpdater")
+    bad_asn_thread.start()
+    logger.info("Bad ASN background updater thread started")
+
+
+# Initialize background services when the module is loaded
+# This ensures that the background services are started even when running with gunicorn
+initialize_background_services()
 
 PROXIES: dict[str, str] = {"https": secrets.proxy_url, "http": secrets.proxy_url}
 
@@ -431,6 +455,24 @@ def graph(analysis_id):
     if analysis_results:
         return render_template("graph.html", analysis_id=analysis_id, API_PREFIX=API_PREFIX), 200
     return render_template("404.html"), 404
+
+
+def initialize_background_services():
+    """
+    Initialize background services required by the application.
+
+    This function starts daemon threads for long-running background tasks:
+    - Bad ASN database updater: Periodically updates malicious ASN lists from
+      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database).
+
+    These threads are marked as daemon threads, so they will automatically
+    terminate when the main application exits.
+    """
+    # Start Bad ASN background updater thread
+    # This maintains up-to-date lists of malicious ASNs for IP reputation checks
+    bad_asn_thread = threading.Thread(target=background_updater, daemon=True, name="BadASNUpdater")
+    bad_asn_thread.start()
+    logger.info("Bad ASN background updater thread started")
 
 
 if __name__ == "__main__":

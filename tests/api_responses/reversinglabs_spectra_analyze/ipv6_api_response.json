@@ -1,0 +1,116 @@
+{
+    "third_party_reputations": {
+        "statistics": {
+            "malicious": 0,
+            "clean": 0,
+            "suspicious": 0,
+            "undetected": 13,
+            "total": 13
+        },
+        "sources": [
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T08:16:42",
+                "detect_time": null,
+                "categories": [],
+                "source": "criminalip"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T09:00:05",
+                "detect_time": null,
+                "categories": [],
+                "source": "cyren"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T15:27:46",
+                "detect_time": null,
+                "categories": [],
+                "source": "crdf"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T16:19:52",
+                "detect_time": null,
+                "categories": [],
+                "source": "threatfox_abuse_ch"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T01:30:46",
+                "detect_time": null,
+                "categories": [],
+                "source": "osint"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T12:26:40",
+                "detect_time": null,
+                "categories": [],
+                "source": "blocklist_de"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T09:24:03",
+                "detect_time": null,
+                "categories": [],
+                "source": "apwg"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T15:59:54",
+                "detect_time": null,
+                "categories": [],
+                "source": "adminus_labs"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-06T23:18:38",
+                "detect_time": null,
+                "categories": [],
+                "source": "asimily"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T13:28:47",
+                "detect_time": null,
+                "categories": [],
+                "source": "cyradar"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T04:20:00",
+                "detect_time": null,
+                "categories": [],
+                "source": "levelblue"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2026-01-07T05:27:59",
+                "detect_time": null,
+                "categories": [],
+                "source": "feodotracker"
+            },
+            {
+                "detection": "undetected",
+                "update_time": "2024-08-17T07:27:23",
+                "detect_time": "2024-08-17T07:27:23",
+                "categories": [
+                    "uncategorized"
+                ],
+                "source": "forcepoint"
+            }
+        ]
+    },
+    "downloaded_files_statistics": {
+        "total": 0,
+        "unknown": 0,
+        "suspicious": 0,
+        "malicious": 0,
+        "goodware": 0
+    },
+    "top_threats": [],
+    "requested_ip": "fe00::",
+    "modified_time": "2026-01-07T16:19:52"
+}

@@ -47,7 +47,7 @@ class MDEEngine(BaseEngine):
 
     def _get_token(self) -> str:
         url = f"https://login.microsoftonline.com/{self.secrets.mde_tenant_id}/oauth2/token"
-        resource_app_id_uri = "https://api.security.microsoft.com"
+        resource_app_id_uri = "https://api.securitycenter.microsoft.com"
         body = {
             "resource": resource_app_id_uri,
             "client_id": self.secrets.mde_client_id,

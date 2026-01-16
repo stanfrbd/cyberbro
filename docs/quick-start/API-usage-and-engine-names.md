@@ -396,6 +396,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: domain, URL, IP, hash, paid API key required  
 **Explanation**: Looks up observables in the Reversing Labs Spectra Analyze service, paid API key required
 
+### Rösti
+**Name**: `rosti`  
+**Supports**: IP, domain, URL, email  
+**Explaination**: Searches Rösti threat intelligence IOC data for observed values, API key required (see https://rosti.bin.re/api)
+
 ### Shodan
 **Name**: `shodan`  
 **Supports**: ports, IP  

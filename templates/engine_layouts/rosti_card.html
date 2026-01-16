@@ -1,0 +1,96 @@
+<div class="card">
+    <h3>Rösti</h3>
+
+    {% if analysis_results.results[0].rosti and analysis_results.results[0].rosti.count > 0 %}
+    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;"><strong>Results:</strong> {{
+        analysis_results.results[0].rosti.count }}</p>
+
+    <style>
+        .rosti-item {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .rosti-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .rosti-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .rosti-value {
+            font-size: 1rem;
+        }
+
+        .rosti-meta {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.35rem;
+            line-height: 1.5;
+        }
+
+        .rosti-meta>div {
+            margin-bottom: 0.15rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.5em;
+            font-size: 0.7rem;
+            font-weight: 600;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+    </style>
+
+    {% for item in analysis_results.results[0].rosti.results[:5] %}
+    <div class="rosti-item">
+        <div class="rosti-header">
+            {%- if item.category %}
+            <span class="badge badge-warning">{{ item.category }}</span>
+            {%- endif %}
+            <span class="rosti-value">
+                {%- if item.link %}
+                <a href="{{ item.link }}" target="_blank" title="{{ item.value or 'N/A' }}">{{ item.value or 'N/A'
+                    }}</a>
+                {%- else %}
+                {{ item.value or 'N/A' }}
+                {%- endif %}
+            </span>
+        </div>
+
+        {%- if item.date or item.comment %}
+        <div class="rosti-meta">
+            {%- if item.date %}<div>📅 {{ item.date }}</div>{%- endif %}
+            {%- if item.comment %}<div>💬 <em>{{ item.comment }}</em></div>{%- endif %}
+        </div>
+        {%- endif %}
+    </div>
+    {% endfor %}
+
+    {% if analysis_results.results[0].rosti.results | length > 5 %}
+    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; text-align: center;">
+        <em>+ {{ analysis_results.results[0].rosti.results | length - 5 }} more</em>
+    </p>
+    {% endif %}
+    {% else %}
+    <p>Not Found</p>
+    {% endif %}
+
+</div>

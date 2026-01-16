@@ -474,6 +474,21 @@
                 });
             }
 
+            if (entry.rosti?.results && entry.rosti.count > 0) {
+                entry.rosti.results.forEach((rostiItem) => {
+                    const rostiNodeId = rostiItem.value || rostiItem.id || "Rösti IOC";
+                    addNode(rostiNodeId, rostiNodeId, "rosti", "https://img.icons8.com/officexs/32/inspection.png");
+                    const rostiLabel = rostiItem.type ? `Rösti (${rostiItem.type})` : "Rösti";
+                    edges.push({ from: obs, to: rostiNodeId, label: rostiLabel });
+
+                    if (rostiItem.risk?.meaning) {
+                        const riskNode = `Rösti risk: ${rostiItem.risk.meaning}`;
+                        addNode(riskNode, riskNode, "rosti_risk", "https://img.icons8.com/officexs/32/high-priority.png");
+                        edges.push({ from: rostiNodeId, to: riskNode, label: rostiItem.risk.msg || "Risk" });
+                    }
+                });
+            }
+
             if (entry.bad_asn) {
                 const badAsnData = entry.bad_asn;
 

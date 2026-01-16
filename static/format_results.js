@@ -114,6 +114,25 @@ function formatResults(data) {
         if (result.threatfox && result.threatfox.count > 0) {
             plainText += `ThreatFox: Count: ${result.threatfox.count}, Malware: ${result.threatfox.malware_printable.join(', ')}\n`;
         }
+        if (result.rosti) {
+            plainText += `Rösti: Matches: ${result.rosti.count || 0}\n`;
+            if (result.rosti.results && Array.isArray(result.rosti.results) && result.rosti.results.length > 0) {
+                result.rosti.results.forEach(rostiItem => {
+                    plainText += `  - ${rostiItem.value || 'value missing'}`;
+                    if (rostiItem.type) plainText += ` (${rostiItem.type})`;
+                    if (rostiItem.category) plainText += ` [${rostiItem.category}]`;
+                    if (rostiItem.date) plainText += ` on ${rostiItem.date}`;
+                    plainText += `\n`;
+                    if (rostiItem.comment) plainText += `    comment: ${rostiItem.comment}\n`;
+                    if (rostiItem.risk && rostiItem.risk.meaning) {
+                        plainText += `    risk: ${rostiItem.risk.meaning}`;
+                        if (rostiItem.risk.msg) plainText += ` (${rostiItem.risk.msg})`;
+                        plainText += `\n`;
+                    }
+                    if (rostiItem.link) plainText += `    ${rostiItem.link}\n`;
+                });
+            }
+        }
         if (result.google && result.google.results.length > 0) {
             plainText += `Google:\n`;
             result.google.results.forEach(googleResult => {

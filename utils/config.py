@@ -44,6 +44,7 @@ class Secrets:
     proxy_url: str = ""
     rl_analyze_url: str = ""
     rl_analyze_api_key: str = ""
+    rosti_api_key: str = ""
     shodan: str = ""
     spur_us: str = ""
     threatfox: str = ""

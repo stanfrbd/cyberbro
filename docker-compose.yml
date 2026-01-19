@@ -30,6 +30,7 @@ services:
       - DFIR_IRIS_URL=${DFIR_IRIS_URL:-}
       - RL_ANALYZE_API_KEY=${RL_ANALYZE_API_KEY:-}
       - RL_ANALYZE_URL=${RL_ANALYZE_URL:-}
+      - ROSTI_API_KEY=${ROSTI_API_KEY:-}
       - SHODAN=${SHODAN:-}
       - SPUR_US=${SPUR_US:-}
       - THREATFOX=${THREATFOX:-}

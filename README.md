@@ -128,6 +128,7 @@ cp secrets-sample.json secrets.json
     "proxy_url": "",
     "rl_analyze_api_key": "token_here",
     "rl_analyze_url": "https://spectra_analyse_url_here",
+    "rosti_api_key": "token_here",
     "shodan": "token_here",
     "spur_us": "token_here",
     "threatfox": "token_here",
@@ -312,11 +313,12 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [OpenCTI](https://www.opencti.io/)
 * [OpenRDAP](https://openrdap.org/api)
 * [Phishtank](https://www.phishtank.com/)
+* [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
+* [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence
 * [Shodan](https://developer.shodan.io/)
 * [Spur.us](https://spur.us/)
 * [ThreatFox](https://threatfox.abuse.ch/api/)
 * [URLscan](https://urlscan.io/)
-* [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [WebScout](https://webscout.io/)
 

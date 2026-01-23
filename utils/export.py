@@ -1,12 +1,15 @@
 import logging
 import threading
 import time
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 import pandas as pd
-from flask import send_file
+from flask import Response, send_file
 
 from engines import get_engine_instances
+from models.analysis_result import AnalysisResult
+from models.base_engine import BaseEngine
 from utils.config import get_config
 
 logger = logging.getLogger(__name__)
@@ -14,11 +17,13 @@ logger = logging.getLogger(__name__)
 # We need access to the engine instances to format the rows.
 # In a real app, you might inject this.
 secrets = get_config()
-LOADED_ENGINES = get_engine_instances(secrets, {"http": secrets.proxy_url}, secrets.ssl_verify)
+LOADED_ENGINES: dict[str, BaseEngine] = get_engine_instances(
+    secrets, {"http": secrets.proxy_url}, secrets.ssl_verify
+)
 
 
-def prepare_row(result, selected_engines):
-    row = {"observable": result.get("observable"), "type": result.get("type")}
+def prepare_row(result: Mapping, selected_engines: Iterable[str]) -> dict:
+    row: dict = {"observable": result.get("observable"), "type": result.get("type")}
 
     # Standard Engines
     for engine_name in selected_engines:
@@ -36,8 +41,8 @@ def prepare_row(result, selected_engines):
     return row
 
 
-def prepare_data_for_export(analysis_results):
-    data = []
+def prepare_data_for_export(analysis_results: AnalysisResult) -> list:
+    data: list = []
     for result in analysis_results.results:
         row = prepare_row(result, analysis_results.selected_engines)
         data.append(row)
@@ -45,15 +50,17 @@ def prepare_data_for_export(analysis_results):
 
 
 # ... (Keep the rest of the export_to_csv / export_to_excel functions exactly as they were) ...
-def export_to_csv(data, timestamp):
+def export_to_csv(data: list[str], timestamp: str) -> Response:
     df = pd.DataFrame(data)
     csv_path = f"{timestamp}_analysis_result.csv"
     df.to_csv(csv_path, index=False, sep=";")
-    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)).start()
+    threading.Thread(
+        target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)
+    ).start()
     return send_file(csv_path, as_attachment=True)
 
 
-def export_to_excel(data, timestamp):
+def export_to_excel(data: list[str], timestamp: str) -> Response:
     df = pd.DataFrame(data)
     excel_path = f"{timestamp}_analysis_result.xlsx"
     with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
@@ -68,8 +75,16 @@ def export_to_excel(data, timestamp):
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
                 except Exception as e:
-                    logger.error("Error exporting to Excel, column %s, cell %s, '%s'", column, cell, e, exc_info=True)
+                    logger.error(
+                        "Error exporting to Excel, column %s, cell %s, '%s'",
+                        column,
+                        cell,
+                        e,
+                        exc_info=True,
+                    )
             worksheet.column_dimensions[column].width = max_length + 2
     response = send_file(excel_path, as_attachment=True)
-    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(excel_path,)).start()
+    threading.Thread(
+        target=lambda path: (time.sleep(10), Path(path).unlink()), args=(excel_path,)
+    ).start()
     return response

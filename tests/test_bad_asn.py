@@ -73,8 +73,14 @@ def test_update_bad_asn_cache_creates_file(mocker: MockerFixture, tmp_path: Path
     mocker.patch("utils.bad_asn_manager.CACHE_FILE", cache_file)
 
     # Mock the download functions
-    mocker.patch("utils.bad_asn_manager.download_spamhaus_asndrop", return_value={"401696": "Spamhaus: Test"})
-    mocker.patch("utils.bad_asn_manager.download_brianhama_bad_asn", return_value={"198375": "Brianhama: Test"})
+    mocker.patch(
+        "utils.bad_asn_manager.download_spamhaus_asndrop",
+        return_value={"401696": "Spamhaus: Test"},
+    )
+    mocker.patch(
+        "utils.bad_asn_manager.download_brianhama_bad_asn",
+        return_value={"198375": "Brianhama: Test"},
+    )
 
     # Run update
     result = update_bad_asn_cache()
@@ -111,7 +117,10 @@ def test_check_asn_malicious(mocker: MockerFixture, tmp_path: Path):
     """Test check_asn with a malicious ASN."""
     # Create a cache file with a malicious ASN
     cache_file = tmp_path / "bad_asn_cache.json"
-    cache_data = {"last_updated": 9999999999999, "asns": {"401696": "Spamhaus ASNDROP (COGNETCLOUD, cognetcloud.com, HK)"}}
+    cache_data = {
+        "last_updated": 9999999999999,
+        "asns": {"401696": "Spamhaus ASNDROP (COGNETCLOUD, cognetcloud.com, HK)"},
+    }
     with cache_file.open("w") as f:
         json.dump(cache_data, f)
 
@@ -151,7 +160,12 @@ def test_bad_asn_engine_analyze_with_context(mocker: MockerFixture):
     # Mock check_asn to return malicious result
     def mock_check_asn(asn):
         if asn == "401696":
-            return {"status": "malicious", "source": "Test Source", "details": "Test details", "asn": asn}
+            return {
+                "status": "malicious",
+                "source": "Test Source",
+                "details": "Test details",
+                "asn": asn,
+            }
         return None
 
     mocker.patch("engines.bad_asn.check_asn", side_effect=mock_check_asn)
@@ -218,7 +232,12 @@ def test_bad_asn_engine_create_export_row():
     secrets = Secrets()
     engine = BadASNEngine(secrets, {}, True)
 
-    analysis_result = {"status": "malicious", "asn": "401696", "source": "Test Source", "details": "Test details"}
+    analysis_result = {
+        "status": "malicious",
+        "asn": "401696",
+        "source": "Test Source",
+        "details": "Test details",
+    }
 
     export_row = engine.create_export_row(analysis_result)
 

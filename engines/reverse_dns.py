@@ -1,8 +1,9 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
 
 import dns.resolver
 import dns.reversename
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 from utils.utils import identify_observable_type, is_really_ipv6
@@ -12,19 +13,23 @@ logger = logging.getLogger(__name__)
 
 class ReverseDNSEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "reverse_dns"
 
     @property
+    @override
     def supported_types(self):
         return ["BOGON", "FQDN", "IPv4", "IPv6", "URL"]
 
     @property
+    @override
     def is_pivot_engine(self):
         # This engine can change the observable type (e.g., FQDN -> IP)
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
         try:
             if observable_type in ["IPv4", "IPv6", "BOGON"]:
                 reverse_name = dns.reversename.from_address(observable_value)
@@ -58,7 +63,9 @@ class ReverseDNSEngine(BaseEngine):
             logger.debug(f"Reverse DNS failed: {e}")
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         rev_dns_data = analysis_result
         return {
             "rev_dns": bool(rev_dns_data),

@@ -1,7 +1,8 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 
-import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -10,21 +11,31 @@ logger = logging.getLogger(__name__)
 
 class GitHubEngine(BaseEngine):
     @property
-    def name(self):
+    @override
+    def name(self) -> str:
         return "github"
 
     @property
-    def supported_types(self):
-        return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL", "Email"]
+    @override
+    def supported_types(self) -> set[str]:
+        return {
+            "CHROME_EXTENSION",
+            "FQDN",
+            "IPv4",
+            "IPv6",
+            "MD5",
+            "SHA1",
+            "SHA256",
+            "URL",
+            "Email",
+        }
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+        url: str = f"https://grep.app/api/search?q={observable_value}"
+
         try:
-            response = requests.get(
-                f"https://grep.app/api/search?q={observable_value}",
-                proxies=self.proxies,
-                verify=self.ssl_verify,
-                timeout=5,
-            )
+            response = self._make_request(url, timeout=5)
             response.raise_for_status()
             data = response.json()
 
@@ -50,9 +61,16 @@ class GitHubEngine(BaseEngine):
             return {"results": search_results, "total": data["hits"]["total"]}
 
         except Exception as e:
-            logger.error("Error while querying GitHub for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error while querying GitHub for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         # Since original export fields are missing, provide a count
         return {"github_results_count": analysis_result.get("total") if analysis_result else None}

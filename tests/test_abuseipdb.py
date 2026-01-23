@@ -1,5 +1,4 @@
 import requests
-import sys
 
 from pytest_mock import MockerFixture
 

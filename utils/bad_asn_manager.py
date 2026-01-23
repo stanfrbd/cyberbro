@@ -135,7 +135,9 @@ def update_bad_asn_cache() -> bool:
     if CACHE_FILE.exists():
         file_age = time.time() - CACHE_FILE.stat().st_mtime
         if file_age < CACHE_MAX_AGE:
-            logger.info(f"Bad ASN cache is fresh (age: {file_age / 3600:.1f} hours), skipping update")
+            logger.info(
+                f"Bad ASN cache is fresh (age: {file_age / 3600:.1f} hours), skipping update"
+            )
             return False
 
     logger.info("Updating Bad ASN cache...")

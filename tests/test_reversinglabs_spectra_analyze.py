@@ -34,7 +34,9 @@ def rlengine_object():
 # Example JSON data from Reversing Labs API response
 @pytest.fixture(scope="session")
 def fqdn_response_from_file():
-    file_response: Path = Path("tests/api_responses/reversinglabs_spectra_analyze/domain_api_response.json")
+    file_response: Path = Path(
+        "tests/api_responses/reversinglabs_spectra_analyze/domain_api_response.json"
+    )
     with file_response.open() as f:
         data: dict = json.loads(f.read())
 
@@ -43,7 +45,9 @@ def fqdn_response_from_file():
 
 @pytest.fixture(scope="session")
 def hash_response_from_file():
-    file_response: Path = Path("tests/api_responses/reversinglabs_spectra_analyze/hash_api_response.json")
+    file_response: Path = Path(
+        "tests/api_responses/reversinglabs_spectra_analyze/hash_api_response.json"
+    )
     with file_response.open() as f:
         data: dict = json.loads(f.read())
 
@@ -52,7 +56,9 @@ def hash_response_from_file():
 
 @pytest.fixture(scope="session")
 def ipv4_response_from_file():
-    file_response: Path = Path("tests/api_responses/reversinglabs_spectra_analyze/ipv4_api_response.json")
+    file_response: Path = Path(
+        "tests/api_responses/reversinglabs_spectra_analyze/ipv4_api_response.json"
+    )
     with file_response.open() as f:
         data: dict = json.loads(f.read())
 
@@ -61,7 +67,9 @@ def ipv4_response_from_file():
 
 @pytest.fixture(scope="session")
 def ipv6_response_from_file():
-    file_response: Path = Path("tests/api_responses/reversinglabs_spectra_analyze/ipv6_api_response.json")
+    file_response: Path = Path(
+        "tests/api_responses/reversinglabs_spectra_analyze/ipv6_api_response.json"
+    )
     with file_response.open() as f:
         data: dict = json.loads(f.read())
 
@@ -70,7 +78,9 @@ def ipv6_response_from_file():
 
 @pytest.fixture(scope="session")
 def url_unknown_response_from_file():
-    file_response: Path = Path("tests/api_responses/reversinglabs_spectra_analyze/url_unknown_api_response.json")
+    file_response: Path = Path(
+        "tests/api_responses/reversinglabs_spectra_analyze/url_unknown_api_response.json"
+    )
     with file_response.open() as f:
         data: dict = json.loads(f.read())
 
@@ -79,7 +89,9 @@ def url_unknown_response_from_file():
 
 @pytest.fixture(scope="session")
 def url_malware_response_from_file():
-    file_response: Path = Path("tests/api_responses/reversinglabs_spectra_analyze/url_malware_api_response.json")
+    file_response: Path = Path(
+        "tests/api_responses/reversinglabs_spectra_analyze/url_malware_api_response.json"
+    )
     with file_response.open() as f:
         data: dict = json.loads(f.read())
 
@@ -214,7 +226,11 @@ def expected_url_malware_report():
         ("IPv4", IP4, f"/api/network-threat-intel/ip/{IP4}/report/"),
         ("IPv6", IP6, f"/api/network-threat-intel/ip/{IP6}/report/"),
         ("FQDN", FQDN, f"/api/network-threat-intel/domain/{FQDN}/"),
-        ("URL", URL_UNKNOWN, f"/api/network-threat-intel/url/?url={quote_plus(URL_UNKNOWN)}"),
+        (
+            "URL",
+            URL_UNKNOWN,
+            f"/api/network-threat-intel/url/?url={quote_plus(URL_UNKNOWN)}",
+        ),
         ("SHA1", SHA1, f"/api/samples/v3/{SHA1}/classification/?av_scanners=1"),
         ("MD5", MD5, f"/api/samples/v3/{MD5}/classification/?av_scanners=1"),
         ("SHA256", SHA256, f"/api/samples/v3/{SHA256}/classification/?av_scanners=1"),
@@ -256,14 +272,39 @@ def test_get_ui_endpoint(type: str, artifact: str, endpoint: str | None):
         ("fqdn_response_from_file", FQDN, "FQDN", API_URL, "expected_fqdn_report"),
         ("hash_response_from_file", MD5, "MD5", API_URL, "expected_md5_report"),
         ("hash_response_from_file", SHA1, "SHA1", API_URL, "expected_sha1_report"),
-        ("hash_response_from_file", SHA256, "SHA256", API_URL, "expected_sha256_report"),
+        (
+            "hash_response_from_file",
+            SHA256,
+            "SHA256",
+            API_URL,
+            "expected_sha256_report",
+        ),
         ("ipv4_response_from_file", IP4, "IPv4", API_URL, "expected_ipv4_report"),
         ("ipv6_response_from_file", IP6, "IPv6", API_URL, "expected_ipv6_report"),
-        ("url_unknown_response_from_file", URL_UNKNOWN, "URL", API_URL, "expected_url_unknown_report"),
-        ("url_malware_response_from_file", URL_MALWARE, "URL", API_URL, "expected_url_malware_report"),
+        (
+            "url_unknown_response_from_file",
+            URL_UNKNOWN,
+            "URL",
+            API_URL,
+            "expected_url_unknown_report",
+        ),
+        (
+            "url_malware_response_from_file",
+            URL_MALWARE,
+            "URL",
+            API_URL,
+            "expected_url_malware_report",
+        ),
     ],
 )
-def test_parse_rl_response(request: dict, input_query_response: dict, observable: str, observable_type: str, api_url: str, expected_report: dict):
+def test_parse_rl_response(
+    request: dict,
+    input_query_response: dict,
+    observable: str,
+    observable_type: str,
+    api_url: str,
+    expected_report: dict,
+):
     """
     Use the built-in pytest fixture, request, to take the fixture name
     **as a string** in the parametrized list and retrieve the **actual**

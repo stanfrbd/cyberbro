@@ -1,11 +1,13 @@
 import json
 import logging
+from collections.abc import Mapping
 from enum import StrEnum
-from typing import Any, Optional, Self
+from typing import Self
 
 import requests
 from pydantic import BaseModel, Field, ValidationError, model_validator
 from requests.exceptions import HTTPError
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 from utils.config import Secrets, get_config
@@ -100,7 +102,9 @@ class SuspiciousInfoReport(BaseModel):
     def _validate_report(self) -> Self:
         # If the status is anything other than 2xx, raise an error
         if not 199 < self.status < 300:
-            raise ValueError(f"Unable to generate Suspicious Info Report for IP: {self.ip}. Status Code: {self.status}{self.model_dump_json()}")
+            raise ValueError(
+                f"Unable to generate Suspicious Info Report for IP: {self.ip}. Status Code: {self.status}{self.model_dump_json()}"  # noqa: E501
+            )
         return self
 
 
@@ -133,11 +137,13 @@ def get_suspicious_info_report(
     headers: dict = {"x-api-key": f"{api_key}"}
 
     try:
-        response = requests.get(url, params=params, headers=headers, proxies=proxies, verify=ssl_verify)
+        response = requests.get(
+            url, params=params, headers=headers, proxies=proxies, verify=ssl_verify
+        )
         response.raise_for_status()
     except HTTPError as e:
         logger.error(
-            f"Error retrieving Criminal IP Suspicious Info report for {observable}: {e}",
+            f"Error retrieving Criminal IP SuspiciousInfo report for {observable}: {e}",
         )
         return None
 
@@ -145,7 +151,7 @@ def get_suspicious_info_report(
         suspcious_info_report: SuspiciousInfoReport = SuspiciousInfoReport(**response.json())
     except ValidationError as e:
         logger.error(
-            f"Error validating Criminal IP Suspicious Info report for {observable}: {e}",
+            f"Error validating Criminal IP SuspiciousInfo report for {observable}: {e}",
         )
         return None
 
@@ -157,19 +163,23 @@ def get_suspicious_info_report(
 
 class CriminalIPEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "criminalip"
 
     @property
+    @override
     def supported_types(self):
         return ["IPv4", "IPv6"]
 
     @property
+    @override
     def execute_after_reverse_dns(self):
         # IP-only engine, runs after potential IP pivot
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
         """Perform Criminal IP analysis using the preserved helper/models."""
 
         api_key: str = self.secrets.criminalip_api_key
@@ -178,7 +188,9 @@ class CriminalIPEngine(BaseEngine):
             logger.error("API key for CriminalIP engine is not configured.")
             return None
 
-        report: SuspiciousInfoReport | None = get_suspicious_info_report(api_key, observable_value, self.proxies, self.ssl_verify)
+        report: SuspiciousInfoReport | None = get_suspicious_info_report(
+            api_key, observable_value, self.proxies, self.ssl_verify
+        )
 
         if not report:
             logger.error("Failed to retrieve the CriminalIP report.")
@@ -187,9 +199,15 @@ class CriminalIPEngine(BaseEngine):
         # Convert the Pydantic model to a standard dict for the rest of the app
         return json.loads(report.model_dump_json())
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
-            return {"cip_score_inbound": None, "cip_score_outbound": None, "cip_abuse_count": None}
+            return {
+                "cip_score_inbound": None,
+                "cip_score_outbound": None,
+                "cip_abuse_count": None,
+            }
 
         score = analysis_result.get("score", {})
 
@@ -217,7 +235,9 @@ if __name__ == "__main__":
         logger.error("No observable provided.")
         exit(1)
 
-    report: SuspiciousInfoReport | None = get_suspicious_info_report(api_key, observable, ssl_verify=ssl_verify)
+    report: SuspiciousInfoReport | None = get_suspicious_info_report(
+        api_key, observable, ssl_verify=ssl_verify
+    )
 
     if report:
         print("Suspicious Info Report:")

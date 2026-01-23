@@ -1,70 +1,117 @@
+import contextlib
 import logging
-from typing import Any, Optional
+from collections import Counter
+from collections.abc import Mapping
+from dataclasses import asdict
 
 import requests
+from pydantic import Field
+from pydantic.dataclasses import dataclass
+from typing_extensions import override
 
-from models.base_engine import BaseEngine
+from models.base_engine import BaseEngine, BaseReport
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass(slots=True)
+class CrtShDomain:
+    domain: str
+    count: int
+
+    def __iter__(self):
+        yield from asdict(self)
+
+    def __getitem__(self, key):
+        return asdict(self)[key]
+
+
+@dataclass(slots=True)
+class CrtShReport(BaseReport):
+    top_domains: list[CrtShDomain] = Field(default_factory=list)
+    link: str = ""
+
+
 class CrtShEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "crtsh"
 
     @property
+    @override
     def supported_types(self):
         return ["FQDN", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict:
+        # If observable is a URL, extract domain
+        if observable_type == "URL":
+            domain_part = observable_value.split("/")[2].split(":")[0]
+            observable = domain_part
+        else:
+            observable = observable_value
+
+        url = "https://crt.sh/json"
+
         try:
-            # If observable is a URL, extract domain
-            if observable_type == "URL":
-                domain_part = observable_value.split("/")[2].split(":")[0]
-                observable = domain_part
-            else:
-                observable = observable_value
-
-            url = f"https://crt.sh/json?q={observable}"
-
-            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=20)
+            response = self._make_request(url=url, params={"q": observable}, timeout=60)
             response.raise_for_status()
 
             results = response.json()
-            domain_count = {}
-            for entry in results:
-                domains = set()
-                common_name = entry.get("common_name")
-                if common_name:
-                    domains.add(common_name)
+        except requests.exceptions.RequestException as e:
+            message: str = f"Error fetching data from crt.sh: {e}"
+            logger.error(message)
+            return CrtShReport(success=False, error_msg=message).__json__()
 
-                name_value = entry.get("name_value")
-                if name_value:
-                    for el in name_value.split("\n"):
-                        if el:
-                            domains.add(str(el).strip())
+        domain_count: Counter = Counter()
+        for entry in results:
+            domains: set[str] = set()
+            domains.add(entry.get("common_name"))
 
-                for domain in domains:
-                    domain_count[domain] = domain_count.get(domain, 0) + 1
+            name_value = entry.get("name_value")
+            if name_value:
+                for el in name_value.split("\n"):
+                    domains.add(str(el).strip())
 
-            # Sort and extract top 5
-            sorted_domains = sorted(domain_count.items(), key=lambda item: item[1], reverse=True)
-            top_domains = [{"domain": dmn, "count": cnt} for dmn, cnt in sorted_domains[:5]]
-            return {
-                "top_domains": top_domains,
-                "link": f"https://crt.sh/?q={observable}",
-            }
+            """
+            Easier and faster to not check for None every time and simply
+            remove it at the end, ignoring any KeyErrors if there were
+            no empty strings to begin with.
+            """
+            with contextlib.suppress(KeyError):
+                domains.remove("")
 
-        except Exception as e:
-            logger.error("Error querying crt.sh for '%s': %s", observable_value, e, exc_info=True)
-            return None
+            domain_count += Counter(domains)
 
-    def create_export_row(self, analysis_result: Any) -> dict:
-        if not analysis_result:
+        top_domains = [
+            CrtShDomain(domain=dmn, count=cnt) for dmn, cnt in domain_count.most_common(5)
+        ]
+
+        return CrtShReport(
+            success=True,
+            top_domains=top_domains,
+            link=f"https://crt.sh/?q={observable}",
+        ).__json__()
+
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
+        if not analysis_result.get("success"):
             return {"crtsh_top_domains": None}
 
         domains = analysis_result.get("top_domains", [])
         top_domains_str = ", ".join([d["domain"] for d in domains])
 
         return {"crtsh_top_domains": top_domains_str if top_domains_str else None}
+
+    @classmethod
+    def create_export_row_from_report_object(cls, analysis_result: CrtShReport) -> dict:
+        if not analysis_result.success:
+            return {"crtsh_top_domains": None}
+        if not analysis_result.top_domains:
+            return {"crtsh_top_domains": None}
+
+        top_domains_str = ", ".join([d.domain for d in analysis_result.top_domains])
+
+        return {"crtsh_top_domains": top_domains_str}

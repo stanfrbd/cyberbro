@@ -2,10 +2,14 @@ import inspect
 import queue
 import threading
 import time
+from typing import Any
+
+from flask import Flask
 
 # --- NEW DYNAMIC ENGINE IMPORTS ---
 from engines import get_engine_instances
 from models.analysis_result import AnalysisResult
+from models.base_engine import BaseEngine
 from utils.config import Secrets, get_config
 from utils.database import get_analysis_result, save_analysis_result
 from utils.utils import is_bogon
@@ -20,10 +24,15 @@ PROXIES: dict[str, str] = {"http": secrets.proxy_url, "https": secrets.proxy_url
 SSL_VERIFY: bool = secrets.ssl_verify
 
 # Initialize ALL engine instances once on startup
-LOADED_ENGINES = get_engine_instances(secrets, PROXIES, SSL_VERIFY)
+LOADED_ENGINES: dict[str, BaseEngine] = get_engine_instances(secrets, PROXIES, SSL_VERIFY)
 
 
-def perform_analysis(app, observables, selected_engines, analysis_id):
+def perform_analysis(
+    app: Flask,
+    observables: dict[str, str],
+    selected_engines: list[str],
+    analysis_id: str,
+) -> None:
     with app.app_context():
         start_time = time.time()
 
@@ -42,8 +51,8 @@ def perform_analysis(app, observables, selected_engines, analysis_id):
         )
         save_analysis_result(analysis_result)
 
-        result_queue = queue.Queue()
-        threads = [
+        result_queue: queue.Queue = queue.Queue()
+        threads: list[threading.Thread] = [
             threading.Thread(
                 target=analyze_observable,
                 args=(observable, index, selected_engines, result_queue),
@@ -60,7 +69,9 @@ def perform_analysis(app, observables, selected_engines, analysis_id):
         update_analysis_metadata(analysis_id, start_time, selected_engines, results)
 
 
-def analyze_observable(observable, index, selected_engines, result_queue):
+def analyze_observable(
+    observable: dict[str, str], index, selected_engines: list[str], result_queue
+):
     result = {
         "observable": observable["value"],
         "type": observable["type"],
@@ -72,10 +83,10 @@ def analyze_observable(observable, index, selected_engines, result_queue):
         observable["type"] = "BOGON"
 
     # Identify and filter requested engine instances
-    active_instances = []
+    active_instances: set[BaseEngine] = set()
     for name in selected_engines:
         if name in LOADED_ENGINES:
-            active_instances.append(LOADED_ENGINES[name])
+            active_instances.add(LOADED_ENGINES[name])
 
     # 1.5. Special handler: Chrome Extension (always runs if type matches)
     if observable["type"] == "CHROME_EXTENSION":
@@ -86,12 +97,19 @@ def analyze_observable(observable, index, selected_engines, result_queue):
 
     # 2. Phase 1: Pre-Pivot Engines (Standard lookups that don't need reverse DNS result)
     for engine in active_instances:
-        if not engine.execute_after_reverse_dns and not engine.is_pivot_engine and engine.name != "chrome_extension":
+        if (
+            not engine.execute_after_reverse_dns
+            and not engine.is_pivot_engine
+            and engine.name != "chrome_extension"
+        ):
             run_engine(engine, observable, result)
 
     # 3. Phase 2: Pivot (Reverse DNS)
-    # The pivot engine runs and can modify the observable in place (observable["type"]/observable["value"])
-    pivot_engines = [e for e in active_instances if e.is_pivot_engine and e.name == "reverse_dns"]
+    # The pivot engine runs and can modify the observable in place
+    # (observable["type"]/observable["value"])
+    pivot_engines: set[BaseEngine] = {
+        e for e in active_instances if e.is_pivot_engine and e.name == "reverse_dns"
+    }
     for engine in pivot_engines:
         analysis_data = run_engine(engine, observable, result)
 
@@ -109,11 +127,21 @@ def analyze_observable(observable, index, selected_engines, result_queue):
     # 4. Phase 3: Post-Pivot Engines (IP-only engines that benefit from pivot)
     # Run all engines except those that depend on other engine results
     for engine in active_instances:
-        if engine.execute_after_reverse_dns and not engine.is_pivot_engine and engine.name != "chrome_extension" and engine.name != "bad_asn":
+        if (
+            engine.execute_after_reverse_dns
+            and not engine.is_pivot_engine
+            and engine.name != "chrome_extension"
+            and engine.name != "bad_asn"
+        ):
             run_engine(engine, observable, result)
 
     # 5. Phase 4: Dependent Engines (engines that need results from other engines)
     # Run bad_asn last so it can access ASN data from ipapi, ipinfo, etc.
+    if "bad_asn" in active_instances:
+        engine: BaseEngine | None = LOADED_ENGINES.get("bad_asn")
+        if engine:
+            run_engine(engine, observable, result)
+
     for engine in active_instances:
         if engine.name == "bad_asn":
             run_engine(engine, observable, result)
@@ -121,13 +149,17 @@ def analyze_observable(observable, index, selected_engines, result_queue):
     result_queue.put((index, result))
 
 
-def run_engine(engine, observable, result_dict):
+def run_engine(engine: BaseEngine, observable: dict[str, str], result_dict: dict[str, Any]):
     """Helper to run a single engine instance and store its result."""
     if observable["type"] in engine.supported_types:
         # Check if engine's analyze method accepts a context parameter
         # (e.g., bad_asn engine needs access to results from other engines)
         sig = inspect.signature(engine.analyze)
-        data = engine.analyze(observable["value"], observable["type"], context=result_dict) if "context" in sig.parameters else engine.analyze(observable["value"], observable["type"])
+        data = (
+            engine.analyze(observable["value"], observable["type"], context=result_dict)
+            if "context" in sig.parameters
+            else engine.analyze(observable["value"], observable["type"])
+        )
         result_dict[engine.name] = data
         return data
     return None
@@ -141,8 +173,8 @@ def collect_results_from_queue(result_queue, num_observables):
     return results
 
 
-def check_analysis_in_progress(analysis_id):
-    analysis_result = get_analysis_result(analysis_id)
+def check_analysis_in_progress(analysis_id: str) -> bool:
+    analysis_result: AnalysisResult | None = get_analysis_result(analysis_id)
     return analysis_result.in_progress if analysis_result else False
 
 
@@ -151,9 +183,11 @@ def update_analysis_metadata(analysis_id, start_time, selected_engines, results)
     if analysis_result:
         end_time = time.time()
         analysis_result.end_time = end_time
-        analysis_result.end_time_string = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
+        analysis_result.end_time_string = time.strftime(
+            "%Y-%m-%d %H:%M:%S", time.localtime(end_time)
+        )
         analysis_result.analysis_duration = end_time - start_time
-        analysis_result.analysis_duration_string = f"{int((end_time - start_time) // 60)} minutes, {(end_time - start_time) % 60:.2f} seconds"
+        analysis_result.analysis_duration_string = f"{int((end_time - start_time) // 60)} minutes, {(end_time - start_time) % 60:.2f} seconds"  # noqa: E501
         analysis_result.results = results
         analysis_result.in_progress = False
         save_analysis_result(analysis_result)

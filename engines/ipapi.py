@@ -1,7 +1,9 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -10,18 +12,22 @@ logger = logging.getLogger(__name__)
 
 class IPAPIEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "ipapi"
 
     @property
+    @override
     def supported_types(self):
         return ["IPv4", "IPv6"]
 
     @property
+    @override
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             url = "https://api.ipapi.is"
             headers = {"Content-Type": "application/json"}
@@ -34,14 +40,24 @@ class IPAPIEngine(BaseEngine):
             else:
                 # Don't use API key if it doesn't match the format
                 if self.secrets.ipapi:
-                    logger.warning("ipapi API key format is invalid, querying without API key for '%s'", observable_value)
+                    logger.warning(
+                        "ipapi API key format is invalid, querying without API key for '%s'",
+                        observable_value,
+                    )
                 else:
                     logger.warning(
-                        "Be careful, you don't use API key for ipapi, rate limit can happen more often (query: '%s')",
+                        "Be careful, you don't use API key for ipapi, rate limit can happen more often (query: '%s')",  # noqa: E501
                         observable_value,
                     )
 
-            response = requests.post(url, json=data, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.post(
+                url,
+                json=data,
+                headers=headers,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -58,7 +74,9 @@ class IPAPIEngine(BaseEngine):
 
         return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {
                 f"ipapi_{k}": None

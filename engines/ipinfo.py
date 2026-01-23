@@ -1,8 +1,10 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import pycountry
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -11,18 +13,22 @@ logger = logging.getLogger(__name__)
 
 class IPInfoEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "ipinfo"
 
     @property
+    @override
     def supported_types(self):
         return ["IPv4", "IPv6"]
 
     @property
+    @override
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             url = f"https://ipinfo.io/{observable_value}/json?token={self.secrets.ipinfo}"
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
@@ -67,11 +73,18 @@ class IPInfoEngine(BaseEngine):
                 }
 
         except Exception as e:
-            logger.error("Error querying ipinfo for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying ipinfo for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
 
         return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {f"ipinfo_{k}": None for k in ["cn", "country", "geo", "asn", "org"]}
 

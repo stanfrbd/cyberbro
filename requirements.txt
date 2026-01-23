@@ -15,3 +15,5 @@ ioc-fanger
 tldextract
 crowdstrike-falconpy
 beautifulsoup4
+responses
+tenacity

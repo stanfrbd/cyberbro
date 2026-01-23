@@ -75,7 +75,12 @@ class Secrets:
         field_type = self._get_field_type(name)
 
         # Convert string to list if needed
-        if hasattr(field_type, "__origin__") and field_type.__origin__ is list and isinstance(value, str) and "," in value:
+        if (
+            hasattr(field_type, "__origin__")
+            and field_type.__origin__ is list
+            and isinstance(value, str)
+            and "," in value
+        ):
             value = [item.strip() for item in value.split(",")]
 
         if field_type is int:
@@ -83,7 +88,9 @@ class Secrets:
             try:
                 value = int(value)
             except ValueError:
-                logger.warning(f"Invalid value for {name}: {value}. Expected int. {name} not updated.")
+                logger.warning(
+                    f"Invalid value for {name}: {value}. Expected int. {name} not updated."
+                )
                 print(f"Invalid value for {name}: {value}. Expected int. {name} not updated.")
                 return
 
@@ -174,12 +181,13 @@ def read_secrets_from_env(secrets: Secrets) -> Secrets:
     for key in secrets:
         env_value: str | None = os.getenv(key.upper())
         if env_value:
-            env_configured: bool = True
+            env_configured = True
             secrets.update({key: env_value})
 
     if not env_configured:
-        print("No environment variables were configured. You can configure secrets later in secrets.json.")
-        logger.info("No environment variables were configured. You can configure secrets later in secrets.json.")
+        msg: str = "No environment variables were configured. You can configure secrets later in secrets.json."  # noqa: E501
+        print(msg)
+        logger.info(msg)
 
     return secrets
 

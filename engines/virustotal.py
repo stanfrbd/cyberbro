@@ -1,8 +1,9 @@
 import base64
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
 
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -11,14 +12,17 @@ logger = logging.getLogger(__name__)
 
 class VirusTotalEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "virustotal"
 
     @property
+    @override
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
         headers = {"x-apikey": self.secrets.virustotal}
 
         try:
@@ -29,14 +33,22 @@ class VirusTotalEngine(BaseEngine):
                 url = f"https://www.virustotal.com/api/v3/domains/{observable_value}"
                 link = f"https://www.virustotal.com/gui/domain/{observable_value}/detection"
             elif observable_type == "URL":
-                encoded_url = base64.urlsafe_b64encode(observable_value.encode()).decode().strip("=")
+                encoded_url = (
+                    base64.urlsafe_b64encode(observable_value.encode()).decode().strip("=")
+                )
                 url = f"https://www.virustotal.com/api/v3/urls/{encoded_url}"
                 link = f"https://www.virustotal.com/gui/url/{encoded_url}/detection"
             else:
                 url = f"https://www.virustotal.com/api/v3/files/{observable_value}"
                 link = f"https://www.virustotal.com/gui/file/{observable_value}/detection"
 
-            response = requests.get(url, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.get(
+                url,
+                headers=headers,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -57,7 +69,9 @@ class VirusTotalEngine(BaseEngine):
             logger.error(f"Error querying VirusTotal: {e}")
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {"vt_detect": None, "vt_nb_detect": None, "vt_community": None}
         return {

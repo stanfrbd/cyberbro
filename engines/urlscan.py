@@ -1,7 +1,9 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -10,14 +12,17 @@ logger = logging.getLogger(__name__)
 
 class URLScanEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "urlscan"
 
     @property
+    @override
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         query_fields = {
             "IPv4": "ip",
             "IPv6": "ip",
@@ -61,10 +66,17 @@ class URLScanEngine(BaseEngine):
             }
 
         except Exception as e:
-            logger.error("Error querying urlscan.io for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying urlscan.io for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {f"urlscan_{k}": None for k in ["count", "top_domains"]}
 

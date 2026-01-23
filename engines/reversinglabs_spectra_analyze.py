@@ -1,8 +1,10 @@
 import logging
 import urllib.parse
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -11,10 +13,12 @@ logger = logging.getLogger(__name__)
 
 class RLAnalyzeEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "rl_analyze"
 
     @property
+    @override
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
@@ -30,7 +34,7 @@ class RLAnalyzeEngine(BaseEngine):
         }
         return endpoint_map.get(observable_type)
 
-    def _get_ui_endpoint(self, observable: str, observable_type: str) -> str | None:
+    def _get_ui_endpoint(self, observable: str, observable_type: str) -> str:
         endpoint_map = {
             "IPv4": f"/ip/{observable}/analysis/ip/",
             "IPv6": f"/ip/{observable}/analysis/ip/",
@@ -40,17 +44,21 @@ class RLAnalyzeEngine(BaseEngine):
             "SHA1": f"/{observable}/",
             "SHA256": f"/{observable}/",
         }
-        return endpoint_map.get(observable_type)
+        return endpoint_map.get(observable_type, "")
 
-    def _parse_rl_response(self, result: dict, observable: str, observable_type: str, url: str) -> dict:
+    def _parse_rl_response(
+        self, result: dict, observable: str, observable_type: str, url: str
+    ) -> dict:
         threats: list[str] = []
-        ui_link = url + self._get_ui_endpoint(observable, observable_type)
+        ui_link: str = url + self._get_ui_endpoint(observable, observable_type)
 
         if observable_type in ["IPv4", "IPv6", "FQDN"]:
             threats.extend([i.get("threat_name") for i in result.get("top_threats", [])])
             total_files: int = result.get("downloaded_files_statistics", {}).get("total", 0)
             malicious_files: int = result.get("downloaded_files_statistics", {}).get("malicious", 0)
-            suspicious_files: int = result.get("downloaded_files_statistics", {}).get("suspicious", 0)
+            suspicious_files: int = result.get("downloaded_files_statistics", {}).get(
+                "suspicious", 0
+            )
 
             reputation = result.get("third_party_reputations", {}).get("statistics", {})
             malicious: int = reputation.get("malicious", 0)
@@ -78,13 +86,15 @@ class RLAnalyzeEngine(BaseEngine):
                 }
 
         elif observable_type in ["URL"]:
-            threats.extend([i.get("threat_name") for i in result.get("analysis").get("top_threats", [])])
+            threats.extend(
+                [i.get("threat_name") for i in result.get("analysis").get("top_threats", [])]
+            )
             threats.append(result.get("threat_name"))
             threats.extend(result.get("categories", []))
 
             reputation = result.get("third_party_reputations", {}).get("statistics", {})
-            malicious: int = reputation.get("malicious", 0)
-            suspicious: int = reputation.get("suspicious", 0)
+            malicious = reputation.get("malicious", 0)
+            suspicious = reputation.get("suspicious", 0)
             total: int = reputation.get("total", 0)
 
             report_color = "green"
@@ -120,7 +130,7 @@ class RLAnalyzeEngine(BaseEngine):
 
             av_scanners = result.get("av_scanners", {})
             if av_scanners:
-                total: int = av_scanners.get("scanner_count", 0)
+                total = av_scanners.get("scanner_count", 0)
                 scanners = av_scanners.get("scanner_match", 0)
 
                 return {
@@ -136,7 +146,8 @@ class RLAnalyzeEngine(BaseEngine):
 
         return {}
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         api_key = self.secrets.rl_analyze_api_key
         rl_analyze_url = self.secrets.rl_analyze_url
 
@@ -152,17 +163,26 @@ class RLAnalyzeEngine(BaseEngine):
             }
 
             # NOTE: Original implementation uses proxies=None
-            response = requests.get(url, headers=headers, proxies=None, verify=self.ssl_verify, timeout=5)
+            response = requests.get(
+                url, headers=headers, proxies=None, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()
             return self._parse_rl_response(data, observable_value, observable_type, rl_analyze_url)
 
         except Exception as e:
-            logger.error("Error querying Reversing Labs for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying Reversing Labs for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {
                 f"rl_analyze_{k}": None

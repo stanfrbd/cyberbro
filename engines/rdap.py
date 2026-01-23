@@ -1,8 +1,10 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import requests
 import tldextract
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -11,10 +13,12 @@ logger = logging.getLogger(__name__)
 
 class RDAPEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "rdap"
 
     @property
+    @override
     def supported_types(self):
         return ["FQDN", "URL"]
 
@@ -32,7 +36,8 @@ class RDAPEngine(BaseEngine):
                 return item[3]
         return ""
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             if observable_type == "URL":
                 domain_part = observable_value.split("/")[2].split(":")[0]
@@ -47,7 +52,9 @@ class RDAPEngine(BaseEngine):
                 return None
 
             api_url = f"https://rdap.net/domain/{domain}"
-            response = requests.get(api_url, verify=self.ssl_verify, proxies=self.proxies, timeout=5)
+            response = requests.get(
+                api_url, verify=self.ssl_verify, proxies=self.proxies, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -68,17 +75,30 @@ class RDAPEngine(BaseEngine):
             for entity in data.get("entities", []):
                 roles = entity.get("roles", [])
                 if "abuse" in roles:
-                    result["abuse_contact"] = self._extract_vcard_field(entity, "email") or result["abuse_contact"]
+                    result["abuse_contact"] = (
+                        self._extract_vcard_field(entity, "email") or result["abuse_contact"]
+                    )
                 if "registrar" in roles:
-                    result["registrar"] = self._extract_vcard_field(entity, "fn") or result["registrar"]
+                    result["registrar"] = (
+                        self._extract_vcard_field(entity, "fn") or result["registrar"]
+                    )
                 if "registrant" in roles:
-                    result["registrant"] = self._extract_vcard_field(entity, "fn") or result["registrant"]
-                    result["registrant_email"] = self._extract_vcard_field(entity, "email") or result["registrant_email"]
-                    result["organization"] = self._extract_vcard_field(entity, "org") or result["organization"]
+                    result["registrant"] = (
+                        self._extract_vcard_field(entity, "fn") or result["registrant"]
+                    )
+                    result["registrant_email"] = (
+                        self._extract_vcard_field(entity, "email") or result["registrant_email"]
+                    )
+                    result["organization"] = (
+                        self._extract_vcard_field(entity, "org") or result["organization"]
+                    )
 
                 for sub_entity in entity.get("entities", []):
                     if "abuse" in sub_entity.get("roles", []):
-                        result["abuse_contact"] = self._extract_vcard_field(sub_entity, "email") or result["abuse_contact"]
+                        result["abuse_contact"] = (
+                            self._extract_vcard_field(sub_entity, "email")
+                            or result["abuse_contact"]
+                        )
 
             for ns in data.get("nameservers", []):
                 ns_name = ns.get("ldhName")
@@ -87,7 +107,11 @@ class RDAPEngine(BaseEngine):
 
             for event in data.get("events", []):
                 action = event.get("eventAction")
-                date_str = event.get("eventDate", "").split("T")[0] if event.get("eventDate") and "T" in event.get("eventDate") else event.get("eventDate", "")
+                date_str = (
+                    event.get("eventDate", "").split("T")[0]
+                    if event.get("eventDate") and "T" in event.get("eventDate")
+                    else event.get("eventDate", "")
+                )
                 if action == "registration":
                     result["creation_date"] = date_str
                 elif action == "expiration":
@@ -105,7 +129,9 @@ class RDAPEngine(BaseEngine):
             logger.error("Error querying RDAP for '%s': %s", observable_value, e, exc_info=True)
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {
                 f"rdap_{k}": None

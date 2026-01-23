@@ -1,0 +1,36 @@
+meta {
+  name: AbuseIPDB
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://api.abuseipdb.com/api/v2/check?ipAddress={{ip}}&maxAgeInDays={{max_age}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ipAddress: {{ip}}
+  maxAgeInDays: {{max_age}}
+}
+
+headers {
+  Accept: application/json
+  Key: {{abuseipdb_api_key}}
+}
+
+vars:pre-request {
+  abuseipdb_api_key: 
+  ip: 213.55.85.204
+  max_age: 90
+}
+
+script:pre-request {
+  bru.setVar("abuseipdb_api_key", process.env.ABUSEIPDB);
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

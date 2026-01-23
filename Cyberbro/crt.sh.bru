@@ -1,0 +1,24 @@
+meta {
+  name: crt.sh
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://crt.sh/json?q={{domain}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  q: {{domain}}
+}
+
+vars:pre-request {
+  domain: cyberbro.net
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

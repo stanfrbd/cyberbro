@@ -1,8 +1,10 @@
 import logging
-from typing import Any, Optional
+from collections.abc import Mapping
+from typing import Any
 from urllib.parse import urljoin
 
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
 
@@ -11,14 +13,26 @@ logger = logging.getLogger(__name__)
 
 class OpenCTIEngine(BaseEngine):
     @property
+    @override
     def name(self):
         return "opencti"
 
     @property
+    @override
     def supported_types(self):
-        return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+        return [
+            "CHROME_EXTENSION",
+            "FQDN",
+            "IPv4",
+            "IPv6",
+            "MD5",
+            "SHA1",
+            "SHA256",
+            "URL",
+        ]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    @override
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         api_key = self.secrets.opencti_api_key
         opencti_url = self.secrets.opencti_url
 
@@ -80,16 +94,34 @@ class OpenCTIEngine(BaseEngine):
                 "orderBy": "created_at",
                 "filters": {
                     "mode": "and",
-                    "filters": [{"key": "entity_type", "values": ["Stix-Core-Object"], "operator": "eq", "mode": "or"}],
+                    "filters": [
+                        {
+                            "key": "entity_type",
+                            "values": ["Stix-Core-Object"],
+                            "operator": "eq",
+                            "mode": "or",
+                        }
+                    ],
                     "filterGroups": [],
                 },
                 "search": observable,
             }
 
-            payload = {"id": "SearchStixCoreObjectsLinesPaginationQuery", "query": query, "variables": variables}
+            payload = {
+                "id": "SearchStixCoreObjectsLinesPaginationQuery",
+                "query": query,
+                "variables": variables,
+            }
             search_link = f"{base_url}/dashboard/search/knowledge/{observable}"
 
-            response = requests.post(url, headers=headers, json=payload, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.post(
+                url,
+                headers=headers,
+                json=payload,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -115,7 +147,9 @@ class OpenCTIEngine(BaseEngine):
                     latest_created_at = node["created_at"]
                 if node["entity_type"] == "Indicator" and not first_id:
                     first_id = node["id"]
-                    latest_indicator_link = f"{base_url}/dashboard/observations/indicators/{first_id}"
+                    latest_indicator_link = (
+                        f"{base_url}/dashboard/observations/indicators/{first_id}"
+                    )
 
             if not latest_created_at:
                 return {
@@ -140,7 +174,10 @@ class OpenCTIEngine(BaseEngine):
                   }
                 }
                 """
-                additional_payload = {"query": additional_query, "variables": {"id": first_id}}
+                additional_payload = {
+                    "query": additional_query,
+                    "variables": {"id": first_id},
+                }
                 add_response = requests.post(
                     url,
                     headers=headers,
@@ -155,8 +192,16 @@ class OpenCTIEngine(BaseEngine):
 
             # Format dates
             latest_created_at = latest_created_at.split("T")[0] if latest_created_at else None
-            valid_from = indicator_data.get("valid_from", "").split("T")[0] if indicator_data.get("valid_from") else None
-            valid_until = indicator_data.get("valid_until", "").split("T")[0] if indicator_data.get("valid_until") else None
+            valid_from = (
+                indicator_data.get("valid_from", "").split("T")[0]
+                if indicator_data.get("valid_from")
+                else None
+            )
+            valid_until = (
+                indicator_data.get("valid_until", "").split("T")[0]
+                if indicator_data.get("valid_until")
+                else None
+            )
 
             return {
                 "entity_counts": entity_counts,
@@ -173,10 +218,17 @@ class OpenCTIEngine(BaseEngine):
             }
 
         except Exception as e:
-            logger.error("Error querying OpenCTI for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying OpenCTI for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
             return None
 
-    def create_export_row(self, analysis_result: Any) -> dict:
+    @classmethod
+    @override
+    def create_export_row(cls, analysis_result: Mapping) -> dict:
         if not analysis_result:
             return {f"opencti_{k}": None for k in ["entity_counts", "global_count", "last_seen"]}
 

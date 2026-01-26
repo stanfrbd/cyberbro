@@ -29,6 +29,7 @@ CACHE_MAX_AGE = 24 * 60 * 60  # 24 hours in seconds
 # Data sources
 SPAMHAUS_URL = "https://www.spamhaus.org/drop/asndrop.json"
 BRIANHAMA_URL = "https://raw.githubusercontent.com/brianhama/bad-asn-list/master/bad-asn-list.csv"
+LETHAL_FORENSICS_URL = "https://raw.githubusercontent.com/LETHAL-FORENSICS/Microsoft-Analyzer-Suite/refs/heads/main/Blacklists/ASN-Blacklist.csv"
 
 
 def normalize_asn(asn_value: str | int) -> str:
@@ -123,9 +124,50 @@ def download_brianhama_bad_asn() -> dict[str, str]:
     return result
 
 
+def download_lethal_forensics_asn() -> dict[str, str]:
+    """
+    Download and parse LETHAL-FORENSICS ASN Blacklist (CSV).
+
+    Returns:
+        Dictionary mapping ASN (string) to source description
+    """
+    logger.info("Downloading LETHAL-FORENSICS ASN Blacklist...")
+    result = {}
+
+    try:
+        response = requests.get(LETHAL_FORENSICS_URL, proxies=PROXIES, verify=SSL_VERIFY, timeout=30)
+        response.raise_for_status()
+
+        # Parse CSV
+        lines = response.text.splitlines()
+        reader = csv.DictReader(lines)
+
+        for row in reader:
+            asn = normalize_asn(row.get("ASN", ""))
+            org_name = row.get("OrgName", "Unknown").strip()
+            info = row.get("Info", "").strip()
+            date = row.get("Date", "").strip()
+
+            if asn:
+                # Format the source description with all available information
+                description = f"LETHAL-FORENSICS ASN Blacklist ({org_name}"
+                if info:
+                    description += f", {info}"
+                if date:
+                    description += f", {date}"
+                description += ")"
+                result[asn] = description
+
+        logger.info(f"Loaded {len(result)} ASNs from LETHAL-FORENSICS ASN Blacklist")
+    except Exception as e:
+        logger.error(f"Failed to download LETHAL-FORENSICS ASN Blacklist: {e}")
+
+    return result
+
+
 def update_bad_asn_cache() -> bool:
     """
-    Download both bad ASN lists and merge them into a single cache file.
+    Download all bad ASN lists and merge them into a single cache file.
     Only updates if cache is older than 24 hours or doesn't exist.
 
     Returns:
@@ -158,6 +200,16 @@ def update_bad_asn_cache() -> bool:
             merged_data[asn] = f"{merged_data[asn]} + {source_description}"
         else:
             # ASN only in Brianhama - add it
+            merged_data[asn] = source_description
+
+    # LETHAL-FORENSICS ASN Blacklist (merge intelligently, don't overwrite)
+    lethal_forensics_data = download_lethal_forensics_asn()
+    for asn, source_description in lethal_forensics_data.items():
+        if asn in merged_data:
+            # ASN exists in other lists - combine the information
+            merged_data[asn] = f"{merged_data[asn]} + {source_description}"
+        else:
+            # ASN only in LETHAL-FORENSICS - add it
             merged_data[asn] = source_description
 
     # Save to cache

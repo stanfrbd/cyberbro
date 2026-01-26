@@ -46,6 +46,8 @@ nav:
       - API Usage & Engine Names: quick-start/API-usage-and-engine-names.md
       - Advanced Options for Deployment: quick-start/Advanced-options-for-deployment.md
       - Upgrade Cyberbro: quick-start/Upgrade-Cyberbro.md
+  - Engines:
+      - Bad ASN Check: engines/Bad-ASN-Check-Engine.md
   - Integrations:
       - Cyberbro in KASM Workspaces: integrations/Cyberbro-in-KASM-Workspaces.md
       - Cyberbro Browser Extension: integrations/Cyberbro-browser-extension.md

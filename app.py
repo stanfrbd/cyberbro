@@ -455,7 +455,7 @@ def initialize_background_services():
 
     This function starts daemon threads for long-running background tasks:
     - Bad ASN database updater: Periodically updates malicious ASN lists from
-      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database).
+      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database, LETHAL-FORENSICS ASN Blacklist).
 
     These threads are marked as daemon threads, so they will automatically
     terminate when the main application exits.

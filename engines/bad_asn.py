@@ -225,17 +225,11 @@ class BadASNEngine(BaseEngine):
                     f"that can be abused by malicious actors. Risk Score: {risk_score}/100. "
                     f"Exercise caution but verify further context."
                 )
-                logger.info(
-                    f"Legitimate provider potentially abused: {asn} (score: {risk_score}) for IP {observable_value} - {result['source']}"
-                )
+                logger.info(f"Legitimate provider potentially abused: {asn} (score: {risk_score}) for IP {observable_value} - {result['source']}")
             else:
                 result["status"] = "malicious"
-                result["details"] = (
-                    f"ASN {asn} is listed in bad ASN databases. Risk Score: {risk_score}/100. Source: {source_description}"
-                )
-                logger.info(
-                    f"Bad ASN detected: {asn} (score: {risk_score}) for IP {observable_value} - {result['source']}"
-                )
+                result["details"] = f"ASN {asn} is listed in bad ASN databases. Risk Score: {risk_score}/100. Source: {source_description}"
+                logger.info(f"Bad ASN detected: {asn} (score: {risk_score}) for IP {observable_value} - {result['source']}")
 
             return result
 
@@ -275,13 +269,7 @@ class BadASNEngine(BaseEngine):
         if ipinfo_data and isinstance(ipinfo_data, dict):
             # ipinfo structure: {"asn": "AS13335 Cloudflare, Inc."}
             asn_str = ipinfo_data.get("asn", "")
-            if (
-                asn_str
-                and isinstance(asn_str, str)
-                and asn_str != "Unknown"
-                and asn_str != "BOGON"
-                and asn_str.startswith("AS")
-            ):
+            if asn_str and isinstance(asn_str, str) and asn_str != "Unknown" and asn_str != "BOGON" and asn_str.startswith("AS"):
                 # Extract ASN from format "AS13335 Cloudflare, Inc."
                 parts = asn_str.split()
                 if len(parts) > 0:

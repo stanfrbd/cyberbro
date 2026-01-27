@@ -1,0 +1,3597 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.cyberbro.net/engines/Bad-ASN-Check-Engine/">
+      
+      
+        <link rel="prev" href="../../quick-start/Upgrade-Cyberbro/">
+      
+      
+        <link rel="next" href="../../integrations/Cyberbro-in-KASM-Workspaces/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Bad ASN Check - Cyberbro Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Segoe+UI,+Helvetica,+Arial,+sans-serif:300,300i,400,400i,700,700i%7CFira+Mono,+Menlo,+Consolas,+Monaco,+monospace:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Segoe UI, Helvetica, Arial, sans-serif";--md-code-font:"Fira Mono, Menlo, Consolas, Monaco, monospace"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../termynal.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Cyberbro Documentation" class="md-header__button md-logo" aria-label="Cyberbro Documentation" data-md-component="logo">
+      
+  <img src="../../images/cyberbro.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Cyberbro Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Bad ASN Check
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5M7 15a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/stanfrbd/cyberbro" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    stanfrbd/cyberbro
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../quick-start/Quick-start-%26-Installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Engines
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../integrations/Cyberbro-in-KASM-Workspaces/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Integrations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api-keys/Get-AbuseIPDB-API-key/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  API Keys
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../contribute/Documentation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Development & Contributing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../troubleshooting/Common-Issues/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Troubleshooting
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../community/They-talk-about-Cyberbro/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Community
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Cyberbro Documentation" class="md-nav__button md-logo" aria-label="Cyberbro Documentation" data-md-component="logo">
+      
+  <img src="../../images/cyberbro.svg" alt="logo">
+
+    </a>
+    Cyberbro Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/stanfrbd/cyberbro" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    stanfrbd/cyberbro
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/Quick-start-%26-Installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start & Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/Reload-secrets-and-configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reload Secrets & Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/API-usage-and-engine-names/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Usage & Engine Names
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/Advanced-options-for-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Options for Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/Upgrade-Cyberbro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Cyberbro
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engines
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engines
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bad ASN Check
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bad ASN Check
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-asn-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. ASN Extraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-background-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Background Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-spamhaus-asndrop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Spamhaus ASNDROP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-brianhama-bad-asn-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Brianhama Bad ASN List
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-lethal-forensics-asn-blacklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. LETHAL-FORENSICS ASN Blacklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-merging-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Merging Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risk-scoring-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risk Scoring Algorithm
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Risk Scoring Algorithm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Base Score
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-1-presence-in-multiple-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor 1: Presence in Multiple Sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-2-legitimate-provider-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor 2: Legitimate Provider Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-3-high-risk-country-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor 3: High-Risk Country Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#score-bounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Score Bounds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-calculations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Calculations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Status Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-malicious" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. malicious
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-potentially_legitimate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. potentially_legitimate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-unlisted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. unlisted
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#via-web-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Web Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#via-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gui-display" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GUI Display
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GUI Display">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#card-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Card View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#table-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table View
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-asn-data-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No ASN Data Available
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-not-updating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cache Not Updating
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proxy-blocking-github" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proxy Blocking GitHub
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#false-positives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        False Positives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#false-negatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        False Negatives
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#engine-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Engine Class
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cache Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        License
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integrations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integrations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/Cyberbro-in-KASM-Workspaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cyberbro in KASM Workspaces
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/Cyberbro-browser-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cyberbro Browser Extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/Use-Cyberbro-MCP-for-LLM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cyberbro MCP for LLM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../integrations/Reverse-Proxy-configuration-%E2%80%90-Caddy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse Proxy Configuration (Caddy)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Keys
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Keys
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-AbuseIPDB-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get AbuseIPDB API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-AlienVault-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get AlienVault API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Crowdstrike-API-Credentials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Crowdstrike API Credentials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-DFIR-IRIS-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get DFIR Iris API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Google-CSE-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Google CSE API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Google-Safe-Browing-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Google Safe Browsing API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-IPapi-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get IPapi API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-IPinfo-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get IPinfo API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-MDE-%28Microsoft-Defender-for-Endpoint%29-API-credentials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get MDE (Microsoft Defender for Endpoint) API Credentials
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-MISP-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get MISP API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-OpenCTI-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get OpenCTI API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-ReversingLabs-Spectra-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Reversing Labs Spectra Analyze API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Rosti-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Rösti API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Shodan-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Shodan API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Spur-Us-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Spur.us API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-ThreatFox-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get ThreatFox API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-VirusTotal-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get VirusTotal API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-WebScout-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get WebScout API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development & Contributing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development & Contributing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribute/Documentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribute/Coding-Style/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Style
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contribute/Contributions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Troubleshooting
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/Common-Issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Common Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Community
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../community/They-talk-about-Cyberbro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    They talk about Cyberbro
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-asn-extraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. ASN Extraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-background-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Background Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-spamhaus-asndrop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Spamhaus ASNDROP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-brianhama-bad-asn-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Brianhama Bad ASN List
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-lethal-forensics-asn-blacklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. LETHAL-FORENSICS ASN Blacklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-merging-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Merging Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#risk-scoring-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Risk Scoring Algorithm
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Risk Scoring Algorithm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Base Score
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-1-presence-in-multiple-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor 1: Presence in Multiple Sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-2-legitimate-provider-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor 2: Legitimate Provider Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factor-3-high-risk-country-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factor 3: High-Risk Country Location
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#score-bounds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Score Bounds
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-calculations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Calculations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#status-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Status Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-malicious" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. malicious
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-potentially_legitimate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. potentially_legitimate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-unlisted" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. unlisted
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#via-web-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via Web Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#via-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Via API
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gui-display" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GUI Display
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="GUI Display">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#card-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Card View
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#table-view" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table View
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-asn-data-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        No ASN Data Available
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-not-updating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cache Not Updating
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proxy-blocking-github" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proxy Blocking GitHub
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#false-positives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        False Positives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#false-negatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        False Negatives
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#engine-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Engine Class
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#background-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Background Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cache Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#license" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        License
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/stanfrbd/cyberbro/edit/main/docs/engines/Bad-ASN-Check-Engine.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>Bad ASN Check</h1>
+
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The <strong>Bad ASN Check</strong> engine is a free, no-API-key-required security feature that identifies malicious Autonomous System Numbers (ASNs) associated with IP addresses. It checks if an IP's ASN is listed in known malicious ASN databases and provides risk scoring to help assess the threat level.</p>
+<p>This engine is particularly useful for:</p>
+<ul>
+<li><strong>VPN and Proxy Detection</strong>: Identifies ASNs commonly used by VPN services and anonymization networks</li>
+<li><strong>Malicious Infrastructure Detection</strong>: Detects ASNs associated with spam, malware distribution, and other malicious activities</li>
+<li><strong>Risk Assessment</strong>: Provides a calculated risk score (0-100) based on multiple factors</li>
+<li><strong>Legitimate Provider Abuse Detection</strong>: Distinguishes between inherently malicious ASNs and legitimate cloud/hosting providers that may be abused</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">No API Key Required</p>
+<p>This engine is completely free and requires no API key. It works by maintaining a local cache of malicious ASN lists.</p>
+</div>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<h3 id="1-asn-extraction">1. ASN Extraction<a class="headerlink" href="#1-asn-extraction" title="Permanent link">&para;</a></h3>
+<p>The Bad ASN engine requires ASN information from other IP geolocation engines. It extracts ASN data from:</p>
+<ul>
+<li><strong>ipapi</strong> (recommended - most reliable)</li>
+<li><strong>ipinfo</strong></li>
+<li><strong>ipquery</strong></li>
+<li><strong>webscout</strong></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Dependency Requirement</p>
+<p>You must enable at least one of these engines (ipapi, ipinfo, ipquery, or webscout) for the Bad ASN Check to function. The engine will skip analysis if no ASN data is available.</p>
+</div>
+<h3 id="2-background-service">2. Background Service<a class="headerlink" href="#2-background-service" title="Permanent link">&para;</a></h3>
+<p>The Bad ASN engine uses a background service that automatically maintains an up-to-date database of malicious ASNs.</p>
+<p><strong>Background Updater Characteristics:</strong></p>
+<ul>
+<li><strong>Update Frequency</strong>: Every 24 hours</li>
+<li><strong>Initial Update</strong>: Runs immediately when the application starts</li>
+<li><strong>Thread Type</strong>: Daemon thread (automatically terminates when the application exits)</li>
+<li><strong>Cache Location</strong>: <code>data/bad_asn_cache.json</code></li>
+<li><strong>Cache Duration</strong>: 24 hours</li>
+</ul>
+<p><strong>How it works with Gunicorn:</strong></p>
+<p>When running with Gunicorn, the background service is initialized at the module level, ensuring it runs even with multiple workers. The cache freshness check prevents duplicate downloads across workers.</p>
+<h2 id="data-sources">Data Sources<a class="headerlink" href="#data-sources" title="Permanent link">&para;</a></h2>
+<p>The engine aggregates data from three authoritative sources:</p>
+<h3 id="1-spamhaus-asndrop">1. Spamhaus ASNDROP<a class="headerlink" href="#1-spamhaus-asndrop" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Source</strong>: <a href="https://www.spamhaus.org/drop/asndrop.json">Spamhaus.org ASNDROP</a></li>
+<li><strong>Format</strong>: JSONL (JSON Lines)</li>
+<li><strong>Focus</strong>: ASNs controlled by or associated with spam operations</li>
+<li><strong>Authority</strong>: Highly authoritative source for spam-related ASNs</li>
+<li><strong>Data Included</strong>: ASN number, organization name, domain, country code</li>
+</ul>
+<p><strong>Example Entry:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AS12345&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EXAMPLE-AS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RU&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="2-brianhama-bad-asn-list">2. Brianhama Bad ASN List<a class="headerlink" href="#2-brianhama-bad-asn-list" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Source</strong>: <a href="https://raw.githubusercontent.com/brianhama/bad-asn-list/master/bad-asn-list.csv">Brianhama Bad ASN List (GitHub)</a></li>
+<li><strong>Format</strong>: CSV</li>
+<li><strong>Focus</strong>: Broad collection of malicious ASNs</li>
+<li><strong>Data Included</strong>: ASN number, entity name</li>
+</ul>
+<p><strong>Example Entry:</strong>
+<div class="highlight"><pre><span></span><code>&quot;ASN&quot;,&quot;Entity&quot;
+&quot;12345&quot;,&quot;Example Malicious Entity&quot;
+</code></pre></div></p>
+<h3 id="3-lethal-forensics-asn-blacklist">3. LETHAL-FORENSICS ASN Blacklist<a class="headerlink" href="#3-lethal-forensics-asn-blacklist" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Source</strong>: <a href="https://raw.githubusercontent.com/LETHAL-FORENSICS/Microsoft-Analyzer-Suite/refs/heads/main/Blacklists/ASN-Blacklist.csv">LETHAL-FORENSICS Microsoft Analyzer Suite</a></li>
+<li><strong>Format</strong>: CSV</li>
+<li><strong>Focus</strong>: VPN services and anonymization networks</li>
+<li><strong>Data Included</strong>: ASN number, organization name, VPN services info, date</li>
+</ul>
+<p><strong>Example Entry:</strong>
+<div class="highlight"><pre><span></span><code>&quot;ASN&quot;,&quot;OrgName&quot;,&quot;Info&quot;,&quot;Date&quot;
+&quot;174&quot;,&quot;Cogent Communications&quot;,&quot;CyberGhost VPN, Mullvad VPN, PIA VPN, ProtonVPN, Pure VPN&quot;,&quot;2024-12-17&quot;
+</code></pre></div></p>
+<h3 id="data-merging-strategy">Data Merging Strategy<a class="headerlink" href="#data-merging-strategy" title="Permanent link">&para;</a></h3>
+<p>When an ASN appears in multiple lists, the information is combined:</p>
+<div class="highlight"><pre><span></span><code>Spamhaus ASNDROP (Example AS, example.com, RU) + Brianhama Bad ASN List (Example Entity) + LETHAL-FORENSICS ASN Blacklist (Example Org, VPN Services, 2024-12-17)
+</code></pre></div>
+<p>This provides comprehensive context for security analysts.</p>
+<h2 id="risk-scoring-algorithm">Risk Scoring Algorithm<a class="headerlink" href="#risk-scoring-algorithm" title="Permanent link">&para;</a></h2>
+<p>The engine calculates a risk score from <strong>0 (low risk)</strong> to <strong>100 (critical risk)</strong> based on multiple factors:</p>
+<div class="admonition info">
+<p class="admonition-title">Algorithm Design</p>
+<p>The risk scoring algorithm was designed with assistance from Claude (Anthropic) to provide balanced and transparent risk assessment. The scoring factors and weights were calibrated to minimize false positives while maintaining high detection accuracy.</p>
+</div>
+<h3 id="base-score">Base Score<a class="headerlink" href="#base-score" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>50 points</strong>: Base score for being listed in any bad ASN database</li>
+</ul>
+<h3 id="factor-1-presence-in-multiple-sources">Factor 1: Presence in Multiple Sources<a class="headerlink" href="#factor-1-presence-in-multiple-sources" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>+30 points</strong>: Listed in all three sources (very high confidence)</li>
+<li><strong>+20 points</strong>: Listed in two sources (higher confidence)</li>
+<li><strong>+10 points</strong>: Listed in Spamhaus only (authoritative source)</li>
+<li><strong>+8 points</strong>: Listed in LETHAL-FORENSICS only (VPN/anonymization focus)</li>
+</ul>
+<h3 id="factor-2-legitimate-provider-detection">Factor 2: Legitimate Provider Detection<a class="headerlink" href="#factor-2-legitimate-provider-detection" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>-30 points</strong>: Identified as a legitimate cloud/hosting provider that can be abused</li>
+</ul>
+<p>The engine checks for these known legitimate provider keywords in the ASN description:
+- amazon, aws, google, microsoft, azure
+- digitalocean, ovh, hetzner, linode, vultr
+- cloudflare, oracle, ibm, alibaba, tencent
+- rackspace, contabo, scaleway</p>
+<h3 id="factor-3-high-risk-country-location">Factor 3: High-Risk Country Location<a class="headerlink" href="#factor-3-high-risk-country-location" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>+10 points</strong>: ASN registered in a high-risk country</li>
+</ul>
+<p>High-risk countries include:
+- <strong>RU</strong> (Russia), <strong>CN</strong> (China), <strong>UA</strong> (Ukraine), <strong>IR</strong> (Iran), <strong>KP</strong> (North Korea)
+- <strong>MD</strong> (Moldova), <strong>SC</strong> (Seychelles), <strong>BY</strong> (Belarus)
+- <strong>PK</strong> (Pakistan), <strong>BD</strong> (Bangladesh), <strong>VN</strong> (Vietnam)
+- <strong>BG</strong> (Bulgaria), <strong>RO</strong> (Romania), <strong>IN</strong> (India)
+- <strong>HK</strong> (Hong Kong), <strong>TR</strong> (Turkey), <strong>ID</strong> (Indonesia)
+- <strong>LT</strong> (Lithuania), <strong>AL</strong> (Albania), <strong>EE</strong> (Estonia)</p>
+<h3 id="score-bounds">Score Bounds<a class="headerlink" href="#score-bounds" title="Permanent link">&para;</a></h3>
+<p>The final score is clamped to ensure it stays within <strong>0-100</strong> range.</p>
+<h3 id="example-calculations">Example Calculations<a class="headerlink" href="#example-calculations" title="Permanent link">&para;</a></h3>
+<p><strong>Example 1: Malicious ASN</strong>
+<div class="highlight"><pre><span></span><code>Base: 50
++ Listed in Spamhaus and Brianhama: +20
++ Located in Russia: +10
+= Total: 80/100 (High Risk)
+Status: malicious
+</code></pre></div></p>
+<p><strong>Example 2: Legitimate Provider Abused</strong>
+<div class="highlight"><pre><span></span><code>Base: 50
++ Listed in LETHAL-FORENSICS only: +8
+- Legitimate provider (AWS): -30
+= Total: 28/100 (Low-Medium Risk)
+Status: potentially_legitimate
+</code></pre></div></p>
+<p><strong>Example 3: Critical Risk</strong>
+<div class="highlight"><pre><span></span><code>Base: 50
++ Listed in all three sources: +30
++ Located in China: +10
+= Total: 90/100 (Critical Risk)
+Status: malicious
+</code></pre></div></p>
+<h2 id="status-types">Status Types<a class="headerlink" href="#status-types" title="Permanent link">&para;</a></h2>
+<p>The engine returns three possible status values:</p>
+<h3 id="1-malicious">1. <code>malicious</code><a class="headerlink" href="#1-malicious" title="Permanent link">&para;</a></h3>
+<p>The ASN is listed in bad ASN databases and represents a genuine threat.</p>
+<p><strong>Indicators:</strong>
+- Listed in one or more databases
+- NOT identified as a legitimate provider
+- Higher risk scores</p>
+<p><strong>Example Output:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;malicious&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;risk_score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spamhaus ASNDROP (...) + Brianhama Bad ASN List (...)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASN 12345 is listed in bad ASN databases. Risk Score: 80/100. Source: ...&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asn_org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Malicious Org&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<h3 id="2-potentially_legitimate">2. <code>potentially_legitimate</code><a class="headerlink" href="#2-potentially_legitimate" title="Permanent link">&para;</a></h3>
+<p>The ASN is listed BUT belongs to a legitimate cloud/hosting provider that can be abused.</p>
+<p><strong>Indicators:</strong>
+- Listed in one or more databases
+- Identified as a legitimate provider (AWS, Google, Azure, etc.)
+- Lower risk scores due to -30 penalty</p>
+<p><strong>Example Output:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;potentially_legitimate&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16509&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;risk_score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LETHAL-FORENSICS ASN Blacklist (Amazon.com Inc., ProtonVPN, 2024-12-17)&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASN 16509 is listed in bad ASN databases BUT this appears to be a legitimate cloud/hosting provider...&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;legitimate_but_abused&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asn_org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Amazon.com, Inc.&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<div class="admonition info">
+<p class="admonition-title">Legitimate Provider Context</p>
+<p>When status is <code>potentially_legitimate</code>, exercise caution but verify further context. The IP may be legitimate traffic from a cloud provider or may be a malicious actor abusing legitimate infrastructure.</p>
+</div>
+<h3 id="3-unlisted">3. <code>unlisted</code><a class="headerlink" href="#3-unlisted" title="Permanent link">&para;</a></h3>
+<p>The ASN is NOT listed in any bad ASN database.</p>
+<p><strong>Example Output:</strong>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unlisted&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;15169&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASN 15169 is not listed in bad ASN databases&quot;</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<div class="admonition warning">
+<p class="admonition-title">Unlisted ≠ Safe</p>
+<p>An <code>unlisted</code> status only means the ASN is not present in the currently monitored bad ASN databases. This does not guarantee the IP is safe or legitimate. The ASN may be:</p>
+<ul>
+<li>A newly created malicious ASN not yet catalogued</li>
+<li>An ASN used for targeted attacks (not mass campaigns)</li>
+<li>A compromised legitimate infrastructure not yet blacklisted</li>
+<li>Updated after the cache's last 24-hour refresh</li>
+</ul>
+<p>Always correlate with other engine results (VirusTotal, AbuseIPDB, etc.) for comprehensive analysis.</p>
+</div>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<h3 id="via-web-interface">Via Web Interface<a class="headerlink" href="#via-web-interface" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Enter an IP address in the search field</li>
+<li>Enable at least one ASN provider engine (ipapi, ipinfo, ipquery, or webscout)</li>
+<li>Enable "Bad ASN Check"</li>
+<li>Submit the analysis</li>
+</ol>
+<h3 id="via-api">Via API<a class="headerlink" href="#via-api" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">    &quot;text&quot;: &quot;1.2.3.4&quot;,</span>
+<span class="s1">    &quot;engines&quot;: [&quot;ipapi&quot;, &quot;bad_asn&quot;]</span>
+<span class="s1">  }&#39;</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Engine Order</p>
+<p>The Bad ASN Check engine runs in <strong>Phase 3 (Post-Pivot)</strong> to ensure ASN data from geolocation engines is available. You don't need to worry about execution order - the system handles this automatically.</p>
+</div>
+<h2 id="gui-display">GUI Display<a class="headerlink" href="#gui-display" title="Permanent link">&para;</a></h2>
+<h3 id="card-view">Card View<a class="headerlink" href="#card-view" title="Permanent link">&para;</a></h3>
+<p>The card view displays:
+- <strong>Status Badge</strong>: Color-coded (Red for malicious, Orange for potentially legitimate, Green for unlisted)
+- <strong>Risk Score</strong>: Displayed with matching color
+- <strong>ASN Number</strong>: The numeric ASN identifier
+- <strong>Organization</strong>: The ASN organization name (from context engines)
+- <strong>Source</strong>: Combined source information with all details
+- <strong>Details</strong>: Human-readable explanation</p>
+<p><strong>Status Colors:</strong><br />
+- 🔴 <strong>Red (malicious)</strong>: ASN is listed and represents a genuine threat<br />
+- 🟠 <strong>Orange (potentially_legitimate)</strong>: Legitimate provider potentially abused<br />
+- 🟢 <strong>Green (unlisted)</strong>: ASN is not listed  </p>
+<h3 id="table-view">Table View<a class="headerlink" href="#table-view" title="Permanent link">&para;</a></h3>
+<p>Compact version showing:
+- Status badge with risk score
+- ASN number
+- Organization (if available)
+- Abbreviated source information</p>
+<h2 id="export">Export<a class="headerlink" href="#export" title="Permanent link">&para;</a></h2>
+<p>When exporting results to CSV/Excel, the following fields are included:</p>
+<ul>
+<li><code>bad_asn_status</code>: Status value (malicious, potentially_legitimate, unlisted, N/A)</li>
+<li><code>bad_asn_asn</code>: ASN number</li>
+<li><code>bad_asn_source</code>: Combined source information</li>
+<li><code>bad_asn_details</code>: Full details text</li>
+<li><code>bad_asn_legitimate_but_abused</code>: Boolean flag</li>
+<li><code>bad_asn_risk_score</code>: Numeric risk score (0-100)</li>
+<li><code>bad_asn_org_name</code>: Organization name from context</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="no-asn-data-available">No ASN Data Available<a class="headerlink" href="#no-asn-data-available" title="Permanent link">&para;</a></h3>
+<p><strong>Problem</strong>: The engine returns "No ASN data available"</p>
+<p><strong>Solution</strong>: Enable at least one ASN provider engine:
+- ipapi (recommended)
+- ipinfo
+- ipquery
+- webscout</p>
+<h3 id="cache-not-updating">Cache Not Updating<a class="headerlink" href="#cache-not-updating" title="Permanent link">&para;</a></h3>
+<p><strong>Problem</strong>: The cache file isn't being updated</p>
+<p><strong>Solutions:</strong>
+1. <strong>Check file permissions</strong>: Ensure the <code>data/</code> directory is writable
+2. <strong>Check network connectivity</strong>: Verify the application can reach external sources
+3. <strong>Check proxy settings</strong>: If using a proxy, ensure it's correctly configured
+4. <strong>Manual cache update</strong>: Delete <code>data/bad_asn_cache.json</code> to force a fresh download
+5. <strong>Check logs</strong>: Look for error messages in the application logs</p>
+<h3 id="proxy-blocking-github">Proxy Blocking GitHub<a class="headerlink" href="#proxy-blocking-github" title="Permanent link">&para;</a></h3>
+<p><strong>Problem</strong>: Your proxy blocks GitHub raw content URLs</p>
+<p><strong>Solution</strong>: 
+- Whitelist the following domains in your proxy:
+  - <code>www.spamhaus.org</code>
+  - <code>raw.githubusercontent.com</code>
+- Or temporarily disable proxy for these requests (not recommended)</p>
+<h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Memory Usage</strong>: The cache file typically contains 1000-2000 ASNs, using minimal memory (~500KB-1MB)</li>
+<li><strong>Disk Usage</strong>: Cache file is typically &lt; 2MB</li>
+<li><strong>Network Usage</strong>: Downloads occur once every 24 hours, total ~100KB</li>
+<li><strong>Analysis Speed</strong>: ASN lookup is instantaneous (in-memory dictionary lookup)</li>
+<li><strong>No Rate Limits</strong>: Since it's a local cache, there are no API rate limits</li>
+</ul>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Always enable ipapi</strong>: It provides the most reliable ASN data</li>
+<li><strong>Review potentially_legitimate results</strong>: Don't automatically dismiss them as safe</li>
+<li><strong>Consider context</strong>: Look at other engine results (VirusTotal, AbuseIPDB) for comprehensive analysis</li>
+<li><strong>Monitor cache updates</strong>: Check logs to ensure the background updater is working</li>
+<li><strong>Use in combination</strong>: Combine with other risk engines for best results</li>
+</ol>
+<h2 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="false-positives">False Positives<a class="headerlink" href="#false-positives" title="Permanent link">&para;</a></h3>
+<p><strong>Legitimate Providers</strong>: The engine specifically handles legitimate cloud providers (AWS, Google, Azure, etc.) by flagging them as <code>potentially_legitimate</code> rather than <code>malicious</code>. Always verify the context.</p>
+<p><strong>VPN Services</strong>: Many VPN services use ASNs from the LETHAL-FORENSICS list. VPN usage alone isn't malicious - consider the broader context.</p>
+<h3 id="false-negatives">False Negatives<a class="headerlink" href="#false-negatives" title="Permanent link">&para;</a></h3>
+<p><strong>New Malicious ASNs</strong>: The cache updates every 24 hours. Brand new malicious ASNs may not be detected immediately.</p>
+<p><strong>Unlisted ASNs</strong>: An <code>unlisted</code> status doesn't guarantee the IP is safe - it just means the ASN isn't in known bad ASN databases.</p>
+<h2 id="technical-implementation">Technical Implementation<a class="headerlink" href="#technical-implementation" title="Permanent link">&para;</a></h2>
+<h3 id="engine-class">Engine Class<a class="headerlink" href="#engine-class" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BadASNEngine</span><span class="p">(</span><span class="n">BaseEngine</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;bad_asn&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supported_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;IPv4&quot;</span><span class="p">,</span> <span class="s2">&quot;IPv6&quot;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute_after_reverse_dns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Phase 3: Post-Pivot</span>
+</code></pre></div>
+<h3 id="background-service">Background Service<a class="headerlink" href="#background-service" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">background_updater</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the bad ASN cache every 24 hours.&quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Bad ASN background updater started&quot;</span><span class="p">)</span>
+    <span class="n">update_bad_asn_cache</span><span class="p">()</span>  <span class="c1"># Initial update</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">CACHE_MAX_AGE</span><span class="p">)</span>  <span class="c1"># 24 hours</span>
+        <span class="n">update_bad_asn_cache</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="cache-structure">Cache Structure<a class="headerlink" href="#cache-structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1706281234.567</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;asns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;12345&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spamhaus ASNDROP (Example AS, example.com, RU)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;67890&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Brianhama Bad ASN List (Example Entity)&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;174&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LETHAL-FORENSICS ASN Blacklist (Cogent Communications, Multiple VPNs, 2024-12-17)&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
+<p>Potential improvements being considered:</p>
+<ul>
+<li>Additional data sources</li>
+<li>Custom ASN blacklist/whitelist support</li>
+</ul>
+<h2 id="support">Support<a class="headerlink" href="#support" title="Permanent link">&para;</a></h2>
+<p>For issues, questions, or contributions related to the Bad ASN Check engine:</p>
+<ul>
+<li><strong>GitHub Issues</strong>: <a href="https://github.com/stanfrbd/cyberbro/issues">Report a bug or request a feature</a></li>
+<li><strong>Discussions</strong>: <a href="https://github.com/stanfrbd/cyberbro/discussions">Ask questions or share ideas</a></li>
+<li><strong>Documentation</strong>: <a href="https://docs.cyberbro.net">Main documentation</a></li>
+</ul>
+<h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
+<p>The Bad ASN Check engine is part of Cyberbro and is licensed under the same terms. The data sources have their own licenses:</p>
+<ul>
+<li><strong>Spamhaus ASNDROP</strong>: <a href="https://www.spamhaus.org/organization/dnsbl/">Spamhaus License</a></li>
+<li><strong>Brianhama Bad ASN List</strong>: <a href="https://github.com/brianhama/bad-asn-list">GitHub Repository</a></li>
+<li><strong>LETHAL-FORENSICS ASN Blacklist</strong>: <a href="https://github.com/LETHAL-FORENSICS/Microsoft-Analyzer-Suite">Microsoft Analyzer Suite</a></li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 26, 2026 14:11:41 UTC"><span class="timeago" datetime="2026-01-26T14:11:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 26, 2026 14:11:41 UTC">2026-01-26</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 26, 2026 14:11:41 UTC"><span class="timeago" datetime="2026-01-26T14:11:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 26, 2026 14:11:41 UTC">2026-01-26</span>
+  </span>
+
+    
+    
+      
+  
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Contributors">
+      
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
+      
+    </span>
+    <nav>
+      stanfrbd
+    </nav>
+  </span>
+
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../quick-start/Upgrade-Cyberbro/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Upgrade Cyberbro">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Upgrade Cyberbro
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../integrations/Cyberbro-in-KASM-Workspaces/" class="md-footer__link md-footer__link--next" aria-label="Next: Cyberbro in KASM Workspaces">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Cyberbro in KASM Workspaces
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2024 - 2025 Stanislas MEDRANO (stanfrbd) - MIT License
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/stanfrbd/cyberbro" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/cyberbro_cti" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+    
+    
+      
+    
+    
+    
+      
+      
+    
+    <a href="https://infosec.exchange/@cyberbro" target="_blank" rel="noopener me" title="infosec.exchange" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M433 179.1c0-97.2-63.7-125.7-63.7-125.7-62.5-28.7-228.6-28.4-290.5 0 0 0-63.7 28.5-63.7 125.7 0 115.7-6.6 259.4 105.6 289.1 40.5 10.7 75.3 13 103.3 11.4 50.8-2.8 79.3-18.1 79.3-18.1l-1.7-36.9s-36.3 11.4-77.1 10.1c-40.4-1.4-83-4.4-89.6-54-.6-4.6-.9-9.3-.9-13.9 85.6 20.9 158.7 9.1 178.7 6.7 56.1-6.7 105-41.3 111.2-72.9 9.8-49.8 9-121.5 9-121.5zm-75.1 125.2h-46.6V190.1c0-49.7-64-51.6-64 6.9v62.5H201V197c0-58.5-64-56.6-64-6.9v114.2H90.3c0-122.1-5.2-147.9 18.4-175 25.9-28.9 79.8-30.8 103.8 6.1l11.6 19.5 11.6-19.5c24.1-37.1 78.1-34.8 103.8-6.1 23.7 27.3 18.4 53 18.4 175"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.sections", "navigation.indexes", "navigation.footer", "search.suggest", "search.highlight", "toc.follow", "content.tabs.link", "content.tooltips", "content.action.edit", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../js/timeago.min.js"></script>
+      
+        <script src="../../js/timeago_mkdocs_material.js"></script>
+      
+        <script src="../../termynal.js"></script>
+      
+    
+  </body>
+</html>

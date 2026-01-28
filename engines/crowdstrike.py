@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urljoin
 
 from falconpy import APIHarnessV2  # Assuming falconpy is installed
@@ -49,18 +49,24 @@ class CrowdstrikeEngine(BaseEngine):
             timeout=5,
         )
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             falcon = self._get_falcon_client()
             falcon_url = urljoin(self.secrets.crowdstrike_falcon_base_url, "/").rstrip("/")
 
-            observable = observable_value.split("/")[2].split(":")[0] if observable_type == "URL" else observable_value
+            observable = (
+                observable_value.split("/")[2].split(":")[0]
+                if observable_type == "URL"
+                else observable_value
+            )
 
             observable = observable.lower()
             mapped_type = self._map_observable_type(observable_type)
 
             # 1. Get device count
-            response = falcon.command("indicator_get_device_count_v1", type=mapped_type, value=observable)
+            response = falcon.command(
+                "indicator_get_device_count_v1", type=mapped_type, value=observable
+            )
             device_count_result = {"device_count": 0}
             if response["status_code"] == 200:
                 data = response["body"]["resources"][0]
@@ -82,8 +88,12 @@ class CrowdstrikeEngine(BaseEngine):
             result.update(
                 {
                     "indicator_found": True,
-                    "published_date": datetime.fromtimestamp(resource.get("published_date", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
-                    "last_updated": datetime.fromtimestamp(resource.get("last_updated", 0), tz=timezone.utc).strftime("%Y-%m-%d"),
+                    "published_date": datetime.fromtimestamp(
+                        resource.get("published_date", 0), tz=timezone.utc
+                    ).strftime("%Y-%m-%d"),
+                    "last_updated": datetime.fromtimestamp(
+                        resource.get("last_updated", 0), tz=timezone.utc
+                    ).strftime("%Y-%m-%d"),
                     "actors": resource.get("actors", []),
                     "malicious_confidence": resource.get("malicious_confidence", ""),
                     "threat_types": resource.get("threat_types", []),
@@ -105,7 +115,18 @@ class CrowdstrikeEngine(BaseEngine):
 
     def create_export_row(self, analysis_result: Any) -> dict:
         if not analysis_result:
-            return {f"cs_{k}": None for k in ["device_count", "actor", "confidence", "threat_types", "malwares", "kill_chain", "vulns"]}
+            return {
+                f"cs_{k}": None
+                for k in [
+                    "device_count",
+                    "actor",
+                    "confidence",
+                    "threat_types",
+                    "malwares",
+                    "kill_chain",
+                    "vulns",
+                ]
+            }
 
         return {
             "cs_device_count": analysis_result.get("device_count"),

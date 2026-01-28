@@ -1,6 +1,6 @@
 import logging
 import urllib.parse
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -42,7 +42,9 @@ class RLAnalyzeEngine(BaseEngine):
         }
         return endpoint_map.get(observable_type)
 
-    def _parse_rl_response(self, result: dict, observable: str, observable_type: str, url: str) -> dict:
+    def _parse_rl_response(
+        self, result: dict, observable: str, observable_type: str, url: str
+    ) -> dict:
         threats: list[str] = []
         ui_link = url + self._get_ui_endpoint(observable, observable_type)
 
@@ -50,7 +52,9 @@ class RLAnalyzeEngine(BaseEngine):
             threats.extend([i.get("threat_name") for i in result.get("top_threats", [])])
             total_files: int = result.get("downloaded_files_statistics", {}).get("total", 0)
             malicious_files: int = result.get("downloaded_files_statistics", {}).get("malicious", 0)
-            suspicious_files: int = result.get("downloaded_files_statistics", {}).get("suspicious", 0)
+            suspicious_files: int = result.get("downloaded_files_statistics", {}).get(
+                "suspicious", 0
+            )
 
             reputation = result.get("third_party_reputations", {}).get("statistics", {})
             malicious: int = reputation.get("malicious", 0)
@@ -78,7 +82,12 @@ class RLAnalyzeEngine(BaseEngine):
                 }
 
         elif observable_type in ["URL"]:
-            threats.extend([i.get("threat_name") for i in result.get("analysis").get("top_threats", [])])
+            # NOTE: Potential issue - if "analysis" key is missing from result, this will fail
+            # with AttributeError. Should defensively handle with .get("analysis", {})
+            # Candidate for future remediation to match safer pattern used elsewhere.
+            threats.extend(
+                [i.get("threat_name") for i in result.get("analysis").get("top_threats", [])]
+            )
             threats.append(result.get("threat_name"))
             threats.extend(result.get("categories", []))
 
@@ -136,7 +145,7 @@ class RLAnalyzeEngine(BaseEngine):
 
         return {}
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         api_key = self.secrets.rl_analyze_api_key
         rl_analyze_url = self.secrets.rl_analyze_url
 
@@ -152,14 +161,18 @@ class RLAnalyzeEngine(BaseEngine):
             }
 
             # NOTE: Original implementation uses proxies=None
-            response = requests.get(url, headers=headers, proxies=None, verify=self.ssl_verify, timeout=5)
+            response = requests.get(
+                url, headers=headers, proxies=None, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()
             return self._parse_rl_response(data, observable_value, observable_type, rl_analyze_url)
 
         except Exception as e:
-            logger.error("Error querying Reversing Labs for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying Reversing Labs for '%s': %s", observable_value, e, exc_info=True
+            )
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

@@ -1,6 +1,6 @@
 import base64
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -18,8 +18,9 @@ class VirusTotalEngine(BaseEngine):
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
         headers = {"x-apikey": self.secrets.virustotal}
+        # TODO: validate api_key before API call
 
         try:
             if observable_type in ["IPv4", "IPv6"]:
@@ -29,14 +30,18 @@ class VirusTotalEngine(BaseEngine):
                 url = f"https://www.virustotal.com/api/v3/domains/{observable_value}"
                 link = f"https://www.virustotal.com/gui/domain/{observable_value}/detection"
             elif observable_type == "URL":
-                encoded_url = base64.urlsafe_b64encode(observable_value.encode()).decode().strip("=")
+                encoded_url = (
+                    base64.urlsafe_b64encode(observable_value.encode()).decode().strip("=")
+                )
                 url = f"https://www.virustotal.com/api/v3/urls/{encoded_url}"
                 link = f"https://www.virustotal.com/gui/url/{encoded_url}/detection"
             else:
                 url = f"https://www.virustotal.com/api/v3/files/{observable_value}"
                 link = f"https://www.virustotal.com/gui/file/{observable_value}/detection"
 
-            response = requests.get(url, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.get(
+                url, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
             data = response.json()
 

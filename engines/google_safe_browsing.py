@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -17,7 +17,7 @@ class GoogleSafeBrowsingEngine(BaseEngine):
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         api_key = self.secrets.google_safe_browsing
 
         try:
@@ -46,7 +46,9 @@ class GoogleSafeBrowsingEngine(BaseEngine):
                 }
             }
 
-            response = requests.post(url, json=body, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.post(
+                url, json=body, proxies=self.proxies, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()

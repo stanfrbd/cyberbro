@@ -46,7 +46,8 @@ app: Flask = Flask(__name__)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-# Enable CORS, very permisive. If you want to restrict it, you can use the origins parameter (can break the GUI)
+# Enable CORS, very permisive. If you want to restrict it, you can use
+# the origins parameter (can break the GUI)
 CORS(app)
 
 # Ensure the data directory exists
@@ -64,7 +65,8 @@ logger.debug(f"CACHE_DEFAULT_TIMEOUT: {app.config['CACHE_DEFAULT_TIMEOUT']}")
 
 cache: Cache = Cache(app)
 
-# Retrieve from secrets or default to 1MB - MAX_FORM_MEMORY_SIZE is the maximum size of the form data in bytes
+# Retrieve from secrets or default to 1MB
+# MAX_FORM_MEMORY_SIZE is the maximum size of the form data in bytes
 app.config["MAX_FORM_MEMORY_SIZE"] = secrets.max_form_memory_size
 logger.debug(f"MAX_FORM_MEMORY_SIZE: {app.config['MAX_FORM_MEMORY_SIZE']}")
 
@@ -219,12 +221,12 @@ def analyze():
     """Handle the analyze request with caching and an option to ignore cache."""
     form_data = ioc_fanger.fang(request.form.get("observables", ""))
     observables = extract_observables(form_data)
-    selected_engines = request.form.getlist("engines")
-    ignore_cache = request.args.get("ignore_cache", "false").lower() == "true"
+    selected_engines: list[str] = request.form.getlist("engines")
+    ignore_cache: bool = request.args.get("ignore_cache", "false").lower() == "true"
 
     # Generate a secure hash for form data and engines using SHA-256
-    combined_data = f"{form_data}|{','.join(selected_engines)}"
-    cache_key = f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
+    combined_data: str = f"{form_data}|{','.join(selected_engines)}"
+    cache_key: str = f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
 
     if not ignore_cache:
         # Check cache
@@ -239,8 +241,10 @@ def analyze():
             ), 200
 
     # If no cache
-    analysis_id = str(uuid.uuid4())
-    threading.Thread(target=perform_analysis, args=(app, observables, selected_engines, analysis_id)).start()
+    analysis_id: str = str(uuid.uuid4())
+    threading.Thread(
+        target=perform_analysis, args=(app, observables, selected_engines, analysis_id)
+    ).start()
 
     # Generate response
     response_data = {"analysis_id": analysis_id}
@@ -328,7 +332,9 @@ def history():
     search_type = request.args.get("search_type", "observable", type=str)
     time_range = request.args.get("time_range", "7d", type=str)
 
-    page, per_page, search_type, time_range = validate_history_params(page, per_page, search_type, time_range)
+    page, per_page, search_type, time_range = validate_history_params(
+        page, per_page, search_type, time_range
+    )
 
     # Calculate offset
     offset = (page - 1) * per_page
@@ -346,7 +352,9 @@ def history():
         analysis_results = filtered_results[offset : offset + per_page]
     else:
         total_count = base_query.count()
-        analysis_results = base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
+        analysis_results = (
+            base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
+        )
 
     # Calculate pagination metadata
     pagination = calculate_pagination_metadata(page, per_page, total_count)
@@ -455,24 +463,6 @@ def graph(analysis_id):
     if analysis_results:
         return render_template("graph.html", analysis_id=analysis_id, API_PREFIX=API_PREFIX), 200
     return render_template("404.html"), 404
-
-
-def initialize_background_services():
-    """
-    Initialize background services required by the application.
-
-    This function starts daemon threads for long-running background tasks:
-    - Bad ASN database updater: Periodically updates malicious ASN lists from
-      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database, LETHAL-FORENSICS ASN Blacklist).
-
-    These threads are marked as daemon threads, so they will automatically
-    terminate when the main application exits.
-    """
-    # Start Bad ASN background updater thread
-    # This maintains up-to-date lists of malicious ASNs for IP reputation checks
-    bad_asn_thread = threading.Thread(target=background_updater, daemon=True, name="BadASNUpdater")
-    bad_asn_thread.start()
-    logger.info("Bad ASN background updater thread started")
 
 
 if __name__ == "__main__":

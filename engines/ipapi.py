@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -21,7 +21,7 @@ class IPAPIEngine(BaseEngine):
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             url = "https://api.ipapi.is"
             headers = {"Content-Type": "application/json"}
@@ -34,14 +34,24 @@ class IPAPIEngine(BaseEngine):
             else:
                 # Don't use API key if it doesn't match the format
                 if self.secrets.ipapi:
-                    logger.warning("ipapi API key format is invalid, querying without API key for '%s'", observable_value)
-                else:
                     logger.warning(
-                        "Be careful, you don't use API key for ipapi, rate limit can happen more often (query: '%s')",
+                        "ipapi API key format is invalid, querying without API key for '%s'",
                         observable_value,
                     )
+                else:
+                    logger.warning(
+                        "Be careful, you don't use API key for ipapi, rate limit"
+                        f"can happen more often (query: '{observable_value}')",
+                    )
 
-            response = requests.post(url, json=data, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.post(
+                url,
+                json=data,
+                headers=headers,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
             response.raise_for_status()
 
             data = response.json()

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -8,7 +8,9 @@ from models.base_engine import BaseEngine
 logger = logging.getLogger(__name__)
 
 
-def query_rosti(observable_value: str, api_key: str, proxies: dict, ssl_verify: bool) -> Optional[dict[str, Any]]:
+def query_rosti(
+    observable_value: str, api_key: str, proxies: dict, ssl_verify: bool
+) -> dict[str, Any] | None:
     """Query Rösti API and normalize the response structure."""
     if not api_key:
         logger.warning("Rösti API key is not configured.")
@@ -19,7 +21,9 @@ def query_rosti(observable_value: str, api_key: str, proxies: dict, ssl_verify: 
     params = {"q": observable_value, "pattern": "true"}
 
     try:
-        response = requests.get(url, headers=headers, params=params, proxies=proxies, verify=ssl_verify, timeout=8)
+        response = requests.get(
+            url, headers=headers, params=params, proxies=proxies, verify=ssl_verify, timeout=8
+        )
         response.raise_for_status()
         payload = response.json()
     except Exception as exc:
@@ -73,15 +77,21 @@ class RostiEngine(BaseEngine):
     def supported_types(self) -> list[str]:
         return ["IPv4", "IPv6", "FQDN", "URL", "Email", "MD5", "SHA1", "SHA256"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
-        return query_rosti(observable_value, self.secrets.rosti_api_key, self.proxies, self.ssl_verify)
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+        return query_rosti(
+            observable_value, self.secrets.rosti_api_key, self.proxies, self.ssl_verify
+        )
 
     def create_export_row(self, analysis_result: Any) -> dict:
         if not analysis_result or analysis_result.get("count", 0) == 0:
             return {"rosti_count": 0, "rosti_values": None, "rosti_types": None}
 
-        values = [item.get("value") for item in analysis_result.get("results", []) if item.get("value")]
-        types = [item.get("type") for item in analysis_result.get("results", []) if item.get("type")]
+        values = [
+            item.get("value") for item in analysis_result.get("results", []) if item.get("value")
+        ]
+        types = [
+            item.get("type") for item in analysis_result.get("results", []) if item.get("type")
+        ]
 
         values_preview = ", ".join(values[:5]) if values else None
         types_preview = ", ".join(types[:5]) if types else None

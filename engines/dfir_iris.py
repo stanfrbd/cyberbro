@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -18,7 +18,7 @@ class DFIRIrisEngine(BaseEngine):
     def supported_types(self):
         return ["BOGON", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         dfir_iris_api_key = self.secrets.dfir_iris_api_key
         dfir_iris_url = self.secrets.dfir_iris_url
 
@@ -32,10 +32,15 @@ class DFIRIrisEngine(BaseEngine):
 
         try:
             url = f"{dfir_iris_url}/search?cid=1"
-            headers = {"Authorization": f"Bearer {dfir_iris_api_key}", "Content-Type": "application/json"}
+            headers = {
+                "Authorization": f"Bearer {dfir_iris_api_key}",
+                "Content-Type": "application/json",
+            }
             payload = json.dumps(body)
             # NOTE: Original code uses proxies=None here, keeping that behavior.
-            response = requests.post(url, headers=headers, data=payload, proxies=None, verify=self.ssl_verify, timeout=5)
+            response = requests.post(
+                url, headers=headers, data=payload, proxies=None, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -52,7 +57,9 @@ class DFIRIrisEngine(BaseEngine):
             return {"reports": len(unique_links), "links": unique_links}
 
         except Exception as e:
-            logger.error("Error querying DFIR-IRIS for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying DFIR-IRIS for '%s': %s", observable_value, e, exc_info=True
+            )
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

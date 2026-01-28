@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 import tldextract
@@ -32,7 +32,7 @@ class RDAPEngine(BaseEngine):
                 return item[3]
         return ""
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             if observable_type == "URL":
                 domain_part = observable_value.split("/")[2].split(":")[0]
@@ -42,12 +42,21 @@ class RDAPEngine(BaseEngine):
                 return None
 
             ext = tldextract.extract(domain_part)
+            """
+            Note from testing:
+            rdap.py:45: DeprecationWarning: The 'registered_domain' property is deprecated and
+            will be removed in the next major version. Use 'top_domain_under_public_suffix'
+            instead, which has the same behavior but a more accurate name.
             domain = ext.registered_domain
+            """
+            domain = ext.top_domain_under_public_suffix
             if not domain:
                 return None
 
             api_url = f"https://rdap.net/domain/{domain}"
-            response = requests.get(api_url, verify=self.ssl_verify, proxies=self.proxies, timeout=5)
+            response = requests.get(
+                api_url, verify=self.ssl_verify, proxies=self.proxies, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -68,17 +77,30 @@ class RDAPEngine(BaseEngine):
             for entity in data.get("entities", []):
                 roles = entity.get("roles", [])
                 if "abuse" in roles:
-                    result["abuse_contact"] = self._extract_vcard_field(entity, "email") or result["abuse_contact"]
+                    result["abuse_contact"] = (
+                        self._extract_vcard_field(entity, "email") or result["abuse_contact"]
+                    )
                 if "registrar" in roles:
-                    result["registrar"] = self._extract_vcard_field(entity, "fn") or result["registrar"]
+                    result["registrar"] = (
+                        self._extract_vcard_field(entity, "fn") or result["registrar"]
+                    )
                 if "registrant" in roles:
-                    result["registrant"] = self._extract_vcard_field(entity, "fn") or result["registrant"]
-                    result["registrant_email"] = self._extract_vcard_field(entity, "email") or result["registrant_email"]
-                    result["organization"] = self._extract_vcard_field(entity, "org") or result["organization"]
+                    result["registrant"] = (
+                        self._extract_vcard_field(entity, "fn") or result["registrant"]
+                    )
+                    result["registrant_email"] = (
+                        self._extract_vcard_field(entity, "email") or result["registrant_email"]
+                    )
+                    result["organization"] = (
+                        self._extract_vcard_field(entity, "org") or result["organization"]
+                    )
 
                 for sub_entity in entity.get("entities", []):
                     if "abuse" in sub_entity.get("roles", []):
-                        result["abuse_contact"] = self._extract_vcard_field(sub_entity, "email") or result["abuse_contact"]
+                        result["abuse_contact"] = (
+                            self._extract_vcard_field(sub_entity, "email")
+                            or result["abuse_contact"]
+                        )
 
             for ns in data.get("nameservers", []):
                 ns_name = ns.get("ldhName")
@@ -87,7 +109,11 @@ class RDAPEngine(BaseEngine):
 
             for event in data.get("events", []):
                 action = event.get("eventAction")
-                date_str = event.get("eventDate", "").split("T")[0] if event.get("eventDate") and "T" in event.get("eventDate") else event.get("eventDate", "")
+                date_str = (
+                    event.get("eventDate", "").split("T")[0]
+                    if event.get("eventDate") and "T" in event.get("eventDate")
+                    else event.get("eventDate", "")
+                )
                 if action == "registration":
                     result["creation_date"] = date_str
                 elif action == "expiration":

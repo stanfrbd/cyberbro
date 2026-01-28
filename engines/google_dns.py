@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -54,7 +54,7 @@ class GoogleDNSEngine(BaseEngine):
                 fields.setdefault("mechanisms", []).append(part)
         return fields
 
-    def _query_dmarc(self, domain: str) -> Optional[dict[str, Any]]:
+    def _query_dmarc(self, domain: str) -> dict[str, Any] | None:
         try:
             dmarc_domain = f"_dmarc.{domain}"
             url = f"https://dns.google/resolve?name={dmarc_domain}&type=TXT"
@@ -71,7 +71,7 @@ class GoogleDNSEngine(BaseEngine):
             logger.error("Error querying DMARC for '%s': %s", domain, e, exc_info=True)
             return None
 
-    def _query_spf(self, domain: str) -> Optional[dict[str, Any]]:
+    def _query_spf(self, domain: str) -> dict[str, Any] | None:
         try:
             url = f"https://dns.google/resolve?name={domain}&type=TXT"
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
@@ -87,7 +87,7 @@ class GoogleDNSEngine(BaseEngine):
             logger.error("Error querying SPF for '%s': %s", domain, e, exc_info=True)
             return None
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             if observable_type in ["IPv4", "IPv6"]:
                 reverse_name = f"{observable_value}.in-addr.arpa"
@@ -96,7 +96,14 @@ class GoogleDNSEngine(BaseEngine):
                 response.raise_for_status()
                 data = response.json()
                 for answer in data.get("Answer", []):
-                    answer["type_name"] = next((record["type"] for record in dns_record_types if record["id"] == answer["type"]), "Unknown")
+                    answer["type_name"] = next(
+                        (
+                            record["type"]
+                            for record in dns_record_types
+                            if record["id"] == answer["type"]
+                        ),
+                        "Unknown",
+                    )
                 return data
 
             domain = self._extract_domain(observable_value)
@@ -129,13 +136,19 @@ class GoogleDNSEngine(BaseEngine):
             return {"Answer": all_records}
 
         except Exception as e:
-            logger.error("Error querying Google DNS for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying Google DNS for '%s': %s", observable_value, e, exc_info=True
+            )
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:
         row = {}
         if not analysis_result or "Answer" not in analysis_result:
-            return {f"google_dns_{t['type'].lower()}": None for t in dns_record_types if t["type"] not in ["PTR"]}
+            return {
+                f"google_dns_{t['type'].lower()}": None
+                for t in dns_record_types
+                if t["type"] not in ["PTR"]
+            }
 
         answers = analysis_result["Answer"]
         dns_records = {}
@@ -153,6 +166,8 @@ class GoogleDNSEngine(BaseEngine):
         for record in dns_record_types:
             type_name = record["type"].lower()
             key = f"google_dns_{type_name}"
-            row[key] = ", ".join(dns_records.get(type_name, [])) if type_name in dns_records else None
+            row[key] = (
+                ", ".join(dns_records.get(type_name, [])) if type_name in dns_records else None
+            )
 
         return row

@@ -133,7 +133,9 @@ def expected_ip_report():
 def expected_md5_report():
     return {
         "count": 1,
-        "pulses": [{"title": "malware", "url": "https://otx.alienvault.com/pulse/686b2966f904d473662ebd22"}],
+        "pulses": [
+            {"title": "malware", "url": "https://otx.alienvault.com/pulse/686b2966f904d473662ebd22"}
+        ],
         "malware_families": [],
         "adversary": [],
         "link": "https://otx.alienvault.com/browse/global/pulses?q=1fd35d9dc2eb919088f4eb48ab18b5a8",
@@ -205,7 +207,9 @@ def fqdn_response_missing_pulse_id(expected_fqdn_report, fqdn_response_from_file
     return input_data
 
 
-def test_parse_alienvault_response_missing_pulse_id(fqdn_response_missing_pulse_id, expected_fqdn_report):
+def test_parse_alienvault_response_missing_pulse_id(
+    fqdn_response_missing_pulse_id, expected_fqdn_report
+):
     expected_report: dict = expected_fqdn_report.copy()
     expected_report["pulses"].pop(0)
     expected_report["count"] = 3
@@ -230,7 +234,11 @@ def test_query_alienvault(fqdn_observable_dict, api_key, fqdn_response_from_file
 
 @responses.activate
 def test_query_alienvault_http_error(api_key, ip_observable_dict):
-    responses.add(responses.GET, "https://otx.alienvault.com/api/v1/indicators/IPv4/1.1.1.1/general", body=HTTPError())
+    responses.add(
+        responses.GET,
+        "https://otx.alienvault.com/api/v1/indicators/IPv4/1.1.1.1/general",
+        body=HTTPError(),
+    )
 
     with pytest.raises(QueryError):
         _ = query_alienvault(ip_observable_dict, api_key)
@@ -261,7 +269,11 @@ def test_query_alienvault_missing_endpoint(api_key):
             "3a30948f8cd5655fede389d73b5fecd91251df4a",
             "/indicators/file/3a30948f8cd5655fede389d73b5fecd91251df4a/general",
         ),
-        ("MD5", "781e5e245d69b566979b86e28d23f2c7", "/indicators/file/781e5e245d69b566979b86e28d23f2c7/general"),
+        (
+            "MD5",
+            "781e5e245d69b566979b86e28d23f2c7",
+            "/indicators/file/781e5e245d69b566979b86e28d23f2c7/general",
+        ),
         (
             "SHA256",
             "84d89877f0d4041efb6bf91a16f0248f2fd573e6af05c19f96bedb9f882f7882",

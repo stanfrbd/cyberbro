@@ -6,8 +6,8 @@ from pathlib import Path
 import pandas as pd
 from flask import send_file
 
-from engines import get_engine_instances
 from utils.config import get_config
+from utils.load_engines import get_engine_instances
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,9 @@ def export_to_csv(data, timestamp):
     df = pd.DataFrame(data)
     csv_path = f"{timestamp}_analysis_result.csv"
     df.to_csv(csv_path, index=False, sep=";")
-    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)).start()
+    threading.Thread(
+        target=lambda path: (time.sleep(10), Path(path).unlink()), args=(csv_path,)
+    ).start()
     return send_file(csv_path, as_attachment=True)
 
 
@@ -68,8 +70,16 @@ def export_to_excel(data, timestamp):
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
                 except Exception as e:
-                    logger.error("Error exporting to Excel, column %s, cell %s, '%s'", column, cell, e, exc_info=True)
+                    logger.error(
+                        "Error exporting to Excel, column %s, cell %s, '%s'",
+                        column,
+                        cell,
+                        e,
+                        exc_info=True,
+                    )
             worksheet.column_dimensions[column].width = max_length + 2
     response = send_file(excel_path, as_attachment=True)
-    threading.Thread(target=lambda path: (time.sleep(10), Path(path).unlink()), args=(excel_path,)).start()
+    threading.Thread(
+        target=lambda path: (time.sleep(10), Path(path).unlink()), args=(excel_path,)
+    ).start()
     return response

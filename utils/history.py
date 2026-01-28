@@ -5,7 +5,9 @@ import time
 from models.analysis_result import AnalysisResult
 
 
-def validate_history_params(page: int, per_page: int, search_type: str, time_range: str) -> tuple[int, int, str, str]:
+def validate_history_params(
+    page: int, per_page: int, search_type: str, time_range: str
+) -> tuple[int, int, str, str]:
     """Validate and sanitize history page parameters.
 
     Args:
@@ -76,7 +78,15 @@ def filter_by_observable(results: list, search_query: str) -> list:
         Filtered list of results
     """
     search_lower = search_query.lower()
-    return [result for result in results if any(search_lower in str(item.get("observable", "")).lower() for item in result.results if item is not None and isinstance(item, dict))]
+    return [
+        result
+        for result in results
+        if any(
+            search_lower in str(item.get("observable", "")).lower()
+            for item in result.results
+            if item is not None and isinstance(item, dict)
+        )
+    ]
 
 
 def calculate_pagination_metadata(page: int, per_page: int, total_count: int) -> dict:

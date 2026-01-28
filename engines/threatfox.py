@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -18,7 +18,7 @@ class ThreatFoxEngine(BaseEngine):
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             # If it's a URL, use the domain portion
             if observable_type == "URL":
@@ -62,7 +62,9 @@ class ThreatFoxEngine(BaseEngine):
             }
 
         except Exception as e:
-            logger.error("Error querying ThreatFox for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying ThreatFox for '%s': %s", observable_value, e, exc_info=True
+            )
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

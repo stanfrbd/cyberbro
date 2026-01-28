@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -17,7 +17,7 @@ class CrtShEngine(BaseEngine):
     def supported_types(self):
         return ["FQDN", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             # If observable is a URL, extract domain
             if observable_type == "URL":

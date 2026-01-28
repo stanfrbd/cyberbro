@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub, version 3.13-slim
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
 # Update the package list and install supervisor and nano, then clean up the apt cache
 RUN apt-get update && \
@@ -13,7 +13,7 @@ WORKDIR /app
 COPY . .
 
 # Install the Python dependencies specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install --system --no-cache-dir -r requirements.txt
 
 # Expose port 5000 to allow external access to the application
 EXPOSE 5000

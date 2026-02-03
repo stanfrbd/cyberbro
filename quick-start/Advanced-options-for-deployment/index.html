@@ -2233,7 +2233,7 @@ If you don't specify proxy, no proxy will be used.</p>
 <span class="nv">SUPERVISORD_TIMEOUT</span><span class="o">=</span><span class="m">200</span>
 <span class="nv">API_PREFIX</span><span class="o">=</span>my_api
 <span class="nv">MAX_FORM_MEMORY_SIZE</span><span class="o">=</span><span class="m">1048576</span>
-<span class="nv">GUI_ENABLED_ENGINES</span><span class="o">=</span>reverse_dns,rdap
+<span class="nv">GUI_ENABLED_ENGINES</span><span class="o">=</span>reverse_dns,rdap_whois
 <span class="nv">CONFIG_PAGE_ENABLED</span><span class="o">=</span><span class="nb">true</span>
 <span class="nv">SSL_VERIFY</span><span class="o">=</span><span class="nb">true</span>
 <span class="nv">GUI_CACHE_TIMEOUT</span><span class="o">=</span><span class="m">1800</span>
@@ -2302,7 +2302,7 @@ If you don't specify proxy, no proxy will be used.</p>
 <p>Example of <code>.env</code> file (note: no <code>"</code> in environment variables)</p>
 <div class="highlight"><pre><span></span><code>VIRUSTOTAL=api_key_here
 ABUSEIPDB=api_key_here
-GUI_ENABLED_ENGINES=reverse_dns,rdap,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,phishtank
+GUI_ENABLED_ENGINES=reverse_dns,rdap_whois,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,phishtank
 API_CACHE_TIMEOUT=1800
 </code></pre></div>
 <p><strong>You can use the file <code>.env.sample</code> as a template to create your own <code>.env</code> file.</strong></p>
@@ -2352,10 +2352,10 @@ This may lead to unexpected behavior as the application will try to read both fi
 <h2 id="selected-engines-in-the-gui-indexhtml-only">Selected engines in the GUI (<code>index.html</code> only)<a class="headerlink" href="#selected-engines-in-the-gui-indexhtml-only" title="Permanent link">&para;</a></h2>
 <p><strong>In <code>secrets.json</code>:</strong></p>
 <ul>
-<li>Adding <code>"gui_enabled_engines": ["reverse_dns", "rdap"]</code> in <code>secrets.json</code> will restrict usage of these two engines in the GUI.</li>
+<li>Adding <code>"gui_enabled_engines": ["reverse_dns", "rdap_whois"]</code> in <code>secrets.json</code> will restrict usage of these two engines in the GUI.</li>
 </ul>
 <p><strong>Or using environment variables:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GUI_ENABLED_ENGINES</span><span class="o">=</span>reverse_dns,rdap
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GUI_ENABLED_ENGINES</span><span class="o">=</span>reverse_dns,rdap_whois
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -2364,8 +2364,8 @@ This may lead to unexpected behavior as the application will try to read both fi
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>Example: for the demo instance of cyberbro, only these engines are used:
-<code>"gui_enabled_engines": ["reverse_dns", "rdap", "ipquery", "abuseipdb", "virustotal", "spur", "google_safe_browsing", "shodan", "phishtank", "threatfox", "urlscan", "google", "github", "opencti", "abusix", "hudsonrock"]</code><br />
-With environment variable: <code>GUI_ENABLED_ENGINES=reverse_dns,rdap,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,shodan,phishtank,threatfox,urlscan,google,github,opencti,abusix,hudsonrock</code></p>
+<code>"gui_enabled_engines": ["reverse_dns", "rdap_whois", "ipquery", "abuseipdb", "virustotal", "spur", "google_safe_browsing", "shodan", "phishtank", "threatfox", "urlscan", "google", "github", "opencti", "abusix", "hudsonrock"]</code><br />
+With environment variable: <code>GUI_ENABLED_ENGINES=reverse_dns,rdap_whois,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,shodan,phishtank,threatfox,urlscan,google,github,opencti,abusix,hudsonrock</code></p>
 </div>
 <h2 id="ssl-verification-settings-for-requests-backend">SSL verification settings for requests (backend)<a class="headerlink" href="#ssl-verification-settings-for-requests-backend" title="Permanent link">&para;</a></h2>
 <div class="admonition danger">
@@ -2469,7 +2469,7 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="January 19, 2026 08:58:49 UTC"><span class="timeago" datetime="2026-01-19T08:58:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="January 19, 2026 08:58:49 UTC">2026-01-19</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 22:17:31 UTC"><span class="timeago" datetime="2026-02-03T22:17:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 22:17:31 UTC">2026-02-03</span>
   </span>
 
     

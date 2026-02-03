@@ -23,6 +23,17 @@
 - **[Upgrade Cyberbro](quick-start/Upgrade-Cyberbro.md)**  
     Step-by-step guide to safely upgrade your Cyberbro instance.
 
+---
+
+## 🔐 Engines
+
+- **[Bad ASN Check](engines/Bad-ASN-Check-Engine.md)**  
+    Learn how the Bad ASN Check engine works, including its background service, data sources, risk scoring algorithm, and how to use it effectively.
+
+---
+
+## 🔗 Integrations
+
 - **[Cyberbro in KASM Workspaces](integrations/Cyberbro-in-KASM-Workspaces.md)**  
     Deploy and configure Cyberbro in KASM Workspaces for browser-based access.
 
@@ -48,6 +59,7 @@
 - [Get MISP API Key](api-keys/Get-MISP-API-key.md)
 - [Get OpenCTI API Key](api-keys/Get-OpenCTI-API-key.md)
 - [Get Reversing Labs Spectra Analyze API key](api-keys/Get-ReversingLabs-Spectra-API-key.md)
+- [Get Rösti API Key](api-keys/Get-Rosti-API-key.md)
 - [Get Shodan API Key](api-keys/Get-Shodan-API-key.md)
 - [Get Spur.us API Key](api-keys/Get-Spur-Us-API-key.md)
 - [Get ThreatFox API Key](api-keys/Get-ThreatFox-API-key.md)

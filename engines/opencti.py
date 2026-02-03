@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urljoin
 
 import requests
@@ -18,7 +18,7 @@ class OpenCTIEngine(BaseEngine):
     def supported_types(self):
         return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         api_key = self.secrets.opencti_api_key
         opencti_url = self.secrets.opencti_url
 
@@ -80,16 +80,34 @@ class OpenCTIEngine(BaseEngine):
                 "orderBy": "created_at",
                 "filters": {
                     "mode": "and",
-                    "filters": [{"key": "entity_type", "values": ["Stix-Core-Object"], "operator": "eq", "mode": "or"}],
+                    "filters": [
+                        {
+                            "key": "entity_type",
+                            "values": ["Stix-Core-Object"],
+                            "operator": "eq",
+                            "mode": "or",
+                        }
+                    ],
                     "filterGroups": [],
                 },
                 "search": observable,
             }
 
-            payload = {"id": "SearchStixCoreObjectsLinesPaginationQuery", "query": query, "variables": variables}
+            payload = {
+                "id": "SearchStixCoreObjectsLinesPaginationQuery",
+                "query": query,
+                "variables": variables,
+            }
             search_link = f"{base_url}/dashboard/search/knowledge/{observable}"
 
-            response = requests.post(url, headers=headers, json=payload, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.post(
+                url,
+                headers=headers,
+                json=payload,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -115,7 +133,9 @@ class OpenCTIEngine(BaseEngine):
                     latest_created_at = node["created_at"]
                 if node["entity_type"] == "Indicator" and not first_id:
                     first_id = node["id"]
-                    latest_indicator_link = f"{base_url}/dashboard/observations/indicators/{first_id}"
+                    latest_indicator_link = (
+                        f"{base_url}/dashboard/observations/indicators/{first_id}"
+                    )
 
             if not latest_created_at:
                 return {
@@ -155,8 +175,16 @@ class OpenCTIEngine(BaseEngine):
 
             # Format dates
             latest_created_at = latest_created_at.split("T")[0] if latest_created_at else None
-            valid_from = indicator_data.get("valid_from", "").split("T")[0] if indicator_data.get("valid_from") else None
-            valid_until = indicator_data.get("valid_until", "").split("T")[0] if indicator_data.get("valid_until") else None
+            valid_from = (
+                indicator_data.get("valid_from", "").split("T")[0]
+                if indicator_data.get("valid_from")
+                else None
+            )
+            valid_until = (
+                indicator_data.get("valid_until", "").split("T")[0]
+                if indicator_data.get("valid_until")
+                else None
+            )
 
             return {
                 "entity_counts": entity_counts,

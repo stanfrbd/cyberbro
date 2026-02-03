@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 from bs4 import BeautifulSoup
@@ -23,7 +23,7 @@ class ChromeExtensionEngine(BaseEngine):
     def supported_types(self):
         return ["CHROME_EXTENSION"]
 
-    def _fetch_extension_name(self, url: str) -> Optional[dict[str, str]]:
+    def _fetch_extension_name(self, url: str) -> dict[str, str] | None:
         try:
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
             response.raise_for_status()
@@ -50,7 +50,7 @@ class ChromeExtensionEngine(BaseEngine):
             )
             return None
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         chrome_url = f"https://chromewebstore.google.com/detail/{observable_value}"
         edge_url = f"https://microsoftedge.microsoft.com/addons/detail/{observable_value}"
 

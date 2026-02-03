@@ -15,7 +15,8 @@
 </div>
 
 <div class="graph-controls">
-    <button class="graph-control-btn" onclick="window.location.href='/results/{{ analysis_id }}'" title="Go back to results">
+    <button class="graph-control-btn" onclick="window.location.href='/results/{{ analysis_id }}'"
+        title="Go back to results">
         <span>←</span>
     </button>
     <button class="graph-control-btn" onclick="toggleFullScreen()" title="Toggle fullscreen">
@@ -471,6 +472,44 @@
                     addNode(malware, malware, "malware", "https://img.icons8.com/officexs/32/spam.png");
                     edges.push({ from: obs, to: malware, label: "Malware" });
                 });
+            }
+
+            if (entry.rosti?.results && entry.rosti.count > 0) {
+                entry.rosti.results.forEach((rostiItem) => {
+                    const rostiNodeId = rostiItem.value || rostiItem.id || "Rösti IOC";
+                    addNode(rostiNodeId, rostiNodeId, "rosti", "https://img.icons8.com/officexs/32/inspection.png");
+                    const rostiLabel = rostiItem.type ? `Rösti (${rostiItem.type})` : "Rösti";
+                    edges.push({ from: obs, to: rostiNodeId, label: rostiLabel });
+
+                    if (rostiItem.risk?.meaning) {
+                        const riskNode = `Rösti risk: ${rostiItem.risk.meaning}`;
+                        addNode(riskNode, riskNode, "rosti_risk", "https://img.icons8.com/officexs/32/high-priority.png");
+                        edges.push({ from: rostiNodeId, to: riskNode, label: rostiItem.risk.msg || "Risk" });
+                    }
+                });
+            }
+
+            if (entry.bad_asn) {
+                const badAsnData = entry.bad_asn;
+
+                // Only create node if ASN is malicious
+                if (badAsnData.status === "malicious") {
+                    const asnLabel = `Bad ASN: ${badAsnData.asn}`;
+                    const asnId = `bad_asn_${badAsnData.asn}`;
+
+                    addNode(
+                        asnId,
+                        asnLabel,
+                        "bad_asn",
+                        "https://img.icons8.com/officexs/32/cancel.png"
+                    );
+
+                    edges.push({
+                        from: obs,
+                        to: asnId,
+                        label: badAsnData.source || "Bad ASN"
+                    });
+                }
             }
 
             if (entry.urlscan?.top_domains) {
@@ -935,69 +974,69 @@
         });
 
         data.forEach((entry) => {
-            if ((entry.type === "FQDN" || entry.type === "URL") && entry.rdap) {
-                const rdap = entry.rdap;
+            if ((entry.type === "FQDN" || entry.type === "URL") && entry.rdap_whois) {
+                const rdapWhois = entry.rdap_whois;
 
-                if (rdap.registrar) {
+                if (rdapWhois.registrar) {
                     addNode(
-                        rdap.registrar,
-                        rdap.registrar,
-                        "rdap_registrar",
+                        rdapWhois.registrar,
+                        rdapWhois.registrar,
+                        "rdap_whois_registrar",
                         "https://img.icons8.com/officexs/32/organization.png",
                     );
-                    edges.push({ from: entry.observable, to: rdap.registrar, label: "Registrar" });
+                    edges.push({ from: entry.observable, to: rdapWhois.registrar, label: "Registrar" });
                 }
 
-                if (rdap.organization) {
+                if (rdapWhois.organization) {
                     addNode(
-                        rdap.organization,
-                        rdap.organization,
-                        "rdap_organization",
+                        rdapWhois.organization,
+                        rdapWhois.organization,
+                        "rdap_whois_organization",
                         "https://img.icons8.com/officexs/32/organization.png",
                     );
-                    edges.push({ from: entry.observable, to: rdap.organization, label: "Organization" });
+                    edges.push({ from: entry.observable, to: rdapWhois.organization, label: "Organization" });
                 }
 
-                if (rdap.abuse_contact) {
+                if (rdapWhois.abuse_contact) {
                     addNode(
-                        rdap.abuse_contact,
-                        rdap.abuse_contact,
-                        "rdap_abuse_contact",
+                        rdapWhois.abuse_contact,
+                        rdapWhois.abuse_contact,
+                        "rdap_whois_abuse_contact",
                         "https://img.icons8.com/officexs/32/email.png",
                     );
-                    edges.push({ from: entry.observable, to: rdap.abuse_contact, label: "Abuse Contact" });
+                    edges.push({ from: entry.observable, to: rdapWhois.abuse_contact, label: "Abuse Contact" });
                 }
 
-                if (rdap.registrant) {
+                if (rdapWhois.registrant) {
                     addNode(
-                        rdap.registrant,
-                        rdap.registrant,
-                        "rdap_registrant",
+                        rdapWhois.registrant,
+                        rdapWhois.registrant,
+                        "rdap_whois_registrant",
                         "https://img.icons8.com/officexs/32/organization.png",
                     );
-                    edges.push({ from: entry.observable, to: rdap.registrant, label: "Registrant" });
+                    edges.push({ from: entry.observable, to: rdapWhois.registrant, label: "Registrant" });
                 }
 
-                if (rdap.registrant_email) {
+                if (rdapWhois.registrant_email) {
                     addNode(
-                        rdap.registrant_email,
-                        rdap.registrant_email,
-                        "rdap_registrant_email",
+                        rdapWhois.registrant_email,
+                        rdapWhois.registrant_email,
+                        "rdap_whois_registrant_email",
                         "https://img.icons8.com/officexs/32/email.png",
                     );
                     edges.push({
                         from: entry.observable,
-                        to: rdap.registrant_email,
+                        to: rdapWhois.registrant_email,
                         label: "Registrant Email",
                     });
                 }
 
-                if (rdap.name_servers && Array.isArray(rdap.name_servers)) {
-                    rdap.name_servers.forEach((nameServer) => {
+                if (rdapWhois.name_servers && Array.isArray(rdapWhois.name_servers)) {
+                    rdapWhois.name_servers.forEach((nameServer) => {
                         addNode(
                             nameServer,
                             nameServer,
-                            "rdap_name_server",
+                            "rdap_whois_name_server",
                             "https://img.icons8.com/officexs/32/dns.png",
                         );
                         edges.push({ from: entry.observable, to: nameServer, label: "Name Server" });
@@ -1035,6 +1074,7 @@
                 port: { color: { background: "#f5b041" } },
                 reverse_dns: { color: { background: "#d4a6ff" } },
                 malware: { color: { background: "#ffcccb" } },
+                bad_asn: { color: { background: "#ff4444" } },
             },
             physics: {
                 stabilization: false,

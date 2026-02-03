@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -22,13 +22,20 @@ class AbuseIPDBEngine(BaseEngine):
         # AbuseIPDB only supports IPs, so we want it to run AFTER any potential DNS resolution
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
         url = "https://api.abuseipdb.com/api/v2/check"
         headers = {"Key": self.secrets.abuseipdb, "Accept": "application/json"}
         params = {"ipAddress": observable_value}
 
         try:
-            response = requests.get(url, headers=headers, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            response = requests.get(
+                url,
+                headers=headers,
+                params=params,
+                proxies=self.proxies,
+                verify=self.ssl_verify,
+                timeout=5,
+            )
             response.raise_for_status()
             json_response = response.json()
 
@@ -48,4 +55,7 @@ class AbuseIPDBEngine(BaseEngine):
     def create_export_row(self, analysis_result: Any) -> dict:
         if not analysis_result:
             return {"a_ipdb_reports": None, "a_ipdb_risk": None}
-        return {"a_ipdb_reports": analysis_result.get("reports"), "a_ipdb_risk": analysis_result.get("risk_score")}
+        return {
+            "a_ipdb_reports": analysis_result.get("reports"),
+            "a_ipdb_risk": analysis_result.get("risk_score"),
+        }

@@ -3,20 +3,23 @@ function formatResults(data) {
     data.forEach(result => {
         plainText += `Observable: ${result.observable}\nType: ${result.type}\n`;
 
-        if (result.rdap) {
-            if (result.rdap) {
-                plainText += `RDAP:\n`;
-                if (result.rdap.registrar) plainText += `- Registrar: ${result.rdap.registrar}\n`;
-                if (result.rdap.abuse_contact) plainText += `- Abuse Contact: ${result.rdap.abuse_contact}\n`;
-                if (result.rdap.registrant) plainText += `- Registrant: ${result.rdap.registrant}\n`;
-                if (result.rdap.organization) plainText += `- Organization: ${result.rdap.organization}\n`;
-                if (result.rdap.registrant_email) plainText += `- Registrant Email: ${result.rdap.registrant_email}\n`;
-                if (result.rdap.creation_date) plainText += `- Creation Date: ${result.rdap.creation_date}\n`;
-                if (result.rdap.expiration_date) plainText += `- Expiration Date: ${result.rdap.expiration_date}\n`;
-                if (result.rdap.update_date) plainText += `- Updated Date: ${result.rdap.update_date}\n`;
-                if (result.rdap.name_servers && result.rdap.name_servers.length > 0) {
-                    plainText += `- Name Servers: ${result.rdap.name_servers.join(', ')}\n`;
-                }
+        if (result.rdap_whois) {
+            plainText += `RDAP / Whois:\n`;
+            if (result.rdap_whois.data_source) plainText += `- Data Source: ${result.rdap_whois.data_source}\n`;
+            if (result.rdap_whois.registrar) plainText += `- Registrar: ${result.rdap_whois.registrar}\n`;
+            if (result.rdap_whois.abuse_contact) plainText += `- Abuse Contact: ${result.rdap_whois.abuse_contact}\n`;
+            if (result.rdap_whois.registrant) plainText += `- Registrant: ${result.rdap_whois.registrant}\n`;
+            if (result.rdap_whois.organization) plainText += `- Organization: ${result.rdap_whois.organization}\n`;
+            if (result.rdap_whois.registrant_email) plainText += `- Registrant Email: ${result.rdap_whois.registrant_email}\n`;
+            if (result.rdap_whois.registrant_country) plainText += `- Registrant Country: ${result.rdap_whois.registrant_country}\n`;
+            if (result.rdap_whois.emails && result.rdap_whois.emails.length > 0) {
+                plainText += `- Emails: ${result.rdap_whois.emails.join(', ')}\n`;
+            }
+            if (result.rdap_whois.creation_date) plainText += `- Creation Date: ${result.rdap_whois.creation_date}\n`;
+            if (result.rdap_whois.expiration_date) plainText += `- Expiration Date: ${result.rdap_whois.expiration_date}\n`;
+            if (result.rdap_whois.update_date) plainText += `- Updated Date: ${result.rdap_whois.update_date}\n`;
+            if (result.rdap_whois.name_servers && result.rdap_whois.name_servers.length > 0) {
+                plainText += `- Name Servers: ${result.rdap_whois.name_servers.join(', ')}\n`;
             }
         }
 
@@ -55,6 +58,14 @@ function formatResults(data) {
             if (result.ipapi.is_proxy) plainText += `- PROXY: ${result.ipapi.is_proxy}\n`;
             if (result.ipapi.is_abuser) plainText += `- ABUSER: ${result.ipapi.is_abuser}\n`;
             if (result.ipapi.is_vpn && result.ipapi.vpn) plainText += `- VPN Service: ${result.ipapi.vpn.service}\n`;
+        }
+        if (result.bad_asn) {
+            plainText += `Bad ASN Check: Status: ${result.bad_asn.status}, Risk Score: ${result.bad_asn.risk_score || 0}/100`;
+            if (result.bad_asn.asn) plainText += `, ASN: ${result.bad_asn.asn}`;
+            if (result.bad_asn.asn_org_name) plainText += ` (${result.bad_asn.asn_org_name})`;
+            plainText += `\n`;
+            if (result.bad_asn.source) plainText += `- Source: ${result.bad_asn.source}\n`;
+            if (result.bad_asn.details) plainText += `- Details: ${result.bad_asn.details}\n`;
         }
         if (result.abuseipdb) {
             plainText += `AbuseIPDB: Reports: ${result.abuseipdb.reports}, Risk Score: ${result.abuseipdb.risk_score}\n`;
@@ -105,6 +116,25 @@ function formatResults(data) {
 
         if (result.threatfox && result.threatfox.count > 0) {
             plainText += `ThreatFox: Count: ${result.threatfox.count}, Malware: ${result.threatfox.malware_printable.join(', ')}\n`;
+        }
+        if (result.rosti) {
+            plainText += `Rösti: Matches: ${result.rosti.count || 0}\n`;
+            if (result.rosti.results && Array.isArray(result.rosti.results) && result.rosti.results.length > 0) {
+                result.rosti.results.forEach(rostiItem => {
+                    plainText += `  - ${rostiItem.value || 'value missing'}`;
+                    if (rostiItem.type) plainText += ` (${rostiItem.type})`;
+                    if (rostiItem.category) plainText += ` [${rostiItem.category}]`;
+                    if (rostiItem.date) plainText += ` on ${rostiItem.date}`;
+                    plainText += `\n`;
+                    if (rostiItem.comment) plainText += `    comment: ${rostiItem.comment}\n`;
+                    if (rostiItem.risk && rostiItem.risk.meaning) {
+                        plainText += `    risk: ${rostiItem.risk.meaning}`;
+                        if (rostiItem.risk.msg) plainText += ` (${rostiItem.risk.msg})`;
+                        plainText += `\n`;
+                    }
+                    if (rostiItem.link) plainText += `    ${rostiItem.link}\n`;
+                });
+            }
         }
         if (result.google && result.google.results.length > 0) {
             plainText += `Google:\n`;
@@ -357,8 +387,25 @@ function showToast(message, type = 'success') {
     }, 2000);
 }
 
+function resolveFetchResults() {
+    if (typeof window.fetchResults === 'function') {
+        return window.fetchResults();
+    }
+
+    const analysisId = window.location.pathname.split('/').filter(x => x).pop();
+    const apiPrefix = document.querySelector('meta[name="api-prefix"]')?.content || 'api/v1';
+    const url = `/${apiPrefix}/results/${analysisId}`;
+
+    return fetch(url).then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    });
+}
+
 function copyAsPlainText() {
-    fetchResults()
+    resolveFetchResults()
         .then(data => {
             const plainText = formatResults(data);
             return navigator.clipboard.writeText(plainText);
@@ -380,7 +427,7 @@ function formatDefanged(plainText) {
 }
 
 function copyAsDefanged() {
-    fetchResults()
+    resolveFetchResults()
         .then(data => {
             const plainText = formatResults(data);
             const defangedText = formatDefanged(plainText);
@@ -396,10 +443,10 @@ function copyAsDefanged() {
 }
 
 // Handle export form submission to show toast
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const exportForm = document.getElementById('exportForm');
     if (exportForm) {
-        exportForm.addEventListener('submit', function(e) {
+        exportForm.addEventListener('submit', function (e) {
             const submitter = e.submitter || document.activeElement;
             const format = submitter.value;
 

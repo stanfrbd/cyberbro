@@ -64,7 +64,9 @@ def update_gui_enabled_engines(secrets: Secrets, request: Request) -> list[str]:
     """
     updated_gui_enabled_engines = request.form.get("gui_enabled_engines", "")
     if updated_gui_enabled_engines:
-        enabled_engines = [engine.strip().lower() for engine in updated_gui_enabled_engines.split(",")]
+        enabled_engines = [
+            engine.strip().lower() for engine in updated_gui_enabled_engines.split(",")
+        ]
         secrets.gui_enabled_engines = enabled_engines
         return enabled_engines
     return []

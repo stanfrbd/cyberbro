@@ -1,0 +1,43 @@
+<td>
+    {% if result.bad_asn %}
+    {% if result.bad_asn.status == 'malicious' %}
+    <span
+        style="display: inline-block; background-color: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px;">⚠️
+        Listed</span><br />
+    <strong>Risk Score: </strong><span
+        style="display: inline-block; background-color: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">{{
+        result.bad_asn.risk_score | default(0)
+        }}/100</span><br />
+    <strong>ASN: </strong>{{ result.bad_asn.asn | default('Unknown') }}<br />
+    {% if result.bad_asn.asn_org_name %}
+    <strong>Org: </strong>{{ result.bad_asn.asn_org_name }}<br />
+    {% endif %}
+    <strong>Source: </strong>{{ result.bad_asn.source | default('Unknown') }}<br />
+    <strong>Details: </strong>{{ result.bad_asn.details | default('No details available') }}<br />
+    {% elif result.bad_asn.status == 'potentially_legitimate' %}
+    <span
+        style="display: inline-block; background-color: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px;">⚠️
+        Potentially Legitimate</span><br />
+    <strong>Risk Score: </strong><span
+        style="display: inline-block; background-color: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">{{
+        result.bad_asn.risk_score | default(0)
+        }}/100</span><br />
+    <strong>ASN: </strong>{{ result.bad_asn.asn | default('Unknown') }}<br />
+    {% if result.bad_asn.asn_org_name %}
+    <strong>Org: </strong>{{ result.bad_asn.asn_org_name }}<br />
+    {% endif %}
+    <strong>Source: </strong>{{ result.bad_asn.source | default('Unknown') }}<br />
+    <em style="font-size: 0.9em;">ℹ️ Legitimate provider potentially abused</em><br />
+    {% elif result.bad_asn.status == 'unlisted' %}
+    <span
+        style="display: inline-block; background-color: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">✓
+        Unlisted</span><br />
+    <strong>ASN: </strong>{{ result.bad_asn.asn | default('Unknown') }}<br />
+    <strong>Details: </strong>{{ result.bad_asn.details | default('No details available') }}<br />
+    {% else %}
+    Status unknown
+    {% endif %}
+    {% else %}
+    No ASN data available
+    {% endif %}
+</td>

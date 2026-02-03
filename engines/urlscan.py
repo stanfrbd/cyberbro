@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -17,7 +17,7 @@ class URLScanEngine(BaseEngine):
     def supported_types(self):
         return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         query_fields = {
             "IPv4": "ip",
             "IPv6": "ip",
@@ -36,6 +36,9 @@ class URLScanEngine(BaseEngine):
             else:
                 observable = observable_value
 
+            # TODO: Bug #4 - Observable values are not URL-encoded
+            # Special characters in domain/hash could break the query string
+            # Consider using: urllib.parse.quote(observable) or requests params parameter
             url = f"https://urlscan.io/api/v1/search/?q={query_field}:{observable}"
 
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
@@ -61,7 +64,9 @@ class URLScanEngine(BaseEngine):
             }
 
         except Exception as e:
-            logger.error("Error querying urlscan.io for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying urlscan.io for '%s': %s", observable_value, e, exc_info=True
+            )
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

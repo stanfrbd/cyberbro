@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -21,7 +21,7 @@ class IPQueryEngine(BaseEngine):
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             url = f"https://api.ipquery.io/{observable_value}"
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
@@ -35,7 +35,9 @@ class IPQueryEngine(BaseEngine):
 
                 return {
                     "ip": data.get("ip", "Unknown"),
-                    "geolocation": f"{location.get('city', 'Unknown')}, {location.get('state', 'Unknown')}",
+                    "geolocation": (
+                        f"{location.get('city', 'Unknown')}, {location.get('state', 'Unknown')}"
+                    ),
                     "country_code": location.get("country_code", "Unknown"),
                     "country_name": location.get("country", "Unknown"),
                     "isp": isp_data.get("isp", "Unknown"),
@@ -54,7 +56,10 @@ class IPQueryEngine(BaseEngine):
 
     def create_export_row(self, analysis_result: Any) -> dict:
         if not analysis_result:
-            return {f"ipq_{k}": None for k in ["cn", "country", "geo", "asn", "isp", "vpn", "tor", "proxy"]}
+            return {
+                f"ipq_{k}": None
+                for k in ["cn", "country", "geo", "asn", "isp", "vpn", "tor", "proxy"]
+            }
 
         return {
             "ipq_cn": analysis_result.get("country_code"),

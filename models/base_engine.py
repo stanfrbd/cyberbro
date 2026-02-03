@@ -1,5 +1,13 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Any
+
+import requests
+from tenacity import after_log, retry, stop_after_attempt, wait_exponential
+
+from utils.config import Secrets
+
+logger = logging.getLogger(__name__)
 
 
 class BaseEngine(ABC):
@@ -7,7 +15,7 @@ class BaseEngine(ABC):
     Abstract base class for all analysis engines.
     """
 
-    def __init__(self, secrets: Any, proxies: dict, ssl_verify: bool):
+    def __init__(self, secrets: Secrets, proxies: dict, ssl_verify: bool):
         self.secrets = secrets
         self.proxies = proxies
         self.ssl_verify = ssl_verify
@@ -47,6 +55,31 @@ class BaseEngine(ABC):
         Perform the analysis. Returns the raw result dictionary or None.
         """
         pass
+
+    @retry(
+        reraise=True,
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        after=after_log(logger, logging.DEBUG),
+    )
+    def _make_request(
+        self,
+        url: str,
+        headers: dict | None = None,
+        params: dict | None = None,
+        timeout: int = 10,
+    ) -> requests.Response:
+        """Request data from the engine API.
+
+        Up to 3 requests can be made before reraising the resulting
+        API exception to the calling function.
+
+        After each attempt, the delay between requests is exponentially increased
+        and a DEBUG level log message is emitted.
+        """
+        response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=timeout)
+        response.raise_for_status()
+        return response
 
     @abstractmethod
     def create_export_row(self, analysis_result: Any) -> dict:

@@ -47,27 +47,21 @@ This project aims to provide a simple and efficient way to check the reputation 
 without having to deploy a **complex** solution. Read the docs at https://docs.cyberbro.net/
 
 > [!TIP]
-> To build custom reports, use Cyberbro with your favorite **LLM** (Claude, OpenAI gpt-4o...) via **MCP** (Model Context Protocol) \
+> To build custom reports, use Cyberbro with your favorite **LLM** (Claude, OpenAI gpt-5...) via **MCP** (Model Context Protocol) \
 > Checkout [Cyberbro MCP](https://github.com/stanfrbd/mcp-cyberbro) for more information.
 
 # Demo
 
-## New graph feature
-
-![cyberbro_graph](https://github.com/user-attachments/assets/0b4e46d0-64ad-4950-8520-c5b2f5102206)
-
-## Bulk
-
-![cyberbro_gh](https://github.com/user-attachments/assets/d82a021c-a199-4f07-ab26-7af8e1b650a0)
+![graph_demo](https://github.com/user-attachments/assets/9116b9d8-ae81-4ff7-a6c3-b613929490ca)
 
 # Features
 
-* **Easy Input**: Paste raw logs or IoCs—automatic parsing and extraction.
+* **Easy Input**: Paste raw logs or IoCs-automatic parsing and extraction.
 * **Multi-Service Checks**: Reputation lookup for IPs, hashes, domains, URLs, and Chrome extension IDs across many threat intel services.
 * **Comprehensive Reports**: Advanced search, filtering, and export to CSV/Excel.
 * **Fast Processing**: Multithreaded for speed.
-* **Automated Pivoting**: Discover related domains, URLs, and IPs via reverse DNS and RDAP.
-* **Accurate Domain & Abuse Info**: ICANN RDAP and abuse contact lookups.
+* **Automated Pivoting**: Discover related domains, URLs, and IPs via reverse DNS and RDAP / Whois.
+* **Accurate Domain & Abuse Info**: RDAP / Whois and abuse contact lookups.
 * **Integrations**: Microsoft Defender for Endpoint, CrowdStrike, OpenCTI, Grep.App, Hudson Rock, and more.
 * **Proxy & Storage**: Proxy support and results stored in SQLite.
 * **History & Graphs**: Analysis history and experimental graph view.
@@ -134,6 +128,7 @@ cp secrets-sample.json secrets.json
     "proxy_url": "",
     "rl_analyze_api_key": "token_here",
     "rl_analyze_url": "https://spectra_analyse_url_here",
+    "rosti_api_key": "token_here",
     "shodan": "token_here",
     "spur_us": "token_here",
     "threatfox": "token_here",
@@ -197,16 +192,17 @@ python3 app.py
 <details>
 <summary>See all screenshots</summary>
 
-![image-analysis](https://github.com/user-attachments/assets/1331e340-e95d-4b0a-b487-f13b27f2e24d)
+<img width="1897" height="909" alt="image" src="https://github.com/user-attachments/assets/8f8da960-e42f-4357-80a0-eb5366b04686" />
 
-![image-history](https://github.com/user-attachments/assets/859c5f43-6da9-4a6a-8b64-23e5035df8a5)
+<img width="1883" height="907" alt="image" src="https://github.com/user-attachments/assets/f6dd920a-884f-47a4-b862-8f3361b0c2f6" />
 
-![image-stats](https://github.com/user-attachments/assets/c4676eb5-b6de-4611-bade-e21d9e10fcf3)
+<img width="1887" height="906" alt="image" src="https://github.com/user-attachments/assets/8bfe69af-3a9e-4e85-a38c-eb8821f1182e" />
 
 </details>
 
-![image](https://github.com/user-attachments/assets/bfff1355-51a2-496e-98c4-c5f3ea3476c8)
-![image](https://github.com/user-attachments/assets/e88dd9fd-3644-42a2-8a47-6ca6d44bf5e7)
+<img width="1788" height="1536" alt="image" src="https://github.com/user-attachments/assets/a5206515-2f5e-44db-bc50-384144c62021" />
+
+<img width="1873" height="900" alt="image" src="https://github.com/user-attachments/assets/7588ade2-9347-4497-8edd-37c5fbd8cce3" />
 
 > [!CAUTION]
 > If you intend to use this in a **production environment**, use well configured **Reverse Proxy** + **WAF** to prevent **security issues**.
@@ -230,7 +226,7 @@ python3 app.py
 * `/api/results/<analysis_id>` - Retrieve the results of a previous analysis (JSON).
 
 ```bash
-curl -X POST "http://localhost:5000/api/analyze" -H "Content-Type: application/json" -d '{"text": "20minutes.fr", "engines": ["reverse_dns", "rdap"]}'
+curl -X POST "http://localhost:5000/api/analyze" -H "Content-Type: application/json" -d '{"text": "20minutes.fr", "engines": ["reverse_dns", "rdap_whois"]}'
 ```
 
 ```json
@@ -258,9 +254,14 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 [
   {
     "observable": "20minutes.fr",
-    "rdap": {
+    "rdap_whois": {
       "abuse_contact": "",
       "creation_date": "2001-07-11",
+      "data_source": "rdap",
+      "emails": [
+        "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
+        "noc@gandi.net"
+      ],
       "expiration_date": "2028-01-08",
       "link": "https://rdap.nic.fr/domain/20minutes.fr",
       "name_servers": [
@@ -271,9 +272,10 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
       ],
       "organization": "",
       "registrant": "20 MINUTES FRANCE SAS",
-      "registrant_email": "0d6621ed24c26f0d32e2c4f76b507da9-679847@contact.gandi.net",
+      "registrant_country": "FR",
+      "registrant_email": "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
       "registrar": "GANDI",
-      "update_date": "2024-11-18"
+      "update_date": "2025-11-12"
     },
     "reverse_dns": {
       "reverse_dns": [
@@ -315,13 +317,14 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
 * [MISP](https://www.misp-project.org/)
 * [OpenCTI](https://www.opencti.io/)
-* [OpenRDAP](https://openrdap.org/api)
+* [Cyberbro Whois API](https://whois.cyberbro.net) - RDAP / Whois lookup service
 * [Phishtank](https://www.phishtank.com/)
+* [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
+* [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence
 * [Shodan](https://developer.shodan.io/)
 * [Spur.us](https://spur.us/)
 * [ThreatFox](https://threatfox.abuse.ch/api/)
 * [URLscan](https://urlscan.io/)
-* [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [WebScout](https://webscout.io/)
 

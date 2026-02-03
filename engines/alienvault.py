@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote
 
 import requests
@@ -29,7 +29,7 @@ class AlienVaultEngine(BaseEngine):
             "URL",
         ]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         """
         Queries the OTX AlienVault API for information about a given observable.
         Reuses the original maintainer's logic for querying and parsing.
@@ -59,7 +59,11 @@ class AlienVaultEngine(BaseEngine):
 
     def create_export_row(self, analysis_result: Any) -> dict:
         if not analysis_result:
-            return {"alienvault_pulses": None, "alienvault_malwares": None, "alienvault_adversary": None}
+            return {
+                "alienvault_pulses": None,
+                "alienvault_malwares": None,
+                "alienvault_adversary": None,
+            }
 
         malware_families = ", ".join(analysis_result.get("malware_families", []))
         adversaries = ", ".join(analysis_result.get("adversary", []))
@@ -88,12 +92,17 @@ def get_endpoint(artifact: str, observable_type: str) -> str | None:
     return endpoint_map.get(observable_type)
 
 
-def query_alienvault(observable_dict: dict, api_key: str, proxies: dict[str, str] | None = None, ssl_verify: bool = True) -> dict:
+def query_alienvault(
+    observable_dict: dict,
+    api_key: str,
+    proxies: dict[str, str] | None = None,
+    ssl_verify: bool = True,
+) -> dict:
     artifact: str = observable_dict["value"]
 
     # If it's a URL, extract the domain portion for searching
     if (observable_type := observable_dict["type"]) == "URL":
-        artifact: str = observable_dict["value"].split("/")[2].split(":")[0]
+        artifact = observable_dict["value"].split("/")[2].split(":")[0]
         observable_type = "FQDN"
 
     endpoint = get_endpoint(artifact, observable_type)
@@ -131,9 +140,21 @@ def parse_alienvault_response(result: dict) -> dict:
     - Related.Other (string)
     """
     report_malware_families: list[str] = []
-    report_malware_families.extend([family for family in otx_report.pulse_info.related.alienvault.malware_families if family.lower() not in map(str.lower, report_malware_families)])
+    report_malware_families.extend(
+        [
+            family
+            for family in otx_report.pulse_info.related.alienvault.malware_families
+            if family.lower() not in map(str.lower, report_malware_families)
+        ]
+    )
 
-    report_malware_families.extend([family for family in otx_report.pulse_info.related.other.malware_families if family.lower() not in map(str.lower, report_malware_families)])
+    report_malware_families.extend(
+        [
+            family
+            for family in otx_report.pulse_info.related.other.malware_families
+            if family.lower() not in map(str.lower, report_malware_families)
+        ]
+    )
 
     """
     Adversary
@@ -164,7 +185,13 @@ def parse_alienvault_response(result: dict) -> dict:
         pulse_data.append({"title": pulse.name, "url": pulse_url})
 
         # Add the pulse malware_family to the set
-        report_malware_families.extend([family.display_name for family in pulse.malware_families if family.display_name.lower() not in map(str.lower, report_malware_families)])
+        report_malware_families.extend(
+            [
+                family.display_name
+                for family in pulse.malware_families
+                if family.display_name.lower() not in map(str.lower, report_malware_families)
+            ]
+        )
 
         if pulse.adversary:
             adversary.add(pulse.adversary)

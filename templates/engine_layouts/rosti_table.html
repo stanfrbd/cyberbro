@@ -1,0 +1,69 @@
+<td>
+    {% if result.rosti and result.rosti.count > 0 %}
+    <div style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 0.5rem;"><strong>Results:</strong> {{
+        result.rosti.count }}</div>
+
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.5em;
+            font-size: 0.7rem;
+            font-weight: 600;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            margin-right: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .rosti-meta {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .rosti-meta>div {
+            margin-top: 0.15rem;
+        }
+    </style>
+
+    {% for item in result.rosti.results[:3] %}
+    <div style="margin-bottom: 0.75rem;">
+        <div>
+            {%- if item.category %}
+            <span class="badge badge-warning">{{ item.category }}</span>
+            {%- endif %}
+            {%- if item.link %}
+            <a href="{{ item.link }}" target="_blank" title="{{ item.value or 'N/A' }}">{{ item.value or 'N/A' }}</a>
+            {%- else %}
+            {{ item.value or 'N/A' }}
+            {%- endif %}
+        </div>
+
+        {%- if item.date or item.comment %}
+        <div class="rosti-meta">
+            {%- if item.date %}<div>📅 {{ item.date }}</div>{%- endif %}
+            {%- if item.comment %}<div>💬 <em>{{ item.comment }}</em></div>{%- endif %}
+        </div>
+        {%- endif %}
+    </div>
+    {% endfor %}
+
+    {% if result.rosti.results | length > 3 %}
+    <div style="color: var(--text-secondary); font-size: 0.85em; margin-top: 0.25rem;">
+        <em>+ {{ result.rosti.results | length - 3 }} more</em>
+    </div>
+    {% endif %}
+    {% elif result.rosti and result.rosti.count == 0 %}
+    Not Found
+    {% else %}
+    Not applicable
+    {% endif %}
+</td>

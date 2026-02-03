@@ -16,6 +16,7 @@ from flask_cors import CORS
 
 from models.analysis_result import AnalysisResult, db
 from utils.analysis import check_analysis_in_progress, perform_analysis
+from utils.bad_asn_manager import background_updater
 from utils.config import (
     BASE_DIR,
     Secrets,
@@ -32,7 +33,7 @@ from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
 # Canonical version string displayed in the about page and used for update checks
-VERSION: str = "v0.10.0"
+VERSION: str = "v0.11.0"
 
 
 class InvalidCachefileError(Exception):
@@ -43,7 +44,8 @@ app: Flask = Flask(__name__)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-# Enable CORS, very permisive. If you want to restrict it, you can use the origins parameter (can break the GUI)
+# Enable CORS, very permisive. If you want to restrict it, you can use
+# the origins parameter (can break the GUI)
 CORS(app)
 
 # Ensure the data directory exists
@@ -61,7 +63,8 @@ logger.debug(f"CACHE_DEFAULT_TIMEOUT: {app.config['CACHE_DEFAULT_TIMEOUT']}")
 
 cache: Cache = Cache(app)
 
-# Retrieve from secrets or default to 1MB - MAX_FORM_MEMORY_SIZE is the maximum size of the form data in bytes
+# Retrieve from secrets or default to 1MB
+# MAX_FORM_MEMORY_SIZE is the maximum size of the form data in bytes
 app.config["MAX_FORM_MEMORY_SIZE"] = secrets.max_form_memory_size
 logger.debug(f"MAX_FORM_MEMORY_SIZE: {app.config['MAX_FORM_MEMORY_SIZE']}")
 
@@ -95,6 +98,29 @@ db.init_app(app)
 # Create the database tables if they do not exist
 with app.app_context():
     db.create_all()
+
+
+def initialize_background_services():
+    """
+    Initialize background services for the application.
+
+    This function starts daemon threads for long-running background tasks:
+    - Bad ASN database updater: Periodically updates malicious ASN lists from
+      external sources (Spamhaus ASNDROP, Brianhama Bad ASN database).
+
+    These threads are marked as daemon threads, so they will automatically
+    terminate when the main application exits.
+    """
+    # Start Bad ASN background updater thread
+    # This maintains up-to-date lists of malicious ASNs for IP reputation checks
+    bad_asn_thread = threading.Thread(target=background_updater, daemon=True, name="BadASNUpdater")
+    bad_asn_thread.start()
+    logger.info("Bad ASN background updater thread started")
+
+
+# Initialize background services when the module is loaded
+# This ensures that the background services are started even when running with gunicorn
+initialize_background_services()
 
 PROXIES: dict[str, str] = {"https": secrets.proxy_url, "http": secrets.proxy_url}
 
@@ -193,12 +219,12 @@ def analyze():
     """Handle the analyze request with caching and an option to ignore cache."""
     form_data = ioc_fanger.fang(request.form.get("observables", ""))
     observables = extract_observables(form_data)
-    selected_engines = request.form.getlist("engines")
-    ignore_cache = request.args.get("ignore_cache", "false").lower() == "true"
+    selected_engines: list[str] = request.form.getlist("engines")
+    ignore_cache: bool = request.args.get("ignore_cache", "false").lower() == "true"
 
     # Generate a secure hash for form data and engines using SHA-256
-    combined_data = f"{form_data}|{','.join(selected_engines)}"
-    cache_key = f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
+    combined_data: str = f"{form_data}|{','.join(selected_engines)}"
+    cache_key: str = f"web-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
 
     if not ignore_cache:
         # Check cache
@@ -213,8 +239,10 @@ def analyze():
             ), 200
 
     # If no cache
-    analysis_id = str(uuid.uuid4())
-    threading.Thread(target=perform_analysis, args=(app, observables, selected_engines, analysis_id)).start()
+    analysis_id: str = str(uuid.uuid4())
+    threading.Thread(
+        target=perform_analysis, args=(app, observables, selected_engines, analysis_id)
+    ).start()
 
     # Generate response
     response_data = {"analysis_id": analysis_id}
@@ -300,12 +328,7 @@ def history():
     per_page = request.args.get("per_page", 20, type=int)
     time_range = request.args.get("time_range", "7d", type=str)
 
-    # Validate and restrict time_range to only 7d or 30d
-    if time_range not in ["7d", "30d"]:
-        time_range = "7d"
-
-    # Validate page and per_page
-    page, per_page, _, _ = validate_history_params(page, per_page, "observable", time_range)
+    page, per_page, _, time_range = validate_history_params(page, per_page, None, time_range)
 
     # Calculate offset
     offset = (page - 1) * per_page
@@ -314,9 +337,10 @@ def history():
     base_query = db.session.query(AnalysisResult).filter(AnalysisResult.results != [])
     base_query = apply_time_range_filter(base_query, time_range)
 
-    # Get results
     total_count = base_query.count()
-    analysis_results = base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
+    analysis_results = (
+        base_query.order_by(AnalysisResult.end_time.desc()).limit(per_page).offset(offset).all()
+    )
 
     # Calculate pagination metadata
     pagination = calculate_pagination_metadata(page, per_page, total_count)

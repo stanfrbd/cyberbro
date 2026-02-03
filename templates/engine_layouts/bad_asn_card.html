@@ -1,0 +1,59 @@
+{% if analysis_results.results[0].bad_asn and analysis_results.results[0].bad_asn.status == 'malicious' %}
+<div class="card">
+    {% elif analysis_results.results[0].bad_asn and analysis_results.results[0].bad_asn.status ==
+    'potentially_legitimate' %}
+    <div class="card">
+        {% else %}
+        <div class="card">
+            {% endif %}
+
+            <h3>Bad ASN Check</h3>
+            {% if analysis_results.results[0].bad_asn %}
+            {% if analysis_results.results[0].bad_asn.status == 'malicious' %}
+            <p><strong>Status: </strong><span
+                    style="display: inline-block; background-color: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">⚠️
+                    Listed</span></p>
+            <p><strong>Risk Score: </strong><span
+                    style="display: inline-block; background-color: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">{{
+                    analysis_results.results[0].bad_asn.risk_score | default(0) }}/100</span></p>
+            <p><strong>ASN: </strong>{{ analysis_results.results[0].bad_asn.asn | default('Unknown') }}</p>
+            {% if analysis_results.results[0].bad_asn.asn_org_name %}
+            <p><strong>Organization: </strong>{{ analysis_results.results[0].bad_asn.asn_org_name }}</p>
+            {% endif %}
+            <p><strong>Source: </strong>{{ analysis_results.results[0].bad_asn.source | default('Unknown') }}</p>
+            <p><strong>Details: </strong>{{ analysis_results.results[0].bad_asn.details | default('No details
+                available') }}</p>
+            {% elif analysis_results.results[0].bad_asn.status == 'potentially_legitimate' %}
+            <p><strong>Status: </strong><span
+                    style="display: inline-block; background-color: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">⚠️
+                    Potentially Legitimate (Abused)</span></p>
+            <p><strong>Risk Score: </strong><span
+                    style="display: inline-block; background-color: #ff9800; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">{{
+                    analysis_results.results[0].bad_asn.risk_score | default(0) }}/100</span></p>
+            <p><strong>ASN: </strong>{{ analysis_results.results[0].bad_asn.asn | default('Unknown') }}</p>
+            {% if analysis_results.results[0].bad_asn.asn_org_name %}
+            <p><strong>Organization: </strong>{{ analysis_results.results[0].bad_asn.asn_org_name }}</p>
+            {% endif %}
+            <p><strong>Source: </strong>{{ analysis_results.results[0].bad_asn.source | default('Unknown') }}</p>
+            <p><strong>Details: </strong>{{ analysis_results.results[0].bad_asn.details | default('No details
+                available') }}</p>
+            <p
+                style="background-color: rgba(33, 150, 243, 0.1); padding: 8px; border-radius: 4px; border-left: 3px solid #2196f3;">
+                <em>ℹ️ This is a legitimate cloud/hosting provider that can be abused by malicious
+                    actors. Exercise caution but verify further context.</em>
+            </p>
+            {% elif analysis_results.results[0].bad_asn.status == 'unlisted' %}
+            <p><strong>Status: </strong><span
+                    style="display: inline-block; background-color: #28a745; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold;">✓
+                    Unlisted</span></p>
+            <p><strong>ASN: </strong>{{ analysis_results.results[0].bad_asn.asn | default('Unknown') }}</p>
+            <p><strong>Details: </strong>{{ analysis_results.results[0].bad_asn.details | default('No details
+                available') }}</p>
+            {% else %}
+            <p>Status unknown</p>
+            {% endif %}
+            {% else %}
+            <p>No ASN data available (requires IP geolocation engine like ipapi, ipinfo, or ipquery. Use ipapi for best
+                results.)</p>
+            {% endif %}
+        </div>

@@ -1,6 +1,6 @@
 import base64
 import logging
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
@@ -19,7 +19,7 @@ class PhishTankEngine(BaseEngine):
     def supported_types(self):
         return ["FQDN", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         headers = {"User-Agent": "phishtank/Cyberbro"}
         observable_to_analyze = observable_value
 
@@ -52,7 +52,9 @@ class PhishTankEngine(BaseEngine):
                 return json_data["results"]
 
         except Exception as e:
-            logger.error("Error querying PhishTank for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error querying PhishTank for '%s': %s", observable_value, e, exc_info=True
+            )
 
         return None
 

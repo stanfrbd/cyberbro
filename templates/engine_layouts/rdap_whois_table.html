@@ -1,0 +1,43 @@
+<td>
+    {% if result.rdap_whois %}
+        {% if result.rdap_whois.data_source %}
+            <strong>Source: </strong>{{ result.rdap_whois.data_source | upper }}<br/>
+        {% endif %}
+        <strong>Registrar: </strong><a href="{{ result.rdap_whois.link }}" target="_blank">{{ result.rdap_whois.registrar }}</a><br/>
+        {% if result.rdap_whois.abuse_contact and result.rdap_whois.abuse_contact != "" %}
+            <strong>Abuse contact: </strong>
+            <a href="mailto:{{ result.rdap_whois.abuse_contact }}?subject=Report of abuse concerning {{ result.observable }}&body=Hello,%0D%0A%0D%0AOur team found out that your {{ result.type }} {{ result.observable }} does malicious activity.%0D%0A%0D%0APlease take actions.">{{ result.rdap_whois.abuse_contact }}</a><br/>
+        {% endif %}
+
+        {% if result.rdap_whois.registrant and result.rdap_whois.registrant != "" %}
+            <strong>Registrant: </strong> {{ result.rdap_whois.registrant }}<br/>
+        {% endif %}
+
+        {% if result.rdap_whois.organization and result.rdap_whois.organization != "" %}
+            <strong>Organization: </strong>{{ result.rdap_whois.organization }}<br/>
+        {% endif %}
+
+        {% if result.rdap_whois.registrant_email and result.rdap_whois.registrant_email != "" %}
+            <strong>Registrant email: </strong>
+            <a href="mailto:{{ result.rdap_whois.registrant_email }}?subject=Report of abuse concerning {{ result.observable }}&body=Hello,%0D%0A%0D%0AOur team found out that your {{ result.type }} {{ result.observable }} does malicious activity.%0D%0A%0D%0APlease take actions.">{{ result.rdap_whois.registrant_email }}</a><br/>
+        {% endif %}
+
+        {% if result.rdap_whois.registrant_country and result.rdap_whois.registrant_country != "" %}
+            <strong>Registrant country: </strong>{{ result.rdap_whois.registrant_country }}<br/>
+        {% endif %}
+
+        {% if result.rdap_whois.emails and result.rdap_whois.emails | length > 0 %}
+            <strong>Emails: </strong>{{ result.rdap_whois.emails | join(', ') }}<br/>
+        {% endif %}
+
+        <strong>Creation: </strong>{{ result.rdap_whois.creation_date }}<br/>
+        <strong>Expiration: </strong>{{ result.rdap_whois.expiration_date }}<br/>
+        <strong>Updated: </strong>{{ result.rdap_whois.update_date }}<br/>
+        <strong>Name servers: </strong><br/>
+        {% for ns in result.rdap_whois.name_servers %}
+            {{ ns }}<br/>
+        {% endfor %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

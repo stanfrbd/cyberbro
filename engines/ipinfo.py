@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import pycountry
 import requests
@@ -22,7 +22,7 @@ class IPInfoEngine(BaseEngine):
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             url = f"https://ipinfo.io/{observable_value}/json?token={self.secrets.ipinfo}"
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)

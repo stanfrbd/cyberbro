@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
@@ -18,7 +18,7 @@ class HudsonRockEngine(BaseEngine):
     def supported_types(self):
         return ["Email", "FQDN", "URL"]
 
-    def analyze(self, observable_value: str, observable_type: str) -> Optional[dict[str, Any]]:
+    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
         try:
             if observable_type == "URL":
                 parsed_url = urlparse(observable_value)
@@ -45,17 +45,36 @@ class HudsonRockEngine(BaseEngine):
                     if section in data:
                         for key in ["all_urls", "clients_urls", "employees_urls"]:
                             if key in data[section]:
-                                data[section][key] = [entry for entry in data[section][key] if "url" not in entry or "••" not in entry["url"]]
+                                data[section][key] = [
+                                    entry
+                                    for entry in data[section][key]
+                                    if "url" not in entry or "••" not in entry["url"]
+                                ]
+                    # REFACTOR NOTE: Line 55 accesses data[section] without checking if
+                    # section is in data. While line 45 checks `if section in data`, the
+                    # logic below (lines 53-58) executes outside that block. This can cause
+                    # KeyError if only "data" is present but not "stats" (or vice versa).
+                    # Should restructure to ensure section exists before accessing.
                     if section == "stats":
                         for key in ["clients_urls", "employees_urls"]:
                             if key in data[section]:
-                                data[section][key] = [url for url in data[section][key] if "••" not in url]
+                                data[section][key] = [
+                                    url for url in data[section][key] if "••" not in url
+                                ]
                     if "thirdPartyDomains" in data:
-                        data["thirdPartyDomains"] = [entry for entry in data["thirdPartyDomains"] if "domain" in entry and entry["domain"] is not None and "••" not in entry["domain"]]
+                        data["thirdPartyDomains"] = [
+                            entry
+                            for entry in data["thirdPartyDomains"]
+                            if "domain" in entry
+                            and entry["domain"] is not None
+                            and "••" not in entry["domain"]
+                        ]
             return data
 
         except Exception as e:
-            logger.error("Error while querying Hudson Rock for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Error while querying Hudson Rock for '%s': %s", observable_value, e, exc_info=True
+            )
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

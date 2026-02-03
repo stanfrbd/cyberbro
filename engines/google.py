@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -18,7 +18,9 @@ class GoogleCSEEngine(BaseEngine):
     def supported_types(self):
         return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL", "Email"]
 
-    def analyze(self, observable_value: str, observable_type: str, dorks: str = "") -> Optional[dict[str, Any]]:
+    def analyze(
+        self, observable_value: str, observable_type: str, dorks: str = ""
+    ) -> dict[str, Any] | None:
         # This engine requires specific secrets (CSE_CX, CSE_KEY)
         google_cse_cx = self.secrets.google_cse_cx
         google_cse_key = self.secrets.google_cse_key
@@ -35,7 +37,9 @@ class GoogleCSEEngine(BaseEngine):
             url = "https://www.googleapis.com/customsearch/v1"
             params = {"key": google_cse_key, "cx": google_cse_cx, "q": q}
 
-            resp = requests.get(url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=10)
+            resp = requests.get(
+                url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=10
+            )
 
             data = None
             try:
@@ -47,15 +51,27 @@ class GoogleCSEEngine(BaseEngine):
                 msg = "API Error"
                 if isinstance(data, dict) and "error" in data:
                     err = data.get("error", {})
-                    msg = err.get("message") or (err.get("errors", [{}])[0].get("message")) or str(err)
+                    msg = (
+                        err.get("message")
+                        or (err.get("errors", [{}])[0].get("message"))
+                        or str(err)
+                    )
                 logger.warning("Google CSE error for '%s': %s", observable_value, msg)
                 return {
-                    "results": [{"title": "API Error", "description": "Check Cyberbro logs for details", "url": ""}],
+                    "results": [
+                        {
+                            "title": "API Error",
+                            "description": "Check Cyberbro logs for details",
+                            "url": "",
+                        }
+                    ],
                     "total": 0,
                 }
 
             if data is None:
-                logger.error("Expected JSON from Google CSE for '%s' but got none.", observable_value)
+                logger.error(
+                    "Expected JSON from Google CSE for '%s' but got none.", observable_value
+                )
                 return None
 
             items = data.get("items", [])
@@ -73,9 +89,16 @@ class GoogleCSEEngine(BaseEngine):
             return {"results": search_results, "total": total_results}
 
         except requests.RequestException as e:
-            logger.error("Network error querying Google CSE for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Network error querying Google CSE for '%s': %s", observable_value, e, exc_info=True
+            )
         except Exception as e:
-            logger.error("Unexpected error querying Google CSE for '%s': %s", observable_value, e, exc_info=True)
+            logger.error(
+                "Unexpected error querying Google CSE for '%s': %s",
+                observable_value,
+                e,
+                exc_info=True,
+            )
 
         return None
 

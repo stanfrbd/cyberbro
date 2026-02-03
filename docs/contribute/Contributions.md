@@ -31,3 +31,8 @@ For details on contributing, community standards, and licensing, see:
 * Make sure to add the link to the API key guide in `docs/index.md` if relevant.
 * Make sure the engine is documented in `docs/quick-start/API-usage-and-engine-names.md`.
 * Make sure to add the page to the sidebar in `mkdocs.yml`.
+* Make sure the engine is documented in `docs/quick-start/Quick-start-&-Installation.md` in the `secrets.json` example.
+* Make sure to add any environment variable needed to `docs/quick-start/Advanced-options-for-deployment.md` in the `docker compose` example.
+* Make sure to add references in the README.md (secrets.json example and URL of the new engine in the "API and third-party services" section).
+
+Note: if you use an LLM to code, just make sure to use this list as a checklist to verify everything is covered (if something is missing, add it!).

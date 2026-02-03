@@ -38,12 +38,13 @@ DFIR_IRIS_API_KEY=token_here
 WEBSCOUT=token_here
 RL_ANALYZE_API_KEY=token_here
 RL_ANALYZE_URL=https://spectra_analyze_url_here
+ROSTI_API_KEY=token_here
 SUPERVISORD_WORKERS_COUNT=4
 SUPERVISORD_THREADS_COUNT=4
 SUPERVISORD_TIMEOUT=200
 API_PREFIX=my_api
 MAX_FORM_MEMORY_SIZE=1048576
-GUI_ENABLED_ENGINES=reverse_dns,rdap
+GUI_ENABLED_ENGINES=reverse_dns,rdap_whois
 CONFIG_PAGE_ENABLED=true
 SSL_VERIFY=true
 GUI_CACHE_TIMEOUT=1800
@@ -92,6 +93,7 @@ services:
       - OPENCTI_URL=${OPENCTI_URL:-}
       - RL_ANALYZE_API_KEY=${RL_ANALYZE_API_KEY:-}
       - RL_ANALYZE_URL=${RL_ANALYZE_URL:-}
+      - ROSTI_API_KEY=${ROSTI_API_KEY:-}
       - SHODAN=${SHODAN:-}
       - SPUR_US=${SPUR_US:-}
       - THREATFOX=${THREATFOX:-}
@@ -119,7 +121,7 @@ Example of `.env` file (note: no `"` in environment variables)
 ```
 VIRUSTOTAL=api_key_here
 ABUSEIPDB=api_key_here
-GUI_ENABLED_ENGINES=reverse_dns,rdap,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,phishtank
+GUI_ENABLED_ENGINES=reverse_dns,rdap_whois,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,phishtank
 API_CACHE_TIMEOUT=1800
 ```
 
@@ -176,12 +178,12 @@ export API_PREFIX=my_api
 
 **In `secrets.json`:**
 
-* Adding `"gui_enabled_engines": ["reverse_dns", "rdap"]` in `secrets.json` will restrict usage of these two engines in the GUI.
+* Adding `"gui_enabled_engines": ["reverse_dns", "rdap_whois"]` in `secrets.json` will restrict usage of these two engines in the GUI.
 
 **Or using environment variables:**
 
 ```bash
-export GUI_ENABLED_ENGINES=reverse_dns,rdap
+export GUI_ENABLED_ENGINES=reverse_dns,rdap_whois
 ```
 
 !!! note
@@ -189,8 +191,8 @@ export GUI_ENABLED_ENGINES=reverse_dns,rdap
 
 !!! tip
     Example: for the demo instance of cyberbro, only these engines are used:
-    `"gui_enabled_engines": ["reverse_dns", "rdap", "ipquery", "abuseipdb", "virustotal", "spur", "google_safe_browsing", "shodan", "phishtank", "threatfox", "urlscan", "google", "github", "opencti", "abusix", "hudsonrock"]`  
-    With environment variable: `GUI_ENABLED_ENGINES=reverse_dns,rdap,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,shodan,phishtank,threatfox,urlscan,google,github,opencti,abusix,hudsonrock`
+    `"gui_enabled_engines": ["reverse_dns", "rdap_whois", "ipquery", "abuseipdb", "virustotal", "spur", "google_safe_browsing", "shodan", "phishtank", "threatfox", "urlscan", "google", "github", "opencti", "abusix", "hudsonrock"]`  
+    With environment variable: `GUI_ENABLED_ENGINES=reverse_dns,rdap_whois,ipquery,abuseipdb,virustotal,spur,google_safe_browsing,shodan,phishtank,threatfox,urlscan,google,github,opencti,abusix,hudsonrock`
 
 ## SSL verification settings for requests (backend)
 

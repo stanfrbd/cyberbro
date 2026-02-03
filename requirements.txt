@@ -3,7 +3,7 @@ flask
 flask-cors
 flask-caching
 pandas
-jwt
+PyJWT
 openpyxl
 dnspython
 pycountry
@@ -15,3 +15,4 @@ ioc-fanger
 tldextract
 crowdstrike-falconpy
 beautifulsoup4
+tenacity

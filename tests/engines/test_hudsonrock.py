@@ -3,8 +3,10 @@ import logging
 import pytest
 import requests
 import responses
+from urllib.parse import quote
 
 from engines.hudsonrock import HudsonRockEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -58,7 +60,7 @@ def test_analyze_email_success_complete(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is not None
     assert result["emails"] == ["test@example.com"]
@@ -79,7 +81,7 @@ def test_analyze_email_success_minimal(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is not None
     assert result["emails"] == [email_observable]
@@ -112,7 +114,7 @@ def test_analyze_fqdn_success_complete(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert len(result["data"]["all_urls"]) == 2
@@ -152,7 +154,7 @@ def test_analyze_fqdn_with_masked_urls(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     # Verify masked URLs are removed
     assert len(result["data"]["all_urls"]) == 2
@@ -184,7 +186,7 @@ def test_analyze_fqdn_with_third_party_domains(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     # Verify null and masked domains are removed
     assert len(result["thirdPartyDomains"]) == 2
@@ -205,7 +207,7 @@ def test_analyze_empty_response(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is not None
     assert result == {}
@@ -223,7 +225,7 @@ def test_analyze_server_error_500(secrets, email_observable, caplog):
     responses.add(responses.GET, url, json={"error": "server error"}, status=500)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -242,7 +244,7 @@ def test_analyze_request_timeout(secrets, email_observable, caplog):
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -260,7 +262,7 @@ def test_analyze_invalid_json_response(secrets, email_observable, caplog):
     responses.add(responses.GET, url, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -284,12 +286,12 @@ def test_analyze_email_observable_routing(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is not None
     assert len(responses.calls) == 1
     assert "search-by-email" in responses.calls[0].request.url
-    assert f"email={email_observable}" in responses.calls[0].request.url
+    assert f"email={quote(email_observable)}" in responses.calls[0].request.url
 
 
 @responses.activate
@@ -305,12 +307,12 @@ def test_analyze_fqdn_observable_routing(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert len(responses.calls) == 1
     assert "search-by-domain" in responses.calls[0].request.url
-    assert f"domain={fqdn_observable}" in responses.calls[0].request.url
+    assert f"domain={quote(fqdn_observable)}" in responses.calls[0].request.url
 
 
 @responses.activate
@@ -326,7 +328,7 @@ def test_analyze_url_observable_simple_domain(secrets, url_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
 
     assert result is not None
     assert len(responses.calls) == 1
@@ -349,7 +351,7 @@ def test_analyze_url_observable_with_port(secrets):
         status=200,
     )
 
-    result = engine.analyze(url_with_port, "URL")
+    result = engine.analyze(url_with_port, ObservableType.URL)
 
     assert result is not None
     assert len(responses.calls) == 1
@@ -372,7 +374,7 @@ def test_analyze_url_observable_with_query_params(secrets):
         status=200,
     )
 
-    result = engine.analyze(url_with_query, "URL")
+    result = engine.analyze(url_with_query, ObservableType.URL)
 
     assert result is not None
     assert len(responses.calls) == 1
@@ -396,22 +398,13 @@ def test_analyze_url_observable_with_fragment(secrets):
         status=200,
     )
 
-    result = engine.analyze(url_with_fragment, "URL")
+    result = engine.analyze(url_with_fragment, ObservableType.URL)
 
     assert result is not None
     assert len(responses.calls) == 1
     # Fragment should NOT be included
     assert "section" not in responses.calls[0].request.url
     assert "domain=example.com" in responses.calls[0].request.url
-
-
-def test_analyze_invalid_observable_type(secrets):
-    """Test handling of unsupported observable types."""
-    engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
-
-    result = engine.analyze("some_value", "INVALID_TYPE")
-
-    assert result is None
 
 
 # ============================================================================
@@ -431,7 +424,7 @@ def test_analyze_unauthorized_401(secrets, email_observable, caplog):
     responses.add(responses.GET, url, json={"error": "unauthorized"}, status=401)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -449,7 +442,7 @@ def test_analyze_forbidden_403(secrets, email_observable, caplog):
     responses.add(responses.GET, url, json={"error": "forbidden"}, status=403)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -467,7 +460,7 @@ def test_analyze_bad_request_400(secrets, email_observable, caplog):
     responses.add(responses.GET, url, json={"error": "bad request"}, status=400)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -486,7 +479,7 @@ def test_analyze_connection_error(secrets, email_observable, caplog):
     responses.add(responses.GET, url, body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -505,7 +498,7 @@ def test_analyze_read_timeout(secrets, email_observable, caplog):
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -523,7 +516,7 @@ def test_analyze_json_decode_error(secrets, email_observable, caplog):
     responses.add(responses.GET, url, body="not valid json", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -557,7 +550,7 @@ def test_analyze_fqdn_clean_data_all_urls(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     # Should have 2 clean entries
     assert len(result["data"]["all_urls"]) == 2
@@ -590,7 +583,7 @@ def test_analyze_fqdn_clean_stats_urls(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     # Should filter masked entries
     assert len(result["stats"]["clients_urls"]) == 2
@@ -620,7 +613,7 @@ def test_analyze_email_no_cleaning_applied(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable, ObservableType.EMAIL)
 
     # Email responses should NOT have cleaning applied
     assert len(result["data"]["all_urls"]) == 2
@@ -652,7 +645,7 @@ def test_analyze_fqdn_clean_third_party_domains(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     # Should filter to only valid domains
     assert len(result["thirdPartyDomains"]) == 2
@@ -750,5 +743,5 @@ def test_engine_properties():
     engine = HudsonRockEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "hudsonrock"
-    assert engine.supported_types == ["Email", "FQDN", "URL"]
+    assert engine.supported_types is ObservableType.EMAIL | ObservableType.FQDN | ObservableType.URL
     assert engine.is_pivot_engine is False

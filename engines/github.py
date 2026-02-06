@@ -4,6 +4,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -14,13 +15,27 @@ class GitHubEngine(BaseEngine):
         return "github"
 
     @property
-    def supported_types(self):
-        return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL", "Email"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+            | ObservableType.EMAIL
+        )
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
+            params: dict[str, str] = {"q": observable_value}
             response = requests.get(
-                f"https://grep.app/api/search?q={observable_value}",
+                url="https://grep.app/api/search",
+                params=params,
                 proxies=self.proxies,
                 verify=self.ssl_verify,
                 timeout=5,

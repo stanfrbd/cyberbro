@@ -5,6 +5,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,40 +16,58 @@ class RLAnalyzeEngine(BaseEngine):
         return "rl_analyze"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
 
-    def _get_api_endpoint(self, observable: str, observable_type: str) -> str | None:
+    def _get_api_endpoint(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> str | None:
         endpoint_map = {
-            "IPv4": f"/api/network-threat-intel/ip/{observable}/report/",
-            "IPv6": f"/api/network-threat-intel/ip/{observable}/report/",
-            "FQDN": f"/api/network-threat-intel/domain/{observable}/",
-            "URL": f"/api/network-threat-intel/url/?url={urllib.parse.quote_plus(observable)}",
-            "MD5": f"/api/samples/v3/{observable}/classification/?av_scanners=1",
-            "SHA1": f"/api/samples/v3/{observable}/classification/?av_scanners=1",
-            "SHA256": f"/api/samples/v3/{observable}/classification/?av_scanners=1",
+            ObservableType.IPV4: f"/api/network-threat-intel/ip/{observable_value}/report/",
+            ObservableType.IPV6: f"/api/network-threat-intel/ip/{observable_value}/report/",
+            ObservableType.FQDN: f"/api/network-threat-intel/domain/{observable_value}/",
+            ObservableType.URL: (
+                f"/api/network-threat-intel/url/?url={urllib.parse.quote_plus(observable_value)}"
+            ),
+            ObservableType.MD5: f"/api/samples/v3/{observable_value}/classification/?av_scanners=1",
+            ObservableType.SHA1: (
+                f"/api/samples/v3/{observable_value}/classification/?av_scanners=1"
+            ),
+            ObservableType.SHA256: (
+                f"/api/samples/v3/{observable_value}/classification/?av_scanners=1"
+            ),
         }
         return endpoint_map.get(observable_type)
 
-    def _get_ui_endpoint(self, observable: str, observable_type: str) -> str | None:
+    def _get_ui_endpoint(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> str | None:
         endpoint_map = {
-            "IPv4": f"/ip/{observable}/analysis/ip/",
-            "IPv6": f"/ip/{observable}/analysis/ip/",
-            "FQDN": f"/domain/{observable}/analysis/domain/",
-            "URL": f"/url/{urllib.parse.quote_plus(observable)}/analysis/url/",
-            "MD5": f"/{observable}/",
-            "SHA1": f"/{observable}/",
-            "SHA256": f"/{observable}/",
+            ObservableType.IPV4: f"/ip/{observable_value}/analysis/ip/",
+            ObservableType.IPV6: f"/ip/{observable_value}/analysis/ip/",
+            ObservableType.FQDN: f"/domain/{observable_value}/analysis/domain/",
+            ObservableType.URL: f"/url/{urllib.parse.quote_plus(observable_value)}/analysis/url/",
+            ObservableType.MD5: f"/{observable_value}/",
+            ObservableType.SHA1: f"/{observable_value}/",
+            ObservableType.SHA256: f"/{observable_value}/",
         }
         return endpoint_map.get(observable_type)
 
     def _parse_rl_response(
-        self, result: dict, observable: str, observable_type: str, url: str
+        self, result: dict, observable_value: str, observable_type: ObservableType, url: str
     ) -> dict:
         threats: list[str] = []
-        ui_link = url + self._get_ui_endpoint(observable, observable_type)
+        ui_link = url + self._get_ui_endpoint(observable_value, observable_type)
 
-        if observable_type in ["IPv4", "IPv6", "FQDN"]:
+        if observable_type in [ObservableType.IPV4, ObservableType.IPV6, ObservableType.FQDN]:
             threats.extend([i.get("threat_name") for i in result.get("top_threats", [])])
             total_files: int = result.get("downloaded_files_statistics", {}).get("total", 0)
             malicious_files: int = result.get("downloaded_files_statistics", {}).get("malicious", 0)
@@ -81,7 +100,7 @@ class RLAnalyzeEngine(BaseEngine):
                     "link": ui_link,
                 }
 
-        elif observable_type in ["URL"]:
+        elif observable_type is ObservableType.URL:
             # NOTE: Potential issue - if "analysis" key is missing from result, this will fail
             # with AttributeError. Should defensively handle with .get("analysis", {})
             # Candidate for future remediation to match safer pattern used elsewhere.
@@ -113,7 +132,7 @@ class RLAnalyzeEngine(BaseEngine):
                     "link": ui_link,
                 }
 
-        elif observable_type in ["MD5", "SHA1", "SHA256"]:
+        elif observable_type in [ObservableType.MD5, ObservableType.SHA1, ObservableType.SHA256]:
             threats.append(result.get("classification"))
             threats.append(result.get("classification_result"))
             threats.append(result.get("classification_reason"))
@@ -145,7 +164,9 @@ class RLAnalyzeEngine(BaseEngine):
 
         return {}
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         api_key = self.secrets.rl_analyze_api_key
         rl_analyze_url = self.secrets.rl_analyze_url
 

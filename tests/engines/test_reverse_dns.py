@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from engines.reverse_dns import ReverseDNSEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -74,11 +75,11 @@ def mock_dns_answer(values):
 @pytest.mark.parametrize(
     "observable_type,observable_value",
     [
-        ("IPv4", "1.1.1.1"),
-        ("IPv6", "2001:4860:4860::8888"),
-        ("BOGON", "127.0.0.1"),
-        ("FQDN", "example.com"),
-        ("URL", "https://example.com/path"),
+        (ObservableType.IPV4, "1.1.1.1"),
+        (ObservableType.IPV6, "2001:4860:4860::8888"),
+        (ObservableType.BOGON, "127.0.0.1"),
+        (ObservableType.FQDN, "example.com"),
+        (ObservableType.URL, "https://example.com/path"),
     ],
 )
 def test_analyze_observable_type_routing(
@@ -88,12 +89,12 @@ def test_analyze_observable_type_routing(
     engine = ReverseDNSEngine(Secrets(), proxies={}, ssl_verify=True)
 
     # Mock return based on type
-    if observable_type in ["IPv4", "IPv6", "BOGON"]:
+    if observable_type in [ObservableType.IPV4, ObservableType.IPV6, ObservableType.BOGON]:
         mock_reversename.return_value = MagicMock()
         mock_resolver.return_value = mock_dns_answer(["hostname.example.com"])
-    elif observable_type == "FQDN":
+    elif observable_type == ObservableType.FQDN:
         mock_resolver.return_value = mock_dns_answer(["192.0.2.1"])
-    elif observable_type == "URL":
+    elif observable_type == ObservableType.URL:
         # URL to example.com -> A lookup
         mock_resolver.return_value = mock_dns_answer(["192.0.2.1"])
 
@@ -119,7 +120,7 @@ def test_ipv4_resolution_success_single_hostname(mock_reversename, mock_resolver
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["one.one.one.one"])
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["reverse_dns"] == ["one.one.one.one"]
@@ -138,7 +139,7 @@ def test_ipv4_resolution_success_multiple_hostnames(
     # Engine uses answer[0] so even with multiple results, only first is returned
     mock_resolver.return_value = mock_dns_answer(["host1.example.com", "host2.example.com"])
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # PTR lookups only return first result (answer[0])
@@ -157,7 +158,7 @@ def test_ipv4_resolution_not_found(mock_reversename, mock_resolver, ipv4_observa
     mock_resolver.return_value = mock_dns_answer([])
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     # Empty results cause exception, engine returns None
     assert result is None
@@ -178,7 +179,7 @@ def test_ipv6_resolution_success_single_hostname(mock_reversename, mock_resolver
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["ipv6host.example.com"])
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable, ObservableType.IPV6)
 
     assert result is not None
     assert result["reverse_dns"] == ["ipv6host.example.com"]
@@ -196,7 +197,7 @@ def test_ipv6_resolution_success_multiple_hostnames(
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["v6host1.example.com", "v6host2.example.com"])
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable, ObservableType.IPV6)
 
     assert result is not None
     # PTR lookups only return first result (answer[0])
@@ -215,7 +216,7 @@ def test_ipv6_resolution_not_found(mock_reversename, mock_resolver, ipv6_observa
     mock_resolver.return_value = mock_dns_answer([])
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(ipv6_observable, "IPv6")
+        result = engine.analyze(ipv6_observable, ObservableType.IPV6)
 
     # Empty results cause exception, engine returns None
     assert result is None
@@ -236,7 +237,7 @@ def test_bogon_resolution(mock_reversename, mock_resolver, bogon_observable):
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["localhost"])
 
-    result = engine.analyze(bogon_observable, "BOGON")
+    result = engine.analyze(bogon_observable, ObservableType.BOGON)
 
     assert result is not None
     assert result["reverse_dns"] == ["localhost"]
@@ -255,7 +256,7 @@ def test_fqdn_resolution_success_single_ip(mock_resolver, fqdn_observable):
 
     mock_resolver.return_value = mock_dns_answer(["192.0.2.1"])
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert result["reverse_dns"] == ["192.0.2.1"]
@@ -269,7 +270,7 @@ def test_fqdn_resolution_success_multiple_ips(mock_resolver, fqdn_observable):
 
     mock_resolver.return_value = mock_dns_answer(["192.0.2.1", "192.0.2.2", "192.0.2.3"])
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert len(result["reverse_dns"]) == 3
@@ -283,7 +284,7 @@ def test_fqdn_resolution_not_found(mock_resolver, fqdn_observable):
 
     mock_resolver.return_value = mock_dns_answer([])
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert result["reverse_dns"] == []
@@ -301,7 +302,7 @@ def test_url_with_domain_a_lookup(mock_resolver, url_observable):
 
     mock_resolver.return_value = mock_dns_answer(["192.0.2.1"])
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
 
     assert result is not None
     assert result["reverse_dns"] == ["192.0.2.1"]
@@ -319,7 +320,7 @@ def test_url_with_ipv4_ptr_lookup(mock_reversename, mock_resolver):
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["host.example.com"])
 
-    result = engine.analyze(url, "URL")
+    result = engine.analyze(url, ObservableType.URL)
 
     assert result is not None
     assert result["reverse_dns"] == ["host.example.com"]
@@ -338,7 +339,7 @@ def test_url_with_fqdn_and_port(mock_resolver, url_observable_with_port):
 
     mock_resolver.return_value = mock_dns_answer(["192.0.2.1"])
 
-    result = engine.analyze(url_observable_with_port, "URL")
+    result = engine.analyze(url_observable_with_port, ObservableType.URL)
 
     assert result is not None
     assert result["reverse_dns"] == ["192.0.2.1"]
@@ -355,7 +356,7 @@ def test_url_with_ipv4_and_port(mock_reversename, mock_resolver, url_observable_
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["host.example.com"])
 
-    result = engine.analyze(url_observable_with_ipv4_port, "URL")
+    result = engine.analyze(url_observable_with_ipv4_port, ObservableType.URL)
 
     assert result is not None
     assert result["reverse_dns"] == ["host.example.com"]
@@ -380,7 +381,7 @@ def test_url_with_ipv6_in_brackets(mock_is_ipv6, mock_reversename, mock_resolver
     # Engine returns None
     mock_is_ipv6.return_value = False
 
-    result = engine.analyze(url, "URL")
+    result = engine.analyze(url, ObservableType.URL)
 
     # Brackets without port don't work with current split logic - returns None
     assert result is None
@@ -402,7 +403,7 @@ def test_url_with_ipv6_and_port_in_brackets(
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["ipv6host.example.com"])
 
-    result = engine.analyze(url_observable_with_ipv6_port, "URL")
+    result = engine.analyze(url_observable_with_ipv6_port, ObservableType.URL)
 
     assert result is not None
     # If is_really_ipv6 returns True, it performs PTR lookup directly
@@ -422,7 +423,7 @@ def test_url_https_with_query_params(mock_resolver):
 
     mock_resolver.return_value = mock_dns_answer(["192.0.2.1"])
 
-    result = engine.analyze(url, "URL")
+    result = engine.analyze(url, ObservableType.URL)
 
     assert result is not None
     # Should extract example.com and perform A lookup
@@ -437,7 +438,7 @@ def test_url_http_protocol(mock_resolver):
 
     mock_resolver.return_value = mock_dns_answer(["192.0.2.5"])
 
-    result = engine.analyze(url, "URL")
+    result = engine.analyze(url, ObservableType.URL)
 
     assert result is not None
     assert result["reverse_dns"] == ["192.0.2.5"]
@@ -461,7 +462,7 @@ def test_exception_dns_nxdomain(mock_reversename, mock_resolver, ipv4_observable
     mock_resolver.side_effect = dns.exception.DNSException("NXDOMAIN")
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Reverse DNS failed" in caplog.text
@@ -479,7 +480,7 @@ def test_exception_dns_noanswer(mock_reversename, mock_resolver, ipv4_observable
     mock_resolver.side_effect = dns.exception.DNSException("NoAnswer")
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Reverse DNS failed" in caplog.text
@@ -495,7 +496,7 @@ def test_exception_generic_exception(mock_reversename, mock_resolver, ipv4_obser
     mock_resolver.side_effect = Exception("Network error")
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Reverse DNS failed" in caplog.text
@@ -515,7 +516,7 @@ def test_exception_url_fqdn_lookup(mock_resolver, fqdn_observable, caplog):
     mock_resolver.side_effect = Exception("DNS resolution failed")
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(url, "URL")
+        result = engine.analyze(url, ObservableType.URL)
 
     assert result is None
 
@@ -531,7 +532,7 @@ def test_exception_url_ipv4_lookup(mock_reversename, mock_resolver, caplog):
     mock_resolver.side_effect = Exception("DNS resolution failed")
 
     with caplog.at_level(logging.DEBUG):
-        result = engine.analyze(url, "URL")
+        result = engine.analyze(url, ObservableType.URL)
 
     assert result is None
 
@@ -545,7 +546,7 @@ def test_analyze_unsupported_type():
     """Test handling of unsupported observable type."""
     engine = ReverseDNSEngine(Secrets(), proxies={}, ssl_verify=True)
 
-    result = engine.analyze("5d41402abc4b2a76b9719d911017c592", "MD5")
+    result = engine.analyze("5d41402abc4b2a76b9719d911017c592", ObservableType.MD5)
 
     assert result is None
 
@@ -564,7 +565,7 @@ def test_create_export_row_with_complete_data(mock_reversename, mock_resolver, i
     mock_reversename.return_value = MagicMock()
     mock_resolver.return_value = mock_dns_answer(["hostname.example.com"])
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     export_row = engine.create_export_row(result)
 
     assert export_row["rev_dns"] is True
@@ -578,7 +579,7 @@ def test_create_export_row_with_empty_dns_data(mock_resolver, fqdn_observable):
 
     mock_resolver.return_value = mock_dns_answer([])
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
     export_row = engine.create_export_row(result)
 
     assert export_row["rev_dns"] is True  # Empty list is still truthy as dict exists
@@ -605,7 +606,7 @@ def test_create_export_row_with_multiple_results(mock_reversename, mock_resolver
     # PTR lookups only use first result
     mock_resolver.return_value = mock_dns_answer(["host1.example.com", "host2.example.com"])
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     export_row = engine.create_export_row(result)
 
     assert export_row["rev_dns"] is True
@@ -628,7 +629,13 @@ def test_engine_name():
 def test_engine_supported_types():
     """Test engine supported types property."""
     engine = ReverseDNSEngine(Secrets(), proxies={}, ssl_verify=True)
-    assert set(engine.supported_types) == {"IPv4", "IPv6", "BOGON", "FQDN", "URL"}
+    assert engine.supported_types is (
+        ObservableType.IPV4
+        | ObservableType.IPV6
+        | ObservableType.BOGON
+        | ObservableType.FQDN
+        | ObservableType.URL
+    )
 
 
 def test_engine_is_pivot_engine():

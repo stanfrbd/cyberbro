@@ -20,6 +20,7 @@ import responses
 
 from engines.opencti import OpenCTIEngine
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 
@@ -125,14 +126,14 @@ class TestOpenCTICredentialValidation:
         """Test analysis fails gracefully when API key is missing."""
         engine = engine_without_key
         engine.secrets.opencti_api_key = None
-        result = engine.analyze("192.0.2.1", "IPv4")
+        result = engine.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     def test_missing_opencti_url(self, engine_without_key: OpenCTIEngine) -> None:
         """Test analysis fails gracefully when URL is missing."""
         engine = engine_without_key
         engine.secrets.opencti_url = None
-        result = engine.analyze("192.0.2.1", "IPv4")
+        result = engine.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     def test_both_credentials_missing(self, engine_without_key: OpenCTIEngine) -> None:
@@ -140,7 +141,7 @@ class TestOpenCTICredentialValidation:
         engine = engine_without_key
         engine.secrets.opencti_api_key = None
         engine.secrets.opencti_url = None
-        result = engine.analyze("192.0.2.1", "IPv4")
+        result = engine.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
 
@@ -176,7 +177,7 @@ class TestOpenCTISuccessfulAnalysis:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert "entity_counts" in result
@@ -224,7 +225,7 @@ class TestOpenCTISuccessfulAnalysis:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert result["entity_counts"]["Malware"] == 1
@@ -246,7 +247,7 @@ class TestOpenCTICredentialErrors:
             status=401,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -259,7 +260,7 @@ class TestOpenCTICredentialErrors:
             status=401,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -272,7 +273,7 @@ class TestOpenCTICredentialErrors:
             status=403,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
 
@@ -281,7 +282,16 @@ class TestOpenCTIObservableTypeRouting:
 
     @pytest.mark.parametrize(
         "observable_type",
-        ["IPv4", "IPv6", "FQDN", "MD5", "SHA1", "SHA256", "URL", "CHROME_EXTENSION"],
+        [
+            ObservableType.IPV4,
+            ObservableType.IPV6,
+            ObservableType.FQDN,
+            ObservableType.MD5,
+            ObservableType.SHA1,
+            ObservableType.SHA256,
+            ObservableType.URL,
+            ObservableType.CHROME_EXTENSION,
+        ],
     )
     @responses.activate
     def test_all_observable_types(
@@ -315,16 +325,16 @@ class TestOpenCTIObservableTypeRouting:
     def test_supported_types_property(self, engine_with_key: OpenCTIEngine) -> None:
         """Test that engine returns all supported types."""
         engine = engine_with_key
-        expected_types = [
-            "CHROME_EXTENSION",
-            "FQDN",
-            "IPv4",
-            "IPv6",
-            "MD5",
-            "SHA1",
-            "SHA256",
-            "URL",
-        ]
+        expected_types = (
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
         assert engine.supported_types == expected_types
 
 
@@ -349,7 +359,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("http://example.com", "URL")
+        result = engine_with_key.analyze("http://example.com", ObservableType.URL)
         assert result is not None
 
     @responses.activate
@@ -370,7 +380,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com", "URL")
+        result = engine_with_key.analyze("https://example.com", ObservableType.URL)
         assert result is not None
 
     @responses.activate
@@ -391,7 +401,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com:8080", "URL")
+        result = engine_with_key.analyze("https://example.com:8080", ObservableType.URL)
         assert result is not None
 
     @responses.activate
@@ -412,7 +422,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com/some/path", "URL")
+        result = engine_with_key.analyze("https://example.com/some/path", ObservableType.URL)
         assert result is not None
 
     @responses.activate
@@ -433,7 +443,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://sub.example.com", "URL")
+        result = engine_with_key.analyze("https://sub.example.com", ObservableType.URL)
         assert result is not None
 
     @responses.activate
@@ -454,7 +464,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("example.com", "URL")
+        result = engine_with_key.analyze("example.com", ObservableType.URL)
         assert result is None or isinstance(result, dict)
 
     @responses.activate
@@ -475,7 +485,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https:///example.com///path", "URL")
+        result = engine_with_key.analyze("https:///example.com///path", ObservableType.URL)
         assert result is None or isinstance(result, dict)
 
     @responses.activate
@@ -496,7 +506,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com:/path", "URL")
+        result = engine_with_key.analyze("https://example.com:/path", ObservableType.URL)
         assert result is None or isinstance(result, dict)
 
 
@@ -524,7 +534,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Test Indicator"
@@ -548,7 +558,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is None
 
@@ -570,7 +580,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=401,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -591,7 +601,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=500,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -629,7 +639,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert len(responses.calls) == 1
@@ -648,7 +658,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -661,7 +671,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -684,7 +694,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is not None
         assert result["global_count"] == 0
         assert result["entity_counts"] == {}
@@ -717,7 +727,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -740,7 +750,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -764,7 +774,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -788,7 +798,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is not None
         assert result["entity_counts"] == {}
         assert result["latest_created_at"] is None
@@ -826,7 +836,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Complete Indicator"
@@ -860,7 +870,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Partial Indicator"
@@ -894,7 +904,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Null Value Indicator"
@@ -919,7 +929,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
 
         assert result is None
 
@@ -941,7 +951,7 @@ class TestOpenCTIHTTPErrors:
             status=status_code,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -953,7 +963,7 @@ class TestOpenCTIHTTPErrors:
             body=ConnectionError("Connection timeout"),
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
     @responses.activate
@@ -965,7 +975,7 @@ class TestOpenCTIHTTPErrors:
             body=ConnectionRefusedError("Connection refused"),
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze("192.0.2.1", ObservableType.IPV4)
         assert result is None
 
 

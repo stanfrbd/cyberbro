@@ -7,12 +7,13 @@ Requires ASN data from other engines (ipapi, ipinfo, ipquery).
 import logging
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 from utils.bad_asn_manager import check_asn
 
 logger = logging.getLogger(__name__)
 
 # Keywords to identify legitimate cloud/hosting providers that can be abused
-LEGITIMATE_PROVIDER_KEYWORDS = [
+LEGITIMATE_PROVIDER_KEYWORDS: set[str] = {
     "amazon",
     "aws",
     "google",
@@ -31,10 +32,10 @@ LEGITIMATE_PROVIDER_KEYWORDS = [
     "rackspace",
     "contabo",
     "scaleway",
-]
+}
 
 # High-risk countries for cybersecurity threats
-HIGH_RISK_COUNTRIES = [
+HIGH_RISK_COUNTRIES: set[str] = {
     "RU",
     "CN",
     "UA",
@@ -55,7 +56,7 @@ HIGH_RISK_COUNTRIES = [
     "LT",
     "AL",
     "EE",  # India, Hong Kong, Turkey, Indonesia, Lithuania, Albania, Estonia
-]
+}
 
 
 def is_legitimate_provider(source_description: str) -> bool:
@@ -168,9 +169,8 @@ class BadASNEngine(BaseEngine):
         return "bad_asn"
 
     @property
-    def supported_types(self) -> list[str]:
-        """Supports IPv4 and IPv6 addresses."""
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self) -> bool:
@@ -181,7 +181,7 @@ class BadASNEngine(BaseEngine):
         return True
 
     def analyze(
-        self, observable_value: str, observable_type: str, context: dict | None = None
+        self, observable_value: str, observable_type: ObservableType, context: dict | None = None
     ) -> dict | None:
         """
         Check if the IP's ASN is listed in bad ASN databases.

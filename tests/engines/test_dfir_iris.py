@@ -6,6 +6,7 @@ import requests
 import responses
 
 from engines.dfir_iris import DFIRIrisEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -95,7 +96,7 @@ def test_analyze_success_ipv4_with_credentials(secrets_with_both_keys, ipv4_obse
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["reports"] == 2
@@ -116,7 +117,7 @@ def test_analyze_missing_api_key(secrets_without_api_key, ipv4_observable, caplo
     responses.add(responses.POST, url, json={"error": "unauthorized"}, status=401)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -128,7 +129,7 @@ def test_analyze_missing_iris_url(secrets_without_url, ipv4_observable, caplog):
     engine = DFIRIrisEngine(secrets_without_url, proxies={}, ssl_verify=True)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     # URL construction will fail with empty URL
     assert result is None
@@ -144,7 +145,7 @@ def test_analyze_unauthorized_401(secrets_with_both_keys, ipv4_observable, caplo
     responses.add(responses.POST, url, json={"error": "unauthorized"}, status=401)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -159,7 +160,7 @@ def test_analyze_forbidden_403(secrets_with_both_keys, ipv4_observable, caplog):
     responses.add(responses.POST, url, json={"error": "forbidden"}, status=403)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -174,7 +175,7 @@ def test_analyze_response_missing_data_key(secrets_with_both_keys, ipv4_observab
     mock_resp = {"error": "No data"}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
 
@@ -188,7 +189,7 @@ def test_analyze_response_empty_data(secrets_with_both_keys, ipv4_observable):
     mock_resp = {"data": []}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
 
@@ -209,7 +210,7 @@ def test_analyze_success_with_duplicate_links(secrets_with_both_keys, ipv4_obser
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Should only have 2 unique links even though 3 case_ids
@@ -231,7 +232,7 @@ def test_analyze_ipv4_prefix_wildcard(secrets_with_both_keys, ipv4_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Verify the request body contained prefix wildcard
@@ -249,7 +250,7 @@ def test_analyze_ipv6_prefix_wildcard(secrets_with_both_keys, ipv6_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable, ObservableType.IPV6)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -265,7 +266,7 @@ def test_analyze_md5_prefix_wildcard(secrets_with_both_keys, md5_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(md5_observable, "MD5")
+    result = engine.analyze(md5_observable, ObservableType.MD5)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -281,7 +282,7 @@ def test_analyze_sha1_prefix_wildcard(secrets_with_both_keys, sha1_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(sha1_observable, "SHA1")
+    result = engine.analyze(sha1_observable, ObservableType.SHA1)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -297,7 +298,7 @@ def test_analyze_sha256_prefix_wildcard(secrets_with_both_keys, sha256_observabl
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(sha256_observable, "SHA256")
+    result = engine.analyze(sha256_observable, ObservableType.SHA256)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -313,7 +314,7 @@ def test_analyze_bogon_prefix_wildcard(secrets_with_both_keys, bogon_observable)
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(bogon_observable, "BOGON")
+    result = engine.analyze(bogon_observable, ObservableType.BOGON)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -329,7 +330,7 @@ def test_analyze_fqdn_suffix_wildcard(secrets_with_both_keys, fqdn_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -346,7 +347,7 @@ def test_analyze_url_suffix_wildcard(secrets_with_both_keys, url_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
 
     assert result is not None
     request_body = json.loads(responses.calls[0].request.body)
@@ -368,7 +369,7 @@ def test_analyze_http_error_500(secrets_with_both_keys, ipv4_observable, caplog)
     responses.add(responses.POST, url, json={"error": "server error"}, status=500)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -383,7 +384,7 @@ def test_analyze_invalid_json_response(secrets_with_both_keys, ipv4_observable, 
     responses.add(responses.POST, url, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -399,7 +400,7 @@ def test_analyze_connection_error(secrets_with_both_keys, ipv4_observable, caplo
     responses.add(responses.POST, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -423,7 +424,7 @@ def test_analyze_multiple_cases_sorted(secrets_with_both_keys, ipv4_observable):
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["reports"] == 4
@@ -442,7 +443,7 @@ def test_analyze_request_timeout(secrets_with_both_keys, ipv4_observable, caplog
     responses.add(responses.POST, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying DFIR-IRIS" in caplog.text
@@ -507,7 +508,16 @@ def test_engine_properties():
     engine = DFIRIrisEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "dfir_iris"
-    expected_types = ["BOGON", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    expected_types = (
+        ObservableType.BOGON
+        | ObservableType.FQDN
+        | ObservableType.IPV4
+        | ObservableType.IPV6
+        | ObservableType.MD5
+        | ObservableType.SHA1
+        | ObservableType.SHA256
+        | ObservableType.URL
+    )
     assert engine.supported_types == expected_types
     assert engine.execute_after_reverse_dns is False
     assert engine.is_pivot_engine is False
@@ -522,7 +532,7 @@ def test_analyze_authorization_header_format(secrets_with_both_keys, ipv4_observ
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Verify Authorization header format
@@ -539,7 +549,7 @@ def test_analyze_content_type_header(secrets_with_both_keys, ipv4_observable):
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Verify Content-Type header
@@ -556,7 +566,7 @@ def test_analyze_url_includes_cid_parameter(secrets_with_both_keys, ipv4_observa
     mock_resp = {"data": [{"case_id": 1}]}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Verify the request was made to the correct URL

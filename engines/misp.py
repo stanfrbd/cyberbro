@@ -6,6 +6,7 @@ from urllib.parse import quote
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -16,30 +17,40 @@ class MISPEngine(BaseEngine):
         return "misp"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
 
-    def _map_observable_type(self, observable_type: str) -> str:
+    def _map_observable_type(self, observable_type: ObservableType) -> str | list[str]:
         mapping = {
-            "URL": "url",
-            "IPv4": ["ip-dst", "ip-src", "ip-src|port", "ip-dst|port", "domain|ip"],
-            "IPv6": ["ip-dst", "ip-src", "ip-src|port", "ip-dst|port", "domain|ip"],
-            "FQDN": ["domain", "domain|ip", "hostname", "hostname|port"],
-            "SHA256": "sha256",
-            "SHA1": "sha1",
-            "MD5": "md5",
+            ObservableType.URL: "url",
+            ObservableType.IPV4: ["ip-dst", "ip-src", "ip-src|port", "ip-dst|port", "domain|ip"],
+            ObservableType.IPV6: ["ip-dst", "ip-src", "ip-src|port", "ip-dst|port", "domain|ip"],
+            ObservableType.FQDN: ["domain", "domain|ip", "hostname", "hostname|port"],
+            ObservableType.SHA256: "sha256",
+            ObservableType.SHA1: "sha1",
+            ObservableType.MD5: "md5",
         }
         return mapping.get(observable_type, "")
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
-        api_key = self.secrets.misp_api_key
-        misp_url = self.secrets.misp_url
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
+        api_key: str = self.secrets.misp_api_key
+        misp_url: str = self.secrets.misp_url
+
+        if not api_key or not misp_url:
+            logger.error("MISP API key or URL is required")
+            return None
 
         try:
-            if not api_key or not misp_url:
-                logger.error("MISP API key or URL is required")
-                return None
-
             misp_url = misp_url.rstrip("/")
             url = f"{misp_url}/attributes/restSearch"
             headers = {

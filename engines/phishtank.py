@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -16,14 +17,16 @@ class PhishTankEngine(BaseEngine):
         return "phishtank"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "URL"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.FQDN | ObservableType.URL
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         headers = {"User-Agent": "phishtank/Cyberbro"}
         observable_to_analyze = observable_value
 
-        if observable_type == "FQDN":
+        if observable_type is ObservableType.FQDN:
             observable_to_analyze = f"http://{observable_value}"
 
         # Ensure URL has a path (e.g., adds / to http://domain.com)

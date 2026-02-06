@@ -9,6 +9,7 @@ import requests
 import responses
 
 from engines.spur_us import SpurUSEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 # ============================================================================
@@ -145,7 +146,7 @@ class TestCredentialPathSelection:
             json={"tunnels": [{"operator": "Acme"}], "country": "US"},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
         assert "data" in result
         assert result["data"]["country"] == "US"
@@ -156,7 +157,7 @@ class TestCredentialPathSelection:
     ) -> None:
         """With empty API key, fallback path should be taken."""
         engine = SpurUSEngine(secrets_with_empty_key, proxies={}, ssl_verify=True)
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
         assert "data" not in result
         assert result["tunnels"] == "Unknown - Behind Captcha"
@@ -167,7 +168,7 @@ class TestCredentialPathSelection:
     ) -> None:
         """With whitespace API key, fallback path should be taken (Bug #1 fix)."""
         engine = SpurUSEngine(secrets_with_whitespace_key, proxies={}, ssl_verify=True)
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
         assert "data" not in result
         assert result["tunnels"] == "Unknown - Behind Captcha"
@@ -178,7 +179,7 @@ class TestCredentialPathSelection:
     ) -> None:
         """With None API key, fallback path should be taken."""
         engine = SpurUSEngine(secrets_with_none_key, proxies={}, ssl_verify=True)
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
         assert "data" not in result
         assert result["tunnels"] == "Unknown - Behind Captcha"
@@ -195,7 +196,7 @@ class TestCredentialPathSelection:
             json={"tunnels": []},
             status=200,
         )
-        engine.analyze(ipv4_observable, "IPv4")
+        engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert len(responses.calls) == 1
         assert responses.calls[0].request.headers.get("Token") == "valid-api-key-12345"
 
@@ -211,7 +212,7 @@ class TestCredentialPathSelection:
             json={"tunnels": []},
             status=200,
         )
-        engine.analyze(ipv4_observable, "IPv4")
+        engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert "api.spur.us" in responses.calls[0].request.url
 
 
@@ -221,7 +222,11 @@ class TestObservableTypes:
     @responses.activate
     @pytest.mark.parametrize(
         "obs_type,obs_value",
-        [("IPv4", "1.2.3.4"), ("IPv6", "::1"), ("IPv6", "2001:db8::1")],
+        [
+            (ObservableType.IPV4, "1.2.3.4"),
+            (ObservableType.IPV6, "::1"),
+            (ObservableType.IPV6, "2001:db8::1"),
+        ],
     )
     def test_both_ip_types_construct_correct_urls(
         self, secrets_with_valid_key: Secrets, obs_type: str, obs_value: str
@@ -254,7 +259,7 @@ class TestHTTPErrorResponses:
             "https://api.spur.us/v2/context/1.2.3.4",
             status=status_code,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "data" not in result
@@ -269,7 +274,7 @@ class TestHTTPErrorResponses:
             json={"error": "Unauthorized"},
             status=401,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
 
     @responses.activate
@@ -282,7 +287,7 @@ class TestHTTPErrorResponses:
             json={"error": "Forbidden"},
             status=403,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
 
 
@@ -301,7 +306,7 @@ class TestSuccessfulAPIResponse:
             json={"tunnels": [{"operator": "Acme"}], "country": "US"},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert set(result.keys()) == {"link", "tunnels", "data"}
 
     @responses.activate
@@ -316,7 +321,7 @@ class TestSuccessfulAPIResponse:
             json={"tunnels": []},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["link"] == "https://spur.us/context/1.2.3.4"
 
     @responses.activate
@@ -336,7 +341,7 @@ class TestSuccessfulAPIResponse:
             json=api_data,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["data"] == api_data
 
 
@@ -372,7 +377,7 @@ class TestTunnelExtraction:
             json={"tunnels": tunnel_data},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == expected_operator
 
     @responses.activate
@@ -390,7 +395,7 @@ class TestTunnelExtraction:
             json=api_response_multiple_tunnels,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "First Operator"
 
     @responses.activate
@@ -408,7 +413,7 @@ class TestTunnelExtraction:
             json=api_response_empty_operator,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Not anonymous"
 
     @responses.activate
@@ -425,7 +430,7 @@ class TestTunnelExtraction:
             json={"tunnels": [{"operator": ""}]},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Not anonymous"
 
     @responses.activate
@@ -443,7 +448,7 @@ class TestTunnelExtraction:
             json=api_response_no_operator,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Not anonymous"
 
     @responses.activate
@@ -461,7 +466,7 @@ class TestTunnelExtraction:
             json=api_response_empty_tunnels,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Not anonymous"
 
     @responses.activate
@@ -479,7 +484,7 @@ class TestTunnelExtraction:
             json=api_response_no_tunnels_field,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Not anonymous"
 
 
@@ -503,7 +508,7 @@ class TestInvalidTunnelDataStructures:
             json={"tunnels": None},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Not anonymous"
 
     @responses.activate
@@ -519,7 +524,7 @@ class TestInvalidTunnelDataStructures:
             json={"tunnels": "string-not-list"},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "Error querying spur.us" in caplog.text
 
@@ -536,7 +541,7 @@ class TestInvalidTunnelDataStructures:
             json={"tunnels": {"invalid": "structure"}},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "Error querying spur.us" in caplog.text
 
@@ -560,7 +565,7 @@ class TestRequestExceptions:
             "https://api.spur.us/v2/context/1.2.3.4",
             body=requests.ConnectTimeout("Connection timeout"),
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "Error querying spur.us" in caplog.text
 
@@ -576,7 +581,7 @@ class TestRequestExceptions:
             "https://api.spur.us/v2/context/1.2.3.4",
             body=requests.ConnectionError("Connection failed"),
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "Error querying spur.us" in caplog.text
 
@@ -592,7 +597,7 @@ class TestRequestExceptions:
             "https://api.spur.us/v2/context/1.2.3.4",
             body=Exception("Generic error"),
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "Error querying spur.us" in caplog.text
 
@@ -613,7 +618,7 @@ class TestJSONParsingErrors:
             body="not valid json {{{",
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["tunnels"] == "Unknown - Behind Captcha"
         assert "Error querying spur.us" in caplog.text
 
@@ -675,7 +680,7 @@ class TestCreateExportRow:
             json={"tunnels": []},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         export_row = engine.create_export_row(result)
         assert export_row == {"spur_us_anon": "Not anonymous"}
 
@@ -693,7 +698,7 @@ class TestEngineProperties:
         """Supported types should be IPv4 and IPv6."""
         mock_secrets = Mock(spec=Secrets)
         engine = SpurUSEngine(mock_secrets, proxies={}, ssl_verify=True)
-        assert engine.supported_types == ["IPv4", "IPv6"]
+        assert engine.supported_types is ObservableType.IPV4 | ObservableType.IPV6
         assert len(engine.supported_types) == 2
 
     def test_execute_after_reverse_dns(self) -> None:
@@ -724,7 +729,7 @@ class TestEdgeCasesAndConfiguration:
             json={"tunnels": []},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
 
     @responses.activate
@@ -739,7 +744,7 @@ class TestEdgeCasesAndConfiguration:
             json={"tunnels": []},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
 
     @responses.activate
@@ -754,7 +759,7 @@ class TestEdgeCasesAndConfiguration:
             json={"tunnels": []},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result is not None
 
     @responses.activate
@@ -769,7 +774,7 @@ class TestEdgeCasesAndConfiguration:
             json={"tunnels": [{"operator": "Test"}], "country": "US"},
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert isinstance(result, dict)
         assert all(k in result for k in ["link", "tunnels", "data"])
 
@@ -779,7 +784,7 @@ class TestEdgeCasesAndConfiguration:
     ) -> None:
         """Fallback response should have consistent structure."""
         engine = SpurUSEngine(secrets_with_empty_key, proxies={}, ssl_verify=True)
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert isinstance(result, dict)
         assert all(k in result for k in ["link", "tunnels"])
         assert "data" not in result
@@ -791,7 +796,7 @@ class TestEdgeCasesAndConfiguration:
     ) -> None:
         """IPv4 and IPv6 should follow same logic."""
         engine = SpurUSEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-        obs_type = "IPv6" if ":" in obs_value else "IPv4"
+        obs_type = ObservableType.IPV6 if ":" in obs_value else ObservableType.IPV4
         responses.add(
             responses.GET,
             f"https://api.spur.us/v2/context/{obs_value}",
@@ -821,5 +826,5 @@ class TestEdgeCasesAndConfiguration:
             json=api_response,
             status=200,
         )
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
         assert result["data"] == api_response

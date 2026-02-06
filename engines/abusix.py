@@ -4,6 +4,7 @@ from typing import Any
 import querycontacts
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,14 +16,16 @@ class AbusixEngine(BaseEngine):
 
     @property
     def supported_types(self):
-        return ["IPv4", "IPv6"]
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         # IP-only engine, runs after potential IP pivot
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, str] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, str] | None:
         try:
             results = querycontacts.ContactFinder().find(observable_value)
             if not results:

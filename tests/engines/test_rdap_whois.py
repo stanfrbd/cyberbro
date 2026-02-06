@@ -4,6 +4,7 @@ import pytest
 import responses
 
 from engines.rdap_whois import RDAPWhoisEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -196,7 +197,7 @@ class TestEngineProperties:
         assert engine.name == "rdap_whois"
 
     def test_supported_types(self, engine):
-        assert engine.supported_types == ["FQDN", "URL"]
+        assert engine.supported_types is ObservableType.FQDN | ObservableType.URL
 
     def test_not_pivot_engine(self, engine):
         assert engine.is_pivot_engine is False
@@ -214,7 +215,7 @@ class TestSuccessfulAnalysis:
         """Test successful FQDN analysis with RDAP data source."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze(fqdn_observable, "FQDN")
+        result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
         assert result is not None
         assert result["registrar"] == "GANDI"
@@ -240,7 +241,7 @@ class TestSuccessfulAnalysis:
         """Test successful URL analysis - domain extracted from URL."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("https://www.20minutes.fr/news/article", "URL")
+        result = engine.analyze("https://www.20minutes.fr/news/article", ObservableType.URL)
 
         assert result is not None
         assert result["registrar"] == "GANDI"
@@ -251,7 +252,7 @@ class TestSuccessfulAnalysis:
         """Test successful analysis with WHOIS data source (API fallback)."""
         responses.add(responses.POST, API_URL, json=complete_whois_response, status=200)
 
-        result = engine.analyze("equans.pt", "FQDN")
+        result = engine.analyze("equans.pt", ObservableType.FQDN)
 
         assert result is not None
         assert result["data_source"] == "whois"
@@ -268,7 +269,7 @@ class TestSuccessfulAnalysis:
         """Test analysis with minimal data (many null fields)."""
         responses.add(responses.POST, API_URL, json=minimal_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
 
         assert result is not None
         assert result["registrar"] == "Example Registrar"
@@ -291,7 +292,7 @@ class TestDomainExtraction:
         """Subdomain should be stripped to registered domain."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("sub.domain.example.com", "FQDN")
+        result = engine.analyze("sub.domain.example.com", ObservableType.FQDN)
         assert result is not None
         # Verify the POST was made with just the registered domain
         assert responses.calls[0].request.body is not None
@@ -301,7 +302,7 @@ class TestDomainExtraction:
         """URL with port should have port stripped during domain extraction."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("https://example.com:8443/path", "URL")
+        result = engine.analyze("https://example.com:8443/path", ObservableType.URL)
         assert result is not None
 
     @responses.activate
@@ -309,12 +310,12 @@ class TestDomainExtraction:
         """URL with deep path should correctly extract domain."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("https://example.com/a/b/c?q=1", "URL")
+        result = engine.analyze("https://example.com/a/b/c?q=1", ObservableType.URL)
         assert result is not None
 
     def test_invalid_domain_returns_none(self, engine):
         """Domain that tldextract can't parse returns None."""
-        result = engine.analyze("notadomain", "FQDN")
+        result = engine.analyze("notadomain", ObservableType.FQDN)
         assert result is None
 
 
@@ -323,15 +324,15 @@ class TestDomainExtraction:
 
 class TestObservableTypeRouting:
     def test_unsupported_type_ipv4(self, engine):
-        result = engine.analyze("1.2.3.4", "IPv4")
+        result = engine.analyze("1.2.3.4", ObservableType.IPV4)
         assert result is None
 
     def test_unsupported_type_hash(self, engine):
-        result = engine.analyze("d41d8cd98f00b204e9800998ecf8427e", "MD5")
+        result = engine.analyze("d41d8cd98f00b204e9800998ecf8427e", ObservableType.MD5)
         assert result is None
 
     def test_unsupported_type_email(self, engine):
-        result = engine.analyze("test@example.com", "EMAIL")
+        result = engine.analyze("test@example.com", ObservableType.EMAIL)
         assert result is None
 
 
@@ -352,7 +353,7 @@ class TestNameServerHandling:
         }
         responses.add(responses.POST, API_URL, json=api_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is not None
         assert result["name_servers"] == ["ns1.example.com", "ns2.example.com"]
 
@@ -369,7 +370,7 @@ class TestNameServerHandling:
         }
         responses.add(responses.POST, API_URL, json=api_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is not None
         assert len(result["name_servers"]) == 2
 
@@ -393,7 +394,7 @@ class TestLinkFallback:
         }
         responses.add(responses.POST, API_URL, json=api_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result["link"] == "https://rdap.example.com/domain/example.com"
 
     @responses.activate
@@ -411,7 +412,7 @@ class TestLinkFallback:
         }
         responses.add(responses.POST, API_URL, json=api_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result["link"] == "https://registrar.com"
 
     @responses.activate
@@ -429,7 +430,7 @@ class TestLinkFallback:
         }
         responses.add(responses.POST, API_URL, json=api_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result["link"] == ""
 
 
@@ -447,7 +448,7 @@ class TestAPIErrorHandling:
             status=400,
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -460,7 +461,7 @@ class TestAPIErrorHandling:
             status=404,
         )
 
-        result = engine.analyze("nonexistent.com", "FQDN")
+        result = engine.analyze("nonexistent.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -473,7 +474,7 @@ class TestAPIErrorHandling:
             status=503,
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -486,7 +487,7 @@ class TestAPIErrorHandling:
             status=500,
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -499,7 +500,7 @@ class TestAPIErrorHandling:
             status=200,
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -511,7 +512,7 @@ class TestAPIErrorHandling:
             body=ConnectionError("Connection refused"),
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -525,7 +526,7 @@ class TestAPIErrorHandling:
             body=Timeout("Request timed out"),
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
     @responses.activate
@@ -539,7 +540,7 @@ class TestAPIErrorHandling:
             content_type="text/plain",
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result is None
 
 
@@ -552,7 +553,7 @@ class TestRequestVerification:
         """Verify POST method is used (not GET)."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        engine.analyze("example.com", "FQDN")
+        engine.analyze("example.com", ObservableType.FQDN)
 
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == "POST"
@@ -562,7 +563,7 @@ class TestRequestVerification:
         """Verify User-Agent header is set to 'Cyberbro'."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        engine.analyze("example.com", "FQDN")
+        engine.analyze("example.com", ObservableType.FQDN)
 
         assert responses.calls[0].request.headers["User-Agent"] == "Cyberbro"
 
@@ -571,7 +572,7 @@ class TestRequestVerification:
         """Verify Content-Type is application/json."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        engine.analyze("example.com", "FQDN")
+        engine.analyze("example.com", ObservableType.FQDN)
 
         assert "application/json" in responses.calls[0].request.headers["Content-Type"]
 
@@ -582,7 +583,7 @@ class TestRequestVerification:
 
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        engine.analyze("example.com", "FQDN")
+        engine.analyze("example.com", ObservableType.FQDN)
 
         body = json.loads(responses.calls[0].request.body)
         assert body["domain"] == "example.com"
@@ -594,7 +595,7 @@ class TestRequestVerification:
 
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        engine.analyze("sub.domain.example.com", "FQDN")
+        engine.analyze("sub.domain.example.com", ObservableType.FQDN)
 
         body = json.loads(responses.calls[0].request.body)
         assert body["domain"] == "example.com"
@@ -609,7 +610,7 @@ class TestDataSource:
         """Verify data_source is correctly set for RDAP responses."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("20minutes.fr", "FQDN")
+        result = engine.analyze("20minutes.fr", ObservableType.FQDN)
         assert result["data_source"] == "rdap"
 
     @responses.activate
@@ -617,7 +618,7 @@ class TestDataSource:
         """Verify data_source is correctly set for WHOIS responses."""
         responses.add(responses.POST, API_URL, json=complete_whois_response, status=200)
 
-        result = engine.analyze("equans.pt", "FQDN")
+        result = engine.analyze("equans.pt", ObservableType.FQDN)
         assert result["data_source"] == "whois"
 
 
@@ -630,7 +631,7 @@ class TestEmailsArray:
         """Multiple emails should be preserved as array."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("20minutes.fr", "FQDN")
+        result = engine.analyze("20minutes.fr", ObservableType.FQDN)
         assert isinstance(result["emails"], list)
         assert len(result["emails"]) == 2
 
@@ -639,7 +640,7 @@ class TestEmailsArray:
         """WHOIS response can have more emails from different contacts."""
         responses.add(responses.POST, API_URL, json=complete_whois_response, status=200)
 
-        result = engine.analyze("equans.pt", "FQDN")
+        result = engine.analyze("equans.pt", ObservableType.FQDN)
         assert len(result["emails"]) == 3
 
     @responses.activate
@@ -647,7 +648,7 @@ class TestEmailsArray:
         """Empty emails array should be handled."""
         responses.add(responses.POST, API_URL, json=minimal_response, status=200)
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
         assert result["emails"] == []
 
 

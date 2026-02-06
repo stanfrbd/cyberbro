@@ -5,6 +5,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,13 +16,15 @@ class ThreatFoxEngine(BaseEngine):
         return "threatfox"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "IPv4", "IPv6", "URL"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.FQDN | ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.URL
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
             # If it's a URL, use the domain portion
-            if observable_type == "URL":
+            if observable_type is ObservableType.URL:
                 domain_part = observable_value.split("/")[2].split(":")[0]
                 observable = domain_part
             else:

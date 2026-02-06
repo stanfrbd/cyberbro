@@ -4,9 +4,11 @@ import socket
 
 import tldextract
 
-# List of valid TLDs that can lead to false positives
+from models.observable import ObservableType
+
+# Set of valid TLDs that can lead to false positives
 # Edit this list to add more invalid TLDs or in case of false positives
-INVALID_TLD = [
+INVALID_TLD: set[str] = {
     "doc",
     "xls",
     "xlsb",
@@ -93,56 +95,57 @@ INVALID_TLD = [
     "iso",
     "crx",
     "config",
-]
+}
 
 
-def identify_observable_type(observable):
+def identify_observable_type(observable) -> ObservableType | str:
     """testing the observable against a set of patterns to identify its type"""
     patterns = {
-        "IPv4": r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$",
-        "IPv6": r"^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$",
-        "MD5": r"^[a-fA-F0-9]{32}$",
-        "SHA1": r"^[a-fA-F0-9]{40}$",
-        "SHA256": r"^[a-fA-F0-9]{64}$",
-        "Email": r"^[\w\.-]+@[\w\.-]+\.\w+$",
-        "FQDN": r"^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$",
-        "URL": r"^(https?|ftp)://[^\s/$.?#].[^\s]*$",
-        "CHROME_EXTENSION": r"^[a-z]{32}$",
+        ObservableType.IPV4: r"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$",
+        ObservableType.IPV6: r"^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$",
+        ObservableType.MD5: r"^[a-fA-F0-9]{32}$",
+        ObservableType.SHA1: r"^[a-fA-F0-9]{40}$",
+        ObservableType.SHA256: r"^[a-fA-F0-9]{64}$",
+        ObservableType.EMAIL: r"^[\w\.-]+@[\w\.-]+\.\w+$",
+        ObservableType.FQDN: r"^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$",
+        ObservableType.URL: r"^(https?|ftp)://[^\s/$.?#].[^\s]*$",
+        ObservableType.CHROME_EXTENSION: r"^[a-z]{32}$",
     }
 
     for type_name, pattern in patterns.items():
         if re.match(pattern, observable):
             return type_name
+    # Raise an error ? or add an ObservableType of "UNKNOWN"?
     return "Unknown"
 
 
 def extract_observables(text):
     """Extract observables from text, focusing on full URLs with http or https."""
     patterns = {
-        "IPv4": r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b",
-        "MD5": r"\b[a-fA-F0-9]{32}\b",
-        "SHA1": r"\b[a-fA-F0-9]{40}\b",
-        "SHA256": r"\b[a-fA-F0-9]{64}\b",
-        "Email": r"\b[\w\.-]+@[\w\.-]+\.\w+\b",
+        ObservableType.IPV4: r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b",
+        ObservableType.MD5: r"\b[a-fA-F0-9]{32}\b",
+        ObservableType.SHA1: r"\b[a-fA-F0-9]{40}\b",
+        ObservableType.SHA256: r"\b[a-fA-F0-9]{64}\b",
+        ObservableType.EMAIL: r"\b[\w\.-]+@[\w\.-]+\.\w+\b",
         # Simplified URL pattern for http(s) only
         # "URL": r"\bhttps?://[^\s/$.?#].[^\s]*\b",
-        "URL": r"\bhttps?://[^\s/$.?#].[^\s<>\"'\?,;\]\[\}\{]*",
-        "FQDN": r"\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b",
-        "CHROME_EXTENSION": r"\b[a-z]{32}\b",
+        ObservableType.URL: r"\bhttps?://[^\s/$.?#].[^\s<>\"'\?,;\]\[\}\{]*",
+        ObservableType.FQDN: r"\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b",
+        ObservableType.CHROME_EXTENSION: r"\b[a-z]{32}\b",
     }
 
-    results = []
+    results: list[dict[str, ObservableType]] = []
     seen = set()
 
     # Extract URLs first to prevent FQDN overlap
-    url_matches = re.findall(patterns["URL"], text)
+    url_matches = re.findall(patterns[ObservableType.URL], text)
 
     # Extract other types of observables from remaining text
     for type_name, pattern in patterns.items():
         matches = re.findall(pattern, text)
         for match in matches:
             # Skip FQDNs if they are already extracted as URLs
-            if type_name == "FQDN" and match in str(url_matches):
+            if type_name is ObservableType.FQDN and match in str(url_matches):
                 continue
             if match not in seen:
                 seen.add(match)
@@ -180,12 +183,12 @@ def extract_observables(text):
     for ipv6 in ipv6_addresses:
         if ipv6 not in seen:
             seen.add(ipv6)
-            results.append({"value": ipv6, "type": "IPv6"})
+            results.append({"value": ipv6, "type": ObservableType.IPV6})
 
     # filter invalid TLDs using tldextract and the list of invalid TLDs
     filtered_results = []
     for result in results:
-        if result["type"] == "FQDN":
+        if result["type"] is ObservableType.FQDN:
             tld = result["value"].split(".")[-1]
             extracted = tldextract.extract(result["value"])
             if tld in INVALID_TLD or not extracted.suffix:

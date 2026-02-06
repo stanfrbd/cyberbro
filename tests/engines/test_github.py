@@ -5,6 +5,7 @@ import requests
 import responses
 
 from engines.github import GitHubEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ def test_analyze_success_complete(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["total"] == 3
@@ -98,7 +99,7 @@ def test_analyze_success_minimal(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["total"] == 1
@@ -122,7 +123,7 @@ def test_analyze_zero_results(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["results"] == []
@@ -153,7 +154,7 @@ def test_analyze_result_limiting_5_repos(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["total"] == 10
@@ -187,7 +188,7 @@ def test_analyze_duplicate_repo_deduplication(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["total"] == 2
@@ -242,7 +243,7 @@ def test_analyze_multiple_duplicates_with_limiting(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["total"] == 6
@@ -261,7 +262,7 @@ def test_analyze_http_401_unauthorized(secrets, ipv4_observable, caplog):
     responses.add(responses.GET, url, status=401)
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -276,7 +277,7 @@ def test_analyze_http_500_server_error(secrets, ipv4_observable, caplog):
     responses.add(responses.GET, url, status=500)
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -295,7 +296,7 @@ def test_analyze_connection_timeout(secrets, ipv4_observable, caplog):
     )
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -310,7 +311,7 @@ def test_analyze_json_decode_error(secrets, ipv4_observable, caplog):
     responses.add(responses.GET, url, body="<html>Error page</html>", status=200)
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -327,15 +328,15 @@ def test_analyze_all_observable_types(secrets):
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
     observable_types = [
-        "CHROME_EXTENSION",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "Email",
+        ObservableType.CHROME_EXTENSION,
+        ObservableType.FQDN,
+        ObservableType.IPV4,
+        ObservableType.IPV6,
+        ObservableType.MD5,
+        ObservableType.SHA1,
+        ObservableType.SHA256,
+        ObservableType.URL,
+        ObservableType.EMAIL,
     ]
 
     mock_resp = {
@@ -389,7 +390,7 @@ def test_analyze_different_observable_values(secrets):
         url = f"https://grep.app/api/search?q={observable}"
         responses.add(responses.GET, url, json=mock_resp, status=200)
 
-        result = engine.analyze(observable, "IPv4")
+        result = engine.analyze(observable, ObservableType.IPV4)
         assert result is not None
 
 
@@ -416,7 +417,7 @@ def test_analyze_special_characters_in_observable(secrets, caplog):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(observable, "Email")
+    result = engine.analyze(observable, ObservableType.EMAIL)
     assert result is not None
 
 
@@ -437,7 +438,7 @@ def test_analyze_empty_observable_value(secrets, caplog):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(observable, "IPv4")
+    result = engine.analyze(observable, ObservableType.IPV4)
     assert result is not None
     assert result["results"] == []
 
@@ -465,7 +466,7 @@ def test_analyze_very_long_observable_value(secrets):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(observable, "IPv4")
+    result = engine.analyze(observable, ObservableType.IPV4)
     assert result is not None
 
 
@@ -516,16 +517,16 @@ def test_engine_supported_types(secrets):
     """Test that supported_types property returns all 9 types."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
-    expected_types = [
-        "CHROME_EXTENSION",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "Email",
-    ]
+    expected_types = (
+        ObservableType.CHROME_EXTENSION
+        | ObservableType.FQDN
+        | ObservableType.IPV4
+        | ObservableType.IPV6
+        | ObservableType.MD5
+        | ObservableType.SHA1
+        | ObservableType.SHA256
+        | ObservableType.URL
+        | ObservableType.EMAIL
+    )
 
-    assert engine.supported_types == expected_types
+    assert engine.supported_types is expected_types

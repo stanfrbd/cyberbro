@@ -5,6 +5,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,23 +16,43 @@ class DFIRIrisEngine(BaseEngine):
         return "dfir_iris"
 
     @property
-    def supported_types(self):
-        return ["BOGON", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.BOGON
+            | ObservableType.FQDN
+            | ObservableType.URL
+        )
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         dfir_iris_api_key = self.secrets.dfir_iris_api_key
         dfir_iris_url = self.secrets.dfir_iris_url
 
         # Use selective wildcards to match ioc
-        if observable_type in ("IPv4", "IPv6", "MD5", "SHA1", "SHA256", "BOGON"):
-            body = {"search_value": f"%{observable_value}", "search_type": "ioc"}
-        elif observable_type in ("FQDN", "URL"):
-            body = {"search_value": f"{observable_value}%", "search_type": "ioc"}
-        else:
-            body = {"search_value": f"{observable_value}", "search_type": "ioc"}
+        match observable_type:
+            case (
+                ObservableType.IPV4
+                | ObservableType.IPV6
+                | ObservableType.MD5
+                | ObservableType.SHA1
+                | ObservableType.SHA256
+                | ObservableType.BOGON
+            ):
+                body = {"search_value": f"%{observable_value}", "search_type": "ioc"}
+            case ObservableType.FQDN | ObservableType.URL:
+                body = {"search_value": f"{observable_value}%", "search_type": "ioc"}
+            case _:
+                body = {"search_value": f"{observable_value}", "search_type": "ioc"}
 
         try:
-            url = f"{dfir_iris_url}/search?cid=1"
+            url = f"{dfir_iris_url}/search"
+            params: dict[str, int] = {"cid": 1}
             headers = {
                 "Authorization": f"Bearer {dfir_iris_api_key}",
                 "Content-Type": "application/json",
@@ -39,7 +60,13 @@ class DFIRIrisEngine(BaseEngine):
             payload = json.dumps(body)
             # NOTE: Original code uses proxies=None here, keeping that behavior.
             response = requests.post(
-                url, headers=headers, data=payload, proxies=None, verify=self.ssl_verify, timeout=5
+                url,
+                params=params,
+                headers=headers,
+                data=payload,
+                proxies=None,
+                verify=self.ssl_verify,
+                timeout=5,
             )
             response.raise_for_status()
 

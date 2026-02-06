@@ -4,6 +4,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -25,16 +26,17 @@ class GoogleDNSEngine(BaseEngine):
         return "google_dns"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "IPv4", "IPv6", "URL"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.FQDN | ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.URL
 
-    def _extract_domain(self, observable: str) -> str:
-        if "://" in observable:
-            domain = observable.split("/")[2]
+    def _extract_domain(self, observable_value: str) -> str:
+        """Candidate for future _get_fqdn_from_url private method from Observable"""
+        if "://" in observable_value:
+            domain = observable_value.split("/")[2]
             if ":" in domain:
                 domain = domain.split(":")[0]
             return domain
-        return observable
+        return observable_value
 
     def _parse_dmarc_record(self, txt: str) -> dict:
         fields = {}
@@ -57,8 +59,11 @@ class GoogleDNSEngine(BaseEngine):
     def _query_dmarc(self, domain: str) -> dict[str, Any] | None:
         try:
             dmarc_domain = f"_dmarc.{domain}"
-            url = f"https://dns.google/resolve?name={dmarc_domain}&type=TXT"
-            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            base_url: str = "https://dns.google/resolve"
+            params: dict[str, str] = {"name": dmarc_domain, "type": "TXT"}
+            response = requests.get(
+                base_url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -73,8 +78,11 @@ class GoogleDNSEngine(BaseEngine):
 
     def _query_spf(self, domain: str) -> dict[str, Any] | None:
         try:
-            url = f"https://dns.google/resolve?name={domain}&type=TXT"
-            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            base_url: str = "https://dns.google/resolve"
+            params: dict[str, str] = {"name": domain, "type": "TXT"}
+            response = requests.get(
+                base_url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -87,12 +95,17 @@ class GoogleDNSEngine(BaseEngine):
             logger.error("Error querying SPF for '%s': %s", domain, e, exc_info=True)
             return None
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
-            if observable_type in ["IPv4", "IPv6"]:
-                reverse_name = f"{observable_value}.in-addr.arpa"
-                url = f"https://dns.google/resolve?name={reverse_name}&type=PTR"
-                response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify)
+            if observable_type in ObservableType.IPV4 | ObservableType.IPV6:
+                reverse_name: str = f"{observable_value}.in-addr.arpa"
+                url = "https://dns.google/resolve"
+                params: dict[str, str] = {"name": reverse_name, "type": "PTR"}
+                response = requests.get(
+                    url, params=params, proxies=self.proxies, verify=self.ssl_verify
+                )
                 response.raise_for_status()
                 data = response.json()
                 for answer in data.get("Answer", []):
@@ -111,8 +124,11 @@ class GoogleDNSEngine(BaseEngine):
 
             # Query all standard records
             for record in dns_record_types:
-                url = f"https://dns.google/resolve?name={domain}&type={record['id']}"
-                response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify)
+                url = "https://dns.google/resolve"
+                params = {"name": domain, "type": record["id"]}
+                response = requests.get(
+                    url, params=params, proxies=self.proxies, verify=self.ssl_verify
+                )
                 response.raise_for_status()
                 data = response.json()
                 for answer in data.get("Answer", []):

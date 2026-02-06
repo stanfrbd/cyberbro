@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,32 +16,41 @@ class HudsonRockEngine(BaseEngine):
         return "hudsonrock"
 
     @property
-    def supported_types(self):
-        return ["Email", "FQDN", "URL"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.EMAIL | ObservableType.FQDN | ObservableType.URL
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
-            if observable_type == "URL":
+            if observable_type is ObservableType.URL:
+                # Candidate for FQDN from URL private method
                 parsed_url = urlparse(observable_value)
                 observable = parsed_url.netloc
-                observable_type = "FQDN"
+                observable_type = ObservableType.FQDN
             else:
                 observable = observable_value
 
-            if observable_type == "Email":
-                url = f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-email?email={observable}"
-            elif observable_type == "FQDN":
-                url = f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/search-by-domain?domain={observable}"
-            else:
-                logger.error("Unsupported observable type: %s", observable_type)
-                return None
+            match observable_type:
+                case ObservableType.EMAIL:
+                    url_path = "search-by-email"
+                    params = {"email": observable}
+                case ObservableType.FQDN:
+                    url_path = "search-by-domain"
+                    params = {"domain": observable}
+                case _:
+                    logger.error("Unsupported observable type: %s", observable_type)
+                    return None
 
-            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            url: str = f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/{url_path}"
+            response = requests.get(
+                url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
             data = response.json()
 
             # Clean up output as in the original logic
-            if observable_type == "FQDN":
+            if observable_type is ObservableType.FQDN:
                 for section in ["data", "stats"]:
                     if section in data:
                         for key in ["all_urls", "clients_urls", "employees_urls"]:

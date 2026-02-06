@@ -5,6 +5,7 @@ from urllib.parse import quote_plus
 import pytest
 
 from engines.reversinglabs_spectra_analyze import RLAnalyzeEngine
+from models.observable import ObservableType
 
 # Test constants
 API_URL = "https://a1000-example123.reversinglabs.com"
@@ -218,13 +219,17 @@ def expected_url_malware_report():
 @pytest.mark.parametrize(
     "type,artifact,endpoint",
     [
-        ("IPv4", IP4, f"/api/network-threat-intel/ip/{IP4}/report/"),
-        ("IPv6", IP6, f"/api/network-threat-intel/ip/{IP6}/report/"),
-        ("FQDN", FQDN, f"/api/network-threat-intel/domain/{FQDN}/"),
-        ("URL", URL_UNKNOWN, f"/api/network-threat-intel/url/?url={quote_plus(URL_UNKNOWN)}"),
-        ("SHA1", SHA1, f"/api/samples/v3/{SHA1}/classification/?av_scanners=1"),
-        ("MD5", MD5, f"/api/samples/v3/{MD5}/classification/?av_scanners=1"),
-        ("SHA256", SHA256, f"/api/samples/v3/{SHA256}/classification/?av_scanners=1"),
+        (ObservableType.IPV4, IP4, f"/api/network-threat-intel/ip/{IP4}/report/"),
+        (ObservableType.IPV6, IP6, f"/api/network-threat-intel/ip/{IP6}/report/"),
+        (ObservableType.FQDN, FQDN, f"/api/network-threat-intel/domain/{FQDN}/"),
+        (
+            ObservableType.URL,
+            URL_UNKNOWN,
+            f"/api/network-threat-intel/url/?url={quote_plus(URL_UNKNOWN)}",
+        ),
+        (ObservableType.SHA1, SHA1, f"/api/samples/v3/{SHA1}/classification/?av_scanners=1"),
+        (ObservableType.MD5, MD5, f"/api/samples/v3/{MD5}/classification/?av_scanners=1"),
+        (ObservableType.SHA256, SHA256, f"/api/samples/v3/{SHA256}/classification/?av_scanners=1"),
         ("NaN", IP4, None),
     ],
 )
@@ -239,13 +244,13 @@ def test_get_api_endpoint(type: str, artifact: str, endpoint: str | None):
 @pytest.mark.parametrize(
     "type,artifact,endpoint",
     [
-        ("IPv4", IP4, f"/ip/{IP4}/analysis/ip/"),
-        ("IPv6", IP6, f"/ip/{IP6}/analysis/ip/"),
-        ("FQDN", FQDN, f"/domain/{FQDN}/analysis/domain/"),
-        ("URL", URL_UNKNOWN, f"/url/{quote_plus(URL_UNKNOWN)}/analysis/url/"),
-        ("MD5", MD5, f"/{MD5}/"),
-        ("SHA1", SHA1, f"/{SHA1}/"),
-        ("SHA256", SHA256, f"/{SHA256}/"),
+        (ObservableType.IPV4, IP4, f"/ip/{IP4}/analysis/ip/"),
+        (ObservableType.IPV6, IP6, f"/ip/{IP6}/analysis/ip/"),
+        (ObservableType.FQDN, FQDN, f"/domain/{FQDN}/analysis/domain/"),
+        (ObservableType.URL, URL_UNKNOWN, f"/url/{quote_plus(URL_UNKNOWN)}/analysis/url/"),
+        (ObservableType.MD5, MD5, f"/{MD5}/"),
+        (ObservableType.SHA1, SHA1, f"/{SHA1}/"),
+        (ObservableType.SHA256, SHA256, f"/{SHA256}/"),
         ("NaN", IP4, None),
     ],
 )
@@ -260,23 +265,29 @@ def test_get_ui_endpoint(type: str, artifact: str, endpoint: str | None):
 @pytest.mark.parametrize(
     "input_query_response,observable,observable_type,api_url,expected_report",
     [
-        ("fqdn_response_from_file", FQDN, "FQDN", API_URL, "expected_fqdn_report"),
-        ("hash_response_from_file", MD5, "MD5", API_URL, "expected_md5_report"),
-        ("hash_response_from_file", SHA1, "SHA1", API_URL, "expected_sha1_report"),
-        ("hash_response_from_file", SHA256, "SHA256", API_URL, "expected_sha256_report"),
-        ("ipv4_response_from_file", IP4, "IPv4", API_URL, "expected_ipv4_report"),
-        ("ipv6_response_from_file", IP6, "IPv6", API_URL, "expected_ipv6_report"),
+        ("fqdn_response_from_file", FQDN, ObservableType.FQDN, API_URL, "expected_fqdn_report"),
+        ("hash_response_from_file", MD5, ObservableType.MD5, API_URL, "expected_md5_report"),
+        ("hash_response_from_file", SHA1, ObservableType.SHA1, API_URL, "expected_sha1_report"),
+        (
+            "hash_response_from_file",
+            SHA256,
+            ObservableType.SHA256,
+            API_URL,
+            "expected_sha256_report",
+        ),
+        ("ipv4_response_from_file", IP4, ObservableType.IPV4, API_URL, "expected_ipv4_report"),
+        ("ipv6_response_from_file", IP6, ObservableType.IPV6, API_URL, "expected_ipv6_report"),
         (
             "url_unknown_response_from_file",
             URL_UNKNOWN,
-            "URL",
+            ObservableType.URL,
             API_URL,
             "expected_url_unknown_report",
         ),
         (
             "url_malware_response_from_file",
             URL_MALWARE,
-            "URL",
+            ObservableType.URL,
             API_URL,
             "expected_url_malware_report",
         ),
@@ -286,7 +297,7 @@ def test_parse_rl_response(
     request: dict,
     input_query_response: dict,
     observable: str,
-    observable_type: str,
+    observable_type: ObservableType,
     api_url: str,
     expected_report: dict,
 ):
@@ -313,9 +324,9 @@ def test_parse_rl_response(
 # Test network response color coding - Green
 @pytest.mark.parametrize(
     "observable_type",
-    ["IPv4", "IPv6", "FQDN", "URL"],
+    [ObservableType.IPV4, ObservableType.IPV6, ObservableType.FQDN, ObservableType.URL],
 )
-def test_network_green_color_logic(observable_type: str):
+def test_network_green_color_logic(observable_type: ObservableType):
     """Verify green color assigned for network observations with no/low threats."""
     response = {
         "top_threats": [],
@@ -345,9 +356,9 @@ def test_network_green_color_logic(observable_type: str):
 # Test network response color coding - Yellow
 @pytest.mark.parametrize(
     "observable_type",
-    ["IPv4", "IPv6", "FQDN", "URL"],
+    [ObservableType.IPV4, ObservableType.IPV6, ObservableType.FQDN, ObservableType.URL],
 )
-def test_network_yellow_color_logic(observable_type: str):
+def test_network_yellow_color_logic(observable_type: ObservableType):
     """Verify yellow color for network observations with low threat counts."""
     response = {
         "top_threats": [{"threat_name": "PUA"}],
@@ -377,9 +388,9 @@ def test_network_yellow_color_logic(observable_type: str):
 # Test network response color coding - Red
 @pytest.mark.parametrize(
     "observable_type",
-    ["IPv4", "IPv6", "FQDN", "URL"],
+    [ObservableType.IPV4, ObservableType.IPV6, ObservableType.FQDN, ObservableType.URL],
 )
-def test_network_red_color_logic(observable_type: str):
+def test_network_red_color_logic(observable_type: ObservableType):
     """Verify red color for network observations with high threat counts."""
     response = {
         "top_threats": [{"threat_name": "Trojan"}, {"threat_name": "Backdoor"}],
@@ -414,9 +425,9 @@ def test_network_red_color_logic(observable_type: str):
 # Test network response with no reputation data
 @pytest.mark.parametrize(
     "observable_type",
-    ["IPv4", "IPv6", "FQDN", "URL"],
+    [ObservableType.IPV4, ObservableType.IPV6, ObservableType.FQDN, ObservableType.URL],
 )
-def test_network_no_reputation_returns_empty(observable_type: str):
+def test_network_no_reputation_returns_empty(observable_type: ObservableType):
     """Verify empty dict returned when total reputation is 0 for network types."""
     response = {
         "top_threats": [],
@@ -445,9 +456,9 @@ def test_network_no_reputation_returns_empty(observable_type: str):
 # Test file hash response color coding - Green
 @pytest.mark.parametrize(
     "hash_type",
-    ["MD5", "SHA1", "SHA256"],
+    [ObservableType.MD5, ObservableType.SHA1, ObservableType.SHA256],
 )
-def test_file_green_color_logic(hash_type: str):
+def test_file_green_color_logic(hash_type: ObservableType):
     """Verify green color for benign file classifications."""
     response = {
         "classification": "goodware",
@@ -469,9 +480,9 @@ def test_file_green_color_logic(hash_type: str):
 # Test file hash response color coding - Yellow
 @pytest.mark.parametrize(
     "hash_type",
-    ["MD5", "SHA1", "SHA256"],
+    [ObservableType.MD5, ObservableType.SHA1, ObservableType.SHA256],
 )
-def test_file_yellow_color_logic(hash_type: str):
+def test_file_yellow_color_logic(hash_type: ObservableType):
     """Verify yellow color for suspicious classifications or non-goodware."""
     response = {
         "classification": "suspicious",
@@ -493,9 +504,9 @@ def test_file_yellow_color_logic(hash_type: str):
 # Test file hash response color coding - Red
 @pytest.mark.parametrize(
     "hash_type",
-    ["MD5", "SHA1", "SHA256"],
+    [ObservableType.MD5, ObservableType.SHA1, ObservableType.SHA256],
 )
-def test_file_red_color_logic(hash_type: str):
+def test_file_red_color_logic(hash_type: ObservableType):
     """Verify red color when classification is malicious with riskscore > 2."""
     response = {
         "classification": "malicious",
@@ -517,9 +528,9 @@ def test_file_red_color_logic(hash_type: str):
 # Test file hash response with no av_scanners
 @pytest.mark.parametrize(
     "hash_type",
-    ["MD5", "SHA1", "SHA256"],
+    [ObservableType.MD5, ObservableType.SHA1, ObservableType.SHA256],
 )
-def test_file_no_av_scanners_returns_empty(hash_type: str):
+def test_file_no_av_scanners_returns_empty(hash_type: ObservableType):
     """Verify empty dict returned when av_scanners missing for file types."""
     response = {
         "classification": "unknown",
@@ -557,7 +568,7 @@ def test_network_threat_list_with_none():
         },
     }
     rlengine = rlengine_object()
-    result = rlengine._parse_rl_response(response, "example.com", "FQDN", API_URL)
+    result = rlengine._parse_rl_response(response, "example.com", ObservableType.FQDN, API_URL)
 
     assert result is not None
     assert "Trojan" in result["threats"]
@@ -579,7 +590,7 @@ def test_file_threat_list_extraction():
         },
     }
     rlengine = rlengine_object()
-    result = rlengine._parse_rl_response(response, "abc123", "MD5", API_URL)
+    result = rlengine._parse_rl_response(response, "abc123", ObservableType.MD5, API_URL)
 
     assert result is not None
     assert "malicious" in result["threats"]
@@ -701,7 +712,15 @@ def test_engine_supported_types():
     """Verify all supported observable types."""
     rlengine = rlengine_object()
     supported = rlengine.supported_types
-    expected_types = ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    expected_types = (
+        ObservableType.FQDN
+        | ObservableType.IPV4
+        | ObservableType.IPV6
+        | ObservableType.MD5
+        | ObservableType.SHA1
+        | ObservableType.SHA256
+        | ObservableType.URL
+    )
     for obs_type in expected_types:
         assert obs_type in supported
 
@@ -727,7 +746,7 @@ def test_network_yellow_at_boundary():
         },
     }
     rlengine = rlengine_object()
-    result = rlengine._parse_rl_response(response, "test.com", "IPv4", API_URL)
+    result = rlengine._parse_rl_response(response, "test.com", ObservableType.IPV4, API_URL)
 
     if result:
         assert result["report_color"] == "yellow"
@@ -748,7 +767,7 @@ def test_network_red_high_suspicious():
         },
     }
     rlengine = rlengine_object()
-    result = rlengine._parse_rl_response(response, "test.com", "FQDN", API_URL)
+    result = rlengine._parse_rl_response(response, "test.com", ObservableType.FQDN, API_URL)
 
     if result:
         assert result["report_color"] == "red"
@@ -765,7 +784,7 @@ def test_file_yellow_unknown_classification():
         "av_scanners": {"scanner_count": 40, "scanner_match": 0},
     }
     rlengine = rlengine_object()
-    result = rlengine._parse_rl_response(response, "abc123", "SHA256", API_URL)
+    result = rlengine._parse_rl_response(response, "abc123", ObservableType.SHA256, API_URL)
 
     if result:
         assert result["report_color"] == "yellow"
@@ -782,7 +801,7 @@ def test_file_red_malicious_low_riskscore():
         "av_scanners": {"scanner_count": 50, "scanner_match": 8},
     }
     rlengine = rlengine_object()
-    result = rlengine._parse_rl_response(response, "abc123", "MD5", API_URL)
+    result = rlengine._parse_rl_response(response, "abc123", ObservableType.MD5, API_URL)
 
     if result:
         assert result["report_color"] == "red"
@@ -793,7 +812,7 @@ def test_url_endpoint_special_characters():
     """Verify URL with special characters is quote_plus encoded in endpoint."""
     rlengine = rlengine_object()
     url = "https://example.com/path?query=test&foo=bar"
-    endpoint = rlengine._get_api_endpoint(url, "URL")
+    endpoint = rlengine._get_api_endpoint(url, ObservableType.URL)
 
     assert endpoint is not None
     assert "%3A%2F%2F" in endpoint  # Encoded "://"

@@ -5,10 +5,20 @@ import requests
 from bs4 import BeautifulSoup
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
-BASE_SUPPORTED_TYPES = ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+BASE_SUPPORTED_TYPES: ObservableType = (
+    ObservableType.CHROME_EXTENSION
+    | ObservableType.FQDN
+    | ObservableType.IPV4
+    | ObservableType.IPV6
+    | ObservableType.MD5
+    | ObservableType.SHA1
+    | ObservableType.SHA256
+    | ObservableType.URL
+)
 
 
 class IOCOneHTMLEngine(BaseEngine):
@@ -20,11 +30,13 @@ class IOCOneHTMLEngine(BaseEngine):
     def supported_types(self):
         return BASE_SUPPORTED_TYPES
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(self, observable_value: str, observable_type: ObservableType) -> dict | None:
         try:
-            url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+            base_url = "https://ioc.one/auth/deep_search"
+            params: dict = {"search": observable_value}
             response = requests.get(
-                url,
+                url=base_url,
+                params=params,
                 proxies=self.proxies,
                 verify=self.ssl_verify,
                 headers={"User-Agent": "cyberbro"},
@@ -49,7 +61,8 @@ class IOCOneHTMLEngine(BaseEngine):
                 ]
                 search_results.append({"header": header, "title": title, "source": source})
 
-            return {"results": search_results, "link": url, "count": len(search_results)}
+            link_url: str = base_url + f"?search={observable_value}"
+            return {"results": search_results, "link": link_url, "count": len(search_results)}
 
         except Exception as e:
             logger.error(
@@ -71,11 +84,15 @@ class IOCOnePDFEngine(BaseEngine):
     def supported_types(self):
         return BASE_SUPPORTED_TYPES
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
-            url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+            base_url = "https://ioc.one/auth/deep_search/pdf"
+            params: dict = {"search": observable_value}
             response = requests.get(
-                url,
+                url=base_url,
+                params=params,
                 proxies=self.proxies,
                 verify=self.ssl_verify,
                 headers={"User-Agent": "cyberbro"},
@@ -100,7 +117,8 @@ class IOCOnePDFEngine(BaseEngine):
                 ]
                 search_results.append({"header": header, "title": title, "source": source})
 
-            return {"results": search_results, "link": url, "count": len(search_results)}
+            link_url: str = base_url + f"?search={observable_value}"
+            return {"results": search_results, "link": link_url, "count": len(search_results)}
 
         except Exception as e:
             logger.error(

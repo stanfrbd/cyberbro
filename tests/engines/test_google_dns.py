@@ -5,6 +5,7 @@ import requests
 import responses
 
 from engines.google_dns import GoogleDNSEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -43,10 +44,10 @@ def url_observable():
 @pytest.mark.parametrize(
     "observable_value,observable_type",
     [
-        ("1.1.1.1", "IPv4"),
-        ("2001:4860:4860::8888", "IPv6"),
-        ("example.com", "FQDN"),
-        ("https://example.com:8080/path", "URL"),
+        ("1.1.1.1", ObservableType.IPV4),
+        ("2001:4860:4860::8888", ObservableType.IPV6),
+        ("example.com", ObservableType.FQDN),
+        ("https://example.com:8080/path", ObservableType.URL),
     ],
 )
 @responses.activate
@@ -54,107 +55,108 @@ def test_analyze_observable_type_routing(secrets, observable_value, observable_t
     """Test observable type routing with basic successful responses."""
     engine = GoogleDNSEngine(secrets, proxies={}, ssl_verify=True)
 
-    if observable_type == "IPv4":
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={
-                "Answer": [
-                    {
-                        "name": "1.1.1.1.in-addr.arpa.",
-                        "type": 12,
-                        "TTL": 300,
-                        "data": "one.one.one.one.",
-                    }
-                ]
-            },
-            status=200,
-        )
-    elif observable_type == "IPv6":
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={
-                "Answer": [
-                    {
-                        "name": "8.8.8.8.8.0.0.0.0.6.8.4.in-addr.arpa.",
-                        "type": 12,
-                        "TTL": 300,
-                        "data": "dns.google.",
-                    }
-                ]
-            },
-            status=200,
-        )
-    elif observable_type == "FQDN":
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": [{"type": 1, "data": "1.1.1.1."}]},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": [{"type": 28, "data": "2001:4860::1."}]},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": []},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": [{"type": 15, "data": "10 mail.example.com."}]},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": []},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": []},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": [{"type": 2, "data": "ns1.example.com."}]},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": []},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": []},
-            status=200,
-        )
-        responses.add(
-            responses.GET,
-            "https://dns.google/resolve",
-            json={"Answer": []},
-            status=200,
-        )
-    elif observable_type == "URL":
-        for _ in range(10):
+    match observable_type:
+        case ObservableType.IPV4:
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={
+                    "Answer": [
+                        {
+                            "name": "1.1.1.1.in-addr.arpa.",
+                            "type": 12,
+                            "TTL": 300,
+                            "data": "one.one.one.one.",
+                        }
+                    ]
+                },
+                status=200,
+            )
+        case ObservableType.IPV6:
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={
+                    "Answer": [
+                        {
+                            "name": "8.8.8.8.8.0.0.0.0.6.8.4.in-addr.arpa.",
+                            "type": 12,
+                            "TTL": 300,
+                            "data": "dns.google.",
+                        }
+                    ]
+                },
+                status=200,
+            )
+        case ObservableType.FQDN:
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": [{"type": 1, "data": "1.1.1.1."}]},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": [{"type": 28, "data": "2001:4860::1."}]},
+                status=200,
+            )
             responses.add(
                 responses.GET,
                 "https://dns.google/resolve",
                 json={"Answer": []},
                 status=200,
             )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": [{"type": 15, "data": "10 mail.example.com."}]},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": []},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": []},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": [{"type": 2, "data": "ns1.example.com."}]},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": []},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": []},
+                status=200,
+            )
+            responses.add(
+                responses.GET,
+                "https://dns.google/resolve",
+                json={"Answer": []},
+                status=200,
+            )
+        case ObservableType.URL:
+            for _ in range(10):
+                responses.add(
+                    responses.GET,
+                    "https://dns.google/resolve",
+                    json={"Answer": []},
+                    status=200,
+                )
 
     result = engine.analyze(observable_value, observable_type)
 
@@ -187,7 +189,7 @@ def test_analyze_ipv4_ptr_success_multiple_records(secrets):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze("8.8.8.8", "IPv4")
+    result = engine.analyze("8.8.8.8", ObservableType.IPV4)
 
     assert result is not None
     assert len(result["Answer"]) == 2
@@ -204,7 +206,7 @@ def test_analyze_ipv4_no_ptr_records(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["Answer"] == []
@@ -235,7 +237,7 @@ def test_analyze_fqdn_with_spf_record(secrets, fqdn_observable):
         status=200,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert "Answer" in result
@@ -268,7 +270,7 @@ def test_analyze_fqdn_with_dmarc_record(secrets, fqdn_observable):
         status=200,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert "Answer" in result
@@ -301,7 +303,7 @@ def test_analyze_fqdn_no_spf_no_dmarc(secrets, fqdn_observable):
         status=200,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert "Answer" in result
@@ -345,7 +347,7 @@ def test_analyze_fqdn_mx_record_extraction(secrets, fqdn_observable):
         status=200,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     mx_records = [r for r in result["Answer"] if r.get("type_name") == "MX"]
@@ -366,7 +368,7 @@ def test_analyze_http_500_error(secrets, ipv4_observable, caplog):
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying Google DNS" in caplog.text
@@ -381,7 +383,7 @@ def test_analyze_http_connection_timeout(secrets, fqdn_observable, caplog):
     responses.add(responses.GET, "https://dns.google/resolve", body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is None
     assert "Error querying Google DNS" in caplog.text
@@ -396,7 +398,7 @@ def test_analyze_http_connection_error(secrets, fqdn_observable, caplog):
     responses.add(responses.GET, "https://dns.google/resolve", body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is None
     assert "Error querying Google DNS" in caplog.text
@@ -410,7 +412,7 @@ def test_analyze_invalid_json_response(secrets, ipv4_observable, caplog):
     responses.add(responses.GET, "https://dns.google/resolve", body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying Google DNS" in caplog.text
@@ -445,7 +447,7 @@ def test_query_dmarc_http_error(secrets, fqdn_observable):
         status=404,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     dmarc_records = [r for r in result["Answer"] if r.get("type_name") == "DMARC"]
@@ -481,7 +483,7 @@ def test_query_spf_http_error(secrets, fqdn_observable):
         status=200,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     spf_records = [r for r in result["Answer"] if r.get("type_name") == "SPF"]
@@ -649,7 +651,7 @@ def test_analyze_all_empty_dns_records(secrets, fqdn_observable):
     for _ in range(10):
         responses.add(responses.GET, "https://dns.google/resolve", json={"Answer": []}, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     assert result["Answer"] == []
@@ -684,7 +686,7 @@ def test_analyze_data_cleaning_trailing_dots(secrets, fqdn_observable):
         status=200,
     )
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable, ObservableType.FQDN)
 
     assert result is not None
     a_records = [r for r in result["Answer"] if r.get("type_name") == "A"]
@@ -709,7 +711,7 @@ def test_analyze_ipv4_reverse_dns_format(secrets):
 
     responses.add(responses.GET, "https://dns.google/resolve", json={"Answer": []}, status=200)
 
-    result = engine.analyze("192.168.1.1", "IPv4")
+    result = engine.analyze("192.168.1.1", ObservableType.IPV4)
 
     assert result is not None
     # Verify the call was made with correct reverse DNS format
@@ -734,7 +736,10 @@ def test_engine_properties(secrets):
     engine = GoogleDNSEngine(secrets, proxies={}, ssl_verify=True)
 
     assert engine.name == "google_dns"
-    assert engine.supported_types == ["FQDN", "IPv4", "IPv6", "URL"]
+    assert (
+        engine.supported_types
+        is ObservableType.FQDN | ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.URL
+    )
 
 
 def test_engine_base_properties(secrets):

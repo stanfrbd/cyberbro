@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 from requests.exceptions import HTTPError
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 from utils.config import Secrets, get_config
 
 logger = logging.getLogger(__name__)
@@ -166,15 +167,15 @@ class CriminalIPEngine(BaseEngine):
         return "criminalip"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         # IP-only engine, runs after potential IP pivot
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
+    def analyze(self, observable_value: str, observable_type: ObservableType) -> dict | None:
         """Perform Criminal IP analysis using the preserved helper/models."""
 
         api_key: str = self.secrets.criminalip_api_key

@@ -2,8 +2,10 @@ import logging
 from typing import Any
 
 import requests
+from typing_extensions import override
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -14,21 +16,27 @@ class CrtShEngine(BaseEngine):
         return "crtsh"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "URL"]
+    @override
+    def supported_types(self) -> ObservableType:
+        return ObservableType.FQDN | ObservableType.URL
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
             # If observable is a URL, extract domain
-            if observable_type == "URL":
+            if observable_type is ObservableType.URL:
                 domain_part = observable_value.split("/")[2].split(":")[0]
                 observable = domain_part
             else:
                 observable = observable_value
 
-            url = f"https://crt.sh/json?q={observable}"
+            url = "https://crt.sh/json"
+            params: dict[str, str] = {"q": observable}
 
-            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=20)
+            response = requests.get(
+                url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=20
+            )
             response.raise_for_status()
 
             results = response.json()

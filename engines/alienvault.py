@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from models.alienvault_datamodel import OTXReport, Pulse
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 from utils.config import QueryError
 
 logger = logging.getLogger(__name__)
@@ -18,18 +19,20 @@ class AlienVaultEngine(BaseEngine):
         return "alienvault"
 
     @property
-    def supported_types(self):
-        return [
-            "FQDN",
-            "IPv4",
-            "IPv6",
-            "MD5",
-            "SHA1",
-            "SHA256",
-            "URL",
-        ]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         """
         Queries the OTX AlienVault API for information about a given observable.
         Reuses the original maintainer's logic for querying and parsing.
@@ -78,15 +81,15 @@ class AlienVaultEngine(BaseEngine):
 # --- Original Maintainer's Code / Helper Functions (Preserved) ---
 
 
-def get_endpoint(artifact: str, observable_type: str) -> str | None:
+def get_endpoint(artifact: str, observable_type: ObservableType) -> str | None:
     # Map observable type to OTX endpoint
-    endpoint_map = {
-        "IPv4": f"/indicators/IPv4/{quote(artifact)}/general",
-        "IPv6": f"/indicators/IPv6/{quote(artifact)}/general",
-        "FQDN": f"/indicators/domain/{quote(artifact)}/general",
-        "SHA1": f"/indicators/file/{quote(artifact)}/general",
-        "MD5": f"/indicators/file/{quote(artifact)}/general",
-        "SHA256": f"/indicators/file/{quote(artifact)}/general",
+    endpoint_map: dict[ObservableType, str] = {
+        ObservableType.IPV4: f"/indicators/IPv4/{quote(artifact)}/general",
+        ObservableType.IPV6: f"/indicators/IPv6/{quote(artifact)}/general",
+        ObservableType.FQDN: f"/indicators/domain/{quote(artifact)}/general",
+        ObservableType.SHA1: f"/indicators/file/{quote(artifact)}/general",
+        ObservableType.MD5: f"/indicators/file/{quote(artifact)}/general",
+        ObservableType.SHA256: f"/indicators/file/{quote(artifact)}/general",
     }
 
     return endpoint_map.get(observable_type)
@@ -101,9 +104,9 @@ def query_alienvault(
     artifact: str = observable_dict["value"]
 
     # If it's a URL, extract the domain portion for searching
-    if (observable_type := observable_dict["type"]) == "URL":
+    if (observable_type := observable_dict["type"]) == ObservableType.URL:
         artifact = observable_dict["value"].split("/")[2].split(":")[0]
-        observable_type = "FQDN"
+        observable_type = ObservableType.FQDN
 
     endpoint = get_endpoint(artifact, observable_type)
 

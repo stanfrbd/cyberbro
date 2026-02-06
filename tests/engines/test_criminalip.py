@@ -4,6 +4,7 @@ import pytest
 import responses
 
 from engines.criminalip import CriminalIPEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -211,7 +212,7 @@ def test_analyze_success_response_variations(
     mock_resp = request.getfixturevalue(response_fixture)
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["ip"] == ipv4_observable
@@ -231,7 +232,7 @@ def test_analyze_missing_api_key(ipv4_observable, base_url, secrets_without_key,
     engine = CriminalIPEngine(secrets_without_key, proxies={}, ssl_verify=True)
     caplog.set_level(logging.ERROR)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "API key for CriminalIP engine is not configured" in caplog.text
@@ -245,7 +246,7 @@ def test_analyze_http_error_codes(secrets_with_key, ipv4_observable, base_url, s
     responses.add(responses.GET, base_url, json={"error": "error"}, status=status_code)
     caplog.set_level(logging.ERROR)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error retrieving Criminal IP Suspicious Info report" in caplog.text
@@ -273,7 +274,7 @@ def test_analyze_score_variations(
     mock_resp = request.getfixturevalue(response_fixture)
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["score"]["inbound"] == inbound_score
@@ -326,7 +327,7 @@ def test_analyze_missing_score_field(secrets_with_key, ipv4_observable, base_url
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Result doesn't include score field since it's optional in model
@@ -344,7 +345,7 @@ def test_analyze_missing_abuse_count(secrets_with_key, ipv4_observable, base_url
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     export_row = engine.create_export_row(result)
 
     # abuse_record_count defaults to 0 in Pydantic model
@@ -363,7 +364,7 @@ def test_analyze_empty_open_ports_list(secrets_with_key, ipv4_observable, base_u
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["current_opened_port"]["count"] == 0
@@ -382,7 +383,7 @@ def test_analyze_empty_ids_list(secrets_with_key, ipv4_observable, base_url):
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["ids"]["count"] == 0
@@ -401,7 +402,7 @@ def test_analyze_empty_whois_list(secrets_with_key, ipv4_observable, base_url):
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["whois"]["count"] == 0
@@ -416,7 +417,7 @@ def test_analyze_all_issues_true(
     engine = CriminalIPEngine(secrets_with_key, proxies={}, ssl_verify=True)
     responses.add(responses.GET, base_url, json=mock_response_all_issues_true, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["issues"]["is_vpn"] is True
@@ -454,7 +455,7 @@ def test_analyze_whois_partial_fields(secrets_with_key, ipv4_observable, base_ur
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["whois"]["data"][0]["as_name"] == "TEST-ASN"
@@ -476,7 +477,7 @@ def test_analyze_validation_error_non_2xx_status(
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
     caplog.set_level(logging.ERROR)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error validating Criminal IP Suspicious Info report" in caplog.text
@@ -490,7 +491,7 @@ def test_verify_api_key_in_headers(
     engine = CriminalIPEngine(secrets_with_key, proxies={}, ssl_verify=True)
     responses.add(responses.GET, base_url, json=mock_response_minimal, status=200)
 
-    engine.analyze(ipv4_observable, "IPv4")
+    engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert len(responses.calls) == 1
     assert responses.calls[0].request.headers.get("x-api-key") == "test_api_key_12345"
@@ -502,7 +503,7 @@ def test_verify_ip_in_params(secrets_with_key, ipv4_observable, base_url, mock_r
     engine = CriminalIPEngine(secrets_with_key, proxies={}, ssl_verify=True)
     responses.add(responses.GET, base_url, json=mock_response_minimal, status=200)
 
-    engine.analyze(ipv4_observable, "IPv4")
+    engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert len(responses.calls) == 1
     assert ipv4_observable in responses.calls[0].request.url
@@ -517,7 +518,7 @@ def test_verify_proxies_parameter(
     engine = CriminalIPEngine(secrets_with_key, proxies=proxies, ssl_verify=True)
     responses.add(responses.GET, base_url, json=mock_response_minimal, status=200)
 
-    engine.analyze(ipv4_observable, "IPv4")
+    engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert len(responses.calls) == 1
 
@@ -530,7 +531,7 @@ def test_verify_ssl_verify_parameter(
     engine = CriminalIPEngine(secrets_with_key, proxies={}, ssl_verify=False)
     responses.add(responses.GET, base_url, json=mock_response_minimal, status=200)
 
-    engine.analyze(ipv4_observable, "IPv4")
+    engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert len(responses.calls) == 1
 
@@ -565,7 +566,7 @@ def test_analyze_open_port_with_vulnerability(secrets_with_key, ipv4_observable,
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["current_opened_port"]["data"][0]["is_vulnerability"] is True
@@ -596,7 +597,7 @@ def test_analyze_confirmed_time_fields(secrets_with_key, ipv4_observable, base_u
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["current_opened_port"]["data"][0]["confirmed_time"] == "2025-12-31T23:59:59Z"
@@ -613,7 +614,7 @@ def test_analyze_ipv6_observable(
     mock_resp["ip"] = ipv6_observable
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable, ObservableType.IPV6)
 
     assert result is not None
     assert result["ip"] == ipv6_observable
@@ -664,7 +665,7 @@ def test_analyze_ids_alert_with_url(secrets_with_key, ipv4_observable, base_url)
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["ids"]["count"] == 2
@@ -724,7 +725,7 @@ def test_analyze_whois_multiple_records(secrets_with_key, ipv4_observable, base_
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["whois"]["count"] == 3
@@ -761,7 +762,7 @@ def test_analyze_coordinate_precision(secrets_with_key, ipv4_observable, base_ur
     }
     responses.add(responses.GET, base_url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Verify precision is preserved (not rounded to int)

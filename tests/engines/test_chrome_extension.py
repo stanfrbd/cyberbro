@@ -4,6 +4,7 @@ import pytest
 import responses
 
 from engines.chrome_extension import ChromeExtensionEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -117,7 +118,7 @@ def test_analyze_success_browser_variants(
     engine = ChromeExtensionEngine(secrets, proxies={}, ssl_verify=True)
     responses.add(responses.GET, url, body=html, status=200)
 
-    result = engine.analyze(extension_id, "CHROME_EXTENSION")
+    result = engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
 
     assert result is not None
     assert result["name"] == "Test Extension Name"
@@ -133,7 +134,7 @@ def test_analyze_chrome_fails_fallback_edge(
     responses.add(responses.GET, chrome_url, body=html_no_tags, status=200)
     responses.add(responses.GET, edge_url, body=edge_html_success, status=200)
 
-    result = engine.analyze(extension_id, "CHROME_EXTENSION")
+    result = engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
 
     assert result is not None
     assert result["name"] == "Test Extension Name"
@@ -147,7 +148,7 @@ def test_analyze_both_urls_fail(secrets, extension_id, chrome_url, edge_url, htm
     responses.add(responses.GET, chrome_url, body=html_no_tags, status=200)
     responses.add(responses.GET, edge_url, body=html_no_tags, status=200)
 
-    result = engine.analyze(extension_id, "CHROME_EXTENSION")
+    result = engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
 
     assert result is None
 
@@ -161,7 +162,7 @@ def test_analyze_chrome_empty_name_fallback(
     responses.add(responses.GET, chrome_url, body=html_empty_name, status=200)
     responses.add(responses.GET, edge_url, body=edge_html_success, status=200)
 
-    result = engine.analyze(extension_id, "CHROME_EXTENSION")
+    result = engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
 
     assert result is not None
     assert result["name"] == "Test Extension Name"
@@ -180,7 +181,7 @@ def test_analyze_edge_title_parsing(secrets, extension_id, edge_url):
     """
     responses.add(responses.GET, edge_url, body=html, status=200)
 
-    result = engine.analyze(extension_id, "CHROME_EXTENSION")
+    result = engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
 
     assert result is not None
     assert result["name"] == "My Cool Extension"
@@ -273,7 +274,7 @@ def test_analyze_url_construction(secrets, extension_id, chrome_url, edge_url, h
     responses.add(responses.GET, chrome_url, body=html_no_tags, status=200)
     responses.add(responses.GET, edge_url, body=html_no_tags, status=200)
 
-    engine.analyze(extension_id, "CHROME_EXTENSION")
+    engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
 
     assert len(responses.calls) == 2
     assert responses.calls[0].request.url == chrome_url
@@ -335,7 +336,7 @@ def test_analyze_extension_id_with_special_chars(secrets):
     responses.add(responses.GET, chrome_url, body=html, status=200)
     responses.add(responses.GET, edge_url, body=html, status=200)
 
-    engine.analyze(special_id, "CHROME_EXTENSION")
+    engine.analyze(special_id, ObservableType.CHROME_EXTENSION)
 
     # Verify URLs were called with special character ID intact
     assert responses.calls[0].request.url == chrome_url
@@ -382,7 +383,7 @@ def test_analyze_extra_keys_in_result(secrets, extension_id, chrome_url):
     """
     responses.add(responses.GET, chrome_url, body=html, status=200)
 
-    analysis_result = engine.analyze(extension_id, "CHROME_EXTENSION")
+    analysis_result = engine.analyze(extension_id, ObservableType.CHROME_EXTENSION)
     export_row = engine.create_export_row(analysis_result)
 
     # Should only have extension_name, not extra keys

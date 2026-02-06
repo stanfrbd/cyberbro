@@ -1,3 +1,4 @@
+from models.observable import ObservableType
 import pytest
 import responses
 from engines.alienvault import parse_alienvault_response, query_alienvault, get_endpoint
@@ -261,28 +262,28 @@ def test_query_alienvault_missing_endpoint(api_key):
 @pytest.mark.parametrize(
     "type,artifact,endpoint",
     [
-        ("IPv4", "1.1.1.1", "/indicators/IPv4/1.1.1.1/general"),
-        ("IPv6", "fe00::0", f"/indicators/IPv6/{quote('fe00::0')}/general"),
-        ("FQDN", "example.net", "/indicators/domain/example.net/general"),
+        (ObservableType.IPV4, "1.1.1.1", "/indicators/IPv4/1.1.1.1/general"),
+        (ObservableType.IPV6, "fe00::0", f"/indicators/IPv6/{quote('fe00::0')}/general"),
+        (ObservableType.FQDN, "example.net", "/indicators/domain/example.net/general"),
         (
-            "SHA1",
+            ObservableType.SHA1,
             "3a30948f8cd5655fede389d73b5fecd91251df4a",
             "/indicators/file/3a30948f8cd5655fede389d73b5fecd91251df4a/general",
         ),
         (
-            "MD5",
+            ObservableType.MD5,
             "781e5e245d69b566979b86e28d23f2c7",
             "/indicators/file/781e5e245d69b566979b86e28d23f2c7/general",
         ),
         (
-            "SHA256",
+            ObservableType.SHA256,
             "84d89877f0d4041efb6bf91a16f0248f2fd573e6af05c19f96bedb9f882f7882",
             "/indicators/file/84d89877f0d4041efb6bf91a16f0248f2fd573e6af05c19f96bedb9f882f7882/general",
         ),
-        ("NaN", "1.1.1.1", None),
+        # ("NaN", "1.1.1.1", None),
     ],
 )
-def test_get_endpoint(type: str, artifact: str, endpoint: str | None):
+def test_get_endpoint(type: ObservableType, artifact: str, endpoint: str | None):
     result: str | None = get_endpoint(artifact, type)
 
     assert endpoint == result

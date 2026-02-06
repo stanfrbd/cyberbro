@@ -7,6 +7,7 @@ import jwt
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,17 @@ class MDEEngine(BaseEngine):
         return "mde"
 
     @property
-    def supported_types(self):
-        return ["BOGON", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.BOGON
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.FQDN
+            | ObservableType.URL
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+        )
 
     def _check_token_validity(self, token: str) -> bool:
         try:
@@ -79,7 +89,9 @@ class MDEEngine(BaseEngine):
             logger.error("Unable to retrieve token from JSON response: %s", json_response)
             return "invalid"
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
             jwt_token = self._read_token() or self._get_token()
             if "invalid" in jwt_token:
@@ -93,29 +105,30 @@ class MDEEngine(BaseEngine):
             observable = observable_value
             extracted_domain = None
 
-            if observable_type in ["MD5", "SHA1", "SHA256"]:
-                url = f"https://api.securitycenter.microsoft.com/api/files/{observable}/stats"
-                file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{observable}"
-                link = f"https://security.microsoft.com/file/{observable}"
-            elif observable_type in ["IPv4", "IPv6", "BOGON"]:
-                url = f"https://api.securitycenter.microsoft.com/api/ips/{observable}/stats"
-                link = f"https://security.microsoft.com/ip/{observable}/overview"
-            elif observable_type == "FQDN":
-                url = f"https://api.securitycenter.microsoft.com/api/domains/{observable}/stats"
-                link = f"https://security.microsoft.com/domains?urlDomain={observable}"
-            elif observable_type == "URL":
-                # TODO: Future refactoring - Line 99 uses fragile string split for URL parsing:
-                # observable.split("/")[2].split(":")[0]
-                # This approach fails on malformed URLs (e.g., missing protocol, no path).
-                # Consider using urllib.parse.urlparse() for robust URL parsing instead.
-                # Test coverage includes both valid URLs and known failure cases.
-                extracted_domain = observable.split("/")[2].split(":")[0]
-                url = (
-                    f"https://api.securitycenter.microsoft.com/api/domains/{extracted_domain}/stats"
-                )
-                link = f"https://security.microsoft.com/url?url={observable}"
-            else:
-                return None
+            match observable_type:
+                case ObservableType.MD5 | ObservableType.SHA1 | ObservableType.SHA256:
+                    url = f"https://api.securitycenter.microsoft.com/api/files/{observable}/stats"
+                    file_info_url = (
+                        f"https://api.securitycenter.microsoft.com/api/files/{observable}"
+                    )
+                    link = f"https://security.microsoft.com/file/{observable}"
+                case ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.BOGON:
+                    url = f"https://api.securitycenter.microsoft.com/api/ips/{observable}/stats"
+                    link = f"https://security.microsoft.com/ip/{observable}/overview"
+                case ObservableType.FQDN:
+                    url = f"https://api.securitycenter.microsoft.com/api/domains/{observable}/stats"
+                    link = f"https://security.microsoft.com/domains?urlDomain={observable}"
+                case ObservableType.URL:
+                    # TODO: Future refactoring - Line 124 uses fragile string split for URL parsing:
+                    # observable.split("/")[2].split(":")[0]
+                    # This approach fails on malformed URLs (e.g., missing protocol, no path).
+                    # Consider using urllib.parse.urlparse() for robust URL parsing instead.
+                    # Test coverage includes both valid URLs and known failure cases.
+                    extracted_domain = observable.split("/")[2].split(":")[0]
+                    url = f"https://api.securitycenter.microsoft.com/api/domains/{extracted_domain}/stats"
+                    link = f"https://security.microsoft.com/url?url={observable}"
+                case _:
+                    return None
 
             response = requests.get(
                 url, headers=headers, proxies=self.proxies, verify=self.ssl_verify, timeout=5

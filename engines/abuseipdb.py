@@ -5,6 +5,7 @@ import pycountry
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +16,15 @@ class AbuseIPDBEngine(BaseEngine):
         return "abuseipdb"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         # AbuseIPDB only supports IPs, so we want it to run AFTER any potential DNS resolution
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
+    def analyze(self, observable_value: str, observable_type: ObservableType) -> dict | None:
         url = "https://api.abuseipdb.com/api/v2/check"
         headers = {"Key": self.secrets.abuseipdb, "Accept": "application/json"}
         params = {"ipAddress": observable_value}

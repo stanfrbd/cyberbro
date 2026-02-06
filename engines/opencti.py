@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +16,23 @@ class OpenCTIEngine(BaseEngine):
         return "opencti"
 
     @property
-    def supported_types(self):
-        return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
-        api_key = self.secrets.opencti_api_key
-        opencti_url = self.secrets.opencti_url
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
+        api_key: str = self.secrets.opencti_api_key
+        opencti_url: str = self.secrets.opencti_url
 
         try:
             observable = observable_value

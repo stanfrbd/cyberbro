@@ -1,13 +1,28 @@
 import logging
 from abc import ABC, abstractmethod
+from enum import Flag, auto
 from typing import Any
 
 import requests
 from tenacity import after_log, retry, stop_after_attempt, wait_exponential
 
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
+
+
+class ExecutionPhase(Flag):
+    """Defines the analysis phase(s) the engine should run duing.
+
+    Not yet used.
+    """
+
+    EXTENSION = auto()  # Browser extension checks always run
+    PRE_PIVOT = auto()
+    PIVOT = auto()  # Can modify the observable in place (e.g. reverse DNS)
+    POST_PIVOT = auto()
+    DEPENDENT = auto()  # Engins that need results from other engines
 
 
 class BaseEngine(ABC):
@@ -28,8 +43,10 @@ class BaseEngine(ABC):
 
     @property
     @abstractmethod
-    def supported_types(self) -> list[str]:
-        """List of observable types this engine supports (e.g., ['IPv4', 'URL'])."""
+    def supported_types(self) -> ObservableType:
+        """List of observable types this engine supports.
+        e.g., SupportedTypes.IPv4 | SupportedTypes.URL
+        """
         pass
 
     @property
@@ -50,9 +67,10 @@ class BaseEngine(ABC):
         return False
 
     @abstractmethod
-    def analyze(self, observable_value: str, observable_type: str) -> Any:
+    def analyze(self, observable_value: str, observable_type: ObservableType) -> dict | None:
         """
-        Perform the analysis. Returns the raw result dictionary or None.
+        Perform the analysis.
+        Returns the report object, including success or the error message, present.
         """
         pass
 

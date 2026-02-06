@@ -8,6 +8,7 @@ import requests
 import responses
 
 from engines.microsoft_defender_for_endpoint import MDEEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -310,7 +311,7 @@ def test_analyze_token_fallback_logic(mock_read_text, secrets_with_key, ipv4_obs
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
     assert result["link"] == f"https://security.microsoft.com/ip/{ipv4_observable}/overview"
 
@@ -333,7 +334,7 @@ def test_analyze_invalid_token_returns_none(
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is None
     assert "No valid token available for Microsoft Defender for Endpoint" in caplog.text
 
@@ -348,26 +349,26 @@ def test_analyze_invalid_token_returns_none(
 @pytest.mark.parametrize(
     "observable_type,observable_value,expected_endpoint",
     [
-        ("IPv4", "8.8.8.8", "/api/ips/8.8.8.8/stats"),
-        ("IPv6", "2001:4860:4860::8888", "/api/ips/2001:4860:4860::8888/stats"),
-        ("BOGON", "10.0.0.1", "/api/ips/10.0.0.1/stats"),
-        ("FQDN", "example.com", "/api/domains/example.com/stats"),
+        (ObservableType.IPV4, "8.8.8.8", "/api/ips/8.8.8.8/stats"),
+        (ObservableType.IPV6, "2001:4860:4860::8888", "/api/ips/2001:4860:4860::8888/stats"),
+        (ObservableType.BOGON, "10.0.0.1", "/api/ips/10.0.0.1/stats"),
+        (ObservableType.FQDN, "example.com", "/api/domains/example.com/stats"),
         (
-            "MD5",
+            ObservableType.MD5,
             "5d41402abc4b2a76b9719d911017c592",
             "/api/files/5d41402abc4b2a76b9719d911017c592/stats",
         ),
         (
-            "SHA1",
+            ObservableType.SHA1,
             "356a192b7913b04c54574d18c28d46e6395428ab",
             "/api/files/356a192b7913b04c54574d18c28d46e6395428ab/stats",
         ),
         (
-            "SHA256",
+            ObservableType.SHA256,
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             "/api/files/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/stats",
         ),
-        ("URL", "https://example.com:8080/path", "/api/domains/example.com/stats"),
+        (ObservableType.URL, "https://example.com:8080/path", "/api/domains/example.com/stats"),
     ],
 )
 def test_analyze_observable_routing(
@@ -389,7 +390,7 @@ def test_analyze_observable_routing(
         status=200,
     )
 
-    if observable_type in ["MD5", "SHA1", "SHA256"]:
+    if observable_type in [ObservableType.MD5, ObservableType.SHA1, ObservableType.SHA256]:
         responses.add(
             responses.GET,
             file_info_url,
@@ -410,7 +411,7 @@ def test_analyze_unsupported_observable_type(mock_read_text, secrets_with_key):
     valid_token = create_valid_jwt_token()
     mock_read_text.return_value = valid_token
 
-    result = engine.analyze("test@example.com", "Email")
+    result = engine.analyze("test@example.com", ObservableType.EMAIL)
     assert result is None
     assert len(responses.calls) == 0
 
@@ -436,7 +437,7 @@ def test_url_domain_extraction_simple(mock_read_text, secrets_with_key):
         status=200,
     )
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
     assert result is not None
 
 
@@ -456,7 +457,7 @@ def test_url_domain_extraction_with_port(mock_read_text, secrets_with_key):
         status=200,
     )
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
     assert result is not None
 
 
@@ -476,7 +477,7 @@ def test_url_domain_extraction_with_subdomain(mock_read_text, secrets_with_key):
         status=200,
     )
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
     assert result is not None
 
 
@@ -496,7 +497,7 @@ def test_url_domain_extraction_with_query_string(mock_read_text, secrets_with_ke
         status=200,
     )
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
     assert result is not None
 
 
@@ -516,7 +517,7 @@ def test_url_domain_extraction_with_fragment(mock_read_text, secrets_with_key):
         status=200,
     )
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable, ObservableType.URL)
     assert result is not None
 
 
@@ -529,7 +530,7 @@ def test_url_parsing_malformed_no_protocol(mock_read_text, secrets_with_key, cap
     mock_read_text.return_value = valid_token
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze("example.com/path", "URL")
+    result = engine.analyze("example.com/path", ObservableType.URL)
     assert result is None
     assert "Error querying Microsoft Defender for Endpoint" in caplog.text
 
@@ -543,7 +544,7 @@ def test_url_parsing_malformed_no_path(mock_read_text, secrets_with_key, caplog)
     mock_read_text.return_value = valid_token
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze("https://example.com", "URL")
+    result = engine.analyze("https://example.com", ObservableType.URL)
     assert result is None
 
 
@@ -568,7 +569,7 @@ def test_analyze_success_complete_response(mock_read_text, secrets_with_key, ipv
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
     assert result["link"] == f"https://security.microsoft.com/ip/{ipv4_observable}/overview"
     assert result["orgPrevalence"] == 150
@@ -605,7 +606,7 @@ def test_analyze_date_simplification_various_formats(
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
     assert result["orgFirstSeen"] == expected_date
     assert result["orgLastSeen"] == expected_date
@@ -631,7 +632,7 @@ def test_analyze_missing_date_fields(mock_read_text, secrets_with_key, ipv4_obse
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
     assert "orgFirstSeen" not in result
     assert "orgLastSeen" not in result
@@ -657,7 +658,7 @@ def test_analyze_null_date_fields(mock_read_text, secrets_with_key, ipv4_observa
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
 
 
@@ -681,7 +682,7 @@ def test_analyze_empty_string_date_fields(mock_read_text, secrets_with_key, ipv4
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
 
 
@@ -714,7 +715,7 @@ def test_analyze_md5_triggers_file_info(mock_read_text, secrets_with_key, md5_ha
         status=200,
     )
 
-    result = engine.analyze(md5_hash, "MD5")
+    result = engine.analyze(md5_hash, ObservableType.MD5)
     assert result is not None
     assert len(responses.calls) == 2
 
@@ -743,7 +744,7 @@ def test_analyze_sha1_triggers_file_info(mock_read_text, secrets_with_key, sha1_
         status=200,
     )
 
-    result = engine.analyze(sha1_hash, "SHA1")
+    result = engine.analyze(sha1_hash, ObservableType.SHA1)
     assert result is not None
     assert len(responses.calls) == 2
 
@@ -772,7 +773,7 @@ def test_analyze_sha256_triggers_file_info(mock_read_text, secrets_with_key, sha
         status=200,
     )
 
-    result = engine.analyze(sha256_hash, "SHA256")
+    result = engine.analyze(sha256_hash, ObservableType.SHA256)
     assert result is not None
     assert len(responses.calls) == 2
 
@@ -801,7 +802,7 @@ def test_analyze_file_info_all_fields_present(mock_read_text, secrets_with_key, 
         status=200,
     )
 
-    result = engine.analyze(md5_hash, "MD5")
+    result = engine.analyze(md5_hash, ObservableType.MD5)
     assert result is not None
     assert result["issuer"] == "Microsoft Corporation"
     assert result["signer"] == "Microsoft Windows"
@@ -836,7 +837,7 @@ def test_analyze_file_info_missing_fields(mock_read_text, secrets_with_key, md5_
         status=200,
     )
 
-    result = engine.analyze(md5_hash, "MD5")
+    result = engine.analyze(md5_hash, ObservableType.MD5)
     assert result is not None
     assert result["issuer"] == "Unknown"
     assert result["signer"] == "Unknown"
@@ -886,7 +887,7 @@ def test_analyze_file_info_partial_fields(mock_read_text, secrets_with_key, md5_
         status=200,
     )
 
-    result = engine.analyze(md5_hash, "MD5")
+    result = engine.analyze(md5_hash, ObservableType.MD5)
     assert result is not None
     assert result[field_name] == "Unknown"
 
@@ -915,7 +916,7 @@ def test_analyze_file_info_request_failure(mock_read_text, secrets_with_key, md5
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(md5_hash, "MD5")
+    result = engine.analyze(md5_hash, ObservableType.MD5)
     assert result is None
     assert "Error querying Microsoft Defender for Endpoint" in caplog.text
 
@@ -936,7 +937,7 @@ def test_analyze_ipv4_no_file_info_call(mock_read_text, secrets_with_key, ipv4_o
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
     assert len(responses.calls) == 1
 
@@ -965,7 +966,7 @@ def test_analyze_http_error_codes(
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is None
     assert "Error querying Microsoft Defender for Endpoint" in caplog.text
 
@@ -986,7 +987,7 @@ def test_analyze_connection_timeout(mock_read_text, secrets_with_key, ipv4_obser
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is None
     assert "Error querying Microsoft Defender for Endpoint" in caplog.text
 
@@ -1007,7 +1008,7 @@ def test_analyze_connection_error(mock_read_text, secrets_with_key, ipv4_observa
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is None
     assert "Error querying Microsoft Defender for Endpoint" in caplog.text
 
@@ -1029,7 +1030,7 @@ def test_analyze_invalid_json_response(mock_read_text, secrets_with_key, ipv4_ob
     )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is None
     assert "Error querying Microsoft Defender for Endpoint" in caplog.text
 
@@ -1052,7 +1053,7 @@ def test_analyze_response_missing_expected_fields(
         status=200,
     )
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
     assert result is not None
     assert result["link"] == f"https://security.microsoft.com/ip/{ipv4_observable}/overview"
 
@@ -1119,5 +1120,14 @@ def test_engine_name(mde_engine):
 
 def test_supported_types(mde_engine):
     """Test supported observable types."""
-    expected_types = ["BOGON", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
-    assert mde_engine.supported_types == expected_types
+    expected_types = (
+        ObservableType.BOGON
+        | ObservableType.FQDN
+        | ObservableType.IPV4
+        | ObservableType.IPV6
+        | ObservableType.MD5
+        | ObservableType.SHA1
+        | ObservableType.SHA256
+        | ObservableType.URL
+    )
+    assert mde_engine.supported_types is expected_types

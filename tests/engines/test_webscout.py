@@ -6,6 +6,7 @@ import requests
 import responses
 
 from engines.webscout import WebscoutEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -162,7 +163,7 @@ def test_analyze_with_valid_key_includes_in_url(secrets_with_valid_key, ipv4_obs
     responses.add(responses.GET, expected_url_pattern, json=mock_resp, status=200)
 
     with patch("time.sleep"):  # Skip rate limiting for test speed
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Verify API key was included in URL
@@ -185,7 +186,7 @@ def test_analyze_with_empty_key_still_makes_request(
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     # Request was made despite empty key
@@ -199,7 +200,7 @@ def test_analyze_with_none_key_error(secrets_with_none_key, ipv4_observable, cap
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -230,7 +231,7 @@ def test_analyze_calls_time_sleep_with_1_second(secrets_with_valid_key, ipv4_obs
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep") as mock_sleep:
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     # Verify sleep was called with 1.0 seconds
     mock_sleep.assert_called_once_with(1)
@@ -239,7 +240,8 @@ def test_analyze_calls_time_sleep_with_1_second(secrets_with_valid_key, ipv4_obs
 
 @responses.activate
 @pytest.mark.parametrize(
-    "observable_type,observable_value", [("IPv4", "1.1.1.1"), ("IPv6", "2001:4860:4860::8888")]
+    "observable_type,observable_value",
+    [(ObservableType.IPV4, "1.1.1.1"), (ObservableType.IPV6, "2001:4860:4860::8888")],
 )
 def test_analyze_correct_url_endpoint_per_type(
     secrets_with_valid_key, observable_type, observable_value
@@ -292,7 +294,7 @@ def test_analyze_success_status_returns_data(secrets_with_valid_key, ipv4_observ
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["ip"] == ipv4_observable
@@ -308,7 +310,7 @@ def test_analyze_error_status_returns_none(secrets_with_valid_key, ipv4_observab
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
 
@@ -323,7 +325,7 @@ def test_analyze_missing_status_returns_none(secrets_with_valid_key, ipv4_observ
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
 
@@ -354,7 +356,7 @@ def test_analyze_location_with_valid_country_code(secrets_with_valid_key, ipv4_o
             mock_country_obj.name = "United States"
             mock_country.return_value = mock_country_obj
 
-            result = engine.analyze(ipv4_observable, "IPv4")
+            result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["country_code"] == "US"
@@ -385,7 +387,7 @@ def test_analyze_location_with_invalid_country_code(secrets_with_valid_key, ipv4
         with patch("time.sleep"), patch("pycountry.countries.get") as mock_country:
             mock_country.return_value = None
 
-            result = engine.analyze(ipv4_observable, "IPv4")
+            result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["country_code"] == "ZZ"
@@ -414,7 +416,7 @@ def test_analyze_location_with_none_country_code(secrets_with_valid_key, ipv4_ob
         mock_get.return_value = mock_response
 
         with patch("time.sleep"):
-            result = engine.analyze(ipv4_observable, "IPv4")
+            result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["country_code"] == "Unknown"
@@ -446,7 +448,7 @@ def test_analyze_location_with_missing_city(secrets_with_valid_key, ipv4_observa
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # City defaults to "Unknown" when missing
@@ -469,7 +471,7 @@ def test_analyze_missing_nested_dicts_default_to_empty(secrets_with_valid_key, i
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["network_type"] == ""
@@ -491,7 +493,7 @@ def test_analyze_success_complete(secrets_with_valid_key, ipv4_observable, compl
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["ip"] == ipv4_observable
@@ -517,7 +519,7 @@ def test_analyze_http_errors_return_none(
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -533,7 +535,7 @@ def test_analyze_timeout_returns_none(secrets_with_valid_key, ipv4_observable, c
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -549,7 +551,7 @@ def test_analyze_connection_error_returns_none(secrets_with_valid_key, ipv4_obse
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -565,7 +567,7 @@ def test_analyze_json_parse_error_returns_none(secrets_with_valid_key, ipv4_obse
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -599,7 +601,7 @@ def test_analyze_osint_tags_aggregation(secrets_with_valid_key, ipv4_observable)
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert "malware" in result["behavior"]
@@ -636,7 +638,7 @@ def test_analyze_osint_tags_deduplication(secrets_with_valid_key, ipv4_observabl
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     behavior = result["behavior"]
@@ -670,7 +672,7 @@ def test_analyze_osint_tags_empty_services(secrets_with_valid_key, ipv4_observab
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["behavior"] == []
@@ -719,7 +721,7 @@ def test_analyze_anonymization_boolean_conversion(
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["is_proxy"] == expected_proxy
@@ -749,7 +751,7 @@ def test_analyze_asn_formatting_valid(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["asn"] == "AS15169"
@@ -777,7 +779,7 @@ def test_analyze_asn_formatting_string_asn(secrets_with_valid_key, ipv4_observab
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["asn"] == "AS15169"
@@ -805,7 +807,7 @@ def test_analyze_asn_formatting_zero_asn(secrets_with_valid_key, ipv4_observable
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["asn"] == "Unknown"
@@ -833,7 +835,7 @@ def test_analyze_asn_formatting_missing(secrets_with_valid_key, ipv4_observable)
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["asn"] == "Unknown"
@@ -932,11 +934,9 @@ def test_supported_types_property():
     """Test supported_types property returns IPv4 and IPv6."""
     engine = WebscoutEngine(Secrets(), proxies={}, ssl_verify=True)
 
-    types = engine.supported_types
+    types = ObservableType.IPV4 | ObservableType.IPV6
 
-    assert len(types) == 2
-    assert "IPv4" in types
-    assert "IPv6" in types
+    assert engine.supported_types is types
 
 
 def test_execute_after_reverse_dns_property():
@@ -974,7 +974,7 @@ def test_analyze_with_proxies(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
 
@@ -1001,7 +1001,7 @@ def test_analyze_with_ssl_verify_false(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
 
@@ -1028,7 +1028,7 @@ def test_analyze_hostnames_empty_list(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["hostnames"] == []
@@ -1056,7 +1056,7 @@ def test_analyze_hostnames_single_item(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["hostnames"] == ["mail.example.com"]
@@ -1085,7 +1085,7 @@ def test_analyze_hostnames_many_items(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["hostnames"] == hostnames
@@ -1117,7 +1117,7 @@ def test_analyze_location_string_formatting(secrets_with_valid_key, ipv4_observa
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["location"] == "United States, New York"
@@ -1153,7 +1153,7 @@ def test_analyze_location_with_empty_city(secrets_with_valid_key, ipv4_observabl
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     # Empty string gets replaced with "Unknown" by the `or "Unknown"` pattern
@@ -1186,7 +1186,7 @@ def test_analyze_export_workflow_ipv4(secrets_with_valid_key, ipv4_observable):
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        analysis = engine.analyze(ipv4_observable, "IPv4")
+        analysis = engine.analyze(ipv4_observable, ObservableType.IPV4)
         export = engine.create_export_row(analysis)
 
     assert export["ws_cn"] == "US"
@@ -1221,7 +1221,7 @@ def test_analyze_export_workflow_ipv6(secrets_with_valid_key, ipv6_observable):
         mock_country_obj.name = "United Kingdom"
         mock_country.return_value = mock_country_obj
 
-        analysis = engine.analyze(ipv6_observable, "IPv6")
+        analysis = engine.analyze(ipv6_observable, ObservableType.IPV6)
         export = engine.create_export_row(analysis)
 
     assert export["ws_cn"] == "GB"
@@ -1276,8 +1276,8 @@ def test_analyze_multiple_ips_same_engine(secrets_with_valid_key):
     )
 
     with patch("time.sleep"):
-        result_ipv4 = engine.analyze(ipv4, "IPv4")
-        result_ipv6 = engine.analyze(ipv6, "IPv6")
+        result_ipv4 = engine.analyze(ipv4, ObservableType.IPV4)
+        result_ipv6 = engine.analyze(ipv6, ObservableType.IPV6)
 
     assert result_ipv4 is not None
     assert result_ipv6 is not None

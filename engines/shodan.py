@@ -5,6 +5,7 @@ import requests
 from requests.exceptions import HTTPError, JSONDecodeError
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,14 +16,14 @@ class ShodanEngine(BaseEngine):
         return "shodan"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
+    def analyze(self, observable_value: str, observable_type: ObservableType) -> dict | None:
         headers = {"Accept": "application/json"}
         params = {"key": self.secrets.shodan}
         url = f"https://api.shodan.io/shodan/host/{observable_value}"

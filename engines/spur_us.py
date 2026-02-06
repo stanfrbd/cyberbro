@@ -4,6 +4,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -14,14 +15,16 @@ class SpurUSEngine(BaseEngine):
         return "spur"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         spur_url = f"https://spur.us/context/{observable_value}"
         api_key = self.secrets.spur_us
 

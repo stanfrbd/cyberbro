@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 from falconpy import APIHarnessV2  # Assuming falconpy is installed
 
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -16,28 +17,50 @@ class CrowdstrikeEngine(BaseEngine):
         return "crowdstrike"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.FQDN
+            | ObservableType.URL
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+        )
 
-    def _map_observable_type(self, observable_type: str) -> str:
-        if observable_type in ["MD5", "SHA256", "SHA1"] or observable_type in ["IPv4", "IPv6"]:
-            return observable_type.lower()
-        if observable_type in ["FQDN", "URL"]:
-            return "domain"
-        return None
+    def _map_observable_type(self, observable_type: ObservableType) -> str | None:
+        match observable_type:
+            case ObservableType.FQDN | ObservableType.URL:
+                return "domain"
+            case ObservableType.IPV4:
+                return "ipv4"
+            case ObservableType.IPV6:
+                return "ipv6"
+            case ObservableType.MD5:
+                return "md5"
+            case ObservableType.SHA256:
+                return "sha256"
+            case ObservableType.SHA1:
+                return "sha1"
+            case _:
+                return None
 
-    def _generate_ioc_id(self, observable: str, observable_type: str) -> str:
-        if observable_type == "domain":
-            return f"domain_{observable}"
-        if observable_type in ["ipv4", "ipv6"]:
-            return f"ip_address_{observable}"
-        if observable_type == "md5":
-            return f"hash_md5_{observable}"
-        if observable_type == "sha256":
-            return f"hash_sha256_{observable}"
-        if observable_type == "sha1":
-            return f"hash_sha1_{observable}"
-        return None
+    def _generate_ioc_id(self, observable: str, mapped_type: str) -> str | None:
+        match mapped_type:
+            case "domain":
+                prefix: str = "domain_"
+            case "ipv4" | "ipv6":
+                prefix = "ip_address_"
+            case "md5":
+                prefix = "hash_md5_"
+            case "sha256":
+                prefix = "hash_sha256_"
+            case "sha1":
+                prefix = "hash_sha1_"
+            case _:
+                return None
+
+        return f"{prefix}{observable}"
 
     def _get_falcon_client(self) -> APIHarnessV2:
         return APIHarnessV2(
@@ -49,19 +72,21 @@ class CrowdstrikeEngine(BaseEngine):
             timeout=5,
         )
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(
+        self, observable_value: str, observable_type: ObservableType
+    ) -> dict[str, Any] | None:
         try:
             falcon = self._get_falcon_client()
             falcon_url = urljoin(self.secrets.crowdstrike_falcon_base_url, "/").rstrip("/")
 
-            observable = (
+            observable: str = (
                 observable_value.split("/")[2].split(":")[0]
-                if observable_type == "URL"
+                if observable_type is ObservableType.URL
                 else observable_value
             )
 
             observable = observable.lower()
-            mapped_type = self._map_observable_type(observable_type)
+            mapped_type: str = self._map_observable_type(observable_type)
 
             # 1. Get device count
             response = falcon.command(

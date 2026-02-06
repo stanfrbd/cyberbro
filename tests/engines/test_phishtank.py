@@ -19,6 +19,7 @@ import responses
 
 from engines.phishtank import PhishTankEngine
 from models.base_engine import BaseEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 
@@ -56,7 +57,7 @@ class TestPhishTankSuccessfulAnalysis:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
         assert result["in_database"] is True
@@ -75,7 +76,7 @@ class TestPhishTankSuccessfulAnalysis:
             status=200,
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
 
         assert result is not None
         assert result["in_database"] is True
@@ -86,7 +87,7 @@ class TestPhishTankObservableTypeRouting:
 
     @pytest.mark.parametrize(
         "observable_type,observable_value",
-        [("URL", "http://example.com"), ("FQDN", "example.com")],
+        [(ObservableType.URL, "http://example.com"), (ObservableType.FQDN, "example.com")],
     )
     @responses.activate
     def test_all_observable_types(
@@ -107,7 +108,7 @@ class TestPhishTankObservableTypeRouting:
 
     def test_supported_types_property(self, engine: PhishTankEngine) -> None:
         """Test that engine returns supported types."""
-        expected_types = ["FQDN", "URL"]
+        expected_types = ObservableType.FQDN | ObservableType.URL
         assert engine.supported_types == expected_types
 
 
@@ -124,7 +125,7 @@ class TestPhishTankFQDNConversion:
             status=200,
         )
 
-        result = engine.analyze("example.com", "FQDN")
+        result = engine.analyze("example.com", ObservableType.FQDN)
 
         assert result is not None
         assert result["in_database"] is False
@@ -139,7 +140,7 @@ class TestPhishTankFQDNConversion:
             status=200,
         )
 
-        result = engine.analyze("sub.example.com", "FQDN")
+        result = engine.analyze("sub.example.com", ObservableType.FQDN)
 
         assert result is not None
         assert result["in_database"] is False
@@ -158,7 +159,7 @@ class TestPhishTankURLNormalization:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
 
@@ -172,7 +173,7 @@ class TestPhishTankURLNormalization:
             status=200,
         )
 
-        result = engine.analyze("https://example.com", "URL")
+        result = engine.analyze("https://example.com", ObservableType.URL)
 
         assert result is not None
 
@@ -186,7 +187,7 @@ class TestPhishTankURLNormalization:
             status=200,
         )
 
-        result = engine.analyze("http://example.com:8080", "URL")
+        result = engine.analyze("http://example.com:8080", ObservableType.URL)
 
         assert result is not None
 
@@ -200,7 +201,7 @@ class TestPhishTankURLNormalization:
             status=200,
         )
 
-        result = engine.analyze("http://example.com/path", "URL")
+        result = engine.analyze("http://example.com/path", ObservableType.URL)
 
         assert result is not None
 
@@ -214,7 +215,7 @@ class TestPhishTankURLNormalization:
             status=200,
         )
 
-        result = engine.analyze("http://example.com/path/", "URL")
+        result = engine.analyze("http://example.com/path/", ObservableType.URL)
 
         assert result is not None
 
@@ -238,7 +239,7 @@ class TestPhishTankResponseStructure:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
         assert result["in_database"] is True
@@ -253,7 +254,7 @@ class TestPhishTankResponseStructure:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is None
 
@@ -267,7 +268,7 @@ class TestPhishTankResponseStructure:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
         assert result == {}
@@ -292,7 +293,7 @@ class TestPhishTankAPIResponseContent:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
         assert result["in_database"] is True
@@ -309,7 +310,7 @@ class TestPhishTankAPIResponseContent:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
         assert result["in_database"] is False
@@ -331,7 +332,7 @@ class TestPhishTankAPIResponseContent:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
         assert result["in_database"] is False
@@ -352,7 +353,7 @@ class TestPhishTankBase64Encoding:
             status=200,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
 
         assert result is not None
 
@@ -366,7 +367,7 @@ class TestPhishTankBase64Encoding:
             status=200,
         )
 
-        result = engine.analyze("http://example.com/path?query=value&other=123", "URL")
+        result = engine.analyze("http://example.com/path?query=value&other=123", ObservableType.URL)
 
         assert result is not None
 
@@ -388,7 +389,7 @@ class TestPhishTankHTTPErrors:
             status=status_code,
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
         assert result is None
 
     @responses.activate
@@ -400,7 +401,7 @@ class TestPhishTankHTTPErrors:
             body=ConnectionError("Connection timeout"),
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
         assert result is None
 
     @responses.activate
@@ -412,7 +413,7 @@ class TestPhishTankHTTPErrors:
             body=ConnectionRefusedError("Connection refused"),
         )
 
-        result = engine.analyze("http://example.com", "URL")
+        result = engine.analyze("http://example.com", ObservableType.URL)
         assert result is None
 
 

@@ -6,6 +6,7 @@ import requests
 import responses
 
 from engines.threatfox import ThreatFoxEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -78,10 +79,10 @@ class TestAnalyzeWithValidKey:
     @pytest.mark.parametrize(
         "observable_type,observable_value,expected_search_term",
         [
-            ("IPv4", "1.1.1.1", "1.1.1.1"),
-            ("IPv6", "2001:4860:4860::8888", "2001:4860:4860::8888"),
-            ("FQDN", "example.com", "example.com"),
-            ("URL", "https://example.com/path", "example.com"),
+            (ObservableType.IPV4, "1.1.1.1", "1.1.1.1"),
+            (ObservableType.IPV6, "2001:4860:4860::8888", "2001:4860:4860::8888"),
+            (ObservableType.FQDN, "example.com", "example.com"),
+            (ObservableType.URL, "https://example.com/path", "example.com"),
         ],
     )
     @responses.activate
@@ -121,7 +122,7 @@ class TestAnalyzeWithValidKey:
 
         responses.add(responses.POST, url, status=401, json={"error": "Unauthorized"})
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # Empty key results in 401, which is caught as exception and returns None
         assert result is None
@@ -139,7 +140,7 @@ class TestAnalyzeWithValidKey:
 
         responses.add(responses.POST, url, status=401, json={"error": "Unauthorized"})
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # Whitespace key results in 401, caught as exception, returns None
         assert result is None
@@ -157,7 +158,7 @@ class TestURLParsing:
         mock_resp = {"data": [{"malware_printable": "Trojan"}]}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(url_observable_standard, "URL")
+        result = engine.analyze(url_observable_standard, ObservableType.URL)
 
         assert result is not None
         request_body = json.loads(responses.calls[0].request.body)
@@ -173,7 +174,7 @@ class TestURLParsing:
         mock_resp = {"data": []}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(url_observable_with_port, "URL")
+        result = engine.analyze(url_observable_with_port, ObservableType.URL)
 
         assert result is not None
         request_body = json.loads(responses.calls[0].request.body)
@@ -191,7 +192,7 @@ class TestURLParsing:
         mock_resp = {"data": []}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(url_observable_complex, "URL")
+        result = engine.analyze(url_observable_complex, ObservableType.URL)
 
         assert result is not None
         request_body = json.loads(responses.calls[0].request.body)
@@ -213,7 +214,7 @@ class TestSuccessfulResponses:
             "data": [
                 {
                     "ioc": ipv4_observable,
-                    "ioc_type": "ipv4",
+                    "ioc_type": "IPv4",
                     "malware_printable": "Trojan.Win32.Generic",
                     "threat_level": 100,
                 },
@@ -222,7 +223,7 @@ class TestSuccessfulResponses:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 1
@@ -247,7 +248,7 @@ class TestSuccessfulResponses:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 3
@@ -270,7 +271,7 @@ class TestSuccessfulResponses:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 3  # Count is total items
@@ -286,7 +287,7 @@ class TestSuccessfulResponses:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 0
@@ -311,7 +312,7 @@ class TestSuccessfulResponses:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 2
@@ -336,7 +337,7 @@ class TestSuccessfulResponses:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 2
@@ -364,7 +365,7 @@ class TestHTTPErrors:
 
         responses.add(responses.POST, url, status=status_code, json={"error": "Error"})
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # HTTP errors are caught as RequestException and return None
         assert result is None
@@ -377,7 +378,7 @@ class TestHTTPErrors:
 
         responses.add(responses.POST, url, status=404, json={"error": "Not Found"})
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is None
 
@@ -396,7 +397,7 @@ class TestResponseStructureVariations:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         # Default to empty list for missing data key
@@ -417,7 +418,7 @@ class TestResponseStructureVariations:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         # isinstance check fails, data processing skipped, count remains 0
@@ -434,7 +435,7 @@ class TestResponseStructureVariations:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         # isinstance(dict, list) is False, processing skipped
@@ -451,7 +452,7 @@ class TestResponseStructureVariations:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         # isinstance("string", list) is False, processing skipped
@@ -466,7 +467,7 @@ class TestResponseStructureVariations:
 
         responses.add(responses.POST, url, body="not valid json", status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # JSON decode error caught as generic Exception, returns None
         assert result is None
@@ -483,7 +484,7 @@ class TestConnectionErrors:
 
         responses.add(responses.POST, url, body=requests.exceptions.Timeout())
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # Timeout caught as generic Exception, returns None
         assert result is None
@@ -496,7 +497,7 @@ class TestConnectionErrors:
 
         responses.add(responses.POST, url, body=requests.exceptions.ConnectionError())
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # Connection error caught as generic Exception, returns None
         assert result is None
@@ -593,8 +594,9 @@ class TestEngineProperties:
     def test_supported_types(self):
         """Test supported observable types."""
         engine = ThreatFoxEngine(Secrets(), proxies={}, ssl_verify=True)
-        assert set(engine.supported_types) == {"FQDN", "IPv4", "IPv6", "URL"}
-        assert len(engine.supported_types) == 4
+        assert engine.supported_types is (
+            ObservableType.FQDN | ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.URL
+        )
 
 
 # ============================================================================
@@ -616,7 +618,7 @@ class TestEdgeCases:
         engine = ThreatFoxEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
 
         # Malformed URL without proper scheme
-        result = engine.analyze("malformed-url", "URL")
+        result = engine.analyze("malformed-url", ObservableType.URL)
 
         # Should return None due to IndexError in URL parsing
         assert result is None
@@ -635,7 +637,7 @@ class TestEdgeCases:
         mock_resp = {"data": []}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv6_url, "URL")
+        result = engine.analyze(ipv6_url, ObservableType.URL)
 
         assert result is not None
         request_body = json.loads(responses.calls[0].request.body)
@@ -660,7 +662,7 @@ class TestEdgeCases:
         mock_resp = {"data": data_items}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         assert result["count"] == 100
@@ -676,13 +678,13 @@ class TestEdgeCases:
         mock_resp = {"data": []}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result1 = engine.analyze(ipv4_observable, "IPv4")
+        result1 = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         # Reset responses and make another call
         responses.reset()
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result2 = engine.analyze(ipv4_observable, "IPv4")
+        result2 = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result1["link"] == result2["link"]
         assert ipv4_observable in result1["link"]
@@ -702,7 +704,7 @@ class TestEdgeCases:
 
         # This will cause IndexError due to Bug #1 (unsafe URL parsing)
         # URL parsing assumes at least 3 segments when split by "/"
-        result = engine.analyze(special_observable, "URL")
+        result = engine.analyze(special_observable, ObservableType.URL)
 
         # Returns None due to exception in URL parsing
         assert result is None
@@ -729,7 +731,7 @@ class TestEdgeCases:
 
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         # Count counts all 5 items in the list
@@ -752,7 +754,7 @@ class TestEdgeCases:
         mock_resp = {"data": []}
         responses.add(responses.POST, url, json=mock_resp, status=200)
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
         assert result is not None
         # Verify request was made (proxies and ssl_verify are used internally by requests)

@@ -5,6 +5,7 @@ import requests
 import responses
 
 from engines.abuseipdb import AbuseIPDBEngine
+from models.observable import ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ def test_analyze_success_complete(secrets_with_key, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is not None
     assert result["reports"] == 24
@@ -94,7 +95,7 @@ def test_analyze_http_error_codes(secrets_with_key, ipv4_observable, status_code
     responses.add(responses.GET, url, json={"error": "error"}, status=status_code)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying AbuseIPDB" in caplog.text
@@ -109,7 +110,7 @@ def test_analyze_response_missing_data_key(secrets_with_key, ipv4_observable):
     mock_resp = {"error": "No data"}
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
 
@@ -135,7 +136,7 @@ def test_analyze_ipv6_success(secrets_with_key, ipv6_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable, ObservableType.IPV6)
 
     assert result is not None
     assert result["reports"] == 5
@@ -153,7 +154,7 @@ def test_analyze_request_timeout(secrets_with_key, ipv4_observable, caplog):
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying AbuseIPDB" in caplog.text
@@ -169,7 +170,7 @@ def test_analyze_request_connection_error(secrets_with_key, ipv4_observable, cap
     responses.add(responses.GET, url, body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying AbuseIPDB" in caplog.text
@@ -184,7 +185,7 @@ def test_analyze_invalid_json_response(secrets_with_key, ipv4_observable, caplog
     responses.add(responses.GET, url, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable, ObservableType.IPV4)
 
     assert result is None
     assert "Error querying AbuseIPDB" in caplog.text
@@ -259,6 +260,6 @@ def test_engine_properties():
     engine = AbuseIPDBEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "abuseipdb"
-    assert engine.supported_types == ["IPv4", "IPv6"]
+    assert engine.supported_types is ObservableType.IPV4 | ObservableType.IPV6
     assert engine.execute_after_reverse_dns is True
     assert engine.is_pivot_engine is False

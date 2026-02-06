@@ -13,7 +13,7 @@ from utils.database import get_analysis_result, save_analysis_result
 
 # --- NEW DYNAMIC ENGINE IMPORTS ---
 from utils.load_engines import get_engine_instances
-from utils.utils import is_bogon
+from utils.utils import is_bogon, is_really_ipv6
 
 # ----------------------------------
 
@@ -120,9 +120,22 @@ def analyze_observable(
 
             # Check if auto-pivoting should occur
             if reverse_dns_results and observable["type"] in ["FQDN", "URL"]:
-                # Pivot: change observable type to IPv4 and use the first IP found.
-                observable["type"] = "IPv4"
-                observable["value"] = reverse_dns_results[0]
+                first_ip = reverse_dns_results[0]
+                observable["value"] = first_ip
+
+                # Edge case: PTR record returning a private/reserved IP address
+                # This is a very specific scenario where reverse DNS resolves to a bogon IP
+                # Determine observable type based on IP characteristics
+                try:
+                    if is_bogon(first_ip):
+                        observable["type"] = "BOGON"
+                    elif is_really_ipv6(first_ip):
+                        observable["type"] = "IPv6"
+                    else:
+                        observable["type"] = "IPv4"
+                except (ValueError, AttributeError):
+                    # Invalid IP format, fallback to BOGON
+                    observable["type"] = "BOGON"
 
     # 4. Phase 3: Post-Pivot Engines (IP-only engines that benefit from pivot)
     # Run all engines except those that depend on other engine results
@@ -182,10 +195,9 @@ def update_analysis_metadata(analysis_id, start_time, selected_engines, results)
             "%Y-%m-%d %H:%M:%S", time.localtime(end_time)
         )
         analysis_result.analysis_duration = end_time - start_time
-        analysis_result.analysis_duration_string = (
-            f"{int((end_time - start_time) // 60)} minutes, "
-            f"{(end_time - start_time) % 60:.2f} seconds"
-        )
+        minutes = int((end_time - start_time) // 60)
+        seconds = (end_time - start_time) % 60
+        analysis_result.analysis_duration_string = f"{minutes} minutes, {seconds:.2f} seconds"
         analysis_result.results = results
         analysis_result.in_progress = False
         save_analysis_result(analysis_result)

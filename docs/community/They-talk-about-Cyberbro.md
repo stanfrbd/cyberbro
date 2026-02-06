@@ -1,5 +1,6 @@
 ## Some articles and posts about Cyberbro
 
+- [Cyberbro - L'Analyse d'IoC facile et en Open Source (Korben.info, Feb 4, 2026)](https://korben.info/cyberbro-analyse-ioc-osint.html)
 - [Cyberbro: Practical helper for Indicators of Compromise (heise.de, Jun 2, 2025)](https://www.heise.de/en/background/Cyberbro-Practical-helper-for-Indicators-of-Compromise-10422108.html)
 - [Cyberbro: Open source tool extracts IOCs and checks their reputation (all-about-it.blog, May 26, 2025)](https://all-about-it.blog/2025/05/26/cyberbro-open-source-tool-extracts-iocs-and-checks-their-reputation/)
 - [OSINT Insider Issue #5: Network/Internet (osintinsider.com, May 20, 2024)](https://osintinsider.com/p/osint-insider-issue-5-networkinternet)

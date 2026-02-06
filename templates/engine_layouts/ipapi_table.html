@@ -9,13 +9,33 @@
         {% if result.ipapi.is_abuser %}<span class="badge badge-danger">ABUSER</span>{% endif %}
     </div>
 
-    <strong>Location: </strong>{{ result.ipapi.location.city }}, {{
-    result.ipapi.location.state }}<br />
-    <strong>Country: </strong><span class="country country-{{ result.ipapi.location.country | lower }}">{{
-        result.ipapi.location.country }}</span>
-    <span class="fi fi-{{ result.ipapi.location.country_code | lower }}"></span><br />
-    <strong>ASN: </strong>{{ result.ipapi.asn.asn }} {{
-    result.ipapi.asn.org }}<br />
+    {% if result.ipapi.location is defined and result.ipapi.location %}
+    <strong>Location: </strong>
+    {% if result.ipapi.location.city %}{{ result.ipapi.location.city }}{% endif %}
+    {% if result.ipapi.location.city and result.ipapi.location.state %}, {% endif %}
+    {% if result.ipapi.location.state %}{{ result.ipapi.location.state }}{% endif %}
+    {% if not result.ipapi.location.city and not result.ipapi.location.state %}Unknown{% endif %}<br />
+    <strong>Country: </strong>
+    {% if result.ipapi.location.country %}
+    <span class="country country-{{ result.ipapi.location.country | lower }}">{{ result.ipapi.location.country }}</span>
+    {% if result.ipapi.location.country_code %}
+    <span class="fi fi-{{ result.ipapi.location.country_code | lower }}"></span>
+    {% endif %}
+    {% else %}
+    Unknown
+    {% endif %}<br />
+    {% else %}
+    <strong>Location: </strong><span class="text-muted">Not available (possibly bogon/private IP)</span><br />
+    <strong>Country: </strong><span class="text-muted">Not available</span><br />
+    {% endif %}
+
+    <strong>ASN: </strong>
+    {% if result.ipapi.asn %}
+    {{ result.ipapi.asn.asn if result.ipapi.asn.asn else 'Unknown' }}
+    {{ result.ipapi.asn.org if result.ipapi.asn.org else '' }}
+    {% else %}
+    Unknown
+    {% endif %}<br />
     {% if result.ipapi.is_vpn and result.ipapi.vpn and result.ipapi.vpn.url %}
     <strong>VPN Service: </strong><a href="{{ result.ipapi.vpn.url }}" target="_blank">{{
         result.ipapi.vpn.service }}</a><br />

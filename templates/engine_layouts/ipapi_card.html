@@ -39,13 +39,40 @@ analysis_results.results[0].ipapi.is_proxy %}
             }
         </style>
 
-        <p><strong>Location: </strong>{{ analysis_results.results[0].ipapi.location.city }}, {{
-            analysis_results.results[0].ipapi.location.state }}
+        {% if analysis_results.results[0].ipapi.location is defined and analysis_results.results[0].ipapi.location %}
+        <p><strong>Location: </strong>
+            {% if analysis_results.results[0].ipapi.location.city %}{{ analysis_results.results[0].ipapi.location.city
+            }}{% endif %}
+            {% if analysis_results.results[0].ipapi.location.city and analysis_results.results[0].ipapi.location.state
+            %}, {% endif %}
+            {% if analysis_results.results[0].ipapi.location.state %}{{ analysis_results.results[0].ipapi.location.state
+            }}{% endif %}
+            {% if not analysis_results.results[0].ipapi.location.city and not
+            analysis_results.results[0].ipapi.location.state %}Unknown{% endif %}
         </p>
-        <p><strong>Country: </strong>{{ analysis_results.results[0].ipapi.location.country }} <span
-                class="fi fi-{{ analysis_results.results[0].ipapi.location.country_code | lower }}"></span></p>
-        <p><strong>ASN: </strong>{{ analysis_results.results[0].ipapi.asn.asn }} {{
-            analysis_results.results[0].ipapi.asn.org }}</p>
+        <p><strong>Country: </strong>
+            {% if analysis_results.results[0].ipapi.location.country %}
+            {{ analysis_results.results[0].ipapi.location.country }}
+            {% if analysis_results.results[0].ipapi.location.country_code %}
+            <span class="fi fi-{{ analysis_results.results[0].ipapi.location.country_code | lower }}"></span>
+            {% endif %}
+            {% else %}
+            Unknown
+            {% endif %}
+        </p>
+        {% else %}
+        <p><strong>Location: </strong><span class="text-muted">Not available (possibly bogon/private IP)</span></p>
+        <p><strong>Country: </strong><span class="text-muted">Not available</span></p>
+        {% endif %}
+
+        <p><strong>ASN: </strong>
+            {% if analysis_results.results[0].ipapi.asn %}
+            {{ analysis_results.results[0].ipapi.asn.asn if analysis_results.results[0].ipapi.asn.asn else 'Unknown' }}
+            {{ analysis_results.results[0].ipapi.asn.org if analysis_results.results[0].ipapi.asn.org else '' }}
+            {% else %}
+            Unknown
+            {% endif %}
+        </p>
         {% if analysis_results.results[0].ipapi.is_vpn and analysis_results.results[0].ipapi.vpn and
         analysis_results.results[0].ipapi.vpn.url and
         analysis_results.results[0].ipapi.vpn.service %}

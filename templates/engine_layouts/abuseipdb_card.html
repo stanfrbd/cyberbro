@@ -6,6 +6,54 @@
 
     <h3>AbuseIPDB</h3>
     <p><strong>Reports: </strong><a href="{{ analysis_results.results[0].abuseipdb.link }}"
-            target="_blank">{{ analysis_results.results[0].abuseipdb.reports }}</a></p>
-    <p><strong>Risk: </strong>{{ analysis_results.results[0].abuseipdb.risk_score }}%</p>
+            target="_blank">{{ analysis_results.results[0].abuseipdb.reports }}</a> / <strong>Risk: </strong>{{ analysis_results.results[0].abuseipdb.risk_score }}%</p>
+
+    {% if analysis_results.results[0].abuseipdb.is_whitelisted or analysis_results.results[0].abuseipdb.usage_type or analysis_results.results[0].abuseipdb.is_tor %}
+    <div class="abuseipdb-badges">
+        {% if analysis_results.results[0].abuseipdb.is_whitelisted %}<span class="badge badge-success">WHITELISTED</span>{% endif %}
+        {% if analysis_results.results[0].abuseipdb.is_tor %}<span class="badge badge-danger">TOR EXIT</span>{% endif %}
+        {% if analysis_results.results[0].abuseipdb.usage_type %}<span class="badge badge-info">{{ analysis_results.results[0].abuseipdb.usage_type }}</span>{% endif %}
+    </div>
+    {% endif %}
+
+    <style>
+        .abuseipdb-badges {
+            margin: 0.5rem 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: bold;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+    </style>
+
+    {% if analysis_results.results[0].abuseipdb.hostnames and analysis_results.results[0].abuseipdb.hostnames | length > 0 %}
+    <p><strong>Hostnames: </strong>{{ analysis_results.results[0].abuseipdb.hostnames | join(', ') }}</p>
+    {% endif %}
+    {% if analysis_results.results[0].abuseipdb.country_code %}
+    <p><strong>Country: </strong>{{ analysis_results.results[0].abuseipdb.country_name }} <span
+            class="fi fi-{{ analysis_results.results[0].abuseipdb.country_code | lower }}"></span></p>
+    {% endif %}
+    {% if analysis_results.results[0].abuseipdb.isp %}
+    <p><strong>ISP: </strong>{{ analysis_results.results[0].abuseipdb.isp }}</p>
+    {% endif %}
 </div>

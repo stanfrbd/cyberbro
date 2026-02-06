@@ -51,6 +51,7 @@ nav:
   - Integrations:
       - Cyberbro in KASM Workspaces: integrations/Cyberbro-in-KASM-Workspaces.md
       - Cyberbro Browser Extension: integrations/Cyberbro-browser-extension.md
+      - Cyberbro CLI: integrations/Cyberbro-CLI.md
       - Use Cyberbro MCP for LLM: integrations/Use-Cyberbro-MCP-for-LLM.md
       - Reverse Proxy Configuration (Caddy): integrations/Reverse-Proxy-configuration-‐-Caddy.md
   - API Keys:
@@ -119,4 +120,4 @@ plugins:
       prompt_literal_start:
         - "$"
         - ">"
-copyright: Copyright © 2024 - 2025 Stanislas MEDRANO (stanfrbd) - MIT License
+copyright: Copyright © 2024 - 2026 Stanislas MEDRANO (stanfrbd) - MIT License

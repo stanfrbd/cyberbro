@@ -4,9 +4,52 @@
     {% endif %}
 
     {% if result.abuseipdb %}
-        <strong>Reports: </strong>
-        <a href="{{ result.abuseipdb.link }}" target="_blank">{{ result.abuseipdb.reports }}</a><br/>
-        <strong>Risk: </strong>{{ result.abuseipdb.risk_score }}%<br/>
+        <style>
+            .badge {
+                display: inline-block;
+                padding: 0.35em 0.65em;
+                font-size: 0.75em;
+                font-weight: bold;
+                line-height: 1;
+                text-align: center;
+                white-space: nowrap;
+                border-radius: 0.25rem;
+                margin-right: 0.25rem;
+                margin-bottom: 0.25rem;
+            }
+            .badge-success {
+                background-color: #28a745;
+                color: white;
+            }
+            .badge-danger {
+                background-color: #dc3545;
+                color: white;
+            }
+            .badge-info {
+                background-color: #17a2b8;
+                color: white;
+            }
+        </style>
+
+        {% if result.abuseipdb.is_whitelisted or result.abuseipdb.usage_type or result.abuseipdb.is_tor %}
+        <div style="margin-bottom: 0.25rem;">
+            {% if result.abuseipdb.is_whitelisted %}<span class="badge badge-success">WHITELISTED</span>{% endif %}
+            {% if result.abuseipdb.is_tor %}<span class="badge badge-danger">TOR EXIT</span>{% endif %}
+            {% if result.abuseipdb.usage_type %}<span class="badge badge-info">{{ result.abuseipdb.usage_type }}</span>{% endif %}
+        </div>
+        {% endif %}
+
+        <strong>Reports: </strong><a href="{{ result.abuseipdb.link }}" target="_blank">{{ result.abuseipdb.reports }}</a> / <strong>Risk: </strong>{{ result.abuseipdb.risk_score }}%<br/>
+        {% if result.abuseipdb.hostnames and result.abuseipdb.hostnames | length > 0 %}
+        <strong>Hostnames: </strong>{{ result.abuseipdb.hostnames | join(', ') }}<br/>
+        {% endif %}
+        {% if result.abuseipdb.country_code %}
+        <strong>Country: </strong><span class="country country-{{result.abuseipdb.country_name | lower}}">{{result.abuseipdb.country_name}}</span>
+        <span class="fi fi-{{ result.abuseipdb.country_code | lower }}"></span><br/>
+        {% endif %}
+        {% if result.abuseipdb.isp %}
+        <strong>ISP: </strong>{{ result.abuseipdb.isp }}<br/>
+        {% endif %}
     {% else %}
         Not applicable
     {% endif %}

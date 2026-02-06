@@ -68,7 +68,16 @@ function formatResults(data) {
             if (result.bad_asn.details) plainText += `- Details: ${result.bad_asn.details}\n`;
         }
         if (result.abuseipdb) {
-            plainText += `AbuseIPDB: Reports: ${result.abuseipdb.reports}, Risk Score: ${result.abuseipdb.risk_score}\n`;
+            plainText += `AbuseIPDB: Reports: ${result.abuseipdb.reports}, Risk Score: ${result.abuseipdb.risk_score}%`;
+            if (result.abuseipdb.country_name) plainText += `, Country: ${result.abuseipdb.country_name}`;
+            if (result.abuseipdb.isp) plainText += `, ISP: ${result.abuseipdb.isp}`;
+            if (result.abuseipdb.domain) plainText += `, Domain: ${result.abuseipdb.domain}`;
+            plainText += `\n`;
+            if (result.abuseipdb.usage_type) plainText += `  - Usage Type: ${result.abuseipdb.usage_type}\n`;
+            if (result.abuseipdb.hostnames && result.abuseipdb.hostnames.length > 0) plainText += `  - Hostnames: ${result.abuseipdb.hostnames.join(', ')}\n`;
+            if (result.abuseipdb.is_tor) plainText += `  - Tor Exit Node: Yes\n`;
+            if (result.abuseipdb.is_whitelisted) plainText += `  - Whitelisted: Yes\n`;
+            if (result.abuseipdb.last_reported_at) plainText += `  - Last Reported: ${result.abuseipdb.last_reported_at}\n`;
         }
         if (result.spur) {
             plainText += `Spur: Tunnels: ${result.spur.tunnels}\n`;

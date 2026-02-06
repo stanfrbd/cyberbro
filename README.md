@@ -317,7 +317,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
 * [MISP](https://www.misp-project.org/)
 * [OpenCTI](https://www.opencti.io/)
-* [Cyberbro Whois API](https://whois.cyberbro.net) - RDAP / Whois lookup service
+* [OpenRDAP](https://www.openrdap.org/)
 * [Phishtank](https://www.phishtank.com/)
 * [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence

@@ -40,6 +40,9 @@
 - **[Cyberbro Browser Extension](integrations/Cyberbro-browser-extension.md)**  
     Install and use the browser extension for quick indicator analysis.
 
+- **[Cyberbro CLI](integrations/Cyberbro-CLI.md)**  
+    Use the command-line interface for quick indicator lookups and automation.
+
 - **[Use Cyberbro MCP for LLM](integrations/Use-Cyberbro-MCP-for-LLM.md)**  
     Integrate Cyberbro with Model Context Protocol for LLM workflows.
 

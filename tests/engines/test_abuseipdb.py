@@ -72,6 +72,16 @@ def test_analyze_success_complete(secrets_with_key, ipv4_observable):
     assert result["reports"] == 24
     assert result["risk_score"] == 25
     assert result["link"] == f"https://www.abuseipdb.com/check/{ipv4_observable}"
+    # Verify new fields
+    assert result["is_whitelisted"] is True
+    assert result["country_code"] == "AU"
+    assert result["country_name"] == "Australia"
+    assert result["usage_type"] == "Content Delivery Network"
+    assert result["isp"] == "APNIC and Cloudflare DNS Resolver project"
+    assert result["domain"] == "cloudflare.com"
+    assert result["hostnames"] == ["one.one.one.one"]
+    assert result["is_tor"] is False
+    assert result["last_reported_at"] == "2025-04-22T13:01:09+00:00"
 
 
 @responses.activate
@@ -193,12 +203,24 @@ def test_create_export_row_with_data():
         "reports": 42,
         "risk_score": 75,
         "link": "https://www.abuseipdb.com/check/1.1.1.1",
+        "country_name": "Germany",
+        "isp": "3xK Tech GmbH",
+        "domain": "3xktech.cloud",
+        "usage_type": "Data Center/Web Hosting/Transit",
+        "is_tor": False,
+        "last_reported_at": "2026-02-05T21:42:02+00:00",
     }
 
     row = engine.create_export_row(analysis_result)
 
     assert row["a_ipdb_reports"] == 42
     assert row["a_ipdb_risk"] == 75
+    assert row["a_ipdb_country"] == "Germany"
+    assert row["a_ipdb_isp"] == "3xK Tech GmbH"
+    assert row["a_ipdb_domain"] == "3xktech.cloud"
+    assert row["a_ipdb_usage_type"] == "Data Center/Web Hosting/Transit"
+    assert row["a_ipdb_is_tor"] is False
+    assert row["a_ipdb_last_reported"] == "2026-02-05T21:42:02+00:00"
 
 
 def test_create_export_row_none():
@@ -209,6 +231,12 @@ def test_create_export_row_none():
 
     assert row["a_ipdb_reports"] is None
     assert row["a_ipdb_risk"] is None
+    assert row["a_ipdb_country"] is None
+    assert row["a_ipdb_isp"] is None
+    assert row["a_ipdb_domain"] is None
+    assert row["a_ipdb_usage_type"] is None
+    assert row["a_ipdb_is_tor"] is None
+    assert row["a_ipdb_last_reported"] is None
 
 
 def test_create_export_row_missing_fields():

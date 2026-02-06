@@ -12,7 +12,7 @@ querycontacts
 flask_sqlalchemy
 gunicorn
 ioc-fanger
-tldextract
+tldextract>=5.3.0
 crowdstrike-falconpy
 beautifulsoup4
 tenacity

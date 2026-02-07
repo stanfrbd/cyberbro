@@ -31,54 +31,51 @@ def url_observable():
 def complete_rdap_response():
     """Complete API response using RDAP as data source."""
     return {
-        "domain_name": "20minutes.fr",
-        "tld": "fr",
+        "domain_name": "cyberbro.net",
+        "tld": "net",
         "status": ["client transfer prohibited"],
-        "registrar": "GANDI",
-        "registrar_url": "https://rdap.nic.fr/entity/RAR524-FRNIC",
+        "registrar": "Cloudflare, Inc.",
+        "registrar_url": "https://www.cloudflare.com",
         "whois_server": None,
-        "creation_date": "2001-07-11",
-        "expiration_date": "2028-01-08",
-        "updated_date": "2025-11-12",
-        "registrant_name": "20 Minutes France SAS",
-        "registrant_org": "20 Minutes France SAS",
-        "registrant_email": "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
-        "registrant_street": "24 Rue du Cotentin",
-        "registrant_city": "Paris",
+        "creation_date": "2024-12-20",
+        "expiration_date": "2026-12-20",
+        "updated_date": "2025-11-20",
+        "registrant_name": None,
+        "registrant_org": None,
+        "registrant_email": None,
+        "registrant_street": None,
+        "registrant_city": None,
         "registrant_state": None,
-        "registrant_postal_code": "75009",
-        "registrant_country": "FR",
-        "admin_name": "20 Minutes France SAS",
-        "admin_org": "20 Minutes France SAS",
-        "admin_email": "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
-        "admin_street": "24 Rue du Cotentin",
-        "admin_city": "Paris",
+        "registrant_postal_code": None,
+        "registrant_country": None,
+        "admin_name": None,
+        "admin_org": None,
+        "admin_email": None,
+        "admin_street": None,
+        "admin_city": None,
         "admin_state": None,
-        "admin_postal_code": "75009",
-        "admin_country": "FR",
-        "tech_name": "GANDI",
-        "tech_org": "GANDI",
-        "tech_email": "noc@gandi.net",
-        "tech_street": "63-65 Boulevard MASSENA",
-        "tech_city": "Paris",
+        "admin_postal_code": None,
+        "admin_country": None,
+        "tech_name": None,
+        "tech_org": None,
+        "tech_email": None,
+        "tech_street": None,
+        "tech_city": None,
         "tech_state": None,
-        "tech_postal_code": "75013",
-        "tech_country": "FR",
-        "abuse_contact": None,
+        "tech_postal_code": None,
+        "tech_country": None,
+        "abuse_contact": "registrar-abuse@cloudflare.com",
         "dnssec": None,
         "name_servers": [
-            "ns-1271.awsdns-30.org",
-            "ns-16.awsdns-02.com",
-            "ns-1958.awsdns-52.co.uk",
-            "ns-748.awsdns-29.net",
+            "anderson.ns.cloudflare.com",
+            "lisa.ns.cloudflare.com",
         ],
         "emails": [
-            "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
-            "noc@gandi.net",
+            "registrar-abuse@cloudflare.com",
         ],
-        "rdap_link": "https://rdap.nic.fr/domain/20minutes.fr",
+        "rdap_link": "https://rdap.verisign.com/net/v1/domain/CYBERBRO.NET",
         "data_source": "rdap",
-        "raw_tld_server": "rdap.nic.fr",
+        "raw_tld_server": "rdap.verisign.com",
         "raw_results": None,
     }
 
@@ -87,30 +84,30 @@ def complete_rdap_response():
 def complete_whois_response():
     """Complete API response using WHOIS as data source (fallback)."""
     return {
-        "domain_name": "equans.pt",
+        "domain_name": "test-domain.pt",
         "tld": "pt",
         "status": ["Registered"],
         "registrar": None,
         "registrar_url": None,
         "whois_server": None,
-        "creation_date": "2026-01-21",
-        "expiration_date": "2027-01-21",
+        "creation_date": "2024-01-15",
+        "expiration_date": "2025-01-15",
         "updated_date": None,
-        "registrant_name": "SAS EQUANS",
+        "registrant_name": "Test Organization",
         "registrant_org": None,
-        "registrant_email": "e12cccc7b6c659251a4cc160692f9872-57985885@contact.gandi.net",
-        "registrant_street": "49 RUE LOUIS BLANC",
-        "registrant_city": "COURBEVOIE",
+        "registrant_email": "contact@test-domain.pt",
+        "registrant_street": "123 Test Street",
+        "registrant_city": "Lisbon",
         "registrant_state": None,
-        "registrant_postal_code": "92400",
+        "registrant_postal_code": "1000-001",
         "registrant_country": None,
         "admin_name": None,
         "admin_org": None,
-        "admin_email": "reg.pt-notification@gandi.net,tld-pt-gandi@registry-auto.rrpproxy.net",
-        "admin_street": "63-65 boulevard Massena",
-        "admin_city": "Paris",
+        "admin_email": "admin@test-registrar.net,tech@test-registrar.net",
+        "admin_street": "456 Admin Street",
+        "admin_city": "Lisbon",
         "admin_state": None,
-        "admin_postal_code": "75013",
+        "admin_postal_code": "1000-002",
         "admin_country": None,
         "tech_name": None,
         "tech_org": None,
@@ -123,15 +120,15 @@ def complete_whois_response():
         "abuse_contact": None,
         "dnssec": None,
         "name_servers": [
-            "ns-104.awsdns-13.com",
-            "ns-1072.awsdns-06.org",
-            "ns-524.awsdns-01.net",
-            "ns-1653.awsdns-14.co.uk",
+            "ns1.test-registrar.net",
+            "ns2.test-registrar.net",
+            "ns3.test-registrar.net",
+            "ns4.test-registrar.net",
         ],
         "emails": [
-            "e12cccc7b6c659251a4cc160692f9872-57985885@contact.gandi.net",
-            "reg.pt-notification@gandi.net",
-            "tld-pt-gandi@registry-auto.rrpproxy.net",
+            "contact@test-domain.pt",
+            "admin@test-registrar.net",
+            "tech@test-registrar.net",
         ],
         "rdap_link": None,
         "data_source": "whois",
@@ -217,33 +214,30 @@ class TestSuccessfulAnalysis:
         result = engine.analyze(fqdn_observable, "FQDN")
 
         assert result is not None
-        assert result["registrar"] == "GANDI"
-        assert result["registrant"] == "20 Minutes France SAS"
-        assert result["organization"] == "20 Minutes France SAS"
-        assert (
-            result["registrant_email"]
-            == "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net"
-        )
-        assert result["creation_date"] == "2001-07-11"
-        assert result["expiration_date"] == "2028-01-08"
-        assert result["update_date"] == "2025-11-12"
-        assert result["link"] == "https://rdap.nic.fr/domain/20minutes.fr"
+        assert result["registrar"] == "Cloudflare, Inc."
+        assert result["registrant"] is None
+        assert result["organization"] is None
+        assert result["registrant_email"] is None
+        assert result["creation_date"] == "2024-12-20"
+        assert result["expiration_date"] == "2026-12-20"
+        assert result["update_date"] == "2025-11-20"
+        assert result["link"] == "https://rdap.verisign.com/net/v1/domain/CYBERBRO.NET"
         assert result["data_source"] == "rdap"
-        assert result["registrant_country"] == "FR"
-        assert len(result["name_servers"]) == 4
-        assert "ns-1271.awsdns-30.org" in result["name_servers"]
-        assert len(result["emails"]) == 2
-        assert "noc@gandi.net" in result["emails"]
+        assert result["registrant_country"] is None
+        assert len(result["name_servers"]) == 2
+        assert "anderson.ns.cloudflare.com" in result["name_servers"]
+        assert len(result["emails"]) == 1
+        assert "registrar-abuse@cloudflare.com" in result["emails"]
 
     @responses.activate
     def test_url_rdap_response(self, engine, complete_rdap_response):
         """Test successful URL analysis - domain extracted from URL."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("https://www.20minutes.fr/news/article", "URL")
+        result = engine.analyze("https://www.cyberbro.net/news/article", "URL")
 
         assert result is not None
-        assert result["registrar"] == "GANDI"
+        assert result["registrar"] == "Cloudflare, Inc."
         assert result["data_source"] == "rdap"
 
     @responses.activate
@@ -251,15 +245,12 @@ class TestSuccessfulAnalysis:
         """Test successful analysis with WHOIS data source (API fallback)."""
         responses.add(responses.POST, API_URL, json=complete_whois_response, status=200)
 
-        result = engine.analyze("equans.pt", "FQDN")
+        result = engine.analyze("test-domain.pt", "FQDN")
 
         assert result is not None
         assert result["data_source"] == "whois"
-        assert result["registrant"] == "SAS EQUANS"
-        assert (
-            result["registrant_email"]
-            == "e12cccc7b6c659251a4cc160692f9872-57985885@contact.gandi.net"
-        )
+        assert result["registrant"] == "Test Organization"
+        assert result["registrant_email"] == "contact@test-domain.pt"
         assert len(result["emails"]) == 3
         assert result["link"] == ""  # No rdap_link and no registrar_url
 
@@ -609,7 +600,7 @@ class TestDataSource:
         """Verify data_source is correctly set for RDAP responses."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("20minutes.fr", "FQDN")
+        result = engine.analyze("cyberbro.net", "FQDN")
         assert result["data_source"] == "rdap"
 
     @responses.activate
@@ -617,7 +608,7 @@ class TestDataSource:
         """Verify data_source is correctly set for WHOIS responses."""
         responses.add(responses.POST, API_URL, json=complete_whois_response, status=200)
 
-        result = engine.analyze("equans.pt", "FQDN")
+        result = engine.analyze("test-domain.pt", "FQDN")
         assert result["data_source"] == "whois"
 
 
@@ -630,16 +621,16 @@ class TestEmailsArray:
         """Multiple emails should be preserved as array."""
         responses.add(responses.POST, API_URL, json=complete_rdap_response, status=200)
 
-        result = engine.analyze("20minutes.fr", "FQDN")
+        result = engine.analyze("cyberbro.net", "FQDN")
         assert isinstance(result["emails"], list)
-        assert len(result["emails"]) == 2
+        assert len(result["emails"]) == 1
 
     @responses.activate
     def test_three_emails_whois(self, engine, complete_whois_response):
         """WHOIS response can have more emails from different contacts."""
         responses.add(responses.POST, API_URL, json=complete_whois_response, status=200)
 
-        result = engine.analyze("equans.pt", "FQDN")
+        result = engine.analyze("test-domain.pt", "FQDN")
         assert len(result["emails"]) == 3
 
     @responses.activate

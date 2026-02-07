@@ -5,6 +5,9 @@
 {% endif %}
 
     <h3>AbuseIPDB</h3>
+    {% if analysis_results.results[0].abuseipdb.ip_address %}
+    <p><strong>IP: </strong>{{ analysis_results.results[0].abuseipdb.ip_address }}</p>
+    {% endif %}
     <p><strong>Reports: </strong><a href="{{ analysis_results.results[0].abuseipdb.link }}"
             target="_blank">{{ analysis_results.results[0].abuseipdb.reports }}</a> / <strong>Risk: </strong>{{ analysis_results.results[0].abuseipdb.risk_score }}%</p>
 

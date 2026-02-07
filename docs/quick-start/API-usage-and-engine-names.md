@@ -20,7 +20,7 @@ Submit an observable (e.g., domain, IP, URL, hash) for analysis using one or mor
     curl -X POST "http://localhost:5000/api/analyze" \
       -H "Content-Type: application/json" \
       -d '{
-      "text": "20minutes.fr",
+      "text": "cyberbro.net",
       "engines": ["reverse_dns", "rdap_whois"]
       }'
     ```
@@ -34,7 +34,7 @@ Submit an observable (e.g., domain, IP, URL, hash) for analysis using one or mor
     url = "http://localhost:5000/api/analyze"
     headers = {"Content-Type": "application/json"}
     data = {
-      "text": "20minutes.fr",
+      "text": "cyberbro.net",
       "engines": ["reverse_dns", "rdap_whois"]
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
@@ -50,7 +50,7 @@ Submit an observable (e.g., domain, IP, URL, hash) for analysis using one or mor
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        text: "20minutes.fr",
+        text: "cyberbro.net",
         engines: ["reverse_dns", "rdap_whois"]
       })
     })
@@ -66,7 +66,7 @@ Submit an observable (e.g., domain, IP, URL, hash) for analysis using one or mor
     Content-Type: application/json
 
     {
-      "text": "20minutes.fr",
+      "text": "cyberbro.net",
       "engines": ["reverse_dns", "rdap_whois"]
     }
     ```
@@ -161,36 +161,31 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ```json title="Example Response"
 [
   {
-  "observable": "20minutes.fr",
+  "observable": "cyberbro.net",
   "rdap_whois": {
-    "abuse_contact": "",
-    "creation_date": "2001-07-11",
+    "abuse_contact": "registrar-abuse@cloudflare.com",
+    "creation_date": "2024-12-20",
     "data_source": "rdap",
     "emails": [
-      "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
-      "noc@gandi.net"
+      "registrar-abuse@cloudflare.com"
     ],
-    "expiration_date": "2028-01-08",
-    "link": "https://rdap.nic.fr/domain/20minutes.fr",
+    "expiration_date": "2026-12-20",
+    "link": "https://rdap.verisign.com/net/v1/domain/CYBERBRO.NET",
     "name_servers": [
-      "ns-1271.awsdns-30.org",
-      "ns-748.awsdns-29.net",
-      "ns-16.awsdns-02.com",
-      "ns-1958.awsdns-52.co.uk"
+      "anderson.ns.cloudflare.com",
+      "lisa.ns.cloudflare.com"
     ],
-    "organization": "",
-    "registrant": "20 MINUTES FRANCE SAS",
-    "registrant_country": "FR",
-    "registrant_email": "9d882bff1f92c7932581ac41a3323275-52062398@contact.gandi.net",
-    "registrar": "GANDI",
-    "update_date": "2025-11-12"
+    "organization": null,
+    "registrant": null,
+    "registrant_country": null,
+    "registrant_email": null,
+    "registrar": "Cloudflare, Inc.",
+    "update_date": "2025-11-20"
   },
   "reverse_dns": {
     "reverse_dns": [
-    "13.249.9.82",
-    "13.249.9.92",
-    "13.249.9.83",
-    "13.249.9.129"
+      "172.67.197.226",
+      "104.21.42.7"
     ]
   },
   "reversed_success": true,
@@ -218,7 +213,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
     curl -X POST "http://localhost:5000/api/analyze" \
       -H "Content-Type: application/json" \
       -d '{
-        "text": "20minutes.fr",
+        "text": "cyberbro.net",
         "engines": ["reverse_dns", "rdap_whois"],
         "ignore_cache": true
       }'
@@ -232,7 +227,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
     url = "http://localhost:5000/api/analyze"
     headers = {"Content-Type": "application/json"}
     data = {
-        "text": "20minutes.fr",
+        "text": "cyberbro.net",
         "engines": ["reverse_dns", "rdap_whois"],
         "ignore_cache": True
     }
@@ -249,7 +244,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            text: "20minutes.fr",
+            text: "cyberbro.net",
             engines: ["reverse_dns", "rdap_whois"],
             ignore_cache: true
         })
@@ -266,7 +261,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
     Content-Type: application/json
 
     {
-        "text": "20minutes.fr",
+        "text": "cyberbro.net",
         "engines": ["reverse_dns", "rdap_whois"],
         "ignore_cache": true
     }

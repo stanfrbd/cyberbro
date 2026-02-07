@@ -31,6 +31,10 @@
             }
         </style>
 
+        {% if result.abuseipdb.ip_address %}
+        <strong>IP: </strong>{{ result.abuseipdb.ip_address }}<br/>
+        {% endif %}
+
         {% if result.abuseipdb.is_whitelisted or result.abuseipdb.usage_type or result.abuseipdb.is_tor %}
         <div style="margin-bottom: 0.25rem;">
             {% if result.abuseipdb.is_whitelisted %}<span class="badge badge-success">WHITELISTED</span>{% endif %}

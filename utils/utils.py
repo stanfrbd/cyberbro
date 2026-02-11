@@ -1,4 +1,5 @@
 import base64
+import binascii
 import ipaddress
 import re
 import socket

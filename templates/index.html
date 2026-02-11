@@ -303,7 +303,6 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             const ENGINE_DEPENDENCIES = {
                 bad_asn: {
                     providers: ['ipapi', 'ipinfo', 'ipquery', 'webscout'],
-                    defaultProvider: 'ipapi',
                     message: {
                         title: '⚠️ ASN Provider Required',
                         body: 'You selected <strong>Bad ASN Check</strong> but no ASN provider is selected. Bad ASN requires an ASN provider to work properly.',
@@ -311,6 +310,36 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                     }
                 }
             };
+
+            /**
+             * Get available providers for an engine based on GUI_ENABLED_ENGINES.
+             * @param {string} engineName - Name of the engine to check
+             * @returns {string[]} Array of available provider names
+             */
+            function getAvailableProviders(engineName) {
+                const dependency = ENGINE_DEPENDENCIES[engineName];
+                if (!dependency) return [];
+
+                // If GUI_ENABLED_ENGINES is empty, all engines are available
+                if (GUI_ENABLED_ENGINES.length === 0) {
+                    return dependency.providers;
+                }
+
+                // Filter providers to only include enabled engines
+                return dependency.providers.filter(provider =>
+                    GUI_ENABLED_ENGINES.includes(provider)
+                );
+            }
+
+            /**
+             * Get default provider for an engine based on available enabled engines.
+             * @param {string} engineName - Name of the engine to check
+             * @returns {string|null} Default provider name or null if none available
+             */
+            function getDefaultProvider(engineName) {
+                const availableProviders = getAvailableProviders(engineName);
+                return availableProviders.length > 0 ? availableProviders[0] : null;
+            }
 
             /**
              * Get list of currently selected engines.
@@ -332,7 +361,10 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 if (!dependency) return false;
 
                 const hasEngine = selectedEngines.includes(engineName);
-                const hasProvider = dependency.providers.some(provider =>
+
+                // Check only among available (enabled) providers
+                const availableProviders = getAvailableProviders(engineName);
+                const hasProvider = availableProviders.some(provider =>
                     selectedEngines.includes(provider)
                 );
 
@@ -394,9 +426,72 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
              */
             function showDependencyWarning(engineName, onConfirm) {
                 const dependency = ENGINE_DEPENDENCIES[engineName];
+                const availableProviders = getAvailableProviders(engineName);
+                const defaultProvider = getDefaultProvider(engineName);
+
+                // If no providers are available at all, show error
+                if (!defaultProvider) {
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; ' +
+                        'background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+
+                    const dialog = document.createElement('div');
+                    dialog.style.cssText = 'background: var(--bg-color, white); padding: 30px; ' +
+                        'border-radius: 8px; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+
+                    dialog.innerHTML = `
+                        <h3 style="margin-top: 0; color: var(--text-color, #333);">❌ No ASN Provider Available</h3>
+                        <p style="color: var(--text-color, #666); line-height: 1.6;">
+                            You selected <strong>Bad ASN Check</strong> but none of the required ASN providers are enabled in your configuration.
+                        </p>
+                        <p style="color: var(--text-color, #666); line-height: 1.6;">
+                            Please enable at least one of these engines in your settings: <strong>IPapi</strong>, <strong>IPinfo</strong>, <strong>IPquery</strong>, or <strong>WebScout</strong>.
+                        </p>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button id="okBtn" class="btn btn-icon" style="flex: 1;">
+                                <span>✅</span>
+                                <span>OK</span>
+                            </button>
+                        </div>
+                    `;
+
+                    overlay.appendChild(dialog);
+                    document.body.appendChild(overlay);
+
+                    // Handle OK
+                    document.getElementById('okBtn').onclick = function () {
+                        document.body.removeChild(overlay);
+                    };
+
+                    // Close on overlay click
+                    overlay.onclick = function (e) {
+                        if (e.target === overlay) {
+                            document.body.removeChild(overlay);
+                        }
+                    };
+                    return;
+                }
+
+                // Build provider list string
+                const providerNames = availableProviders.map(p => {
+                    const names = {
+                        'ipapi': 'IPapi',
+                        'ipinfo': 'IPinfo',
+                        'ipquery': 'IPquery',
+                        'webscout': 'WebScout'
+                    };
+                    return `<strong>${names[p] || p}</strong>`;
+                });
+
+                const providersText = providerNames.length > 1
+                    ? `Please select one of: ${providerNames.join(', ')}.`
+                    : `Please select <strong>${providerNames[0]}</strong>.`;
+
                 const config = {
-                    ...dependency.message,
-                    confirmText: `Add ${dependency.defaultProvider.toUpperCase()} & Continue`
+                    title: dependency.message.title,
+                    body: dependency.message.body,
+                    providers: providersText,
+                    confirmText: `Add ${defaultProvider.toUpperCase()} & Continue`
                 };
 
                 const overlay = createConfirmationDialog(config);
@@ -404,7 +499,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
 
                 // Handle confirm
                 document.getElementById('confirmBtn').onclick = function () {
-                    enableEngine(dependency.defaultProvider);
+                    enableEngine(defaultProvider);
                     document.body.removeChild(overlay);
                     onConfirm();
                 };

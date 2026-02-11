@@ -27,4 +27,4 @@ jobs:
 
       # Step 4: run tests
       - name: Run tests
-        run: bash tests/run_tests.sh
+        run: pytest -q tests/

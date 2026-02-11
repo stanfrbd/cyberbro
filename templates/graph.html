@@ -460,6 +460,89 @@
                 edges.push({ from: obs, to: country, label: "Country (CriminalIP)" });
             }
 
+            // AbuseIPDB country (note: AbuseIPDB is NOT an ASN provider, only provides ISP and country)
+            if (entry.abuseipdb?.country_code) {
+                const countryCode = entry.abuseipdb.country_code.toLowerCase();
+                const country = entry.abuseipdb.country_name || country_code_to_country_name(entry.abuseipdb.country_code);
+                const flagUrl = `https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/flags/1x1/${countryCode}.svg`;
+
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns && entry.reverse_dns.reverse_dns.length > 0) {
+                        // Link country to the first resolved IP
+                        const resolvedIp = entry.reverse_dns.reverse_dns[0];
+                        addNode(country, country, "country_name", flagUrl);
+                        edges.push({ from: resolvedIp, to: country, label: "Country (AbuseIPDB)" });
+                    }
+                } else {
+                    addNode(country, country, "country_name", flagUrl);
+                    edges.push({ from: obs, to: country, label: "Country (AbuseIPDB)" });
+                }
+            }
+
+            // AbuseIPDB ISP (not ASN, just ISP name)
+            if (entry.abuseipdb?.isp) {
+                const ispNode = entry.abuseipdb.isp;
+
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns && entry.reverse_dns.reverse_dns.length > 0) {
+                        const resolvedIp = entry.reverse_dns.reverse_dns[0];
+                        addNode(ispNode, ispNode, "abuseipdb_isp", "https://img.icons8.com/officexs/32/organization.png");
+                        edges.push({ from: resolvedIp, to: ispNode, label: "ISP (AbuseIPDB)" });
+                    }
+                } else {
+                    addNode(ispNode, ispNode, "abuseipdb_isp", "https://img.icons8.com/officexs/32/organization.png");
+                    edges.push({ from: obs, to: ispNode, label: "ISP (AbuseIPDB)" });
+                }
+            }
+
+            // AbuseIPDB Tor Exit Node
+            if (entry.abuseipdb?.is_tor) {
+                const torNode = "Tor Exit Node (AbuseIPDB)";
+
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns && entry.reverse_dns.reverse_dns.length > 0) {
+                        const resolvedIp = entry.reverse_dns.reverse_dns[0];
+                        addNode(torNode, torNode, "abuseipdb_tor_exit", "https://img.icons8.com/officexs/32/lock.png");
+                        edges.push({ from: resolvedIp, to: torNode, label: "Tor (AbuseIPDB)" });
+                    }
+                } else {
+                    addNode(torNode, torNode, "abuseipdb_tor_exit", "https://img.icons8.com/officexs/32/lock.png");
+                    edges.push({ from: obs, to: torNode, label: "Tor (AbuseIPDB)" });
+                }
+            }
+
+            // AbuseIPDB Whitelisted
+            if (entry.abuseipdb?.is_whitelisted) {
+                const whitelistedNode = "Whitelisted (AbuseIPDB)";
+
+                if (entry.type === "FQDN" || entry.type === "URL") {
+                    if (entry.reverse_dns?.reverse_dns && entry.reverse_dns.reverse_dns.length > 0) {
+                        const resolvedIp = entry.reverse_dns.reverse_dns[0];
+                        addNode(whitelistedNode, whitelistedNode, "abuseipdb_whitelisted", "https://img.icons8.com/officexs/32/ok.png");
+                        edges.push({ from: resolvedIp, to: whitelistedNode, label: "Whitelisted" });
+                    }
+                } else {
+                    addNode(whitelistedNode, whitelistedNode, "abuseipdb_whitelisted", "https://img.icons8.com/officexs/32/ok.png");
+                    edges.push({ from: obs, to: whitelistedNode, label: "Whitelisted" });
+                }
+            }
+
+            // AbuseIPDB Hostnames
+            if (entry.abuseipdb?.hostnames && entry.abuseipdb.hostnames.length > 0) {
+                entry.abuseipdb.hostnames.forEach((hostname) => {
+                    if (entry.type === "FQDN" || entry.type === "URL") {
+                        if (entry.reverse_dns?.reverse_dns && entry.reverse_dns.reverse_dns.length > 0) {
+                            const resolvedIp = entry.reverse_dns.reverse_dns[0];
+                            addNode(hostname, hostname, "abuseipdb_hostname", "https://img.icons8.com/officexs/32/server.png");
+                            edges.push({ from: resolvedIp, to: hostname, label: "Hostname (AbuseIPDB)" });
+                        }
+                    } else {
+                        addNode(hostname, hostname, "abuseipdb_hostname", "https://img.icons8.com/officexs/32/server.png");
+                        edges.push({ from: obs, to: hostname, label: "Hostname (AbuseIPDB)" });
+                    }
+                });
+            }
+
             if (entry.reverse_dns?.reverse_dns) {
                 entry.reverse_dns.reverse_dns.forEach((reverse) => {
                     addNode(reverse, reverse, "reverse_dns", "https://img.icons8.com/officexs/32/server.png");

@@ -72,19 +72,19 @@ def sha256_hash():
 def create_valid_jwt_token(exp_offset: int = 3600) -> str:
     """Create a valid JWT token with specified expiration offset."""
     payload = {"exp": int(time.time()) + exp_offset, "iat": int(time.time())}
-    return jwt.encode(payload, "secret", algorithm="HS256")
+    return jwt.encode(payload, "test-secret-key-for-unit-tests-only!", algorithm="HS256")
 
 
 def create_expired_jwt_token() -> str:
     """Create an expired JWT token."""
     payload = {"exp": int(time.time()) - 3600, "iat": int(time.time()) - 7200}
-    return jwt.encode(payload, "secret", algorithm="HS256")
+    return jwt.encode(payload, "test-secret-key-for-unit-tests-only!", algorithm="HS256")
 
 
 def create_jwt_no_exp() -> str:
     """Create a JWT token without exp claim."""
     payload = {"iat": int(time.time())}
-    return jwt.encode(payload, "secret", algorithm="HS256")
+    return jwt.encode(payload, "test-secret-key-for-unit-tests-only!", algorithm="HS256")
 
 
 def mock_mde_stats_response(observable_value: str) -> dict:

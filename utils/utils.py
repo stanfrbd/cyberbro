@@ -1,3 +1,4 @@
+import base64
 import ipaddress
 import re
 import socket
@@ -134,9 +135,12 @@ def extract_observables(text):
     results = []
     seen = set()
 
-    # Concat any base64 encoded strings that are found before extracting IOCs in case a encoded URL or IP is included.
+    # Concat any base64 encoded strings found before extracting IOCs in case
+    # an encoded URL or IP is included.
     # Examples: Encoded email body, encoded command line
-    text += extract_base64(text)
+    decoded_text = extract_base64(text)
+    if decoded_text:
+        text = f"{text}\n{decoded_text}"
 
     # Extract URLs first to prevent FQDN overlap
     url_matches = re.findall(patterns["URL"], text)
@@ -198,35 +202,36 @@ def extract_observables(text):
 
     return filtered_results
 
-def extract_base64(text):
+
+def extract_base64(text: str) -> str:
     # Regex explains: Look for blocks of A-Z, a-z, 0-9, +, / that end with optional =
     # We use a minimum length to filter out short words like "email" or "const"
-    pattern = r'(?:[A-Za-z0-9+/]{4}){2,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?'
+    pattern = r"(?:[A-Za-z0-9+/]{4}){2,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?"
     min_length = 4
-    
+
     matches = re.findall(pattern, text)
     results = []
 
     for match in matches:
         if len(match) < min_length:
             continue
-            
+
         try:
             # Add padding if missing (crucial for raw command line strings)
             missing_padding = len(match) % 4
-            padded_match = match + ('=' * (4 - missing_padding) if missing_padding else "")
-            
+            padded_match = match + ("=" * (4 - missing_padding) if missing_padding else "")
+
             decoded = base64.b64decode(padded_match)
-            
-            # We try to return a string, but keep as bytes if it's binary data
+
+            # Only keep text content to avoid mixing bytes in the result.
             try:
-                results.append(decoded.decode('utf-8'))
+                results.append(decoded.decode("utf-8"))
             except UnicodeDecodeError:
-                results.append(decoded) # Keep as bytes (e.g. for zipped data)
-                
+                continue
+
         except Exception:
-            continue # If it's not valid B64, just skip it
-            
+            continue  # If it's not valid B64, just skip it
+
     return "\n".join(results)
 
 def is_really_ipv6(value):

@@ -204,8 +204,7 @@ def extract_observables(text):
 
 
 def extract_base64(text: str) -> str:
-    # Regex explains: Look for blocks of A-Z, a-z, 0-9, +, / that end with optional =
-    # We use a minimum length to filter out short words like "email" or "const"
+    # Regex explained: Look for blocks of A-Z, a-z, 0-9, +, / that end with optional =
     pattern = r"(?:[A-Za-z0-9+/]{4}){2,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?"
     min_length = 4
 
@@ -217,7 +216,7 @@ def extract_base64(text: str) -> str:
             continue
 
         try:
-            # Add padding if missing (crucial for raw command line strings)
+            # Add padding if missing
             missing_padding = len(match) % 4
             padded_match = match + ("=" * (4 - missing_padding) if missing_padding else "")
 

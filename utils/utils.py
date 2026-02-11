@@ -222,16 +222,15 @@ def extract_base64(text: str) -> str:
 
             decoded = base64.b64decode(padded_match)
 
-            # Only keep text content to avoid mixing bytes in the result.
             try:
                 results.append(decoded.decode("utf-8"))
             except UnicodeDecodeError:
                 continue
-
-        except Exception:
+        except (binascii.Error, ValueError):
             continue  # If it's not valid B64, just skip it
 
     return "\n".join(results)
+
 
 def is_really_ipv6(value):
     try:

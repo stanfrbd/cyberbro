@@ -1,3 +1,5 @@
+import base64
+import binascii
 import ipaddress
 import re
 import socket
@@ -134,6 +136,13 @@ def extract_observables(text):
     results = []
     seen = set()
 
+    # Concat any base64 encoded strings found before extracting IOCs in case
+    # an encoded URL or IP is included.
+    # Examples: Encoded email body, encoded command line
+    decoded_text = extract_base64(text)
+    if decoded_text:
+        text = f"{text}\n{decoded_text}"
+
     # Extract URLs first to prevent FQDN overlap
     url_matches = re.findall(patterns["URL"], text)
 
@@ -193,6 +202,35 @@ def extract_observables(text):
         filtered_results.append(result)
 
     return filtered_results
+
+
+def extract_base64(text: str) -> str:
+    # Regex explained: Look for blocks of A-Z, a-z, 0-9, +, / that end with optional =
+    pattern = r"(?:[A-Za-z0-9+/]{4}){2,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?"
+    min_length = 4
+
+    matches = re.findall(pattern, text)
+    results = []
+
+    for match in matches:
+        if len(match) < min_length:
+            continue
+
+        try:
+            # Add padding if missing
+            missing_padding = len(match) % 4
+            padded_match = match + ("=" * (4 - missing_padding) if missing_padding else "")
+
+            decoded = base64.b64decode(padded_match)
+
+            try:
+                results.append(decoded.decode("utf-8"))
+            except UnicodeDecodeError:
+                continue
+        except (binascii.Error, ValueError):
+            continue  # If it's not valid B64, just skip it
+
+    return "\n".join(results)
 
 
 def is_really_ipv6(value):

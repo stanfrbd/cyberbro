@@ -191,7 +191,8 @@ passphrase every time.** The plain-text key never touches the filesystem.
 === "secrets.json (Windows PowerShell)"
     ```powershell
     # Prompts for the age passphrase; decrypted key lives only in memory
-    $env:SOPS_AGE_KEY = (age --decrypt "$env:APPDATA\sops\age\keys.age")
+    # -join "`n" is required: PowerShell returns an array per line; SOPS needs newline-separated text
+    $env:SOPS_AGE_KEY = (age --decrypt "$env:APPDATA\sops\age\keys.age") -join "`n"
     sops --decrypt secrets.enc.json | Out-File -Encoding utf8 secrets.json
     docker compose up -d
     ```
@@ -207,7 +208,8 @@ passphrase every time.** The plain-text key never touches the filesystem.
 === ".env (Windows PowerShell)"
     ```powershell
     # Prompts for the age passphrase; decrypted key lives only in memory
-    $env:SOPS_AGE_KEY = (age --decrypt "$env:APPDATA\sops\age\keys.age")
+    # -join "`n" is required: PowerShell returns an array per line; SOPS needs newline-separated text
+    $env:SOPS_AGE_KEY = (age --decrypt "$env:APPDATA\sops\age\keys.age") -join "`n"
     sops --decrypt --input-type dotenv --output-type dotenv .env.enc | Out-File -Encoding utf8 .env
     docker compose up -d
     ```

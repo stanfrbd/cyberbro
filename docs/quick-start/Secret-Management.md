@@ -86,9 +86,22 @@ committed to Git.
     ```
 
 !!! warning
-    Back up your keys file securely (`~/.config/sops/age/keys.txt` on Linux/macOS,
-    `%APPDATA%\sops\age\keys.txt` on Windows). Losing this file means losing access to all
-    encrypted secrets.
+    **age keys are not passphrase-protected by default.** The generated `keys.txt` is a
+    plain-text file. Protect it at the OS level:
+
+    === "Linux / macOS"
+        ```bash
+        chmod 600 ~/.config/sops/age/keys.txt
+        ```
+
+    === "Windows (PowerShell)"
+        ```powershell
+        # Remove inherited permissions and restrict to current user only
+        icacls "$env:APPDATA\sops\age\keys.txt" /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
+        ```
+
+    Back up the file in a **password manager** (e.g. Bitwarden, 1Password) or another
+    secure offline location. Losing `keys.txt` means losing access to all encrypted secrets.
 
 ### 3 · Configure SOPS
 

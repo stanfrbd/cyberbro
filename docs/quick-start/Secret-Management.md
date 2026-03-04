@@ -95,6 +95,21 @@ the best balance of security, simplicity, and zero operational overhead:
 
 ---
 
+## Compatibility with existing workflows
+
+!!! note
+    The SOPS approach is **fully opt-in**. No application code is changed and no existing mechanism
+    is removed. Cyberbro will continue to read credentials from `secrets.json` or `.env` exactly as
+    before — SOPS simply encrypts those files at rest so they can be safely stored in version control.
+
+    The workflow is:
+
+    1. **Encrypt once** — `secrets.json` / `.env` → encrypted file committed to Git.
+    2. **Decrypt at runtime** — encrypted file → original `secrets.json` / `.env` (or injected as env vars).
+    3. **Application starts normally** — reads the same files / env vars it always has.
+
+---
+
 ## Getting Started with SOPS + age
 
 ### 1 · Install SOPS and age
@@ -140,49 +155,87 @@ creation_rules:
   - path_regex: secrets\.enc\..*
     age: >-
       age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  - path_regex: \.env\.enc$
+    age: >-
+      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Replace the `age1...` value with your **public key** from step 2.
 
 ### 4 · Encrypt your secrets file
 
-```bash
-# Start from the existing sample and fill in real values
-cp secrets-sample.json secrets.json
-# Edit secrets.json with your real API keys, then encrypt:
-sops --encrypt secrets.json > secrets.enc.json
-# Remove the plaintext file
-rm secrets.json
-```
+=== "secrets.json"
+    ```bash
+    # Start from the existing sample and fill in real values
+    cp secrets-sample.json secrets.json
+    # Edit secrets.json with your real API keys, then encrypt:
+    sops --encrypt secrets.json > secrets.enc.json
+    # Remove the plaintext file
+    rm secrets.json
+    ```
 
-Add `secrets.json` to `.gitignore` (it is already there) and commit `secrets.enc.json` safely.
+    `secrets.json` is already in `.gitignore`. Commit `secrets.enc.json` safely.
+
+=== ".env"
+    ```bash
+    # Start from the existing sample and fill in real values
+    cp .env.sample .env
+    # Edit .env with your real API keys, then encrypt (dotenv format):
+    sops --encrypt --input-type dotenv --output-type dotenv .env > .env.enc
+    # Remove the plaintext file
+    rm .env
+    ```
+
+    `.env` is already in `.gitignore`. Commit `.env.enc` safely.
 
 ### 5 · Use in Docker Compose
 
 Add the following step to your startup procedure (or a `Makefile`/shell script):
 
-```bash
-# Decrypt at deploy time (requires the age private key in the environment)
-export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-sops --decrypt secrets.enc.json > secrets.json
-docker compose up -d
-```
+=== "secrets.json"
+    ```bash
+    export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+    sops --decrypt secrets.enc.json > secrets.json
+    docker compose up -d
+    ```
+
+=== ".env"
+    ```bash
+    export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+    sops --decrypt --input-type dotenv --output-type dotenv .env.enc > .env
+    docker compose up -d
+    ```
+
+In both cases Docker Compose reads the decrypted file exactly as it always did — **no changes to `docker-compose.yml` or the application**.
 
 ### 6 · CI/CD integration
 
 Store the **age private key** as a CI secret (e.g., `SOPS_AGE_KEY` in GitHub Actions) and decrypt
 before the Docker build step:
 
-```yaml
-# .github/workflows/deploy.yml (excerpt)
-- name: Decrypt secrets
-  env:
-    SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-  run: |
-    mkdir -p ~/.config/sops/age
-    echo "$SOPS_AGE_KEY" > ~/.config/sops/age/keys.txt
-    sops --decrypt secrets.enc.json > secrets.json
-```
+=== "secrets.json"
+    ```yaml
+    # .github/workflows/deploy.yml (excerpt)
+    - name: Decrypt secrets
+      env:
+        SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+      run: |
+        mkdir -p ~/.config/sops/age
+        echo "$SOPS_AGE_KEY" > ~/.config/sops/age/keys.txt
+        sops --decrypt secrets.enc.json > secrets.json
+    ```
+
+=== ".env"
+    ```yaml
+    # .github/workflows/deploy.yml (excerpt)
+    - name: Decrypt secrets
+      env:
+        SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+      run: |
+        mkdir -p ~/.config/sops/age
+        echo "$SOPS_AGE_KEY" > ~/.config/sops/age/keys.txt
+        sops --decrypt --input-type dotenv --output-type dotenv .env.enc > .env
+    ```
 
 !!! tip
     You can also pass the decrypted values directly as environment variables without writing `secrets.json` to disk, using `sops exec-env`:

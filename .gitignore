@@ -17,7 +17,9 @@ tests/
 *.txt
 # Sensitive files
 secrets.json
+secrets.enc.json
 .env
+.env.enc
 
 # Claude Code
 CLAUDE.md

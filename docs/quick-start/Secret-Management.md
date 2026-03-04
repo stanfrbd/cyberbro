@@ -1,12 +1,17 @@
 # Secret Management
 
-Cyberbro relies on API keys and credentials that must be kept out of source control.
-By default, secrets live in `secrets.json` or `.env` — both are listed in `.gitignore`, which
-prevents accidental commits but leaves the files unencrypted on disk.
+Cyberbro relies on API keys and credentials stored in `secrets.json` or `.env`.
+Both files are listed in `.gitignore` to prevent accidental commits, but they remain
+**unencrypted on disk** — meaning a local infostealer or any process with filesystem access
+can read them in plain text.
 
-**Mozilla SOPS + age** is the recommended solution for Cyberbro: it encrypts individual values
-inside your existing file so the encrypted copy can be safely committed to Git, with zero new
-infrastructure and a single-binary install.
+**Mozilla SOPS + age** solves this by encrypting those files **at rest on your machine**.
+The encrypted files never need to leave your disk; `.gitignore` stays in place and nothing is
+committed to Git.
+
+!!! warning
+    **Never commit your secrets to Git**, even if they are encrypted.
+    The encryption described here is for **local disk protection only**.
 
 ---
 
@@ -15,12 +20,12 @@ infrastructure and a single-binary install.
 !!! note
     SOPS is **fully opt-in**. No application code, `docker-compose.yml`, or startup procedure
     changes. Cyberbro continues to read credentials from `secrets.json` or `.env` exactly as
-    before — SOPS just encrypts those files at rest.
+    before.
 
     The workflow is:
 
-    1. **Encrypt once** — `secrets.json` / `.env` → encrypted file committed to Git.
-    2. **Decrypt at runtime** — encrypted file → original `secrets.json` / `.env` (or injected directly as env vars).
+    1. **Encrypt** — `secrets.json` / `.env` → encrypted file stored locally on disk.
+    2. **Decrypt at runtime** — encrypted file → original `secrets.json` / `.env` (or injected directly as env vars, never touching the filesystem).
     3. **Application starts normally** — reads the same files / env vars it always has.
 
 ---
@@ -77,24 +82,14 @@ age-keygen -o ~/.config/sops/age/keys.txt
 
 ### 3 · Configure SOPS
 
-Create a `.sops.yaml` file at the root of the repository (safe to commit — contains only public keys):
+Set your **public key** as an environment variable so SOPS knows which key to use when encrypting:
 
-```yaml
-# .sops.yaml
-creation_rules:
-  - path_regex: secrets\.enc\..*
-    age: >-
-      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  - path_regex: \.env\.enc$
-    age: >-
-      age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```bash
+# Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.) for convenience
+export SOPS_AGE_RECIPIENTS=age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 Replace the `age1...` value with your **public key** from step 2.
-
-!!! note
-    For team environments, add each team member's public age key (one per line) to the `age:` field
-    and re-encrypt: `sops updatekeys secrets.enc.json`.
 
 ### 4 · Encrypt your secrets file
 
@@ -104,11 +99,11 @@ Replace the `age1...` value with your **public key** from step 2.
     cp secrets-sample.json secrets.json
     # Edit secrets.json with your real API keys, then encrypt:
     sops --encrypt secrets.json > secrets.enc.json
-    # Remove the plaintext file
+    # Remove the plaintext file — only the encrypted copy stays on disk
     rm secrets.json
     ```
 
-    `secrets.json` is already in `.gitignore`. Commit `secrets.enc.json` safely.
+    `secrets.json` and `secrets.enc.json` are both listed in `.gitignore` — **neither is committed**.
 
 === ".env"
     ```bash
@@ -116,11 +111,11 @@ Replace the `age1...` value with your **public key** from step 2.
     cp .env.sample .env
     # Edit .env with your real API keys, then encrypt (dotenv format):
     sops --encrypt --input-type dotenv --output-type dotenv .env > .env.enc
-    # Remove the plaintext file
+    # Remove the plaintext file — only the encrypted copy stays on disk
     rm .env
     ```
 
-    `.env` is already in `.gitignore`. Commit `.env.enc` safely.
+    `.env` and `.env.enc` are both listed in `.gitignore` — **neither is committed**.
 
 ### 5 · Use in Docker Compose
 
@@ -144,49 +139,9 @@ In both cases Docker Compose reads the decrypted file exactly as it always did �
 `docker-compose.yml` or the application**.
 
 !!! tip
-    You can also pass secrets directly as environment variables without writing any plaintext file to
-    disk using `sops exec-env`:
+    Use `sops exec-env` to inject secrets directly as environment variables without ever writing
+    a plaintext file to disk:
     ```bash
-    # Decrypt inline — secrets never touch the filesystem
+    # Secrets are decrypted in memory — the plaintext never touches the filesystem
     sops exec-env secrets.enc.json 'docker compose up -d'
     ```
-
-### 6 · CI/CD integration
-
-Store the **age private key** as a CI secret (e.g., `SOPS_AGE_KEY` in GitHub Actions) and decrypt
-before the Docker build step:
-
-=== "secrets.json"
-    ```yaml
-    # .github/workflows/deploy.yml (excerpt)
-    - name: Decrypt secrets
-      env:
-        SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-      run: |
-        mkdir -p ~/.config/sops/age
-        echo "$SOPS_AGE_KEY" > ~/.config/sops/age/keys.txt
-        sops --decrypt secrets.enc.json > secrets.json
-    ```
-
-=== ".env"
-    ```yaml
-    # .github/workflows/deploy.yml (excerpt)
-    - name: Decrypt secrets
-      env:
-        SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-      run: |
-        mkdir -p ~/.config/sops/age
-        echo "$SOPS_AGE_KEY" > ~/.config/sops/age/keys.txt
-        sops --decrypt --input-type dotenv --output-type dotenv .env.enc > .env
-    ```
-
-### 7 · Key rotation
-
-When a team member leaves or a key is compromised:
-
-```bash
-# Remove the old public key from .sops.yaml, add the new one, then:
-sops updatekeys secrets.enc.json
-```
-
-SOPS re-encrypts only the data key, not all values, so rotation is fast.

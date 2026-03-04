@@ -14,7 +14,10 @@
 - **[Reload Secrets and Configuration](quick-start/Reload-secrets-and-configuration.md)**  
     How to reload or update your configuration and secrets without downtime.
 
-- **[API Usage & Engine Names](quick-start/API-usage-and-engine-names.md)**  
+- **[Secret Management](quick-start/Secret-Management.md)**  
+    Encrypt `secrets.json` / `.env` at rest with SOPS + age so they can be safely committed to Git.
+
+- **[API Usage & Engine Names](quick-start/API-usage-and-engine-names.md)**
     Explore the Cyberbro API, supported engines, and integration details.
 
 - **[Advanced Deployment Options](quick-start/Advanced-options-for-deployment.md)**  

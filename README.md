@@ -207,6 +207,10 @@ python3 app.py
 > [!CAUTION]
 > If you intend to use this in a **production environment**, use well configured **Reverse Proxy** + **WAF** to prevent **security issues**.
 
+> [!WARNING]
+> `secrets.json` and `.env` are listed in `.gitignore` but remain **plain text on disk**.  
+> For production or team environments, encrypt them with **[SOPS + age](https://docs.cyberbro.net/quick-start/Secret-Management)** — the encrypted versions can then be safely committed to version control with no infrastructure changes required.
+
 # Cyberbro browser extension
 
 <p>

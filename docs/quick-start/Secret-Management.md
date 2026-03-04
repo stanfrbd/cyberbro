@@ -52,9 +52,10 @@ infrastructure and a single-binary install.
     tar -xzf age.tar.gz && sudo mv age/age age/age-keygen /usr/local/bin/ && rm -rf age age.tar.gz
     ```
 
-=== "Windows (Scoop)"
+=== "Windows (winget)"
     ```powershell
-    scoop install sops age
+    winget install --id Mozilla.SOPS
+    winget install --id FiloSottile.age
     ```
 
 !!! tip

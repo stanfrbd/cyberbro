@@ -45,6 +45,7 @@ nav:
       - Reload Secrets & Configuration: quick-start/Reload-secrets-and-configuration.md
       - API Usage & Engine Names: quick-start/API-usage-and-engine-names.md
       - Advanced Options for Deployment: quick-start/Advanced-options-for-deployment.md
+      - Secret Management: quick-start/Secret-Management.md
       - Upgrade Cyberbro: quick-start/Upgrade-Cyberbro.md
   - Engines:
       - Bad ASN Check: engines/Bad-ASN-Check-Engine.md

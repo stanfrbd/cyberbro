@@ -71,29 +71,49 @@ committed to Git.
 
 ### 2 · Generate an age key pair
 
-```bash
-age-keygen -o ~/.config/sops/age/keys.txt
-# Outputs: Public key: age1...
-```
+=== "Linux / macOS"
+    ```bash
+    age-keygen -o ~/.config/sops/age/keys.txt
+    # Outputs: Public key: age1...
+    ```
+
+=== "Windows (PowerShell)"
+    ```powershell
+    # Create the directory if it doesn't exist
+    New-Item -ItemType Directory -Force -Path "$env:APPDATA\sops\age" | Out-Null
+    age-keygen -o "$env:APPDATA\sops\age\keys.txt"
+    # Outputs: Public key: age1...
+    ```
 
 !!! warning
-    Back up `~/.config/sops/age/keys.txt` securely. Losing this file means losing access to all
+    Back up your keys file securely (`~/.config/sops/age/keys.txt` on Linux/macOS,
+    `%APPDATA%\sops\age\keys.txt` on Windows). Losing this file means losing access to all
     encrypted secrets.
 
 ### 3 · Configure SOPS
 
 Set your **public key** as an environment variable so SOPS knows which key to use when encrypting:
 
-```bash
-# Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.) for convenience
-export SOPS_AGE_RECIPIENTS=age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
+=== "Linux / macOS"
+    ```bash
+    # Add this to your shell profile (~/.bashrc, ~/.zshrc, etc.) for convenience
+    export SOPS_AGE_RECIPIENTS=age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    ```
+
+=== "Windows (PowerShell)"
+    ```powershell
+    # For the current session only:
+    $env:SOPS_AGE_RECIPIENTS = "age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+    # To persist across sessions, add it to your PowerShell profile:
+    [System.Environment]::SetEnvironmentVariable("SOPS_AGE_RECIPIENTS", "age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "User")
+    ```
 
 Replace the `age1...` value with your **public key** from step 2.
 
 ### 4 · Encrypt your secrets file
 
-=== "secrets.json"
+=== "secrets.json (Linux / macOS)"
     ```bash
     # Start from the existing sample and fill in real values
     cp secrets-sample.json secrets.json
@@ -105,7 +125,19 @@ Replace the `age1...` value with your **public key** from step 2.
 
     `secrets.json` and `secrets.enc.json` are both listed in `.gitignore` — **neither is committed**.
 
-=== ".env"
+=== "secrets.json (Windows PowerShell)"
+    ```powershell
+    # Start from the existing sample and fill in real values
+    Copy-Item secrets-sample.json secrets.json
+    # Edit secrets.json with your real API keys, then encrypt:
+    sops --encrypt secrets.json | Out-File -Encoding utf8 secrets.enc.json
+    # Remove the plaintext file — only the encrypted copy stays on disk
+    Remove-Item secrets.json
+    ```
+
+    `secrets.json` and `secrets.enc.json` are both listed in `.gitignore` — **neither is committed**.
+
+=== ".env (Linux / macOS)"
     ```bash
     # Start from the existing sample and fill in real values
     cp .env.sample .env
@@ -117,21 +149,47 @@ Replace the `age1...` value with your **public key** from step 2.
 
     `.env` and `.env.enc` are both listed in `.gitignore` — **neither is committed**.
 
+=== ".env (Windows PowerShell)"
+    ```powershell
+    # Start from the existing sample and fill in real values
+    Copy-Item .env.sample .env
+    # Edit .env with your real API keys, then encrypt (dotenv format):
+    sops --encrypt --input-type dotenv --output-type dotenv .env | Out-File -Encoding utf8 .env.enc
+    # Remove the plaintext file — only the encrypted copy stays on disk
+    Remove-Item .env
+    ```
+
+    `.env` and `.env.enc` are both listed in `.gitignore` — **neither is committed**.
+
 ### 5 · Use in Docker Compose
 
 Add the following step to your startup procedure (or a `Makefile` / shell script):
 
-=== "secrets.json"
+=== "secrets.json (Linux / macOS)"
     ```bash
     export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
     sops --decrypt secrets.enc.json > secrets.json
     docker compose up -d
     ```
 
-=== ".env"
+=== "secrets.json (Windows PowerShell)"
+    ```powershell
+    $env:SOPS_AGE_KEY_FILE = "$env:APPDATA\sops\age\keys.txt"
+    sops --decrypt secrets.enc.json | Out-File -Encoding utf8 secrets.json
+    docker compose up -d
+    ```
+
+=== ".env (Linux / macOS)"
     ```bash
     export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
     sops --decrypt --input-type dotenv --output-type dotenv .env.enc > .env
+    docker compose up -d
+    ```
+
+=== ".env (Windows PowerShell)"
+    ```powershell
+    $env:SOPS_AGE_KEY_FILE = "$env:APPDATA\sops\age\keys.txt"
+    sops --decrypt --input-type dotenv --output-type dotenv .env.enc | Out-File -Encoding utf8 .env
     docker compose up -d
     ```
 

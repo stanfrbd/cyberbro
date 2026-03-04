@@ -69,39 +69,39 @@ committed to Git.
     - SOPS: <https://github.com/getsops/sops/releases>
     - age: <https://github.com/FiloSottile/age/releases>
 
-### 2 · Generate an age key pair
+### 2 · Generate an age key pair and protect it with a passphrase
+
+`age-keygen` does not support passphrases natively. The recommended approach is to generate
+the key into a temporary file, immediately encrypt it with a passphrase using `age --passphrase`,
+then delete the plain-text copy. **Only the passphrase-protected file is kept on disk.**
 
 === "Linux / macOS"
     ```bash
-    age-keygen -o ~/.config/sops/age/keys.txt
-    # Outputs: Public key: age1...
+    mkdir -p ~/.config/sops/age
+    # Generate key pair — note the public key printed (age1...)
+    age-keygen -o /tmp/age_key.txt
+    # Encrypt the private key with a passphrase (you will be prompted twice)
+    age --passphrase -o ~/.config/sops/age/keys.age /tmp/age_key.txt
+    # Remove the plain-text key from disk
+    rm /tmp/age_key.txt
     ```
 
 === "Windows (PowerShell)"
     ```powershell
-    # Create the directory if it doesn't exist
     New-Item -ItemType Directory -Force -Path "$env:APPDATA\sops\age" | Out-Null
-    age-keygen -o "$env:APPDATA\sops\age\keys.txt"
-    # Outputs: Public key: age1...
+    # Generate key pair — note the public key printed (age1...)
+    age-keygen -o "$env:TEMP\age_key.txt"
+    # Encrypt the private key with a passphrase (you will be prompted twice)
+    age --passphrase -o "$env:APPDATA\sops\age\keys.age" "$env:TEMP\age_key.txt"
+    # Remove the plain-text key from disk
+    Remove-Item "$env:TEMP\age_key.txt"
     ```
 
 !!! warning
-    **age keys are not passphrase-protected by default.** The generated `keys.txt` is a
-    plain-text file. Protect it at the OS level:
-
-    === "Linux / macOS"
-        ```bash
-        chmod 600 ~/.config/sops/age/keys.txt
-        ```
-
-    === "Windows (PowerShell)"
-        ```powershell
-        # Remove inherited permissions and restrict to current user only
-        icacls "$env:APPDATA\sops\age\keys.txt" /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
-        ```
-
-    Back up the file in a **password manager** (e.g. Bitwarden, 1Password) or another
-    secure offline location. Losing `keys.txt` means losing access to all encrypted secrets.
+    **Note the `age1...` public key printed by `age-keygen`** before running the next step.
+    Once the plain-text file is deleted, the public key is only recoverable by decrypting
+    `keys.age` (which requires the passphrase). Store the public key in your notes or password
+    manager alongside the passphrase — losing either means losing access to your encrypted secrets.
 
 ### 3 · Configure SOPS
 
@@ -176,32 +176,38 @@ Replace the `age1...` value with your **public key** from step 2.
 
 ### 5 · Use in Docker Compose
 
-Add the following step to your startup procedure (or a `Makefile` / shell script):
+To decrypt, you first unlock the passphrase-protected age key in memory and pass the raw key
+material to SOPS via the `SOPS_AGE_KEY` environment variable. **You will be prompted for your
+passphrase every time.** The plain-text key never touches the filesystem.
 
 === "secrets.json (Linux / macOS)"
     ```bash
-    export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-    sops --decrypt secrets.enc.json > secrets.json
+    # Prompts for the age passphrase; decrypted key lives only in memory
+    SOPS_AGE_KEY=$(age --decrypt ~/.config/sops/age/keys.age) \
+      sops --decrypt secrets.enc.json > secrets.json
     docker compose up -d
     ```
 
 === "secrets.json (Windows PowerShell)"
     ```powershell
-    $env:SOPS_AGE_KEY_FILE = "$env:APPDATA\sops\age\keys.txt"
+    # Prompts for the age passphrase; decrypted key lives only in memory
+    $env:SOPS_AGE_KEY = (age --decrypt "$env:APPDATA\sops\age\keys.age")
     sops --decrypt secrets.enc.json | Out-File -Encoding utf8 secrets.json
     docker compose up -d
     ```
 
 === ".env (Linux / macOS)"
     ```bash
-    export SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
-    sops --decrypt --input-type dotenv --output-type dotenv .env.enc > .env
+    # Prompts for the age passphrase; decrypted key lives only in memory
+    SOPS_AGE_KEY=$(age --decrypt ~/.config/sops/age/keys.age) \
+      sops --decrypt --input-type dotenv --output-type dotenv .env.enc > .env
     docker compose up -d
     ```
 
 === ".env (Windows PowerShell)"
     ```powershell
-    $env:SOPS_AGE_KEY_FILE = "$env:APPDATA\sops\age\keys.txt"
+    # Prompts for the age passphrase; decrypted key lives only in memory
+    $env:SOPS_AGE_KEY = (age --decrypt "$env:APPDATA\sops\age\keys.age")
     sops --decrypt --input-type dotenv --output-type dotenv .env.enc | Out-File -Encoding utf8 .env
     docker compose up -d
     ```
@@ -213,6 +219,7 @@ In both cases Docker Compose reads the decrypted file exactly as it always did �
     Use `sops exec-env` to inject secrets directly as environment variables without ever writing
     a plaintext file to disk:
     ```bash
-    # Secrets are decrypted in memory — the plaintext never touches the filesystem
-    sops exec-env secrets.enc.json 'docker compose up -d'
+    # Prompts for the age passphrase; secrets are decrypted in memory — plaintext never touches disk
+    SOPS_AGE_KEY=$(age --decrypt ~/.config/sops/age/keys.age) \
+      sops exec-env secrets.enc.json 'docker compose up -d'
     ```

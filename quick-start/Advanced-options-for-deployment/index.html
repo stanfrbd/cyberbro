@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -690,17 +690,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#example-of-custom-docker-compose-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example of custom docker compose file
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#supervisord-options-for-docker-only" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -782,6 +771,17 @@
     <span class="md-ellipsis">
       
         Cache timeout for the API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disable-version-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disable version check
       
     </span>
   </a>
@@ -2095,17 +2095,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#example-of-custom-docker-compose-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example of custom docker compose file
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#supervisord-options-for-docker-only" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2193,6 +2182,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#disable-version-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disable version check
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2268,8 +2268,8 @@ If you don't specify proxy, no proxy will be used.</p>
 <span class="nv">SSL_VERIFY</span><span class="o">=</span><span class="nb">true</span>
 <span class="nv">GUI_CACHE_TIMEOUT</span><span class="o">=</span><span class="m">1800</span>
 <span class="nv">API_CACHE_TIMEOUT</span><span class="o">=</span><span class="m">86400</span>
+<span class="nv">DISABLE_VERSION_CHECK</span><span class="o">=</span><span class="nb">false</span>
 </code></pre></div>
-<h2 id="example-of-custom-docker-compose-file">Example of custom docker compose file<a class="headerlink" href="#example-of-custom-docker-compose-file" title="Permanent link">&para;</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>This can be useful when you don't want to build the image yourself. This image is produced by the GitHub actions workflow</p>
@@ -2324,6 +2324,7 @@ If you don't specify proxy, no proxy will be used.</p>
       - SUPERVISORD_TIMEOUT=${SUPERVISORD_TIMEOUT:-}
       - API_PREFIX=${API_PREFIX:-}
       - MAX_FORM_MEMORY_SIZE=${MAX_FORM_MEMORY_SIZE:-}
+      - DISABLE_VERSION_CHECK=${DISABLE_VERSION_CHECK:-}
     restart: always
     volumes:
       - ./data:/app/data
@@ -2477,6 +2478,17 @@ Adding <code>"api_cache_timeout": 86400</code> in <code>secrets.json</code> will
 Don't set it too high, it can cause problems with the database or treatment of the data.<br />
 This variable is optional, so if it doesn't exist in <code>secrets.json</code> or ENV, it will use the default parameter (24 hours).</p>
 </div>
+<h2 id="disable-version-check">Disable version check<a class="headerlink" href="#disable-version-check" title="Permanent link">&para;</a></h2>
+<p>You can disable the version check and suppress the "new update available" popup using the following:</p>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<p>Adding <code>"disable_version_check": true</code> in <code>secrets.json</code> will disable the version check.</p>
+<p><strong>Or using environment variables:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">DISABLE_VERSION_CHECK</span><span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This variable is optional, so if it doesn't exist in <code>secrets.json</code> or ENV, it will use the default parameter (false) which means version check is enabled.</p>
+</div>
 
 
 
@@ -2499,7 +2511,7 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="February 3, 2026 22:17:31 UTC"><span class="timeago" datetime="2026-02-03T22:17:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="February 3, 2026 22:17:31 UTC">2026-02-03</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 2, 2026 18:02:53 UTC"><span class="timeago" datetime="2026-03-02T18:02:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 2, 2026 18:02:53 UTC">2026-03-02</span>
   </span>
 
     
@@ -2523,7 +2535,7 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
       
     </span>
     <nav>
-      Stig Dahl, stanfrbd
+      Stig Dahl, copilot-swe-agent[bot], stanfrbd
     </nav>
   </span>
 

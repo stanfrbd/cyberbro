@@ -1,9 +1,9 @@
 import logging
 from typing import Any
+from urllib.parse import urlparse
 
 import dns.resolver
 import dns.reversename
-from pydantic import AnyUrl, ValidationError
 
 from models.base_engine import BaseEngine
 from models.observable import Observable, ObservableType
@@ -32,47 +32,51 @@ class ReverseDNSEngine(BaseEngine):
         # This engine can change the observable type (e.g., FQDN -> IP)
         return True
 
+    def _resolve_ptr(self, value: str) -> dict[str, list[str]]:
+        reverse_name = dns.reversename.from_address(value)
+        answer = dns.resolver.resolve(reverse_name, "PTR")
+        return {"reverse_dns": [str(answer[0])]}
+
+    def _resolve_a(self, value: str) -> dict[str, list[str]]:
+        answer = dns.resolver.resolve(value, "A")
+        return {"reverse_dns": [str(ip) for ip in answer]}
+
+    def _extract_url_host(self, url: str) -> str:
+        parsed_url = urlparse(url)
+        return parsed_url.hostname or ""
+
     def analyze(self, observable: Observable) -> dict | None:
         observable_value = observable.value
         observable_type = observable.type
+
         try:
-            if observable_type in [ObservableType.IPV4, ObservableType.IPV6, ObservableType.BOGON]:
-                reverse_name = dns.reversename.from_address(observable_value)
-                answer = dns.resolver.resolve(reverse_name, "PTR")
-                return {"reverse_dns": [str(answer[0])]}
+            if observable_type in (
+                ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.BOGON
+            ):
+                return self._resolve_ptr(observable_value)
 
             if observable_type is ObservableType.FQDN:
-                answer = dns.resolver.resolve(observable_value, "A")
-                return {"reverse_dns": [str(ip) for ip in answer]}
+                return self._resolve_a(observable_value)
 
             if observable_type is ObservableType.URL:
-                try:
-                    extracted: str = AnyUrl(observable_value).host or ""
-                    if not extracted:
-                        raise ValidationError
-                except ValidationError:
+                extracted = self._extract_url_host(observable_value)
+                if not extracted:
                     logger.debug(f"Failed to parse URL: {observable_value}")
                     return None
 
-                # Check for IPv6 address
-                if ":" in extracted:
-                    if is_really_ipv6(extracted):
-                        reverse_name = dns.reversename.from_address(extracted)
-                        answer = dns.resolver.resolve(reverse_name, "PTR")
-                        return {"reverse_dns": [str(answer[0])]}
-                    extracted = extracted.split(":")[0]
+                if is_really_ipv6(extracted):
+                    return self._resolve_ptr(extracted)
 
-                # TODO: Fix identify_observable_type to not return "Unknown"
-                extracted_type: ObservableType = identify_observable_type(extracted)
-                # assert isinstance(extracted_type, ObservableType)
+                try:
+                    extracted_type = identify_observable_type(extracted)
+                except ValueError:
+                    return None
+
                 match extracted_type:
                     case ObservableType.FQDN:
-                        answer = dns.resolver.resolve(extracted, "A")
-                        return {"reverse_dns": [str(ip) for ip in answer]}
+                        return self._resolve_a(extracted)
                     case ObservableType.IPV4:
-                        reverse_name = dns.reversename.from_address(extracted)
-                        answer = dns.resolver.resolve(reverse_name, "PTR")
-                        return {"reverse_dns": [str(answer[0])]}
+                        return self._resolve_ptr(extracted)
                     case _:
                         return None
 

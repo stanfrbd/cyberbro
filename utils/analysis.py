@@ -82,18 +82,21 @@ def perform_analysis(
 def analyze_observable(
     observable: Observable, index: int, selected_engines: list[str], result_queue: queue.Queue
 ):
+    original_observable = Observable(value=observable.value, type=observable.type)
+    working_observable = Observable(value=observable.value, type=observable.type)
+
     result: Results = Results(
-        observable=observable,
-        type=observable.type,
+        observable=original_observable,
+        type=original_observable.type,
         reversed_success=False,
         extension={},
     )
 
     # 1. Global check: Bogon
-    if (observable.type in ObservableType.IPV4 | ObservableType.IPV6) and is_bogon(
-        observable.value
+    if (working_observable.type in ObservableType.IPV4 | ObservableType.IPV6) and is_bogon(
+        working_observable.value
     ):
-        observable.type = observable.type | ObservableFlag.BOGON
+        working_observable.type = working_observable.type | ObservableFlag.BOGON
 
     # Identify and filter requested engine instances
     active_instances: list[BaseEngine] = []
@@ -102,11 +105,11 @@ def analyze_observable(
             active_instances.append(LOADED_ENGINES[name])
 
     # 1.5. Special handler: Chrome Extension (always runs if type matches)
-    if observable.type is ObservableType.CHROME_EXTENSION:
+    if working_observable.type is ObservableType.CHROME_EXTENSION:
         engine = LOADED_ENGINES.get("chrome_extension")
         if engine:
             # Note: The original logic uses "extension" as the key, overriding the engine's name
-            result["extension"] = engine.analyze(observable)
+            result["extension"] = engine.analyze(working_observable)
 
     # 2. Phase 1: Pre-Pivot Engines (Standard lookups that don't need reverse DNS result)
     for engine in active_instances:
@@ -115,7 +118,7 @@ def analyze_observable(
             and not engine.is_pivot_engine
             and engine.name != "chrome_extension"
         ):
-            run_engine(engine, observable, result)
+            run_engine(engine, working_observable, result)
 
     # 3. Phase 2: Pivot (Reverse DNS)
     # The pivot engine runs and can modify the observable in place
@@ -124,7 +127,7 @@ def analyze_observable(
         e for e in active_instances if e.is_pivot_engine and e.name == "reverse_dns"
     ]
     for engine in pivot_engines:
-        analysis_data = run_engine(engine, observable, result)
+        analysis_data = run_engine(engine, working_observable, result)
 
         # Specific Pivot Logic for Reverse DNS
         if analysis_data:
@@ -132,26 +135,26 @@ def analyze_observable(
             reverse_dns_results = analysis_data.get("reverse_dns")
 
             # Check if auto-pivoting should occur
-            if reverse_dns_results and observable.type in [
+            if reverse_dns_results and working_observable.type in [
                 ObservableType.FQDN,
                 ObservableType.URL,
             ]:
                 first_ip = reverse_dns_results[0]
-                observable.value = first_ip
+                working_observable.value = first_ip
 
                 # Edge case: PTR record returning a private/reserved IP address
                 # This is a very specific scenario where reverse DNS resolves to a bogon IP
                 # Determine observable type based on IP characteristics
                 try:
                     if is_bogon(first_ip):
-                        observable.type = ObservableType.BOGON
+                        working_observable.type = ObservableType.BOGON
                     elif is_really_ipv6(first_ip):
-                        observable.type = ObservableType.IPV6
+                        working_observable.type = ObservableType.IPV6
                     else:
-                        observable.type = ObservableType.IPV4
+                        working_observable.type = ObservableType.IPV4
                 except (ValueError, AttributeError):
                     # Invalid IP format, fallback to BOGON
-                    observable.type = ObservableType.BOGON
+                    working_observable.type = ObservableType.BOGON
 
     # 4. Phase 3: Post-Pivot Engines (IP-only engines that benefit from pivot)
     # Run all engines except those that depend on other engine results
@@ -162,13 +165,13 @@ def analyze_observable(
             and engine.name != "chrome_extension"
             and engine.name != "bad_asn"
         ):
-            run_engine(engine, observable, result)
+            run_engine(engine, working_observable, result)
 
     # 5. Phase 4: Dependent Engines (engines that need results from other engines)
     # Run bad_asn last so it can access ASN data from ipapi, ipinfo, etc.
     for engine in active_instances:
         if engine.name == "bad_asn":
-            run_engine(engine, observable, result)
+            run_engine(engine, working_observable, result)
 
     result_queue.put((index, result))
 

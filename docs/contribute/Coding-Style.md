@@ -58,29 +58,29 @@ Automated checks are enforced using [pre-commit](https://pre-commit.com/), confi
 - **ruff-format**: Format Python files with Ruff
 - **bandit**: Run Bandit for security checks
 
-Some files and directories (e.g., `tests/`, `__version__.py`) are excluded from pre-commit checks.
+Some files and directories (e.g., `tests/`) are excluded from pre-commit checks.
 
 ## Setup Instructions
 
 1. **Install development dependencies:** (make sure you have a venv activated)
 
-    ```sh
-    pip install -r requirements-dev.txt
-    ```
+   ```sh
+   pip install -r requirements-dev.txt
+   ```
 
 2. **Install pre-commit hooks:**
 
-    ```sh
-    pre-commit install
-    ```
+   ```sh
+   pre-commit install
+   ```
 
-    This ensures that Ruff, Bandit, and other checks run automatically on staged files before each commit.
+   This ensures that Ruff, Bandit, and other checks run automatically on staged files before each commit.
 
 3. **Run all pre-commit hooks manually (optional):**
 
-    ```sh
-    pre-commit run --all-files
-    ```
+   ```sh
+   pre-commit run --all-files
+   ```
 
 ## References
 

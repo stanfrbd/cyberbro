@@ -115,8 +115,11 @@ pip install -r requirements.txt
 * Run the app with `gunicorn` (clean mode).
 
 ```bash
-gunicorn -b 0.0.0.0:5000 app:app --timeout 120
+gunicorn -c prod/gunicorn.conf.py app:app
 ```
+
+!!! note
+    When running without Docker, gunicorn's behavior is controlled by settings in `secrets.json`: `flask_port` (bind port), `flask_host` (bind interface), `gunicorn_workers_count`, `gunicorn_threads_count`, and `gunicorn_timeout`.
 
 * Run the app with in development mode.
 

@@ -2,8 +2,10 @@ import logging
 
 import pytest
 import responses
+from responses import matchers
 
 from engines.ioc_one import IOCOneHTMLEngine, IOCOnePDFEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -20,8 +22,13 @@ def observable_value():
 
 
 @pytest.fixture
+def ipv4_observable():
+    return Observable(value="8.8.8.8", type=ObservableType.IPV4)
+
+
+@pytest.fixture
 def special_observable():
-    return "test@example.com"
+    return Observable(value="test@example.com", type=ObservableType.CHROME_EXTENSION)
 
 
 @pytest.fixture
@@ -195,13 +202,13 @@ class TestIOCOneHTMLEngineSuccess:
     """Success path tests for IOCOneHTMLEngine."""
 
     @responses.activate
-    def test_analyze_html_success_5_cards(self, secrets, observable_value, html_success_5_cards):
+    def test_analyze_html_success_5_cards(self, secrets, ipv4_observable, html_success_5_cards):
         """Test successful analysis with 5 cards returns correct structure."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_success_5_cards, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert "results" in result
@@ -211,52 +218,52 @@ class TestIOCOneHTMLEngineSuccess:
         assert result["count"] == 5
 
     @responses.activate
-    def test_analyze_html_success_1_card(self, secrets, observable_value, html_success_1_card):
+    def test_analyze_html_success_1_card(self, secrets, ipv4_observable, html_success_1_card):
         """Test successful analysis with 1 card."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_success_1_card, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 1
         assert result["count"] == 1
 
     @responses.activate
-    def test_analyze_html_empty_results(self, secrets, observable_value, html_empty_results):
+    def test_analyze_html_empty_results(self, secrets, ipv4_observable, html_empty_results):
         """Test analysis with no cards returns empty list."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_empty_results, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert result["results"] == []
         assert result["count"] == 0
 
     @responses.activate
-    def test_analyze_html_9_cards_truncates_to_5(self, secrets, observable_value, html_9_cards):
+    def test_analyze_html_9_cards_truncates_to_5(self, secrets, ipv4_observable, html_9_cards):
         """Test that 9 cards are truncated to maximum of 5."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_9_cards, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 5
         assert result["count"] == 5
 
     @responses.activate
-    def test_analyze_html_card_structure(self, secrets, observable_value, html_success_1_card):
+    def test_analyze_html_card_structure(self, secrets, ipv4_observable, html_success_1_card):
         """Test each card has header, title, and source fields."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_success_1_card, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         card = result["results"][0]
@@ -269,14 +276,14 @@ class TestIOCOneHTMLEngineSuccess:
 
     @responses.activate
     def test_analyze_html_link_field_contains_url(
-        self, secrets, observable_value, html_success_1_card
+        self, secrets, ipv4_observable, html_success_1_card
     ):
         """Test link field contains constructed search URL."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        expected_url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        expected_url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, expected_url, body=html_success_1_card, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result["link"] == expected_url
 
@@ -285,56 +292,56 @@ class TestIOCOnePDFEngineSuccess:
     """Success path tests for IOCOnePDFEngine."""
 
     @responses.activate
-    def test_analyze_pdf_success_5_cards(self, secrets, observable_value, html_success_5_cards):
+    def test_analyze_pdf_success_5_cards(self, secrets, ipv4_observable, html_success_5_cards):
         """Test successful analysis with 5 cards returns correct structure."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
         # PDF engine uses different CSS class for source link (mx-1 instead of m-1)
         html = html_success_5_cards.replace("btn-primary m-1", "btn-primary mx-1")
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 5
         assert result["count"] == 5
 
     @responses.activate
-    def test_analyze_pdf_success_1_card(self, secrets, observable_value, html_success_1_card):
+    def test_analyze_pdf_success_1_card(self, secrets, ipv4_observable, html_success_1_card):
         """Test successful analysis with 1 card."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
         html = html_success_1_card.replace("btn-primary m-1", "btn-primary mx-1")
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 1
         assert result["count"] == 1
 
     @responses.activate
-    def test_analyze_pdf_empty_results(self, secrets, observable_value, html_empty_results):
+    def test_analyze_pdf_empty_results(self, secrets, ipv4_observable, html_empty_results):
         """Test analysis with no cards returns empty list."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_empty_results, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert result["results"] == []
         assert result["count"] == 0
 
     @responses.activate
-    def test_analyze_pdf_9_cards_truncates_to_5(self, secrets, observable_value, html_9_cards):
+    def test_analyze_pdf_9_cards_truncates_to_5(self, secrets, ipv4_observable, html_9_cards):
         """Test that 9 cards are truncated to maximum of 5."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
         html = html_9_cards.replace("btn-primary m-1", "btn-primary mx-1")
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 5
@@ -347,28 +354,34 @@ class TestObservableTypeRouting:
     @pytest.mark.parametrize(
         "engine_class,endpoint,observable_type",
         [
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "CHROME_EXTENSION"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "FQDN"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "IPv4"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "IPv6"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "MD5"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "SHA1"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "SHA256"),
-            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", "URL"),
-            (IOCOnePDFEngine, "https://ioc.one/auth/deep_search/pdf", "IPv4"),
-            (IOCOnePDFEngine, "https://ioc.one/auth/deep_search/pdf", "SHA256"),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.CHROME_EXTENSION),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.FQDN),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.IPV4),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.IPV6),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.MD5),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.SHA1),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.SHA256),
+            (IOCOneHTMLEngine, "https://ioc.one/auth/deep_search", ObservableType.URL),
+            (IOCOnePDFEngine, "https://ioc.one/auth/deep_search/pdf", ObservableType.IPV4),
+            (IOCOnePDFEngine, "https://ioc.one/auth/deep_search/pdf", ObservableType.SHA256),
         ],
     )
     @responses.activate
     def test_analyze_url_construction(
-        self, secrets, observable_value, html_empty_results, engine_class, endpoint, observable_type
+        self,
+        secrets,
+        observable_value,
+        html_empty_results,
+        engine_class,
+        endpoint,
+        observable_type,
     ):
         """Test correct URL is constructed for all observable types."""
         engine = engine_class(secrets, proxies={}, ssl_verify=True)
         url = f"{endpoint}?search={observable_value}"
         responses.add(responses.GET, url, body=html_empty_results, status=200)
 
-        engine.analyze(observable_value, observable_type)
+        engine.analyze(Observable(value=observable_value, type=observable_type))
 
         assert len(responses.calls) == 1
         assert responses.calls[0].request.url == url
@@ -441,36 +454,36 @@ class TestErrorHandling:
     )
     @responses.activate
     def test_analyze_http_error_returns_none(
-        self, secrets, observable_value, engine_class, endpoint, status_code
+        self, secrets, ipv4_observable, engine_class, endpoint, status_code
     ):
         """Test HTTP errors return None."""
         engine = engine_class(secrets, proxies={}, ssl_verify=True)
-        url = f"{endpoint}?search={observable_value}"
+        url = f"{endpoint}?search={ipv4_observable.value}"
         responses.add(responses.GET, url, status=status_code)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is None
 
     @responses.activate
-    def test_analyze_html_timeout_error(self, secrets, observable_value):
+    def test_analyze_html_timeout_error(self, secrets, ipv4_observable):
         """Test timeout exception returns None."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=TimeoutError("Connection timeout"))
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is None
 
     @responses.activate
-    def test_analyze_pdf_connection_error(self, secrets, observable_value):
+    def test_analyze_pdf_connection_error(self, secrets, ipv4_observable):
         """Test connection error exception returns None."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=ConnectionError("Failed to connect"))
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is None
 
@@ -480,67 +493,72 @@ class TestMalformedHTML:
 
     @responses.activate
     def test_analyze_html_missing_card_header(
-        self, secrets, observable_value, html_missing_card_header
+        self, secrets, ipv4_observable, html_missing_card_header
     ):
         """Test card without header div causes analysis to fail."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_missing_card_header, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is None
 
     @responses.activate
     def test_analyze_html_missing_card_title(
-        self, secrets, observable_value, html_missing_card_title
+        self, secrets, ipv4_observable, html_missing_card_title
     ):
         """Test card without title h5 causes analysis to fail."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_missing_card_title, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is None
 
     @responses.activate
     def test_analyze_pdf_missing_source_link(
-        self, secrets, observable_value, html_missing_source_link
+        self, secrets, ipv4_observable, html_missing_source_link
     ):
         """Test card without source link causes analysis to fail."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
         html = html_missing_source_link.replace("btn-primary m-1", "btn-primary mx-1")
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is None
 
     @responses.activate
-    def test_analyze_html_no_cards_returns_empty(self, secrets, observable_value, html_no_cards):
+    def test_analyze_html_no_cards_returns_empty(self, secrets, ipv4_observable, html_no_cards):
         """Test HTML with no card elements returns empty results."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
-        responses.add(responses.GET, url, body=html_no_cards, status=200)
+        url = "https://ioc.one/auth/deep_search"
+        params: dict = {"search": ipv4_observable.value}
+        responses.add(
+            responses.GET,
+            url=url,
+            match=[matchers.query_param_matcher(params)],
+            body=html_no_cards,
+            status=200,
+        )
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert result["results"] == []
         assert result["count"] == 0
 
     @responses.activate
-    def test_analyze_html_empty_body_returns_empty(
-        self, secrets, observable_value, html_empty_body
-    ):
+    def test_analyze_html_empty_body_returns_empty(self, secrets, ipv4_observable, html_empty_body):
         """Test empty HTML body returns empty results."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         responses.add(responses.GET, url, body=html_empty_body, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert result["results"] == []
@@ -551,10 +569,10 @@ class TestCSSClassDifference:
     """Test the CSS class difference between HTML and PDF engines."""
 
     @responses.activate
-    def test_analyze_html_uses_correct_css_class(self, secrets, observable_value):
+    def test_analyze_html_uses_correct_css_class(self, secrets, ipv4_observable):
         """Test IOCOneHTMLEngine uses correct CSS class (m-1) for source link."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search?search={ipv4_observable.value}"
         # HTML with correct m-1 class should work
         html = """
         <html><body>
@@ -567,16 +585,16 @@ class TestCSSClassDifference:
         """
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 1
 
     @responses.activate
-    def test_analyze_pdf_uses_correct_css_class(self, secrets, observable_value):
+    def test_analyze_pdf_uses_correct_css_class(self, secrets, ipv4_observable):
         """Test IOCOnePDFEngine uses correct CSS class (mx-1) for source link."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         # PDF with correct mx-1 class should work
         html = """
         <html><body>
@@ -589,7 +607,7 @@ class TestCSSClassDifference:
         """
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 1
@@ -607,19 +625,19 @@ class TestEdgeCases:
     def test_analyze_html_special_chars_in_observable(self, secrets, special_observable):
         """Test observable with special characters in URL."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search?search={special_observable}"
+        url = f"https://ioc.one/auth/deep_search?search={special_observable.value}"
         responses.add(responses.GET, url, body="<html><body></body></html>", status=200)
 
-        result = engine.analyze(special_observable, "CHROME_EXTENSION")
+        result = engine.analyze(special_observable)
 
         assert result is not None
         assert result["link"] == url
 
     @responses.activate
-    def test_analyze_pdf_special_chars_in_values(self, secrets, observable_value):
+    def test_analyze_pdf_special_chars_in_values(self, secrets, ipv4_observable):
         """Test special characters in HTML values are preserved."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
-        url = f"https://ioc.one/auth/deep_search/pdf?search={observable_value}"
+        url = f"https://ioc.one/auth/deep_search/pdf?search={ipv4_observable.value}"
         html = """
         <html><body>
             <div class="card box-shadow my-1">
@@ -631,7 +649,7 @@ class TestEdgeCases:
         """
         responses.add(responses.GET, url, body=html, status=200)
 
-        result = engine.analyze(observable_value, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
         assert result is not None
         assert len(result["results"]) == 1
@@ -641,10 +659,11 @@ class TestEdgeCases:
         """Test very long observable value in URL."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
         long_value = "a" * 500
+        observable = Observable(value=long_value, type=ObservableType.URL)
         url = f"https://ioc.one/auth/deep_search?search={long_value}"
         responses.add(responses.GET, url, body="<html><body></body></html>", status=200)
 
-        result = engine.analyze(long_value, "URL")
+        result = engine.analyze(observable)
 
         assert result is not None
 
@@ -685,31 +704,31 @@ class TestEngineProperties:
     def test_html_engine_supported_types(self, secrets):
         """Test IOCOneHTMLEngine supported_types property."""
         engine = IOCOneHTMLEngine(secrets, proxies={}, ssl_verify=True)
-        expected_types = [
-            "CHROME_EXTENSION",
-            "FQDN",
-            "IPv4",
-            "IPv6",
-            "MD5",
-            "SHA1",
-            "SHA256",
-            "URL",
-        ]
+        expected_types = ObservableType(
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
 
-        assert engine.supported_types == expected_types
+        assert engine.supported_types is expected_types
 
     def test_pdf_engine_supported_types(self, secrets):
         """Test IOCOnePDFEngine supported_types property."""
         engine = IOCOnePDFEngine(secrets, proxies={}, ssl_verify=True)
-        expected_types = [
-            "CHROME_EXTENSION",
-            "FQDN",
-            "IPv4",
-            "IPv6",
-            "MD5",
-            "SHA1",
-            "SHA256",
-            "URL",
-        ]
+        expected_types = ObservableType(
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
 
         assert engine.supported_types == expected_types

@@ -4,6 +4,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -14,22 +15,22 @@ class SpurUSEngine(BaseEngine):
         return "spur"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
-        spur_url = f"https://spur.us/context/{observable_value}"
+    def analyze(self, observable: Observable) -> dict[str, Any] | None:
+        spur_url = f"https://spur.us/context/{observable.value}"
         api_key = self.secrets.spur_us
 
         """TODO: test for api_key and return specific error if invalid"""
 
         try:
             if api_key and api_key.strip():
-                api_url = f"https://api.spur.us/v2/context/{observable_value}"
+                api_url = f"https://api.spur.us/v2/context/{observable.value}"
                 headers = {"Token": api_key}
 
                 response = requests.get(
@@ -57,7 +58,7 @@ class SpurUSEngine(BaseEngine):
 
         except Exception as e:
             logger.error(
-                "Error querying spur.us for IP '%s': %s", observable_value, e, exc_info=True
+                "Error querying spur.us for IP '%s': %s", observable.value, e, exc_info=True
             )
             return {"link": spur_url, "tunnels": "Unknown - Behind Captcha"}
 

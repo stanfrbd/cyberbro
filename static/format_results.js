@@ -115,6 +115,17 @@ function formatResults(data) {
         }
         if (result.google_safe_browsing) {
             plainText += `Google Safe Browsing: ${result.google_safe_browsing.threat_found}\n`;
+            if (result.google_safe_browsing.threat_types && result.google_safe_browsing.threat_types.length > 0) {
+                plainText += `  - Threat Types: ${result.google_safe_browsing.threat_types.join(', ')}\n`;
+            }
+            if (result.google_safe_browsing.details && result.google_safe_browsing.details.length > 0) {
+                const matchedUrls = result.google_safe_browsing.details
+                    .map(match => match.url)
+                    .filter(url => url);
+                if (matchedUrls.length > 0) {
+                    plainText += `  - Matched URLs: ${matchedUrls.join(', ')}\n`;
+                }
+            }
         }
         if (result.shodan) {
             plainText += `Shodan: Ports: ${result.shodan.ports.join(', ')}${result.shodan.tags.length > 0 ? `, Tags: ${result.shodan.tags.join(', ')}` : ''}\n`;
@@ -263,7 +274,7 @@ function formatResults(data) {
         if (result.hudsonrock) {
             plainText += `Hudson Rock:\n`;
 
-            if (result.type === "Email" && result.hudsonrock.stealers) {
+            if (result.type === "EMAIL" && result.hudsonrock.stealers) {
                 plainText += `Compromised Computer Details:\n`;
                 result.hudsonrock.stealers.forEach(stealer => {
                     if (stealer.computer_name) plainText += `Computer Name: ${stealer.computer_name}\n`;

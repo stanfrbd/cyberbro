@@ -3,3 +3,4 @@ ruff
 pytest
 pytest-mock
 responses
+fakerx

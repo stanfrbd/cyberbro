@@ -5,6 +5,7 @@ import requests
 import responses
 
 from engines.ipapi import IPAPIEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -26,12 +27,12 @@ def secrets_without_key():
 
 @pytest.fixture
 def ipv4_observable():
-    return "1.1.1.1"
+    return Observable(value="1.1.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
 def ipv6_observable():
-    return "2001:4860:4860::8888"
+    return Observable(value="2001:4860:4860::8888", type=ObservableType.IPV6)
 
 
 @responses.activate
@@ -40,7 +41,7 @@ def test_analyze_success_complete(secrets_with_key, ipv4_observable):
     url = "https://api.ipapi.is"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "is_vpn": False,
         "is_tor": False,
         "is_proxy": False,
@@ -52,10 +53,10 @@ def test_analyze_success_complete(secrets_with_key, ipv4_observable):
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
     assert result["asn"]["asn"] == "AS15169"
 
 
@@ -64,10 +65,10 @@ def test_analyze_minimal_and_asn_missing(secrets_without_key, ipv4_observable):
     engine = IPAPIEngine(secrets_without_key, proxies={}, ssl_verify=True)
     url = "https://api.ipapi.is"
 
-    mock_resp = {"ip": ipv4_observable}
+    mock_resp = {"ip": ipv4_observable.value}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["asn"]["asn"] == "Unknown"
@@ -82,7 +83,7 @@ def test_analyze_missing_credentials_error(secrets_with_key, ipv4_observable):
     mock_resp = {"error": "invalid API key"}
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     # When 'ip' key is missing from response, analyze returns None
     assert result is None
@@ -98,7 +99,7 @@ def test_analyze_http_error_codes(secrets_with_key, ipv4_observable, status_code
     responses.add(responses.POST, url, json={"error": "error"}, status=status_code)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipapi" in caplog.text
@@ -145,7 +146,7 @@ def test_analyze_ipv6_success(secrets_with_key, ipv6_observable):
     url = "https://api.ipapi.is"
 
     mock_resp = {
-        "ip": ipv6_observable,
+        "ip": ipv6_observable.value,
         "is_vpn": False,
         "is_tor": False,
         "is_proxy": False,
@@ -161,10 +162,10 @@ def test_analyze_ipv6_success(secrets_with_key, ipv6_observable):
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable)
 
     assert result is not None
-    assert result["ip"] == ipv6_observable
+    assert result["ip"] == ipv6_observable.value
     assert result["asn"]["asn"] == "AS15169"
 
 
@@ -175,17 +176,17 @@ def test_analyze_asn_without_asn_subfield(secrets_with_key, ipv4_observable):
     url = "https://api.ipapi.is"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "asn": {"org": "Google LLC"},  # Missing 'asn' subfield
     }
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     # Should handle gracefully - either keep structure or default
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
 
 
 @responses.activate
@@ -196,13 +197,13 @@ def test_analyze_asn_with_empty_asn_value(secrets_with_key, ipv4_observable):
 
     # Test with empty/falsy asn dict
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "asn": {},  # Empty dict is falsy
     }
 
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     # Empty asn dict should trigger default per line 50-51 logic
@@ -220,7 +221,7 @@ def test_analyze_response_missing_ip_key(secrets_with_key, ipv4_observable, capl
     responses.add(responses.POST, url, json=mock_resp, status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     # Should return None silently when 'ip' is missing
     assert result is None
@@ -236,7 +237,7 @@ def test_analyze_request_timeout(secrets_with_key, ipv4_observable, caplog):
     responses.add(responses.POST, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipapi" in caplog.text
@@ -252,7 +253,7 @@ def test_analyze_request_connection_error(secrets_with_key, ipv4_observable, cap
     responses.add(responses.POST, url, body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipapi" in caplog.text
@@ -338,6 +339,6 @@ def test_engine_properties():
     engine = IPAPIEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "ipapi"
-    assert engine.supported_types == ["IPv4", "IPv6"]
+    assert engine.supported_types is ObservableType.IPV4 | ObservableType.IPV6
     assert engine.execute_after_reverse_dns is True
     assert engine.is_pivot_engine is False

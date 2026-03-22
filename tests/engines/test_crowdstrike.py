@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from engines.crowdstrike import CrowdstrikeEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -43,42 +44,45 @@ def secrets_missing_client_secret():
 
 @pytest.fixture
 def ipv4_observable():
-    return "1.1.1.1"
+    return Observable(value="1.1.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
 def ipv6_observable():
-    return "2001:4860:4860::8888"
+    return Observable(value="2001:4860:4860::8888", type=ObservableType.IPV6)
 
 
 @pytest.fixture
 def url_observable():
-    return "https://example.com/path?query=1"
+    return Observable(value="https://example.com/path?query=1", type=ObservableType.URL)
 
 
 @pytest.fixture
 def url_observable_with_port():
-    return "https://example.com:8443/path?query=1"
+    return Observable(value="https://example.com:8443/path?query=1", type=ObservableType.URL)
 
 
 @pytest.fixture
 def domain_observable():
-    return "example.com"
+    return Observable(value="example.com", type=ObservableType.FQDN)
 
 
 @pytest.fixture
 def hash_md5_observable():
-    return "5d41402abc4b2a76b9719d911017c592"
+    return Observable(value="5d41402abc4b2a76b9719d911017c592", type=ObservableType.MD5)
 
 
 @pytest.fixture
 def hash_sha1_observable():
-    return "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    return Observable(value="da39a3ee5e6b4b0d3255bfef95601890afd80709", type=ObservableType.SHA1)
 
 
 @pytest.fixture
 def hash_sha256_observable():
-    return "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    return Observable(
+        value="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        type=ObservableType.SHA256,
+    )
 
 
 # ============================================================================
@@ -92,7 +96,7 @@ def test_analyze_missing_client_id(mock_get_client, secrets_missing_client_id, i
     mock_get_client.side_effect = Exception("Missing or invalid credentials")
 
     engine = CrowdstrikeEngine(secrets_missing_client_id, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -105,7 +109,7 @@ def test_analyze_missing_client_secret(
     mock_get_client.side_effect = Exception("Missing or invalid credentials")
 
     engine = CrowdstrikeEngine(secrets_missing_client_secret, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -143,7 +147,7 @@ def test_analyze_success_complete(mock_get_client, secrets_with_credentials, ipv
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["device_count"] == 15
@@ -178,7 +182,7 @@ def test_analyze_invalid_credentials_401(
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["indicator_found"] is False
@@ -199,7 +203,7 @@ def test_analyze_invalid_credentials_403(
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["indicator_found"] is False
@@ -222,7 +226,7 @@ def test_analyze_indicator_not_found(mock_get_client, secrets_with_credentials, 
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["indicator_found"] is False
@@ -242,7 +246,7 @@ def test_analyze_device_count_only(mock_get_client, secrets_with_credentials, ip
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["indicator_found"] is False
@@ -284,7 +288,7 @@ def test_analyze_url_observable_extraction(
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is not None
     assert result["indicator_found"] is True
@@ -297,13 +301,13 @@ def test_analyze_observable_type_mapping(mock_get_client, secrets_with_credentia
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
 
     # Test all type mappings
-    assert engine._map_observable_type("IPv4") == "ipv4"
-    assert engine._map_observable_type("IPv6") == "ipv6"
-    assert engine._map_observable_type("MD5") == "md5"
-    assert engine._map_observable_type("SHA1") == "sha1"
-    assert engine._map_observable_type("SHA256") == "sha256"
-    assert engine._map_observable_type("FQDN") == "domain"
-    assert engine._map_observable_type("URL") == "domain"
+    assert engine._map_observable_type(ObservableType.IPV4) == "ipv4"
+    assert engine._map_observable_type(ObservableType.IPV6) == "ipv6"
+    assert engine._map_observable_type(ObservableType.MD5) == "md5"
+    assert engine._map_observable_type(ObservableType.SHA1) == "sha1"
+    assert engine._map_observable_type(ObservableType.SHA256) == "sha256"
+    assert engine._map_observable_type(ObservableType.FQDN) == "domain"
+    assert engine._map_observable_type(ObservableType.URL) == "domain"
     assert engine._map_observable_type("UNKNOWN") is None
 
 
@@ -356,7 +360,7 @@ def test_analyze_timestamp_parsing(mock_get_client, secrets_with_credentials, ip
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["published_date"] == "2021-01-01"
@@ -369,7 +373,7 @@ def test_analyze_exception_handling(mock_get_client, secrets_with_credentials, i
     mock_get_client.side_effect = RuntimeError("Unexpected error")
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -407,7 +411,7 @@ def test_analyze_success_minimal_fields(mock_get_client, secrets_with_credential
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["indicator_found"] is True
@@ -443,7 +447,7 @@ def test_analyze_missing_optional_fields(
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["indicator_found"] is True
@@ -480,7 +484,7 @@ def test_analyze_empty_array_fields(mock_get_client, secrets_with_credentials, i
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["actors"] == []
@@ -493,13 +497,13 @@ def test_analyze_empty_array_fields(mock_get_client, secrets_with_credentials, i
 @pytest.mark.parametrize(
     "observable_value,observable_type",
     [
-        ("1.1.1.1", "IPv4"),
-        ("2001:4860:4860::8888", "IPv6"),
-        ("example.com", "FQDN"),
-        ("5d41402abc4b2a76b9719d911017c592", "MD5"),
-        ("da39a3ee5e6b4b0d3255bfef95601890afd80709", "SHA1"),
-        ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "SHA256"),
-        ("https://example.com:8443/path?query=1", "URL"),
+        ("1.1.1.1", ObservableType.IPV4),
+        ("2001:4860:4860::8888", ObservableType.IPV6),
+        ("example.com", ObservableType.FQDN),
+        ("5d41402abc4b2a76b9719d911017c592", ObservableType.MD5),
+        ("da39a3ee5e6b4b0d3255bfef95601890afd80709", ObservableType.SHA1),
+        ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", ObservableType.SHA256),
+        ("https://example.com:8443/path?query=1", ObservableType.URL),
     ],
 )
 @patch("engines.crowdstrike.CrowdstrikeEngine._get_falcon_client")
@@ -532,7 +536,7 @@ def test_analyze_observable_types(
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(observable_value, observable_type)
+    result = engine.analyze(Observable(value=observable_value, type=observable_type))
 
     assert result is not None
     assert result["indicator_found"] is True
@@ -567,7 +571,7 @@ def test_analyze_device_count_zero(mock_get_client, secrets_with_credentials, ip
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["device_count"] == 0
@@ -604,7 +608,7 @@ def test_analyze_observable_case_normalization(mock_get_client, secrets_with_cre
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(mixed_case_observable, "FQDN")
+    result = engine.analyze(Observable(value=mixed_case_observable, type=ObservableType.FQDN))
 
     assert result is not None
     assert result["indicator_found"] is True
@@ -655,7 +659,7 @@ def test_analyze_special_characters_in_observable(mock_get_client, secrets_with_
     ]
 
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    result = engine.analyze(special_observable, "FQDN")
+    result = engine.analyze(Observable(value=special_observable, type=ObservableType.FQDN))
 
     assert result is not None
     assert result["indicator_found"] is True

@@ -5,6 +5,7 @@ import requests
 import responses
 
 from engines.github import GitHubEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -18,17 +19,17 @@ def secrets():
 
 @pytest.fixture
 def ipv4_observable():
-    return "1.1.1.1"
+    return Observable(value="1.1.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
 def fqdn_observable():
-    return "example.com"
+    return Observable(value="example.com", type=ObservableType.FQDN)
 
 
 @pytest.fixture
 def hash_observable():
-    return "a" * 40
+    return Observable(value="a" * 40, type=ObservableType.SHA1)
 
 
 # ============================================================================
@@ -40,7 +41,7 @@ def hash_observable():
 def test_analyze_success_complete(secrets, ipv4_observable):
     """Test successful API response with multiple results from different repos."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     mock_resp = {
         "hits": {
@@ -67,7 +68,7 @@ def test_analyze_success_complete(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["total"] == 3
@@ -81,7 +82,7 @@ def test_analyze_success_complete(secrets, ipv4_observable):
 def test_analyze_success_minimal(secrets, ipv4_observable):
     """Test successful API response with minimal required fields."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     mock_resp = {
         "hits": {
@@ -98,7 +99,7 @@ def test_analyze_success_minimal(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["total"] == 1
@@ -111,7 +112,7 @@ def test_analyze_success_minimal(secrets, ipv4_observable):
 def test_analyze_zero_results(secrets, ipv4_observable):
     """Test handling of API response with zero results."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     mock_resp = {
         "hits": {
@@ -122,7 +123,7 @@ def test_analyze_zero_results(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["results"] == []
@@ -132,7 +133,7 @@ def test_analyze_zero_results(secrets, ipv4_observable):
 def test_analyze_result_limiting_5_repos(secrets, ipv4_observable):
     """Test that analyze() limits results to maximum 5 unique repos."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     # Create 10 hits from different repos
     hits = [
@@ -153,7 +154,7 @@ def test_analyze_result_limiting_5_repos(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["total"] == 10
@@ -164,7 +165,7 @@ def test_analyze_result_limiting_5_repos(secrets, ipv4_observable):
 def test_analyze_duplicate_repo_deduplication(secrets, ipv4_observable):
     """Test that duplicate repos are deduplicated."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     # Same repo appears twice (different branches/paths)
     mock_resp = {
@@ -187,7 +188,7 @@ def test_analyze_duplicate_repo_deduplication(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["total"] == 2
@@ -199,7 +200,7 @@ def test_analyze_duplicate_repo_deduplication(secrets, ipv4_observable):
 def test_analyze_multiple_duplicates_with_limiting(secrets, ipv4_observable):
     """Test deduplication and limiting work together correctly."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     # Pattern: repo1 twice, repo2 twice, repo3 twice
     mock_resp = {
@@ -242,7 +243,7 @@ def test_analyze_multiple_duplicates_with_limiting(secrets, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["total"] == 6
@@ -256,12 +257,12 @@ def test_analyze_multiple_duplicates_with_limiting(secrets, ipv4_observable):
 def test_analyze_http_401_unauthorized(secrets, ipv4_observable, caplog):
     """Test handling of 401 Unauthorized response."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     responses.add(responses.GET, url, status=401)
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -271,12 +272,12 @@ def test_analyze_http_401_unauthorized(secrets, ipv4_observable, caplog):
 def test_analyze_http_500_server_error(secrets, ipv4_observable, caplog):
     """Test handling of 500 Server Error response."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     responses.add(responses.GET, url, status=500)
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -286,7 +287,7 @@ def test_analyze_http_500_server_error(secrets, ipv4_observable, caplog):
 def test_analyze_connection_timeout(secrets, ipv4_observable, caplog):
     """Test handling of connection timeout."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     responses.add(
         responses.GET,
@@ -295,7 +296,7 @@ def test_analyze_connection_timeout(secrets, ipv4_observable, caplog):
     )
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -305,12 +306,12 @@ def test_analyze_connection_timeout(secrets, ipv4_observable, caplog):
 def test_analyze_json_decode_error(secrets, ipv4_observable, caplog):
     """Test handling of malformed JSON response."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
-    url = f"https://grep.app/api/search?q={ipv4_observable}"
+    url = f"https://grep.app/api/search?q={ipv4_observable.value}"
 
     responses.add(responses.GET, url, body="<html>Error page</html>", status=200)
 
     with caplog.at_level(logging.ERROR):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error while querying GitHub" in caplog.text
@@ -327,15 +328,15 @@ def test_analyze_all_observable_types(secrets):
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
     observable_types = [
-        "CHROME_EXTENSION",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "Email",
+        ObservableType.CHROME_EXTENSION,
+        ObservableType.FQDN,
+        ObservableType.IPV4,
+        ObservableType.IPV6,
+        ObservableType.MD5,
+        ObservableType.SHA1,
+        ObservableType.SHA256,
+        ObservableType.URL,
+        ObservableType.EMAIL,
     ]
 
     mock_resp = {
@@ -352,11 +353,12 @@ def test_analyze_all_observable_types(secrets):
     }
 
     for obs_type in observable_types:
-        observable = f"test_{obs_type}"
-        url = f"https://grep.app/api/search?q={observable}"
+        obs_value = f"test_{obs_type}"
+        observable = Observable(value=obs_value, type=obs_type)
+        url = f"https://grep.app/api/search?q={obs_value}"
         responses.add(responses.GET, url, json=mock_resp, status=200)
 
-        result = engine.analyze(observable, obs_type)
+        result = engine.analyze(observable)
         assert result is not None
 
 
@@ -366,10 +368,10 @@ def test_analyze_different_observable_values(secrets):
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
     observables = [
-        "1.1.1.1",
-        "example.com",
-        "a" * 40,  # SHA1
-        "d41d8cd98f00b204e9800998ecf8427e",  # MD5
+        Observable(value="1.1.1.1", type=ObservableType.IPV4),
+        Observable(value="example.com", type=ObservableType.FQDN),
+        Observable(value="a" * 40, type=ObservableType.SHA1),
+        Observable(value="d41d8cd98f00b204e9800998ecf8427e", type=ObservableType.MD5),
     ]
 
     mock_resp = {
@@ -386,10 +388,10 @@ def test_analyze_different_observable_values(secrets):
     }
 
     for observable in observables:
-        url = f"https://grep.app/api/search?q={observable}"
+        url = f"https://grep.app/api/search?q={observable.value}"
         responses.add(responses.GET, url, json=mock_resp, status=200)
 
-        result = engine.analyze(observable, "IPv4")
+        result = engine.analyze(observable)
         assert result is not None
 
 
@@ -398,8 +400,8 @@ def test_analyze_special_characters_in_observable(secrets, caplog):
     """Test handling of special characters in observable values."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
-    observable = "test@example.com"
-    url = f"https://grep.app/api/search?q={observable}"
+    observable = Observable(value="test@example.com", type=ObservableType.EMAIL)
+    url = f"https://grep.app/api/search?q={observable.value}"
 
     mock_resp = {
         "hits": {
@@ -416,7 +418,7 @@ def test_analyze_special_characters_in_observable(secrets, caplog):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(observable, "Email")
+    result = engine.analyze(observable)
     assert result is not None
 
 
@@ -425,8 +427,8 @@ def test_analyze_empty_observable_value(secrets, caplog):
     """Test handling of empty observable value."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
-    observable = ""
-    url = f"https://grep.app/api/search?q={observable}"
+    observable = Observable(value="", type=ObservableType.IPV4)
+    url = f"https://grep.app/api/search?q={observable.value}"
 
     mock_resp = {
         "hits": {
@@ -437,7 +439,7 @@ def test_analyze_empty_observable_value(secrets, caplog):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(observable, "IPv4")
+    result = engine.analyze(observable)
     assert result is not None
     assert result["results"] == []
 
@@ -447,8 +449,8 @@ def test_analyze_very_long_observable_value(secrets):
     """Test handling of very long observable values."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
-    observable = "a" * 1000
-    url = f"https://grep.app/api/search?q={observable}"
+    observable = Observable(value="a" * 1000, type=ObservableType.IPV4)
+    url = f"https://grep.app/api/search?q={observable.value}"
 
     mock_resp = {
         "hits": {
@@ -465,7 +467,7 @@ def test_analyze_very_long_observable_value(secrets):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(observable, "IPv4")
+    result = engine.analyze(observable)
     assert result is not None
 
 
@@ -516,16 +518,16 @@ def test_engine_supported_types(secrets):
     """Test that supported_types property returns all 9 types."""
     engine = GitHubEngine(secrets, proxies={}, ssl_verify=True)
 
-    expected_types = [
-        "CHROME_EXTENSION",
-        "FQDN",
-        "IPv4",
-        "IPv6",
-        "MD5",
-        "SHA1",
-        "SHA256",
-        "URL",
-        "Email",
-    ]
+    expected_types = (
+        ObservableType.CHROME_EXTENSION
+        | ObservableType.FQDN
+        | ObservableType.IPV4
+        | ObservableType.IPV6
+        | ObservableType.MD5
+        | ObservableType.SHA1
+        | ObservableType.SHA256
+        | ObservableType.URL
+        | ObservableType.EMAIL
+    )
 
-    assert engine.supported_types == expected_types
+    assert engine.supported_types is expected_types

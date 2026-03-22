@@ -30,13 +30,13 @@ def get_analysis_stats():
 
     for analysis in recent_analyses:
         for result in analysis.results:
-            observable = result.get("observable") if result else "Unknown"
-            observable_type = result.get("type") if result else "Unknown"
-            observables_set.add(observable)
-            observable_type_counter[observable_type] = (
-                observable_type_counter.get(observable_type, 0) + 1
-            )
-            observable_counter[observable] = observable_counter.get(observable, 0) + 1
+            observable_raw = result.get("observable") if result else "Unknown"
+            observable_type_raw = result.get("type") if result else "Unknown"
+            observable_key = str(observable_raw) if observable_raw != "Unknown" else "Unknown"
+            type_key = str(observable_type_raw) if observable_type_raw != "Unknown" else "Unknown"
+            observables_set.add(observable_key)
+            observable_type_counter[type_key] = observable_type_counter.get(type_key, 0) + 1
+            observable_counter[observable_key] = observable_counter.get(observable_key, 0) + 1
 
         for engine in analysis.selected_engines:
             engines_set.add(engine)

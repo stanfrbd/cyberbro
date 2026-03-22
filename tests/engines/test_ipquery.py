@@ -5,6 +5,8 @@ import requests
 import responses
 
 from engines.ipquery import IPQueryEngine
+from models.observable import Observable, ObservableType
+
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -17,12 +19,12 @@ def secrets():
 
 @pytest.fixture
 def ipv4_observable():
-    return "1.1.1.1"
+    return Observable(value="1.1.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
 def ipv6_observable():
-    return "2001:4860:4860::8888"
+    return Observable(value="2001:4860:4860::8888", type=ObservableType.IPV6)
 
 
 # ============================================================================
@@ -34,10 +36,10 @@ def ipv6_observable():
 def test_analyze_success_complete(ipv4_observable):
     """Test successful API response with all data fields."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "location": {
             "city": "Los Angeles",
             "state": "California",
@@ -58,10 +60,10 @@ def test_analyze_success_complete(ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
     assert result["geolocation"] == "Los Angeles, California"
     assert result["country_code"] == "US"
     assert result["country_name"] == "United States"
@@ -71,23 +73,23 @@ def test_analyze_success_complete(ipv4_observable):
     assert result["is_tor"] is False
     assert result["is_proxy"] is False
     assert result["risk_score"] == 0
-    assert result["link"] == f"https://api.ipquery.io/{ipv4_observable}"
+    assert result["link"] == f"https://api.ipquery.io/{ipv4_observable.value}"
 
 
 @responses.activate
 def test_analyze_success_minimal(ipv4_observable):
     """Test minimal response with only ip field, rest defaults."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
-    mock_resp = {"ip": ipv4_observable}
+    mock_resp = {"ip": ipv4_observable.value}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
     assert result["geolocation"] == "Unknown, Unknown"
     assert result["country_code"] == "Unknown"
     assert result["country_name"] == "Unknown"
@@ -103,10 +105,10 @@ def test_analyze_success_minimal(ipv4_observable):
 def test_analyze_success_country_only(ipv4_observable):
     """Test response with only country in location dict."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "location": {
             "country": "United Kingdom",
             "country_code": "GB",
@@ -117,7 +119,7 @@ def test_analyze_success_country_only(ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["geolocation"] == "Unknown, Unknown"
@@ -131,10 +133,10 @@ def test_analyze_success_country_only(ipv4_observable):
 def test_analyze_success_risk_true(ipv4_observable):
     """Test response with risk flags set to true."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "location": {
             "city": "Moscow",
             "state": "Moscow",
@@ -155,7 +157,7 @@ def test_analyze_success_risk_true(ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["is_vpn"] is True
@@ -173,10 +175,10 @@ def test_analyze_success_risk_true(ipv4_observable):
 def test_analyze_ipv6_success(ipv6_observable):
     """Test successful analysis of IPv6 address."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv6_observable}"
+    url = f"https://api.ipquery.io/{ipv6_observable.value}"
 
     mock_resp = {
-        "ip": ipv6_observable,
+        "ip": ipv6_observable.value,
         "location": {
             "city": "Mountain View",
             "state": "California",
@@ -197,10 +199,10 @@ def test_analyze_ipv6_success(ipv6_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable)
 
     assert result is not None
-    assert result["ip"] == ipv6_observable
+    assert result["ip"] == ipv6_observable.value
     assert result["country_code"] == "US"
 
 
@@ -214,12 +216,12 @@ def test_analyze_ipv6_success(ipv6_observable):
 def test_analyze_http_error_codes(ipv4_observable, status_code, caplog):
     """Test handling of HTTP error responses (401, 403, 500)."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     responses.add(responses.GET, url, json={"error": "error"}, status=status_code)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipquery" in caplog.text
@@ -229,7 +231,7 @@ def test_analyze_http_error_codes(ipv4_observable, status_code, caplog):
 def test_analyze_missing_ip_key(ipv4_observable, caplog):
     """Test handling of valid 200 response missing 'ip' key."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
         "location": {
@@ -242,7 +244,7 @@ def test_analyze_missing_ip_key(ipv4_observable, caplog):
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -251,13 +253,13 @@ def test_analyze_missing_ip_key(ipv4_observable, caplog):
 def test_analyze_request_timeout(ipv4_observable, caplog):
     """Test handling of request timeout."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     timeout_error = requests.exceptions.ConnectTimeout("Connection timed out")
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipquery" in caplog.text
@@ -267,13 +269,13 @@ def test_analyze_request_timeout(ipv4_observable, caplog):
 def test_analyze_request_connection_error(ipv4_observable, caplog):
     """Test handling of connection error."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     conn_error = requests.exceptions.ConnectionError("Connection failed")
     responses.add(responses.GET, url, body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipquery" in caplog.text
@@ -283,12 +285,12 @@ def test_analyze_request_connection_error(ipv4_observable, caplog):
 def test_analyze_invalid_json_response(ipv4_observable, caplog):
     """Test handling of 200 status but invalid JSON response."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     responses.add(responses.GET, url, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipquery" in caplog.text
@@ -303,10 +305,10 @@ def test_analyze_invalid_json_response(ipv4_observable, caplog):
 def test_analyze_nested_dict_none_values(ipv4_observable):
     """Test handling of nested dicts that are None instead of empty."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "location": None,
         "isp": None,
         "risk": None,
@@ -316,7 +318,7 @@ def test_analyze_nested_dict_none_values(ipv4_observable):
 
     # This should raise an exception because .get() on None will fail
     # Exception is caught and returns None
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -325,10 +327,10 @@ def test_analyze_nested_dict_none_values(ipv4_observable):
 def test_analyze_nested_dict_partial(ipv4_observable):
     """Test response with partial nested dict data."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "location": {
             "city": "Boston",
             # missing state
@@ -347,7 +349,7 @@ def test_analyze_nested_dict_partial(ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["geolocation"] == "Boston, Unknown"
@@ -362,10 +364,10 @@ def test_analyze_nested_dict_partial(ipv4_observable):
 def test_analyze_empty_risk_dict(ipv4_observable):
     """Test response with empty risk dict."""
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
-    url = f"https://api.ipquery.io/{ipv4_observable}"
+    url = f"https://api.ipquery.io/{ipv4_observable.value}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "location": {
             "city": "Paris",
             "state": "Ile-de-France",
@@ -381,7 +383,7 @@ def test_analyze_empty_risk_dict(ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["is_vpn"] is False
@@ -503,6 +505,6 @@ def test_engine_properties():
     engine = IPQueryEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "ipquery"
-    assert engine.supported_types == ["IPv4", "IPv6"]
+    assert engine.supported_types is ObservableType.IPV4 | ObservableType.IPV6
     assert engine.execute_after_reverse_dns is True
     assert engine.is_pivot_engine is False

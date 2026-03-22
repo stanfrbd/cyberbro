@@ -5,6 +5,7 @@ import pycountry
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,18 +16,24 @@ class AbuseIPDBEngine(BaseEngine):
         return "abuseipdb"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         # AbuseIPDB only supports IPs, so we want it to run AFTER any potential DNS resolution
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
+    def analyze(self, observable: Observable) -> dict | None:
+        api_key: str = self.secrets.abuseipdb
+
+        if not api_key:
+            logger.warning("AbuseIPDB API key not set")
+            return None
+
         url = "https://api.abuseipdb.com/api/v2/check"
-        headers = {"Key": self.secrets.abuseipdb, "Accept": "application/json"}
-        params = {"ipAddress": observable_value}
+        headers = {"Key": api_key, "Accept": "application/json"}
+        params = {"ipAddress": observable.value}
 
         try:
             response = requests.get(
@@ -56,7 +63,7 @@ class AbuseIPDBEngine(BaseEngine):
                     country_name = "Unknown"
 
             return {
-                "ip_address": observable_value,
+                "ip_address": observable.value,
                 "reports": data.get("totalReports", 0),
                 "risk_score": data.get("abuseConfidenceScore", 0),
                 "is_whitelisted": data.get("isWhitelisted", False),
@@ -68,7 +75,7 @@ class AbuseIPDBEngine(BaseEngine):
                 "hostnames": data.get("hostnames", []),
                 "is_tor": data.get("isTor", False),
                 "last_reported_at": data.get("lastReportedAt", ""),
-                "link": f"https://www.abuseipdb.com/check/{observable_value}",
+                "link": f"https://www.abuseipdb.com/check/{observable.value}",
             }
         except Exception as e:
             logger.error(f"Error querying AbuseIPDB: {e}")

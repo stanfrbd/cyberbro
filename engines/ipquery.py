@@ -4,6 +4,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -14,16 +15,16 @@ class IPQueryEngine(BaseEngine):
         return "ipquery"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
         return True  # IP-only engine
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(self, observable: Observable) -> dict[str, Any] | None:
         try:
-            url = f"https://api.ipquery.io/{observable_value}"
+            url = f"https://api.ipquery.io/{observable.value}"
             response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
             response.raise_for_status()
 
@@ -46,11 +47,11 @@ class IPQueryEngine(BaseEngine):
                     "is_tor": risk_data.get("is_tor", False),
                     "is_proxy": risk_data.get("is_proxy", False),
                     "risk_score": risk_data.get("risk_score", "Unknown"),
-                    "link": f"https://api.ipquery.io/{observable_value}",
+                    "link": f"https://api.ipquery.io/{observable.value}",
                 }
 
         except Exception as e:
-            logger.error("Error querying ipquery for '%s': %s", observable_value, e, exc_info=True)
+            logger.error("Error querying ipquery for '%s': %s", observable.value, e, exc_info=True)
 
         return None
 

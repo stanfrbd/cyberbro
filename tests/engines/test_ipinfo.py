@@ -5,6 +5,7 @@ import requests
 import responses
 
 from engines.ipinfo import IPInfoEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -26,12 +27,12 @@ def secrets_without_key():
 
 @pytest.fixture
 def ipv4_observable():
-    return "1.1.1.1"
+    return Observable(value="1.1.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
 def ipv6_observable():
-    return "2001:4860:4860::8888"
+    return Observable(value="2001:4860:4860::8888", type=ObservableType.IPV6)
 
 
 # ============================================================================
@@ -43,10 +44,10 @@ def ipv6_observable():
 def test_analyze_success_complete(secrets_with_key, ipv4_observable):
     """Test successful API response with all data fields."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "city": "Los Angeles",
         "region": "California",
         "country": "US",
@@ -56,16 +57,16 @@ def test_analyze_success_complete(secrets_with_key, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
     assert result["geolocation"] == "Los Angeles, California"
     assert result["country_code"] == "US"
     assert result["country_name"] == "United States"
     assert result["hostname"] == "one.one.one.one"
     assert result["asn"] == "15169 Google LLC"
-    assert result["link"] == f"https://ipinfo.io/{ipv4_observable}"
+    assert result["link"] == f"https://ipinfo.io/{ipv4_observable.value}"
 
 
 @responses.activate
@@ -82,7 +83,7 @@ def test_analyze_success_bogon(secrets_with_key):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(bogon_ip, "IPv4")
+    result = engine.analyze(Observable(value=bogon_ip, type=ObservableType.IPV4))
 
     assert result is not None
     assert result["ip"] == bogon_ip
@@ -98,10 +99,10 @@ def test_analyze_success_bogon(secrets_with_key):
 def test_analyze_success_country_resolution(secrets_with_key, ipv4_observable):
     """Test successful country code resolution via pycountry."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "city": "London",
         "region": "England",
         "country": "GB",
@@ -111,7 +112,7 @@ def test_analyze_success_country_resolution(secrets_with_key, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["country_code"] == "GB"
@@ -122,10 +123,10 @@ def test_analyze_success_country_resolution(secrets_with_key, ipv4_observable):
 def test_analyze_success_unknown_country(secrets_with_key, ipv4_observable):
     """Test handling of invalid/unknown country code."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "city": "Unknown City",
         "region": "Unknown Region",
         "country": "XX",
@@ -135,7 +136,7 @@ def test_analyze_success_unknown_country(secrets_with_key, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["country_code"] == "XX"
@@ -151,10 +152,10 @@ def test_analyze_success_unknown_country(secrets_with_key, ipv4_observable):
 def test_analyze_ipv6_success(secrets_with_key, ipv6_observable):
     """Test successful analysis of IPv6 address."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv6_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv6_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
-        "ip": ipv6_observable,
+        "ip": ipv6_observable.value,
         "city": "Mountain View",
         "region": "California",
         "country": "US",
@@ -164,10 +165,10 @@ def test_analyze_ipv6_success(secrets_with_key, ipv6_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv6_observable, "IPv6")
+    result = engine.analyze(ipv6_observable)
 
     assert result is not None
-    assert result["ip"] == ipv6_observable
+    assert result["ip"] == ipv6_observable.value
     assert result["geolocation"] == "Mountain View, California"
     assert result["country_code"] == "US"
     assert result["country_name"] == "United States"
@@ -183,12 +184,12 @@ def test_analyze_ipv6_success(secrets_with_key, ipv6_observable):
 def test_analyze_http_error_codes(secrets_with_key, ipv4_observable, status_code, caplog):
     """Test handling of HTTP error responses (401, 403, 500)."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     responses.add(responses.GET, url, json={"error": "error"}, status=status_code)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipinfo" in caplog.text
@@ -198,7 +199,7 @@ def test_analyze_http_error_codes(secrets_with_key, ipv4_observable, status_code
 def test_analyze_missing_ip_key(secrets_with_key, ipv4_observable, caplog):
     """Test handling of valid 200 response missing 'ip' key."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
         "city": "Los Angeles",
@@ -209,7 +210,7 @@ def test_analyze_missing_ip_key(secrets_with_key, ipv4_observable, caplog):
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -218,13 +219,13 @@ def test_analyze_missing_ip_key(secrets_with_key, ipv4_observable, caplog):
 def test_analyze_no_bogon_and_no_ip(secrets_with_key, ipv4_observable):
     """Test response with neither bogon nor ip key."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {"error": "Invalid IP address"}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -233,13 +234,13 @@ def test_analyze_no_bogon_and_no_ip(secrets_with_key, ipv4_observable):
 def test_analyze_request_timeout(secrets_with_key, ipv4_observable, caplog):
     """Test handling of request timeout."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     timeout_error = requests.exceptions.ConnectTimeout("Connection timed out")
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipinfo" in caplog.text
@@ -249,13 +250,13 @@ def test_analyze_request_timeout(secrets_with_key, ipv4_observable, caplog):
 def test_analyze_request_connection_error(secrets_with_key, ipv4_observable, caplog):
     """Test handling of connection error."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     conn_error = requests.exceptions.ConnectionError("Connection failed")
     responses.add(responses.GET, url, body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipinfo" in caplog.text
@@ -265,12 +266,12 @@ def test_analyze_request_connection_error(secrets_with_key, ipv4_observable, cap
 def test_analyze_invalid_json_response(secrets_with_key, ipv4_observable, caplog):
     """Test handling of 200 status but invalid JSON response."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     responses.add(responses.GET, url, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying ipinfo" in caplog.text
@@ -285,16 +286,16 @@ def test_analyze_invalid_json_response(secrets_with_key, ipv4_observable, caplog
 def test_analyze_missing_optional_fields(secrets_with_key, ipv4_observable):
     """Test handling of minimal response with missing optional fields."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
-    mock_resp = {"ip": ipv4_observable}
+    mock_resp = {"ip": ipv4_observable.value}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
     assert result["geolocation"] == "Unknown, Unknown"
     assert result["country_code"] == "Unknown"
     assert result["country_name"] == "Unknown"
@@ -306,10 +307,10 @@ def test_analyze_missing_optional_fields(secrets_with_key, ipv4_observable):
 def test_analyze_missing_hostname(secrets_with_key, ipv4_observable):
     """Test handling of response missing hostname field."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "city": "San Francisco",
         "region": "California",
         "country": "US",
@@ -318,7 +319,7 @@ def test_analyze_missing_hostname(secrets_with_key, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["hostname"] == "Unknown"
@@ -329,10 +330,10 @@ def test_analyze_missing_hostname(secrets_with_key, ipv4_observable):
 def test_analyze_asn_parsing(secrets_with_key, ipv4_observable):
     """Test ASN extraction and formatting for export parsing."""
     engine = IPInfoEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = f"https://ipinfo.io/{ipv4_observable}/json?token={secrets_with_key.ipinfo}"
+    url = f"https://ipinfo.io/{ipv4_observable.value}/json?token={secrets_with_key.ipinfo}"
 
     mock_resp = {
-        "ip": ipv4_observable,
+        "ip": ipv4_observable.value,
         "city": "Boston",
         "region": "Massachusetts",
         "country": "US",
@@ -341,7 +342,7 @@ def test_analyze_asn_parsing(secrets_with_key, ipv4_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(ipv4_observable, "IPv4")
+    result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["asn"] == "15169 Google LLC"
@@ -461,6 +462,6 @@ def test_engine_properties():
     engine = IPInfoEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "ipinfo"
-    assert engine.supported_types == ["IPv4", "IPv6"]
+    assert engine.supported_types is ObservableType.IPV4 | ObservableType.IPV6
     assert engine.execute_after_reverse_dns is True
     assert engine.is_pivot_engine is False

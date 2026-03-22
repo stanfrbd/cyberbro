@@ -1,5 +1,25 @@
-<div class="card">
-    <h3>Google Safe Browsing</h3>
-    <p><strong>Threat: </strong>{{ analysis_results.results[0].google_safe_browsing.threat_found }}</p>
-    <p><strong>Details: </strong>{{ analysis_results.results[0].google_safe_browsing.details }}</p>
-</div>
+{% if analysis_results.results[0].google_safe_browsing and analysis_results.results[0].google_safe_browsing.threat_found
+== "Threat found" %}
+<div class="card high-detection" style="background-color: red;">
+    {% else %}
+    <div class="card">
+        {% endif %}
+        <h3>Google Safe Browsing</h3>
+        <p><strong>Threat: </strong>{{ analysis_results.results[0].google_safe_browsing.threat_found }}</p>
+        <p><strong>Threat types: </strong>
+            {% if analysis_results.results[0].google_safe_browsing.threat_types %}
+            {{ analysis_results.results[0].google_safe_browsing.threat_types | join(', ') }}
+            {% else %}
+            None
+            {% endif %}
+        </p>
+        <p><strong>Matched URLs: </strong>
+            {% if analysis_results.results[0].google_safe_browsing.details %}
+            {% for threat in analysis_results.results[0].google_safe_browsing.details %}
+            {{ threat.url }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            {% else %}
+            None
+            {% endif %}
+        </p>
+    </div>

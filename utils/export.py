@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 from flask import send_file
 
+from models.analysis_result import AnalysisResult
 from utils.config import get_config
 from utils.load_engines import get_engine_instances
 
@@ -18,7 +19,7 @@ LOADED_ENGINES = get_engine_instances(secrets, {"http": secrets.proxy_url}, secr
 
 
 def prepare_row(result, selected_engines):
-    row = {"observable": result.get("observable"), "type": result.get("type")}
+    row = {"observable": str(result.get("observable", "")), "type": str(result.get("type", ""))}
 
     # Standard Engines
     for engine_name in selected_engines:
@@ -36,8 +37,8 @@ def prepare_row(result, selected_engines):
     return row
 
 
-def prepare_data_for_export(analysis_results):
-    data = []
+def prepare_data_for_export(analysis_results: AnalysisResult) -> list[dict]:
+    data: list[dict] = []
     for result in analysis_results.results:
         row = prepare_row(result, analysis_results.selected_engines)
         data.append(row)

@@ -1,4 +1,4 @@
-exclude: "^.*/(tests/|__version__.py)"
+exclude: "^.*/(tests/)"
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -10,7 +10,7 @@ repos:
       - id: check-yaml
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.4
+    rev: v0.15.5
     hooks:
       - id: ruff
         types_or: [python, pyi]
@@ -23,7 +23,7 @@ repos:
     # Bandit SAST
     # https://bandit.readthedocs.io/en/latest/index.html
   - repo: https://github.com/PyCQA/bandit
-    rev: "1.8.6"
+    rev: "1.9.4"
     hooks:
       - id: bandit
         types_or: [python, pyi]

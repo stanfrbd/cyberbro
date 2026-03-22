@@ -10,11 +10,13 @@ from pathlib import Path
 
 import ioc_fanger
 import requests
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, Response, jsonify, render_template, request, send_from_directory
+from flask.json.provider import DefaultJSONProvider
 from flask_caching import Cache
 from flask_cors import CORS
 
 from models.analysis_result import AnalysisResult, db
+from models.observable import Observable, ObservableFlag
 from utils.analysis import check_analysis_in_progress, perform_analysis
 from utils.bad_asn_manager import background_updater
 from utils.config import (
@@ -33,14 +35,28 @@ from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
 # Canonical version string displayed in the about page and used for update checks
-VERSION: str = "v0.11.1"
+VERSION: str = "v0.12.0"
 
 
 class InvalidCachefileError(Exception):
     pass
 
 
+class CyberbroJSONProvider(DefaultJSONProvider):
+    """Custom JSON serializer for Observable objects."""
+
+    @staticmethod
+    def default(obj: object) -> str:
+        if isinstance(obj, Observable):
+            return str(obj)
+        if isinstance(obj, ObservableFlag):
+            return str(obj)
+        return super(CyberbroJSONProvider, CyberbroJSONProvider).default(obj)
+
+
 app: Flask = Flask(__name__)
+app.json_provider_class = CyberbroJSONProvider
+app.json = CyberbroJSONProvider(app)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -188,6 +204,9 @@ def get_latest_version_from_updated_cache_file(cache_file: Path) -> str:
 def check_for_new_version(current_version: str) -> bool:
     """Check if a new version of the application is available."""
 
+    if get_config().disable_version_check:
+        return False
+
     cache_file: Path = DATA_DIR / "version_cache.json"
 
     # Check if cache file exists and is not older than a day
@@ -215,10 +234,10 @@ def index():
 
 
 @app.route("/analyze", methods=["POST"])
-def analyze():
+def analyze() -> tuple[str, int]:
     """Handle the analyze request with caching and an option to ignore cache."""
     form_data = ioc_fanger.fang(request.form.get("observables", ""))
-    observables = extract_observables(form_data)
+    observables: list[Observable] = extract_observables(form_data)
     selected_engines: list[str] = request.form.getlist("engines")
     ignore_cache: bool = request.args.get("ignore_cache", "false").lower() == "true"
 
@@ -254,7 +273,7 @@ def analyze():
 
 
 @app.route("/results/<analysis_id>", methods=["GET"])
-def show_results(analysis_id):
+def show_results(analysis_id: str) -> tuple[str, int]:
     """Show the results of the analysis."""
 
     # If URL includes "?display=table", force a table view of results
@@ -266,23 +285,23 @@ def show_results(analysis_id):
             analysis_results=analysis_results,
             API_PREFIX=API_PREFIX,
             display_mode=display,
-        )
+        ), 200
     return render_template("404.html"), 404
 
 
 @app.route(f"/{API_PREFIX}/is_analysis_complete/<analysis_id>", methods=["GET"])
-def is_analysis_complete(analysis_id):
+def is_analysis_complete(analysis_id: str) -> Response:
     """Check if the analysis is complete."""
     complete = not check_analysis_in_progress(analysis_id)
     return jsonify({"complete": complete})
 
 
 @app.route("/export/<analysis_id>")
-def export(analysis_id):
+def export(analysis_id: str) -> Response | tuple[Response, int]:
     """Export the analysis results."""
-    format = request.args.get("format")
+    format: str | None = request.args.get("format")
     analysis_results = db.session.get(AnalysisResult, analysis_id)
-    data = prepare_data_for_export(analysis_results)
+    data: list[dict] = prepare_data_for_export(analysis_results)
     timestamp = time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime())
 
     if format == "csv":
@@ -293,7 +312,7 @@ def export(analysis_id):
 
 
 @app.route("/favicon.ico")
-def favicon():
+def favicon() -> Response:
     """Serve the favicon."""
     return send_from_directory(
         Path(app.root_path) / "images",
@@ -303,19 +322,19 @@ def favicon():
 
 
 @app.errorhandler(404)
-def page_not_found(e):
+def page_not_found(_) -> tuple[str, int]:
     """Handle 404 errors."""
     return render_template("404.html"), 404
 
 
 @app.errorhandler(500)
-def internal_server_error(e):
+def internal_server_error(_) -> tuple[str, int]:
     """Handle 500 errors."""
     return render_template("500.html"), 500
 
 
 @app.errorhandler(413)
-def request_entity_too_large(e):
+def request_entity_too_large(_) -> tuple[str, int]:
     """Handle 413 errors."""
     return render_template("413.html"), 413
 
@@ -331,7 +350,7 @@ def history():
     page, per_page, _, time_range = validate_history_params(page, per_page, None, time_range)
 
     # Calculate offset
-    offset = (page - 1) * per_page
+    offset: int = (page - 1) * per_page
 
     # Build base query (no search)
     base_query = db.session.query(AnalysisResult).filter(AnalysisResult.results != [])
@@ -357,28 +376,28 @@ def history():
 
 
 @app.route("/stats")
-def stats():
+def stats() -> tuple[str, int]:
     """Render the stats page."""
     stats = get_analysis_stats()
-    return render_template("stats.html", stats=stats)
+    return render_template("stats.html", stats=stats), 200
 
 
 @app.route("/about")
-def about():
+def about() -> tuple[str, int]:
     """Render the about page."""
-    return render_template("about.html", version=app.config["VERSION"])
+    return render_template("about.html", version=app.config["VERSION"]), 200
 
 
 @app.route("/config")
-def config():
+def config() -> tuple[str, int]:
     """Render the config page."""
     if not app.config.get("CONFIG_PAGE_ENABLED", False):
         return render_template("404.html"), 404
-    return render_template("config.html", secrets=asdict(secrets))
+    return render_template("config.html", secrets=asdict(secrets)), 200
 
 
 @app.route("/update_config", methods=["POST"])
-def update_config():
+def update_config() -> tuple[Response, int]:
     """Update config from the form data"""
     if not app.config.get("CONFIG_PAGE_ENABLED", False):
         return jsonify({"message": "Configuration update is disabled."}), 403
@@ -395,43 +414,43 @@ def update_config():
 
 
 @app.route(f"/{API_PREFIX}/results/<analysis_id>", methods=["GET"])
-def get_results(analysis_id):
+def get_results(analysis_id: str) -> tuple[Response, int]:
     """Get the results of the analysis."""
     analysis_results = db.session.get(AnalysisResult, analysis_id)
     if analysis_results:
-        return jsonify(analysis_results.results)
+        return jsonify(analysis_results.results), 200
     return jsonify({"error": "Analysis not found."}), 404
 
 
 @app.route(f"/{API_PREFIX}/analyze", methods=["POST"])
-def analyze_api():
+def analyze_api() -> tuple[Response, int]:
     """Handle the analyze request via API with caching and hashing."""
-    data = request.get_json()
-    form_data = ioc_fanger.fang(data.get("text", ""))
-    selected_engines = data.get("engines", [])
-    ignore_cache = data.get("ignore_cache", False)
+    data: dict = request.get_json()
+    form_data: str = ioc_fanger.fang(data.get("text", ""))
+    selected_engines: list[str] = data.get("engines", [])
+    ignore_cache: bool = data.get("ignore_cache", False)
 
     # Generate a secure hash for form data and engines using SHA-256
-    combined_data = f"{form_data}|{','.join(selected_engines)}"
-    cache_key = f"api-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
+    combined_data: str = f"{form_data}|{','.join(selected_engines)}"
+    cache_key: str = f"api-analyze-{hashlib.sha256(combined_data.encode('utf-8')).hexdigest()}"
 
     if not ignore_cache:
         # Check cache
-        cached_result = cache.get(cache_key)
+        cached_result: str | None = cache.get(cache_key)
         if cached_result:
             logger.debug(f"Cache hit: {cache_key}")
             logger.debug(f"Cached result: {cached_result}")
             return jsonify(cached_result), 200
 
     # If no cache
-    analysis_id = str(uuid.uuid4())
+    analysis_id: str = str(uuid.uuid4())
     threading.Thread(
         target=perform_analysis,
         args=(app, extract_observables(form_data), selected_engines, analysis_id),
     ).start()
 
     # Generate response
-    response_data = {"analysis_id": analysis_id, "link": f"/results/{analysis_id}"}
+    response_data: dict[str, str] = {"analysis_id": analysis_id, "link": f"/results/{analysis_id}"}
     response = jsonify(response_data)
 
     # Store in cache with the specified timeout for the API (api_cache_timeout)
@@ -441,7 +460,7 @@ def analyze_api():
 
 
 @app.route("/graph/<analysis_id>", methods=["GET"])
-def graph(analysis_id):
+def graph(analysis_id: str) -> tuple[str, int]:
     """Render the graph visualization for the given analysis ID."""
     analysis_results = db.session.get(AnalysisResult, analysis_id)
     if analysis_results:
@@ -450,4 +469,4 @@ def graph(analysis_id):
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=False)
+    app.run(port=secrets.flask_port, debug=secrets.flask_debug, host=secrets.flask_host)

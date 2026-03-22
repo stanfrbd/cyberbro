@@ -59,7 +59,8 @@
             <option value="{{ result.ipapi.location.country | lower }}">{{ result.ipapi.location.country }}</option>
             {% endif %}
 
-            {% if result.abuseipdb and result.abuseipdb.country_name and result.abuseipdb.country_name not in countries %}
+            {% if result.abuseipdb and result.abuseipdb.country_name and result.abuseipdb.country_name not in countries
+            %}
             {% set _ = countries.append(result.abuseipdb.country_name) %}
             <option value="{{ result.abuseipdb.country_name | lower }}">{{ result.abuseipdb.country_name }}</option>
             {% endif %}
@@ -245,6 +246,9 @@
                 <tr class="high-risk">
                     {% elif result.threatfox and result.threatfox.count != 0 %}
                 <tr class="high-risk">
+                    {% elif result.google_safe_browsing and result.google_safe_browsing.threat_found == "Threat found"
+                    %}
+                <tr class="high-risk high-detection">
                     {% elif result.opencti and result.opencti.latest_indicator_link and not result.opencti.revoked %}
                 <tr class="warning-row">
                     {% elif result.crowdstrike and result.crowdstrike.indicator_found and

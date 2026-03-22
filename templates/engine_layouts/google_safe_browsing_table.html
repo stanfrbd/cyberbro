@@ -1,8 +1,26 @@
 <td>
     {% if result.google_safe_browsing %}
-        <strong>Threat: </strong>{{ result.google_safe_browsing.threat_found }} <br/>
-        <strong>Details: </strong>{{ result.google_safe_browsing.details }}
+    <strong>Threat: </strong>{{ result.google_safe_browsing.threat_found }}
+    {% if result.google_safe_browsing.threat_found == "Threat found" %}
+    <span
+        style="display: inline-block; margin-left: 0.35rem; padding: 0.1rem 0.45rem; border-radius: 999px; background-color: #dc2626; color: #fff; font-size: 0.75rem; font-weight: 700;">THREAT</span>
+    {% endif %}
+    <br />
+    <strong>Threat types: </strong>
+    {% if result.google_safe_browsing.threat_types %}
+    {{ result.google_safe_browsing.threat_types | join(', ') }}<br />
     {% else %}
-        Not applicable
+    None<br />
+    {% endif %}
+    <strong>Matched URLs: </strong>
+    {% if result.google_safe_browsing.details %}
+    {% for threat in result.google_safe_browsing.details %}
+    {{ threat.url }}{% if not loop.last %}, {% endif %}
+    {% endfor %}<br />
+    {% else %}
+    None<br />
+    {% endif %}
+    {% else %}
+    Not applicable
     {% endif %}
 </td>

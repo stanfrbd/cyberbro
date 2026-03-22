@@ -6,6 +6,7 @@ import pycountry
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +17,8 @@ class WebscoutEngine(BaseEngine):
         return "webscout"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.IPV4 | ObservableType.IPV6
 
     @property
     def execute_after_reverse_dns(self):
@@ -28,7 +29,7 @@ class WebscoutEngine(BaseEngine):
             return dt.split("T", 1)[0]
         return dt
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(self, observable: Observable) -> dict[str, Any] | None:
         api_key: str = self.secrets.webscout
         try:
             # TODO: Hardcoded 1-second rate limiting makes tests slow
@@ -36,8 +37,11 @@ class WebscoutEngine(BaseEngine):
             # Is this something we could use tenacity for?
             time.sleep(1)  # rate limit
             # TODO: No credential validation - empty keys still make API requests
-            url = f"https://api.webscout.io/query/ip/{observable_value}?apikey={api_key}"
-            response = requests.get(url, proxies=self.proxies, verify=self.ssl_verify, timeout=5)
+            url = f"https://api.webscout.io/query/ip/{observable.value}"
+            params: dict[str, str] = {"apikey": api_key}
+            response = requests.get(
+                url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=5
+            )
             response.raise_for_status()
 
             data = response.json()
@@ -80,7 +84,7 @@ class WebscoutEngine(BaseEngine):
                 """
 
                 return {
-                    "ip": d.get("ip", observable_value),
+                    "ip": d.get("ip", observable.value),
                     "risk_score": None,  # Placeholder for backward compatibility
                     "is_proxy": bool(anonymization.get("proxy", False)),
                     "is_tor": bool(anonymization.get("tor", False)),
@@ -105,7 +109,7 @@ class WebscoutEngine(BaseEngine):
                 }
 
         except Exception as e:
-            logger.error("Error querying webscout for '%s': %s", observable_value, e, exc_info=True)
+            logger.error("Error querying webscout for '%s': %s", observable.value, e, exc_info=True)
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

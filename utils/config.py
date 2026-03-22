@@ -26,6 +26,9 @@ class Secrets:
     crowdstrike_falcon_base_url: str = "https://falcon.crowdstrike.com"
     dfir_iris_url: str = ""
     dfir_iris_api_key: str = ""
+    flask_debug: bool = False
+    flask_port: int = 5000
+    flask_host: str = "0.0.0.0"  # nosec: B104
     google_cse_cx: str = ""
     google_cse_key: str = ""
     google_safe_browsing: str = ""
@@ -48,6 +51,10 @@ class Secrets:
     shodan: str = ""
     spur_us: str = ""
     threatfox: str = ""
+    gunicorn_workers_count: int = 1
+    gunicorn_threads_count: int = 1
+    gunicorn_timeout: int = 120
+    disable_version_check: bool = False
     ssl_verify: bool = True
     virustotal: str = ""
     webscout: str = ""

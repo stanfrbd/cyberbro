@@ -6,6 +6,7 @@ Downloads and maintains a local cache of known malicious ASNs from public blackl
 import csv
 import json
 import logging
+import threading
 import time
 from pathlib import Path
 
@@ -25,6 +26,7 @@ SSL_VERIFY = secrets.ssl_verify
 # Cache file location
 CACHE_FILE = Path("data/bad_asn_cache.json")
 CACHE_MAX_AGE = 24 * 60 * 60  # 24 hours in seconds
+_CACHE_WRITE_LOCK = threading.Lock()
 
 # Data sources
 SPAMHAUS_URL = "https://www.spamhaus.org/drop/asndrop.json"
@@ -175,9 +177,11 @@ def update_bad_asn_cache() -> bool:
     Returns:
         True if cache was updated, False if skipped (cache is fresh)
     """
+    cache_file = CACHE_FILE
+
     # Check if cache exists and is fresh
-    if CACHE_FILE.exists():
-        file_age = time.time() - CACHE_FILE.stat().st_mtime
+    if cache_file.exists():
+        file_age = time.time() - cache_file.stat().st_mtime
         if file_age < CACHE_MAX_AGE:
             logger.info(
                 f"Bad ASN cache is fresh (age: {file_age / 3600:.1f} hours), skipping update"
@@ -187,7 +191,7 @@ def update_bad_asn_cache() -> bool:
     logger.info("Updating Bad ASN cache...")
 
     # Ensure data directory exists
-    CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Download both sources
     merged_data = {}
@@ -220,8 +224,11 @@ def update_bad_asn_cache() -> bool:
     cache_data = {"last_updated": time.time(), "asns": merged_data}
 
     try:
-        with CACHE_FILE.open("w", encoding="utf-8") as f:
-            json.dump(cache_data, f, indent=2)
+        temp_file = cache_file.with_name(f"{cache_file.name}.{threading.get_ident()}.tmp")
+        with _CACHE_WRITE_LOCK:
+            with temp_file.open("w", encoding="utf-8") as f:
+                json.dump(cache_data, f, indent=2)
+            temp_file.replace(cache_file)
         logger.info(f"Bad ASN cache updated successfully with {len(merged_data)} ASNs")
         return True
     except Exception as e:
@@ -236,12 +243,14 @@ def load_bad_asn_cache() -> dict[str, str]:
     Returns:
         Dictionary mapping ASN (string) to source description
     """
-    if not CACHE_FILE.exists():
+    cache_file = CACHE_FILE
+
+    if not cache_file.exists():
         logger.warning("Bad ASN cache file not found, returning empty cache")
         return {}
 
     try:
-        with CACHE_FILE.open(encoding="utf-8") as f:
+        with cache_file.open(encoding="utf-8") as f:
             cache_data = json.load(f)
             return cache_data.get("asns", {})
     except Exception as e:

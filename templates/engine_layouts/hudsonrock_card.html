@@ -1,7 +1,7 @@
 <div class="card">
     <h3>Hudson Rock</h3>
 
-    {% if analysis_results.results[0].type == "Email" and analysis_results.results[0].hudsonrock.stealers %}
+    {% if analysis_results.results[0].type == "EMAIL" and analysis_results.results[0].hudsonrock.stealers %}
         <p><strong>Compromised Computer Details:</strong></p>
 
         {% for stealer in analysis_results.results[0].hudsonrock.stealers %}

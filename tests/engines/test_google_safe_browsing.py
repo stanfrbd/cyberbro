@@ -4,451 +4,411 @@ import pytest
 import requests
 import responses
 
-from engines.google_safe_browsing import GoogleSafeBrowsingEngine
+from engines.google_safe_browsing import GOOGLE_SAFE_BROWSING_V5_URL, GoogleSafeBrowsingEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
 
 
+def _encode_varint(value: int) -> bytes:
+    output = bytearray()
+    number = value
+    while number > 0x7F:
+        output.append((number & 0x7F) | 0x80)
+        number >>= 7
+    output.append(number)
+    return bytes(output)
+
+
+def _encode_length_delimited(field_number: int, value: bytes) -> bytes:
+    tag = (field_number << 3) | 2
+    return _encode_varint(tag) + _encode_varint(len(value)) + value
+
+
+def _encode_varint_field(field_number: int, value: int) -> bytes:
+    tag = field_number << 3
+    return _encode_varint(tag) + _encode_varint(value)
+
+
 @pytest.fixture
-def secrets_with_key():
+def secrets_with_key() -> Secrets:
     s = Secrets()
     s.google_safe_browsing = "AIzaSy_test_api_key_12345678"
     return s
 
 
 @pytest.fixture
-def secrets_without_key():
+def secrets_without_key() -> Secrets:
     s = Secrets()
     s.google_safe_browsing = ""
     return s
 
 
 @pytest.fixture
-def url_observable():
-    return "http://malicious-site.com"
+def url_observable() -> Observable:
+    return Observable(value="http://malicious-site.com", type=ObservableType.URL)
 
 
 @pytest.fixture
-def fqdn_observable():
-    return "example.com"
+def fqdn_observable() -> Observable:
+    return Observable(value="example.com", type=ObservableType.FQDN)
 
 
 @pytest.fixture
-def ipv4_observable():
-    return "192.168.1.1"
+def ipv4_observable() -> Observable:
+    return Observable(value="192.168.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
-def ipv6_observable():
-    return "2001:4860:4860::8888"
-
-
-# ============================================================================
-# High Priority: Credentials & Response Parsing Tests
-# ============================================================================
+def ipv6_observable() -> Observable:
+    return Observable(value="2001:4860:4860::8888", type=ObservableType.IPV6)
 
 
 @responses.activate
-def test_analyze_threat_found_complete(secrets_with_key, url_observable):
-    """Test successful API response with threat found and complete data."""
+def test_analyze_threat_found_complete(
+    secrets_with_key: Secrets, url_observable: Observable
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
     mock_resp = {
-        "matches": [
+        "threats": [
             {
-                "threatType": "MALWARE",
-                "platformType": "ALL",
-                "threat": {"url": url_observable},
-                "cacheDuration": "300s",
+                "url": url_observable.value,
+                "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
             }
-        ]
+        ],
+        "cacheDuration": "300s",
     }
 
-    responses.add(responses.POST, url, json=mock_resp, status=200)
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json=mock_resp, status=200)
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is not None
     assert result["threat_found"] == "Threat found"
     assert result["details"] is not None
     assert len(result["details"]) == 1
-    assert result["details"][0]["threatType"] == "MALWARE"
+    assert result["details"][0]["url"] == url_observable.value
+    assert result["threat_types"] == ["MALWARE", "SOCIAL_ENGINEERING"]
 
 
 @responses.activate
-def test_analyze_no_threat_found(secrets_with_key, url_observable):
-    """Test successful API response with no threat detected."""
+def test_analyze_no_threat_found(secrets_with_key: Secrets, url_observable: Observable) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    mock_resp = {}
+    mock_resp = {"threats": [], "cacheDuration": "60s"}
 
-    responses.add(responses.POST, url, json=mock_resp, status=200)
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json=mock_resp, status=200)
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is not None
     assert result["threat_found"] == "No threat found"
     assert result["details"] is None
+    assert result["threat_types"] == []
 
 
 @responses.activate
-def test_analyze_minimal_threat_match(secrets_with_key, url_observable):
-    """Test with minimal threat match structure (only required fields)."""
+def test_analyze_response_without_threats_key(
+    secrets_with_key: Secrets, url_observable: Observable
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    mock_resp = {
-        "matches": [
-            {
-                "threatType": "SOCIAL_ENGINEERING",
-                "platformType": "ALL",
-                "threat": {"url": url_observable},
-            }
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json={}, status=200)
+
+    result = engine.analyze(url_observable)
+
+    assert result is not None
+    assert result["threat_found"] == "No threat found"
+    assert result["details"] is None
+    assert result["threat_types"] == []
+
+
+@responses.activate
+def test_analyze_protobuf_response_with_threat(secrets_with_key: Secrets) -> None:
+    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
+
+    threat_message = b"".join(
+        [
+            _encode_length_delimited(1, b"http://malicious.com"),
+            _encode_varint_field(2, 1),
+            _encode_varint_field(2, 2),
         ]
-    }
+    )
+    duration_message = _encode_varint_field(1, 300)
+    response_payload = b"".join(
+        [
+            _encode_length_delimited(1, threat_message),
+            _encode_length_delimited(2, duration_message),
+        ]
+    )
 
-    responses.add(responses.POST, url, json=mock_resp, status=200)
+    responses.add(
+        responses.GET,
+        GOOGLE_SAFE_BROWSING_V5_URL,
+        body=response_payload,
+        status=200,
+        content_type="application/x-protobuf",
+    )
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(Observable(value="malicious.com", type=ObservableType.FQDN))
 
     assert result is not None
     assert result["threat_found"] == "Threat found"
-    assert isinstance(result["details"], list)
+    assert result["details"] == [
+        {
+            "url": "http://malicious.com",
+            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
+        }
+    ]
+    assert result["threat_types"] == ["MALWARE", "SOCIAL_ENGINEERING"]
 
 
 @responses.activate
-def test_analyze_unauthorized_response(secrets_with_key, url_observable, caplog):
-    """Test handling of 401 Unauthorized response (missing/invalid API key)."""
+def test_analyze_protobuf_response_with_packed_threat_types(
+    secrets_with_key: Secrets,
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    responses.add(responses.POST, url, json={"error": "unauthorized"}, status=401)
+    packed_threat_types = _encode_varint(1) + _encode_varint(2)
+    threat_message = b"".join(
+        [
+            _encode_length_delimited(1, b"http://packed-threat.com"),
+            _encode_length_delimited(2, packed_threat_types),
+        ]
+    )
+    duration_message = _encode_varint_field(1, 300)
+    response_payload = b"".join(
+        [
+            _encode_length_delimited(1, threat_message),
+            _encode_length_delimited(2, duration_message),
+        ]
+    )
+
+    responses.add(
+        responses.GET,
+        GOOGLE_SAFE_BROWSING_V5_URL,
+        body=response_payload,
+        status=200,
+        content_type="application/x-protobuf",
+    )
+
+    result = engine.analyze(Observable(value="packed-threat.com", type=ObservableType.FQDN))
+
+    assert result is not None
+    assert result["threat_found"] == "Threat found"
+    assert result["details"] == [
+        {
+            "url": "http://packed-threat.com",
+            "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
+        }
+    ]
+    assert result["threat_types"] == ["MALWARE", "SOCIAL_ENGINEERING"]
+
+
+@responses.activate
+def test_analyze_unauthorized_response(
+    secrets_with_key: Secrets, url_observable: Observable, caplog: pytest.LogCaptureFixture
+) -> None:
+    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
+
+    responses.add(
+        responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json={"error": "unauthorized"}, status=401
+    )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is None
     assert "Error while querying Google Safe Browsing" in caplog.text
 
 
 @responses.activate
-def test_analyze_forbidden_response(secrets_with_key, url_observable, caplog):
-    """Test handling of 403 Forbidden response (insufficient permissions)."""
+def test_analyze_server_error_500(
+    secrets_with_key: Secrets, url_observable: Observable, caplog: pytest.LogCaptureFixture
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    responses.add(responses.POST, url, json={"error": "forbidden"}, status=403)
+    responses.add(
+        responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json={"error": "server error"}, status=500
+    )
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is None
     assert "Error while querying Google Safe Browsing" in caplog.text
 
 
 @responses.activate
-def test_analyze_server_error_500(secrets_with_key, url_observable, caplog):
-    """Test handling of HTTP 500 server error."""
+def test_analyze_request_timeout(
+    secrets_with_key: Secrets, url_observable: Observable, caplog: pytest.LogCaptureFixture
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    responses.add(responses.POST, url, json={"error": "server error"}, status=500)
-
-    caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
-
-    assert result is None
-    assert "Error while querying Google Safe Browsing" in caplog.text
-
-
-@responses.activate
-def test_analyze_bad_request_400(secrets_with_key, url_observable, caplog):
-    """Test handling of HTTP 400 bad request."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    responses.add(responses.POST, url, json={"error": "bad request"}, status=400)
-
-    caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
-
-    assert result is None
-    assert "Error while querying Google Safe Browsing" in caplog.text
-
-
-@responses.activate
-def test_analyze_request_timeout(secrets_with_key, url_observable, caplog):
-    """Test handling of request timeout."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
     timeout_error = requests.exceptions.ConnectTimeout("Connection timed out")
-    responses.add(responses.POST, url, body=timeout_error)
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is None
     assert "Error while querying Google Safe Browsing" in caplog.text
 
 
 @responses.activate
-def test_analyze_request_connection_error(secrets_with_key, url_observable, caplog):
-    """Test handling of connection error."""
+def test_analyze_invalid_json_response(
+    secrets_with_key: Secrets, url_observable: Observable, caplog: pytest.LogCaptureFixture
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    conn_error = requests.exceptions.ConnectionError("Connection failed")
-    responses.add(responses.POST, url, body=conn_error)
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is None
     assert "Error while querying Google Safe Browsing" in caplog.text
-
-
-@responses.activate
-def test_analyze_invalid_json_response(secrets_with_key, url_observable, caplog):
-    """Test handling of 200 status but invalid JSON."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    responses.add(responses.POST, url, body="invalid json{", status=200)
-
-    caplog.set_level(logging.ERROR)
-    result = engine.analyze(url_observable, "URL")
-
-    assert result is None
-    assert "Error while querying Google Safe Browsing" in caplog.text
-
-
-# ============================================================================
-# Medium Priority: Observable Type Handling Tests
-# ============================================================================
 
 
 @pytest.mark.parametrize(
-    "observable_value,observable_type,threat_type",
+    "observable_value,observable_type,expected_url",
     [
-        ("http://malicious-site.com", "URL", "MALWARE"),
-        ("example.com", "FQDN", "SOCIAL_ENGINEERING"),
-        ("192.168.1.1", "IPv4", "UNWANTED_SOFTWARE"),
-        ("2001:4860:4860::8888", "IPv6", "THREAT_TYPE_UNSPECIFIED"),
+        ("http://malicious-site.com", ObservableType.URL, "http://malicious-site.com"),
+        ("example.com", ObservableType.FQDN, "http://example.com"),
+        ("192.168.1.1", ObservableType.IPV4, "http://192.168.1.1"),
+        ("2001:4860:4860::8888", ObservableType.IPV6, "http://2001:4860:4860::8888"),
     ],
 )
 @responses.activate
 def test_analyze_observable_types_success(
-    secrets_with_key, observable_value, observable_type, threat_type
-):
-    """Test various observable types wrapped and analyzed successfully."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    mock_resp = {"matches": [{"threatType": threat_type}]}
-
-    responses.add(responses.POST, url, json=mock_resp, status=200)
-
-    result = engine.analyze(observable_value, observable_type)
-
-    assert result is not None
-    assert result["threat_found"] == "Threat found"
-
-
-def test_analyze_invalid_observable_type(secrets_with_key):
-    """Test handling of unsupported observable types."""
+    secrets_with_key: Secrets,
+    observable_value: str,
+    observable_type: ObservableType,
+    expected_url: str,
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
 
-    result = engine.analyze("some_value", "INVALID_TYPE")
+    mock_resp = {"threats": [{"url": expected_url, "threatTypes": ["MALWARE"]}]}
 
-    assert result is None
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json=mock_resp, status=200)
 
-
-@responses.activate
-def test_analyze_empty_url_observable(secrets_with_key, caplog):
-    """Test with empty string URL observable."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    mock_resp = {}
-
-    responses.add(responses.POST, url, json=mock_resp, status=200)
-
-    caplog.set_level(logging.ERROR)
-    result = engine.analyze("", "URL")
-
-    assert result is not None
-    assert result["threat_found"] == "No threat found"
-
-
-@responses.activate
-def test_analyze_url_with_query_parameters(secrets_with_key):
-    """Test URL with query parameters preserved."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    url_with_params = "http://site.com?param=value&other=123"
-
-    mock_resp = {"matches": [{"threatType": "MALWARE"}]}
-
-    responses.add(responses.POST, url, json=mock_resp, status=200)
-
-    result = engine.analyze(url_with_params, "URL")
+    result = engine.analyze(Observable(value=observable_value, type=observable_type))
 
     assert result is not None
     assert result["threat_found"] == "Threat found"
 
 
 @responses.activate
-def test_analyze_url_with_fragment_identifier(secrets_with_key):
-    """Test URL with fragment identifier preserved."""
+def test_analyze_request_uses_get_method(
+    secrets_with_key: Secrets, url_observable: Observable
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    url_with_fragment = "http://site.com#section"
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json={"threats": []}, status=200)
 
-    mock_resp = {"matches": [{"threatType": "SOCIAL_ENGINEERING"}]}
-
-    responses.add(responses.POST, url, json=mock_resp, status=200)
-
-    result = engine.analyze(url_with_fragment, "URL")
-
-    assert result is not None
-    assert result["threat_found"] == "Threat found"
-
-
-# ============================================================================
-# Medium Priority: Request Formation & API Details Tests
-# ============================================================================
-
-
-@responses.activate
-def test_analyze_request_contains_threat_types(secrets_with_key, url_observable):
-    """Test that request body contains all required threat types."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    api_url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    mock_resp = {}
-
-    responses.add(responses.POST, api_url, json=mock_resp, status=200)
-
-    engine.analyze(url_observable, "URL")
-
-    # Verify request was made
-    assert len(responses.calls) == 1
-    request = responses.calls[0].request
-
-    # Verify request body contains threatTypes
-    assert b"threatTypes" in request.body
-
-
-@responses.activate
-def test_analyze_request_uses_post_method(secrets_with_key, url_observable):
-    """Test that request uses POST HTTP method."""
-    engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    api_url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
-
-    mock_resp = {}
-
-    responses.add(responses.POST, api_url, json=mock_resp, status=200)
-
-    engine.analyze(url_observable, "URL")
+    engine.analyze(url_observable)
 
     assert len(responses.calls) == 1
-    assert responses.calls[0].request.method == "POST"
+    assert responses.calls[0].request.method == "GET"
 
 
 @responses.activate
-def test_analyze_api_key_in_url_query_params(secrets_with_key, url_observable):
-    """Test that API key is passed as query parameter in URL."""
+def test_analyze_request_contains_urls_query_param(
+    secrets_with_key: Secrets, url_observable: Observable
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    api_url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    mock_resp = {}
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json={"threats": []}, status=200)
 
-    responses.add(responses.POST, api_url, json=mock_resp, status=200)
-
-    engine.analyze(url_observable, "URL")
+    engine.analyze(url_observable)
 
     assert len(responses.calls) == 1
     request_url = responses.calls[0].request.url
     assert f"key={secrets_with_key.google_safe_browsing}" in request_url
+    assert "urls=http%3A%2F%2Fmalicious-site.com" in request_url
 
 
 @responses.activate
-def test_analyze_response_parsing_with_json(secrets_with_key, url_observable):
-    """Test that response JSON is parsed correctly."""
+def test_analyze_request_contains_user_agent_header(
+    secrets_with_key: Secrets, url_observable: Observable
+) -> None:
     engine = GoogleSafeBrowsingEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    api_url = "https://safebrowsing.googleapis.com/v4/threatMatches:find"
 
-    mock_resp = {
-        "matches": [
-            {
-                "threatType": "MALWARE",
-                "platformType": "WINDOWS",
-                "threat": {"url": url_observable},
-            }
-        ]
-    }
+    responses.add(responses.GET, GOOGLE_SAFE_BROWSING_V5_URL, json={"threats": []}, status=200)
 
-    responses.add(responses.POST, api_url, json=mock_resp, status=200)
+    engine.analyze(url_observable)
 
-    result = engine.analyze(url_observable, "URL")
-
-    # Verify JSON was parsed and included in result
-    assert result["details"] == mock_resp["matches"]
-    assert result["details"][0]["platformType"] == "WINDOWS"
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.headers.get("User-Agent") == "cyberbro/1.0"
 
 
-# ============================================================================
-# Low Priority: Export Formatting & Property Tests
-# ============================================================================
+def test_analyze_missing_api_key_returns_none(
+    secrets_without_key: Secrets, url_observable: Observable, caplog: pytest.LogCaptureFixture
+) -> None:
+    engine = GoogleSafeBrowsingEngine(secrets_without_key, proxies={}, ssl_verify=True)
+
+    caplog.set_level(logging.ERROR)
+    result = engine.analyze(url_observable)
+
+    assert result is None
+    assert "Missing Google Safe Browsing API key" in caplog.text
 
 
-def test_create_export_row_with_threat_found():
-    """Test export row with threat detected."""
+def test_create_export_row_with_threat_found() -> None:
     engine = GoogleSafeBrowsingEngine(Secrets(), proxies={}, ssl_verify=True)
 
     analysis_result = {
         "threat_found": "Threat found",
-        "details": [{"threatType": "MALWARE"}],
+        "threat_types": ["MALWARE", "SOCIAL_ENGINEERING"],
+        "details": [
+            {
+                "url": "http://malicious.com",
+                "threatTypes": ["MALWARE", "SOCIAL_ENGINEERING"],
+            }
+        ],
     }
 
     row = engine.create_export_row(analysis_result)
 
     assert row["gsb_threat"] == "Threat found"
+    assert row["gsb_threat_types"] == "MALWARE, SOCIAL_ENGINEERING"
+    assert row["gsb_matched_urls"] == "http://malicious.com"
 
 
-def test_create_export_row_with_no_threat():
-    """Test export row with no threat detected."""
+def test_create_export_row_with_no_threat() -> None:
     engine = GoogleSafeBrowsingEngine(Secrets(), proxies={}, ssl_verify=True)
 
     analysis_result = {
         "threat_found": "No threat found",
+        "threat_types": [],
         "details": None,
     }
 
     row = engine.create_export_row(analysis_result)
 
     assert row["gsb_threat"] == "No threat found"
+    assert row["gsb_threat_types"] is None
+    assert row["gsb_matched_urls"] is None
 
 
-def test_create_export_row_with_none_result():
-    """Test export row with None analysis result."""
+def test_create_export_row_with_none_result() -> None:
     engine = GoogleSafeBrowsingEngine(Secrets(), proxies={}, ssl_verify=True)
 
     row = engine.create_export_row(None)
 
     assert row["gsb_threat"] is None
+    assert row["gsb_threat_types"] is None
+    assert row["gsb_matched_urls"] is None
 
 
-def test_engine_properties():
-    """Test BaseEngine property inheritance and values."""
+def test_engine_properties() -> None:
     engine = GoogleSafeBrowsingEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "google_safe_browsing"
-    assert engine.supported_types == ["FQDN", "IPv4", "IPv6", "URL"]
+    assert (
+        engine.supported_types
+        is ObservableType.FQDN | ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.URL
+    )
     assert engine.is_pivot_engine is False

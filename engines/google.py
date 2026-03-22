@@ -5,6 +5,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,28 +16,43 @@ class GoogleCSEEngine(BaseEngine):
         return "google"
 
     @property
-    def supported_types(self):
-        return ["CHROME_EXTENSION", "FQDN", "IPv4", "IPv6", "MD5", "SHA1", "SHA256", "URL", "Email"]
+    def supported_types(self) -> ObservableType:
+        return (
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+            | ObservableType.EMAIL
+        )
 
-    def analyze(
-        self, observable_value: str, observable_type: str, dorks: str = ""
-    ) -> dict[str, Any] | None:
+    def analyze(self, observable: Observable, dorks: str = "") -> dict[str, Any] | None:
         # This engine requires specific secrets (CSE_CX, CSE_KEY)
-        google_cse_cx = self.secrets.google_cse_cx
-        google_cse_key = self.secrets.google_cse_key
+        google_cse_cx: str = self.secrets.google_cse_cx
+        google_cse_key: str = self.secrets.google_cse_key
+
+        if not all([google_cse_cx, google_cse_key]):
+            logger.error(
+                "Missing secrets for Google Custom Search Engine for %s observable",
+                observable.value,
+            )
+            return None
+
+        time.sleep(0.5)  # Respect rate limit
+
+        dorks_prefix: str = dorks.strip()
+        if dorks_prefix:
+            dorks_prefix += " "
+
+        q = f'{dorks_prefix}"{observable.value}"'
+
+        url: str = "https://www.googleapis.com/customsearch/v1"
+        params: dict[str, str] = {"key": google_cse_key, "cx": google_cse_cx, "q": q}
 
         try:
-            time.sleep(0.5)  # Respect rate limit
-
-            dorks_prefix = dorks.strip()
-            if dorks_prefix:
-                dorks_prefix += " "
-
-            q = f'{dorks_prefix}"{observable_value}"'
-
-            url = "https://www.googleapis.com/customsearch/v1"
-            params = {"key": google_cse_key, "cx": google_cse_cx, "q": q}
-
             resp = requests.get(
                 url, params=params, proxies=self.proxies, verify=self.ssl_verify, timeout=10
             )
@@ -56,7 +72,7 @@ class GoogleCSEEngine(BaseEngine):
                         or (err.get("errors", [{}])[0].get("message"))
                         or str(err)
                     )
-                logger.warning("Google CSE error for '%s': %s", observable_value, msg)
+                logger.warning("Google CSE error for '%s': %s", observable.value, msg)
                 return {
                     "results": [
                         {
@@ -70,12 +86,12 @@ class GoogleCSEEngine(BaseEngine):
 
             if data is None:
                 logger.error(
-                    "Expected JSON from Google CSE for '%s' but got none.", observable_value
+                    "Expected JSON from Google CSE for '%s' but got none.", observable.value
                 )
                 return None
 
-            items = data.get("items", [])
-            total_results = int(data.get("searchInformation", {}).get("totalResults", 0))
+            items: list = data.get("items", [])
+            total_results: int = int(data.get("searchInformation", {}).get("totalResults", 0))
 
             search_results = [
                 {
@@ -90,12 +106,12 @@ class GoogleCSEEngine(BaseEngine):
 
         except requests.RequestException as e:
             logger.error(
-                "Network error querying Google CSE for '%s': %s", observable_value, e, exc_info=True
+                "Network error querying Google CSE for '%s': %s", observable.value, e, exc_info=True
             )
         except Exception as e:
             logger.error(
                 "Unexpected error querying Google CSE for '%s': %s",
-                observable_value,
+                observable.value,
                 e,
                 exc_info=True,
             )

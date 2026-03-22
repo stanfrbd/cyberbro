@@ -1,10 +1,12 @@
 import logging
+from urllib.parse import quote
 
 import pytest
 import requests
 import responses
 
 from engines.hudsonrock import HudsonRockEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -17,17 +19,17 @@ def secrets():
 
 @pytest.fixture
 def email_observable():
-    return "test@example.com"
+    return Observable(value="test@example.com", type=ObservableType.EMAIL)
 
 
 @pytest.fixture
 def fqdn_observable():
-    return "example.com"
+    return Observable(value="example.com", type=ObservableType.FQDN)
 
 
 @pytest.fixture
 def url_observable():
-    return "https://example.com/path"
+    return Observable(value="https://example.com/path", type=ObservableType.URL)
 
 
 # ============================================================================
@@ -41,7 +43,7 @@ def test_analyze_email_success_complete(secrets, email_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     mock_resp = {
@@ -58,7 +60,7 @@ def test_analyze_email_success_complete(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is not None
     assert result["emails"] == ["test@example.com"]
@@ -72,17 +74,17 @@ def test_analyze_email_success_minimal(secrets, email_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
-    mock_resp = {"emails": [email_observable]}
+    mock_resp = {"emails": [email_observable.value]}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is not None
-    assert result["emails"] == [email_observable]
+    assert result["emails"] == [email_observable.value]
 
 
 @responses.activate
@@ -91,7 +93,7 @@ def test_analyze_fqdn_success_complete(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {
@@ -112,7 +114,7 @@ def test_analyze_fqdn_success_complete(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     assert result is not None
     assert len(result["data"]["all_urls"]) == 2
@@ -125,7 +127,7 @@ def test_analyze_fqdn_with_masked_urls(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {
@@ -152,7 +154,7 @@ def test_analyze_fqdn_with_masked_urls(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     # Verify masked URLs are removed
     assert len(result["data"]["all_urls"]) == 2
@@ -168,7 +170,7 @@ def test_analyze_fqdn_with_third_party_domains(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {
@@ -184,7 +186,7 @@ def test_analyze_fqdn_with_third_party_domains(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     # Verify null and masked domains are removed
     assert len(result["thirdPartyDomains"]) == 2
@@ -198,14 +200,14 @@ def test_analyze_empty_response(secrets, email_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     mock_resp = {}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is not None
     assert result == {}
@@ -217,13 +219,13 @@ def test_analyze_server_error_500(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     responses.add(responses.GET, url, json={"error": "server error"}, status=500)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -235,14 +237,14 @@ def test_analyze_request_timeout(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     timeout_error = requests.exceptions.ConnectTimeout("Connection timed out")
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -254,13 +256,13 @@ def test_analyze_invalid_json_response(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     responses.add(responses.GET, url, body="invalid json{", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -277,19 +279,19 @@ def test_analyze_email_observable_routing(secrets, email_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
-    mock_resp = {"emails": [email_observable]}
+    mock_resp = {"emails": [email_observable.value]}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is not None
     assert len(responses.calls) == 1
     assert "search-by-email" in responses.calls[0].request.url
-    assert f"email={email_observable}" in responses.calls[0].request.url
+    assert f"email={quote(email_observable.value)}" in responses.calls[0].request.url
 
 
 @responses.activate
@@ -298,19 +300,19 @@ def test_analyze_fqdn_observable_routing(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {"data": {}, "stats": {}}
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     assert result is not None
     assert len(responses.calls) == 1
     assert "search-by-domain" in responses.calls[0].request.url
-    assert f"domain={fqdn_observable}" in responses.calls[0].request.url
+    assert f"domain={quote(fqdn_observable.value)}" in responses.calls[0].request.url
 
 
 @responses.activate
@@ -326,7 +328,7 @@ def test_analyze_url_observable_simple_domain(secrets, url_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(url_observable, "URL")
+    result = engine.analyze(url_observable)
 
     assert result is not None
     assert len(responses.calls) == 1
@@ -338,7 +340,6 @@ def test_analyze_url_observable_simple_domain(secrets, url_observable):
 def test_analyze_url_observable_with_port(secrets):
     """Test URL domain extraction preserves port."""
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
-    url_with_port = "https://example.com:8443/path"
 
     mock_resp = {"data": {}, "stats": {}}
 
@@ -349,7 +350,9 @@ def test_analyze_url_observable_with_port(secrets):
         status=200,
     )
 
-    result = engine.analyze(url_with_port, "URL")
+    result = engine.analyze(
+        Observable(value="https://example.com:8443/path", type=ObservableType.URL)
+    )
 
     assert result is not None
     assert len(responses.calls) == 1
@@ -361,7 +364,6 @@ def test_analyze_url_observable_with_port(secrets):
 def test_analyze_url_observable_with_query_params(secrets):
     """Test URL domain extraction ignores query parameters."""
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
-    url_with_query = "https://example.com?param=value&other=123"
 
     mock_resp = {"data": {}, "stats": {}}
 
@@ -372,7 +374,9 @@ def test_analyze_url_observable_with_query_params(secrets):
         status=200,
     )
 
-    result = engine.analyze(url_with_query, "URL")
+    result = engine.analyze(
+        Observable(value="https://example.com?param=value&other=123", type=ObservableType.URL)
+    )
 
     assert result is not None
     assert len(responses.calls) == 1
@@ -385,7 +389,6 @@ def test_analyze_url_observable_with_query_params(secrets):
 def test_analyze_url_observable_with_fragment(secrets):
     """Test URL domain extraction ignores fragment."""
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
-    url_with_fragment = "https://example.com#section"
 
     mock_resp = {"data": {}, "stats": {}}
 
@@ -396,22 +399,15 @@ def test_analyze_url_observable_with_fragment(secrets):
         status=200,
     )
 
-    result = engine.analyze(url_with_fragment, "URL")
+    result = engine.analyze(
+        Observable(value="https://example.com#section", type=ObservableType.URL)
+    )
 
     assert result is not None
     assert len(responses.calls) == 1
     # Fragment should NOT be included
     assert "section" not in responses.calls[0].request.url
     assert "domain=example.com" in responses.calls[0].request.url
-
-
-def test_analyze_invalid_observable_type(secrets):
-    """Test handling of unsupported observable types."""
-    engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
-
-    result = engine.analyze("some_value", "INVALID_TYPE")
-
-    assert result is None
 
 
 # ============================================================================
@@ -425,13 +421,13 @@ def test_analyze_unauthorized_401(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     responses.add(responses.GET, url, json={"error": "unauthorized"}, status=401)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -443,13 +439,13 @@ def test_analyze_forbidden_403(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     responses.add(responses.GET, url, json={"error": "forbidden"}, status=403)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -461,13 +457,13 @@ def test_analyze_bad_request_400(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     responses.add(responses.GET, url, json={"error": "bad request"}, status=400)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -479,14 +475,14 @@ def test_analyze_connection_error(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     conn_error = requests.exceptions.ConnectionError("Connection failed")
     responses.add(responses.GET, url, body=conn_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -498,14 +494,14 @@ def test_analyze_read_timeout(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     timeout_error = requests.exceptions.ReadTimeout("Read timed out")
     responses.add(responses.GET, url, body=timeout_error)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -517,13 +513,13 @@ def test_analyze_json_decode_error(secrets, email_observable, caplog):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     responses.add(responses.GET, url, body="not valid json", status=200)
 
     caplog.set_level(logging.ERROR)
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     assert result is None
     assert "Error while querying Hudson Rock" in caplog.text
@@ -540,7 +536,7 @@ def test_analyze_fqdn_clean_data_all_urls(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {
@@ -557,7 +553,7 @@ def test_analyze_fqdn_clean_data_all_urls(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     # Should have 2 clean entries
     assert len(result["data"]["all_urls"]) == 2
@@ -570,7 +566,7 @@ def test_analyze_fqdn_clean_stats_urls(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {
@@ -590,7 +586,7 @@ def test_analyze_fqdn_clean_stats_urls(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     # Should filter masked entries
     assert len(result["stats"]["clients_urls"]) == 2
@@ -605,11 +601,11 @@ def test_analyze_email_no_cleaning_applied(secrets, email_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-email?email={email_observable}"
+        f"search-by-email?email={email_observable.value}"
     )
 
     mock_resp = {
-        "emails": [email_observable],
+        "emails": [email_observable.value],
         "data": {
             "all_urls": [
                 {"url": "https://example.com/page"},
@@ -620,7 +616,7 @@ def test_analyze_email_no_cleaning_applied(secrets, email_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(email_observable, "Email")
+    result = engine.analyze(email_observable)
 
     # Email responses should NOT have cleaning applied
     assert len(result["data"]["all_urls"]) == 2
@@ -635,7 +631,7 @@ def test_analyze_fqdn_clean_third_party_domains(secrets, fqdn_observable):
     engine = HudsonRockEngine(secrets, proxies={}, ssl_verify=True)
     url = (
         f"https://cavalier.hudsonrock.com/api/json/v2/osint-tools/"
-        f"search-by-domain?domain={fqdn_observable}"
+        f"search-by-domain?domain={fqdn_observable.value}"
     )
 
     mock_resp = {
@@ -652,7 +648,7 @@ def test_analyze_fqdn_clean_third_party_domains(secrets, fqdn_observable):
 
     responses.add(responses.GET, url, json=mock_resp, status=200)
 
-    result = engine.analyze(fqdn_observable, "FQDN")
+    result = engine.analyze(fqdn_observable)
 
     # Should filter to only valid domains
     assert len(result["thirdPartyDomains"]) == 2
@@ -750,5 +746,5 @@ def test_engine_properties():
     engine = HudsonRockEngine(Secrets(), proxies={}, ssl_verify=True)
 
     assert engine.name == "hudsonrock"
-    assert engine.supported_types == ["Email", "FQDN", "URL"]
+    assert engine.supported_types is ObservableType.EMAIL | ObservableType.FQDN | ObservableType.URL
     assert engine.is_pivot_engine is False

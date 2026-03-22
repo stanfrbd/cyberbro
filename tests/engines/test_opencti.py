@@ -20,6 +20,7 @@ import responses
 
 from engines.opencti import OpenCTIEngine
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 
@@ -51,6 +52,12 @@ def engine_with_key(secrets_with_key: Secrets) -> OpenCTIEngine:
 def engine_without_key(secrets_without_key: Secrets) -> OpenCTIEngine:
     """Fixture providing OpenCTI engine without credentials."""
     return OpenCTIEngine(secrets=secrets_without_key, proxies={}, ssl_verify=True)
+
+
+@pytest.fixture
+def ipv4_observable() -> Observable:
+    """Fixture providing an IPv4 observable."""
+    return Observable(value="192.0.2.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
@@ -121,26 +128,32 @@ def realistic_indicator_response() -> dict[str, Any]:
 class TestOpenCTICredentialValidation:
     """Test credential validation and missing credentials scenarios."""
 
-    def test_missing_api_key(self, engine_without_key: OpenCTIEngine) -> None:
+    def test_missing_api_key(
+        self, engine_without_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test analysis fails gracefully when API key is missing."""
         engine = engine_without_key
         engine.secrets.opencti_api_key = None
-        result = engine.analyze("192.0.2.1", "IPv4")
+        result = engine.analyze(ipv4_observable)
         assert result is None
 
-    def test_missing_opencti_url(self, engine_without_key: OpenCTIEngine) -> None:
+    def test_missing_opencti_url(
+        self, engine_without_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test analysis fails gracefully when URL is missing."""
         engine = engine_without_key
         engine.secrets.opencti_url = None
-        result = engine.analyze("192.0.2.1", "IPv4")
+        result = engine.analyze(ipv4_observable)
         assert result is None
 
-    def test_both_credentials_missing(self, engine_without_key: OpenCTIEngine) -> None:
+    def test_both_credentials_missing(
+        self, engine_without_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test analysis fails gracefully when both credentials are missing."""
         engine = engine_without_key
         engine.secrets.opencti_api_key = None
         engine.secrets.opencti_url = None
-        result = engine.analyze("192.0.2.1", "IPv4")
+        result = engine.analyze(ipv4_observable)
         assert result is None
 
 
@@ -149,7 +162,10 @@ class TestOpenCTISuccessfulAnalysis:
 
     @responses.activate
     def test_successful_analysis_with_indicator_entity(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test successful analysis when globalSearch returns Indicator entity."""
         responses.add(
@@ -176,7 +192,7 @@ class TestOpenCTISuccessfulAnalysis:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert "entity_counts" in result
@@ -189,7 +205,7 @@ class TestOpenCTISuccessfulAnalysis:
 
     @responses.activate
     def test_successful_analysis_without_indicator_entity(
-        self, engine_with_key: OpenCTIEngine
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
     ) -> None:
         """Test successful analysis when no Indicator entity is found (skips second query)."""
         response_no_indicator = {
@@ -224,7 +240,7 @@ class TestOpenCTISuccessfulAnalysis:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert result["entity_counts"]["Malware"] == 1
@@ -237,7 +253,9 @@ class TestOpenCTICredentialErrors:
     """Test credential-related API errors."""
 
     @responses.activate
-    def test_invalid_api_key_401(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_invalid_api_key_401(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test graceful handling of 401 Unauthorized for invalid API key."""
         responses.add(
             responses.POST,
@@ -246,11 +264,13 @@ class TestOpenCTICredentialErrors:
             status=401,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_invalid_url_401(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_invalid_url_401(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test graceful handling of 401 Unauthorized for invalid URL."""
         responses.add(
             responses.POST,
@@ -259,11 +279,13 @@ class TestOpenCTICredentialErrors:
             status=401,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_forbidden_access_403(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_forbidden_access_403(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test graceful handling of 403 Forbidden."""
         responses.add(
             responses.POST,
@@ -272,7 +294,7 @@ class TestOpenCTICredentialErrors:
             status=403,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
 
@@ -281,12 +303,21 @@ class TestOpenCTIObservableTypeRouting:
 
     @pytest.mark.parametrize(
         "observable_type",
-        ["IPv4", "IPv6", "FQDN", "MD5", "SHA1", "SHA256", "URL", "CHROME_EXTENSION"],
+        [
+            ObservableType.IPV4,
+            ObservableType.IPV6,
+            ObservableType.FQDN,
+            ObservableType.MD5,
+            ObservableType.SHA1,
+            ObservableType.SHA256,
+            ObservableType.URL,
+            ObservableType.CHROME_EXTENSION,
+        ],
     )
     @responses.activate
     def test_all_observable_types(
         self,
-        observable_type: str,
+        observable_type: ObservableType,
         engine_with_key: OpenCTIEngine,
         realistic_global_search_response: dict,
         realistic_indicator_response: dict,
@@ -305,8 +336,8 @@ class TestOpenCTIObservableTypeRouting:
             status=200,
         )
 
-        observable_value = "192.0.2.1"
-        result = engine_with_key.analyze(observable_value, observable_type)
+        observable = Observable(value="192.0.2.1", type=observable_type)
+        result = engine_with_key.analyze(observable)
 
         assert result is not None
         assert result["global_count"] == 2
@@ -315,16 +346,16 @@ class TestOpenCTIObservableTypeRouting:
     def test_supported_types_property(self, engine_with_key: OpenCTIEngine) -> None:
         """Test that engine returns all supported types."""
         engine = engine_with_key
-        expected_types = [
-            "CHROME_EXTENSION",
-            "FQDN",
-            "IPv4",
-            "IPv6",
-            "MD5",
-            "SHA1",
-            "SHA256",
-            "URL",
-        ]
+        expected_types = (
+            ObservableType.CHROME_EXTENSION
+            | ObservableType.FQDN
+            | ObservableType.IPV4
+            | ObservableType.IPV6
+            | ObservableType.MD5
+            | ObservableType.SHA1
+            | ObservableType.SHA256
+            | ObservableType.URL
+        )
         assert engine.supported_types == expected_types
 
 
@@ -349,7 +380,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("http://example.com", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="http://example.com", type=ObservableType.URL)
+        )
         assert result is not None
 
     @responses.activate
@@ -370,7 +403,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="https://example.com", type=ObservableType.URL)
+        )
         assert result is not None
 
     @responses.activate
@@ -391,7 +426,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com:8080", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="https://example.com:8080", type=ObservableType.URL)
+        )
         assert result is not None
 
     @responses.activate
@@ -412,7 +449,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com/some/path", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="https://example.com/some/path", type=ObservableType.URL)
+        )
         assert result is not None
 
     @responses.activate
@@ -433,7 +472,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://sub.example.com", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="https://sub.example.com", type=ObservableType.URL)
+        )
         assert result is not None
 
     @responses.activate
@@ -454,7 +495,7 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("example.com", "URL")
+        result = engine_with_key.analyze(Observable(value="example.com", type=ObservableType.URL))
         assert result is None or isinstance(result, dict)
 
     @responses.activate
@@ -475,7 +516,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https:///example.com///path", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="https:///example.com///path", type=ObservableType.URL)
+        )
         assert result is None or isinstance(result, dict)
 
     @responses.activate
@@ -496,7 +539,9 @@ class TestOpenCTIURLExtraction:
             status=200,
         )
 
-        result = engine_with_key.analyze("https://example.com:/path", "URL")
+        result = engine_with_key.analyze(
+            Observable(value="https://example.com:/path", type=ObservableType.URL)
+        )
         assert result is None or isinstance(result, dict)
 
 
@@ -507,6 +552,7 @@ class TestOpenCTIDualAPICallScenarios:
     def test_both_queries_succeed(
         self,
         engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
         realistic_global_search_response: dict,
         realistic_indicator_response: dict,
     ) -> None:
@@ -524,7 +570,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Test Indicator"
@@ -532,7 +578,10 @@ class TestOpenCTIDualAPICallScenarios:
 
     @responses.activate
     def test_first_succeeds_second_empty_indicator(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test when first succeeds but second returns empty indicator data."""
         responses.add(
@@ -548,13 +597,16 @@ class TestOpenCTIDualAPICallScenarios:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is None
 
     @responses.activate
     def test_first_succeeds_second_fails_401(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test when first query succeeds but second fails with 401."""
         responses.add(
@@ -570,12 +622,15 @@ class TestOpenCTIDualAPICallScenarios:
             status=401,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
     def test_first_succeeds_second_fails_500(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test when first query succeeds but second fails with 500."""
         responses.add(
@@ -591,11 +646,13 @@ class TestOpenCTIDualAPICallScenarios:
             status=500,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_first_succeeds_no_indicator_entity(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_first_succeeds_no_indicator_entity(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test when first query succeeds but no Indicator entity (second never called)."""
         response_no_indicator = {
             "data": {
@@ -629,7 +686,7 @@ class TestOpenCTIDualAPICallScenarios:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert len(responses.calls) == 1
@@ -639,7 +696,9 @@ class TestOpenCTIResponseStructure:
     """Test response structure variations and edge cases."""
 
     @responses.activate
-    def test_missing_data_key(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_missing_data_key(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of response missing 'data' key."""
         responses.add(
             responses.POST,
@@ -648,11 +707,13 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_missing_global_search_key(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_missing_global_search_key(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of response missing 'globalSearch' key."""
         responses.add(
             responses.POST,
@@ -661,11 +722,13 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_missing_edges_key(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_missing_edges_key(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of response missing 'edges' key."""
         responses.add(
             responses.POST,
@@ -684,13 +747,15 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is not None
         assert result["global_count"] == 0
         assert result["entity_counts"] == {}
 
     @responses.activate
-    def test_missing_page_info_key(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_missing_page_info_key(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of response missing 'pageInfo' key."""
         responses.add(
             responses.POST,
@@ -717,11 +782,13 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_missing_page_info_global_count(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_missing_page_info_global_count(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of response missing 'globalCount' in pageInfo."""
         responses.add(
             responses.POST,
@@ -740,11 +807,13 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_malformed_edge_structure(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_malformed_edge_structure(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of malformed edge structure missing 'node'."""
         responses.add(
             responses.POST,
@@ -764,11 +833,13 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_empty_edges_list(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_empty_edges_list(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test handling of empty edges list."""
         responses.add(
             responses.POST,
@@ -788,7 +859,7 @@ class TestOpenCTIResponseStructure:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is not None
         assert result["entity_counts"] == {}
         assert result["latest_created_at"] is None
@@ -799,7 +870,10 @@ class TestOpenCTIIndicatorQueryEdgeCases:
 
     @responses.activate
     def test_complete_indicator_data(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test indicator query with all fields populated."""
         responses.add(
@@ -826,7 +900,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Complete Indicator"
@@ -837,7 +911,10 @@ class TestOpenCTIIndicatorQueryEdgeCases:
 
     @responses.activate
     def test_partial_indicator_data(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test indicator query with missing optional fields."""
         responses.add(
@@ -860,7 +937,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Partial Indicator"
@@ -869,7 +946,10 @@ class TestOpenCTIIndicatorQueryEdgeCases:
 
     @responses.activate
     def test_indicator_with_null_values(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test indicator query with null values for optional fields."""
         responses.add(
@@ -894,7 +974,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is not None
         assert result["latest_indicator_name"] == "Null Value Indicator"
@@ -903,7 +983,10 @@ class TestOpenCTIIndicatorQueryEdgeCases:
 
     @responses.activate
     def test_indicator_query_returns_null(
-        self, engine_with_key: OpenCTIEngine, realistic_global_search_response: dict
+        self,
+        engine_with_key: OpenCTIEngine,
+        ipv4_observable: Observable,
+        realistic_global_search_response: dict,
     ) -> None:
         """Test indicator query when entire indicator is null."""
         responses.add(
@@ -919,7 +1002,7 @@ class TestOpenCTIIndicatorQueryEdgeCases:
             status=200,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
 
         assert result is None
 
@@ -932,7 +1015,9 @@ class TestOpenCTIHTTPErrors:
         [401, 403, 404, 500, 503],
     )
     @responses.activate
-    def test_http_error_codes(self, status_code: int, engine_with_key: OpenCTIEngine) -> None:
+    def test_http_error_codes(
+        self, status_code: int, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test graceful handling of various HTTP error codes."""
         responses.add(
             responses.POST,
@@ -941,11 +1026,13 @@ class TestOpenCTIHTTPErrors:
             status=status_code,
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_connection_timeout(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_connection_timeout(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test graceful handling of connection timeout."""
         responses.add(
             responses.POST,
@@ -953,11 +1040,13 @@ class TestOpenCTIHTTPErrors:
             body=ConnectionError("Connection timeout"),
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
     @responses.activate
-    def test_connection_refused(self, engine_with_key: OpenCTIEngine) -> None:
+    def test_connection_refused(
+        self, engine_with_key: OpenCTIEngine, ipv4_observable: Observable
+    ) -> None:
         """Test graceful handling of connection refused."""
         responses.add(
             responses.POST,
@@ -965,7 +1054,7 @@ class TestOpenCTIHTTPErrors:
             body=ConnectionRefusedError("Connection refused"),
         )
 
-        result = engine_with_key.analyze("192.0.2.1", "IPv4")
+        result = engine_with_key.analyze(ipv4_observable)
         assert result is None
 
 

@@ -150,3 +150,32 @@ def test_cache_file_invalid():
         with patch("app.get_latest_version_from_updated_cache_file", return_value="v1.1.0"):
             result = check_for_new_version("v1.0.0")
             assert result is True
+
+
+def test_disable_version_check_returns_false():
+    """Test that check_for_new_version returns False when disable_version_check is True."""
+
+    check_for_new_version.cache_clear()
+
+    with patch("app.get_config") as mock_get_config:
+        mock_secrets = MagicMock()
+        mock_secrets.disable_version_check = True
+        mock_get_config.return_value = mock_secrets
+
+        result = check_for_new_version("v1.0.0")
+        assert result is False
+
+
+def test_disable_version_check_false_performs_check():
+    """Test that check_for_new_version proceeds normally when disable_version_check is False."""
+
+    check_for_new_version.cache_clear()
+
+    with patch("app.get_config") as mock_get_config:
+        mock_secrets = MagicMock()
+        mock_secrets.disable_version_check = False
+        mock_get_config.return_value = mock_secrets
+
+        with patch("app.get_latest_version_from_cache_file", return_value="v1.1.0"):
+            result = check_for_new_version("v1.0.0")
+            assert result is True

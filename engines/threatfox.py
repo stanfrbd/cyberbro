@@ -5,6 +5,7 @@ from typing import Any
 import requests
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
@@ -15,20 +16,19 @@ class ThreatFoxEngine(BaseEngine):
         return "threatfox"
 
     @property
-    def supported_types(self):
-        return ["FQDN", "IPv4", "IPv6", "URL"]
+    def supported_types(self) -> ObservableType:
+        return ObservableType.FQDN | ObservableType.IPV4 | ObservableType.IPV6 | ObservableType.URL
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict[str, Any] | None:
+    def analyze(self, observable: Observable) -> dict[str, Any] | None:
         try:
             # If it's a URL, use the domain portion
-            if observable_type == "URL":
-                domain_part = observable_value.split("/")[2].split(":")[0]
-                observable = domain_part
+            if observable.type is ObservableType.URL:
+                search_term = observable.value.split("/")[2].split(":")[0]
             else:
-                observable = observable_value
+                search_term = observable.value
 
             url = "https://threatfox-api.abuse.ch/api/v1/"
-            payload = {"query": "search_ioc", "search_term": observable}
+            payload = {"query": "search_ioc", "search_term": search_term}
             headers = {"Auth-Key": self.secrets.threatfox}
 
             response = requests.post(
@@ -54,7 +54,7 @@ class ThreatFoxEngine(BaseEngine):
                         malware_printable_set.add(malware_name)
                 count = len(data)
 
-            link = f"https://threatfox.abuse.ch/browse.php?search=ioc%3A{observable}"
+            link = f"https://threatfox.abuse.ch/browse.php?search=ioc%3A{search_term}"
             return {
                 "count": count,
                 "malware_printable": list(malware_printable_set),
@@ -63,7 +63,7 @@ class ThreatFoxEngine(BaseEngine):
 
         except Exception as e:
             logger.error(
-                "Error querying ThreatFox for '%s': %s", observable_value, e, exc_info=True
+                "Error querying ThreatFox for '%s': %s", observable.value, e, exc_info=True
             )
             return None
 

@@ -709,7 +709,36 @@
                 edges.push({ from: obs, to: vtNodeLabel, label: vtEdgeLabel });
             }
 
-            if (entry.type === "Email" && entry.hudsonrock?.stealers) {
+            if (entry.google_safe_browsing && entry.google_safe_browsing.threat_found === "Threat found") {
+                const gsbNodeLabel = "Google Safe Browsing flagged";
+                addNode(
+                    gsbNodeLabel,
+                    gsbNodeLabel,
+                    "google_safe_browsing",
+                    "https://img.icons8.com/officexs/32/google-logo.png",
+                );
+                edges.push({ from: obs, to: gsbNodeLabel, label: "Google Safe Browsing" });
+
+                if (Array.isArray(entry.google_safe_browsing.threat_types)) {
+                    entry.google_safe_browsing.threat_types.forEach((threatType) => {
+                        if (threatType && threatType.trim() !== "") {
+                            addNode(
+                                threatType,
+                                threatType,
+                                "google_safe_browsing_threat_type",
+                                "https://img.icons8.com/officexs/32/hacking.png",
+                            );
+                            edges.push({
+                                from: gsbNodeLabel,
+                                to: threatType,
+                                label: "GSB Threat Type",
+                            });
+                        }
+                    });
+                }
+            }
+
+            if (entry.type === "EMAIL" && entry.hudsonrock?.stealers) {
                 entry.hudsonrock.stealers.forEach((stealer) => {
                     if (stealer.computer_name) {
                         addNode(stealer.computer_name, stealer.computer_name, "compromised_computer");
@@ -1046,7 +1075,7 @@
                 edges.push({ from: obs, to: extensionName, label: "Extension Name" });
             }
 
-            if (entry.type == "Email") {
+            if (entry.type == "EMAIL") {
                 const email = entry.observable;
                 const domain = email.split("@")[1]; // Extract the domain name from the email address
                 if (domain) {

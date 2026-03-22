@@ -6,6 +6,7 @@ import requests
 import responses
 
 from engines.webscout import WebscoutEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
@@ -39,12 +40,12 @@ def secrets_with_none_key():
 
 @pytest.fixture
 def ipv4_observable():
-    return "1.1.1.1"
+    return Observable(value="1.1.1.1", type=ObservableType.IPV4)
 
 
 @pytest.fixture
 def ipv6_observable():
-    return "2001:4860:4860::8888"
+    return Observable(value="2001:4860:4860::8888", type=ObservableType.IPV6)
 
 
 @pytest.fixture
@@ -144,12 +145,12 @@ def test_analyze_with_valid_key_includes_in_url(secrets_with_valid_key, ipv4_obs
     TODO (Bug #1): API key in URL is a security risk - should use Authorization header.
     """
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url_pattern = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url_pattern = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -162,7 +163,7 @@ def test_analyze_with_valid_key_includes_in_url(secrets_with_valid_key, ipv4_obs
     responses.add(responses.GET, expected_url_pattern, json=mock_resp, status=200)
 
     with patch("time.sleep"):  # Skip rate limiting for test speed
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     # Verify API key was included in URL
@@ -179,13 +180,13 @@ def test_analyze_with_empty_key_still_makes_request(
     TODO (Bug #3): Engine should validate credential before API call.
     """
     engine = WebscoutEngine(secrets_with_empty_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     responses.add(responses.GET, expected_url, json={"error": "Invalid API key"}, status=401)
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     # Request was made despite empty key
@@ -199,7 +200,7 @@ def test_analyze_with_none_key_error(secrets_with_none_key, ipv4_observable, cap
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -212,12 +213,12 @@ def test_analyze_calls_time_sleep_with_1_second(secrets_with_valid_key, ipv4_obs
     TODO (Bug #2): Hardcoded 1-second rate limiting cannot be configured or disabled.
     """
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -230,7 +231,7 @@ def test_analyze_calls_time_sleep_with_1_second(secrets_with_valid_key, ipv4_obs
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep") as mock_sleep:
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     # Verify sleep was called with 1.0 seconds
     mock_sleep.assert_called_once_with(1)
@@ -239,7 +240,8 @@ def test_analyze_calls_time_sleep_with_1_second(secrets_with_valid_key, ipv4_obs
 
 @responses.activate
 @pytest.mark.parametrize(
-    "observable_type,observable_value", [("IPv4", "1.1.1.1"), ("IPv6", "2001:4860:4860::8888")]
+    "observable_type,observable_value",
+    [(ObservableType.IPV4, "1.1.1.1"), (ObservableType.IPV6, "2001:4860:4860::8888")],
 )
 def test_analyze_correct_url_endpoint_per_type(
     secrets_with_valid_key, observable_type, observable_value
@@ -264,7 +266,7 @@ def test_analyze_correct_url_endpoint_per_type(
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(observable_value, observable_type)
+        result = engine.analyze(Observable(value=observable_value, type=observable_type))
 
     assert result is not None
     assert result["ip"] == observable_value
@@ -274,12 +276,12 @@ def test_analyze_correct_url_endpoint_per_type(
 def test_analyze_success_status_returns_data(secrets_with_valid_key, ipv4_observable):
     """Test successful response with status: success."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -292,23 +294,23 @@ def test_analyze_success_status_returns_data(secrets_with_valid_key, ipv4_observ
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
 
 
 @responses.activate
 def test_analyze_error_status_returns_none(secrets_with_valid_key, ipv4_observable):
     """Test response with status: error returns None."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {"status": "error", "message": "IP not found"}
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -317,13 +319,13 @@ def test_analyze_error_status_returns_none(secrets_with_valid_key, ipv4_observab
 def test_analyze_missing_status_returns_none(secrets_with_valid_key, ipv4_observable):
     """Test response without status key returns None."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
-    mock_resp = {"data": {"ip": ipv4_observable}}
+    mock_resp = {"data": {"ip": ipv4_observable.value}}
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
 
@@ -337,7 +339,7 @@ def test_analyze_location_with_valid_country_code(secrets_with_valid_key, ipv4_o
         mock_response.json.return_value = {
             "status": "success",
             "data": {
-                "ip": ipv4_observable,
+                "ip": ipv4_observable.value,
                 "location": {"country_iso": "US", "city": "New York"},
                 "network": {},
                 "company": {},
@@ -354,7 +356,7 @@ def test_analyze_location_with_valid_country_code(secrets_with_valid_key, ipv4_o
             mock_country_obj.name = "United States"
             mock_country.return_value = mock_country_obj
 
-            result = engine.analyze(ipv4_observable, "IPv4")
+            result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["country_code"] == "US"
@@ -370,7 +372,7 @@ def test_analyze_location_with_invalid_country_code(secrets_with_valid_key, ipv4
         mock_response.json.return_value = {
             "status": "success",
             "data": {
-                "ip": ipv4_observable,
+                "ip": ipv4_observable.value,
                 "location": {"country_iso": "ZZ", "city": "Unknown"},
                 "network": {},
                 "company": {},
@@ -385,7 +387,7 @@ def test_analyze_location_with_invalid_country_code(secrets_with_valid_key, ipv4
         with patch("time.sleep"), patch("pycountry.countries.get") as mock_country:
             mock_country.return_value = None
 
-            result = engine.analyze(ipv4_observable, "IPv4")
+            result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["country_code"] == "ZZ"
@@ -401,7 +403,7 @@ def test_analyze_location_with_none_country_code(secrets_with_valid_key, ipv4_ob
         mock_response.json.return_value = {
             "status": "success",
             "data": {
-                "ip": ipv4_observable,
+                "ip": ipv4_observable.value,
                 "location": {"country_iso": None, "city": "Unknown"},
                 "network": {},
                 "company": {},
@@ -414,7 +416,7 @@ def test_analyze_location_with_none_country_code(secrets_with_valid_key, ipv4_ob
         mock_get.return_value = mock_response
 
         with patch("time.sleep"):
-            result = engine.analyze(ipv4_observable, "IPv4")
+            result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["country_code"] == "Unknown"
@@ -424,12 +426,12 @@ def test_analyze_location_with_none_country_code(secrets_with_valid_key, ipv4_ob
 def test_analyze_location_with_missing_city(secrets_with_valid_key, ipv4_observable):
     """Test location parsing when city is missing - defaults to 'Unknown'."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {"country_iso": "US"},
             "network": {},
             "company": {},
@@ -446,7 +448,7 @@ def test_analyze_location_with_missing_city(secrets_with_valid_key, ipv4_observa
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     # City defaults to "Unknown" when missing
@@ -457,19 +459,19 @@ def test_analyze_location_with_missing_city(secrets_with_valid_key, ipv4_observa
 def test_analyze_missing_nested_dicts_default_to_empty(secrets_with_valid_key, ipv4_observable):
     """Test that missing nested dicts default to empty dicts."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             # Intentionally missing all nested dicts
         },
     }
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["network_type"] == ""
@@ -482,7 +484,7 @@ def test_analyze_missing_nested_dicts_default_to_empty(secrets_with_valid_key, i
 def test_analyze_success_complete(secrets_with_valid_key, ipv4_observable, complete_api_response):
     """Test successful API response with complete data."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     responses.add(responses.GET, expected_url, json=complete_api_response, status=200)
 
@@ -491,10 +493,10 @@ def test_analyze_success_complete(secrets_with_valid_key, ipv4_observable, compl
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
-    assert result["ip"] == ipv4_observable
+    assert result["ip"] == ipv4_observable.value
     assert result["country_code"] == "US"
     assert result["country_name"] == "United States"
 
@@ -511,13 +513,13 @@ def test_analyze_http_errors_return_none(
 ):
     """Test handling of HTTP error responses."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     responses.add(responses.GET, expected_url, json={"error": "error"}, status=status_code)
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -527,13 +529,13 @@ def test_analyze_http_errors_return_none(
 def test_analyze_timeout_returns_none(secrets_with_valid_key, ipv4_observable, caplog):
     """Test handling of request timeout."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     responses.add(responses.GET, expected_url, body=requests.Timeout("Connection timed out"))
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -543,13 +545,13 @@ def test_analyze_timeout_returns_none(secrets_with_valid_key, ipv4_observable, c
 def test_analyze_connection_error_returns_none(secrets_with_valid_key, ipv4_observable, caplog):
     """Test handling of connection error."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     responses.add(responses.GET, expected_url, body=requests.ConnectionError("Connection failed"))
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -559,13 +561,13 @@ def test_analyze_connection_error_returns_none(secrets_with_valid_key, ipv4_obse
 def test_analyze_json_parse_error_returns_none(secrets_with_valid_key, ipv4_observable, caplog):
     """Test handling of invalid JSON response."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     responses.add(responses.GET, expected_url, body="Invalid JSON {{{", status=200)
     caplog.set_level(logging.ERROR)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is None
     assert "Error querying webscout" in caplog.text
@@ -575,12 +577,12 @@ def test_analyze_json_parse_error_returns_none(secrets_with_valid_key, ipv4_obse
 def test_analyze_osint_tags_aggregation(secrets_with_valid_key, ipv4_observable):
     """Test OSINT tag aggregation from multiple services."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -599,7 +601,7 @@ def test_analyze_osint_tags_aggregation(secrets_with_valid_key, ipv4_observable)
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert "malware" in result["behavior"]
@@ -613,12 +615,12 @@ def test_analyze_osint_tags_aggregation(secrets_with_valid_key, ipv4_observable)
 def test_analyze_osint_tags_deduplication(secrets_with_valid_key, ipv4_observable):
     """Test OSINT tags are deduplicated while preserving order."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -636,7 +638,7 @@ def test_analyze_osint_tags_deduplication(secrets_with_valid_key, ipv4_observabl
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     behavior = result["behavior"]
@@ -652,12 +654,12 @@ def test_analyze_osint_tags_deduplication(secrets_with_valid_key, ipv4_observabl
 def test_analyze_osint_tags_empty_services(secrets_with_valid_key, ipv4_observable):
     """Test OSINT with empty services array."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -670,7 +672,7 @@ def test_analyze_osint_tags_empty_services(secrets_with_valid_key, ipv4_observab
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["behavior"] == []
@@ -701,12 +703,12 @@ def test_analyze_anonymization_boolean_conversion(
 ):
     """Test boolean conversion of anonymization fields."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -719,7 +721,7 @@ def test_analyze_anonymization_boolean_conversion(
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["is_proxy"] == expected_proxy
@@ -731,12 +733,12 @@ def test_analyze_anonymization_boolean_conversion(
 def test_analyze_asn_formatting_valid(secrets_with_valid_key, ipv4_observable):
     """Test ASN formatting with valid AS number."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -749,7 +751,7 @@ def test_analyze_asn_formatting_valid(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["asn"] == "AS15169"
@@ -759,12 +761,12 @@ def test_analyze_asn_formatting_valid(secrets_with_valid_key, ipv4_observable):
 def test_analyze_asn_formatting_string_asn(secrets_with_valid_key, ipv4_observable):
     """Test ASN formatting when ASN is already a string."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -777,7 +779,7 @@ def test_analyze_asn_formatting_string_asn(secrets_with_valid_key, ipv4_observab
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["asn"] == "AS15169"
@@ -787,12 +789,12 @@ def test_analyze_asn_formatting_string_asn(secrets_with_valid_key, ipv4_observab
 def test_analyze_asn_formatting_zero_asn(secrets_with_valid_key, ipv4_observable):
     """Test ASN formatting when AS number is 0 (falsy)."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -805,7 +807,7 @@ def test_analyze_asn_formatting_zero_asn(secrets_with_valid_key, ipv4_observable
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["asn"] == "Unknown"
@@ -815,12 +817,12 @@ def test_analyze_asn_formatting_zero_asn(secrets_with_valid_key, ipv4_observable
 def test_analyze_asn_formatting_missing(secrets_with_valid_key, ipv4_observable):
     """Test ASN formatting when AS number is missing."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -833,7 +835,7 @@ def test_analyze_asn_formatting_missing(secrets_with_valid_key, ipv4_observable)
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["asn"] == "Unknown"
@@ -932,11 +934,9 @@ def test_supported_types_property():
     """Test supported_types property returns IPv4 and IPv6."""
     engine = WebscoutEngine(Secrets(), proxies={}, ssl_verify=True)
 
-    types = engine.supported_types
+    types = ObservableType.IPV4 | ObservableType.IPV6
 
-    assert len(types) == 2
-    assert "IPv4" in types
-    assert "IPv6" in types
+    assert engine.supported_types is types
 
 
 def test_execute_after_reverse_dns_property():
@@ -956,12 +956,12 @@ def test_analyze_with_proxies(secrets_with_valid_key, ipv4_observable):
     """Test that proxies are correctly passed to requests."""
     proxies = {"http": "http://proxy.example.com:8080"}
     engine = WebscoutEngine(secrets_with_valid_key, proxies=proxies, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -974,7 +974,7 @@ def test_analyze_with_proxies(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
 
@@ -983,12 +983,12 @@ def test_analyze_with_proxies(secrets_with_valid_key, ipv4_observable):
 def test_analyze_with_ssl_verify_false(secrets_with_valid_key, ipv4_observable):
     """Test that SSL verification can be disabled."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=False)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -1001,7 +1001,7 @@ def test_analyze_with_ssl_verify_false(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
 
@@ -1010,12 +1010,12 @@ def test_analyze_with_ssl_verify_false(secrets_with_valid_key, ipv4_observable):
 def test_analyze_hostnames_empty_list(secrets_with_valid_key, ipv4_observable):
     """Test with empty hostnames array."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -1028,7 +1028,7 @@ def test_analyze_hostnames_empty_list(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["hostnames"] == []
@@ -1038,12 +1038,12 @@ def test_analyze_hostnames_empty_list(secrets_with_valid_key, ipv4_observable):
 def test_analyze_hostnames_single_item(secrets_with_valid_key, ipv4_observable):
     """Test with single hostname."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -1056,7 +1056,7 @@ def test_analyze_hostnames_single_item(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["hostnames"] == ["mail.example.com"]
@@ -1066,13 +1066,13 @@ def test_analyze_hostnames_single_item(secrets_with_valid_key, ipv4_observable):
 def test_analyze_hostnames_many_items(secrets_with_valid_key, ipv4_observable):
     """Test with multiple hostnames."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     hostnames = ["mail1.example.com", "mail2.example.com", "smtp.example.com"]
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {},
             "network": {},
             "company": {},
@@ -1085,7 +1085,7 @@ def test_analyze_hostnames_many_items(secrets_with_valid_key, ipv4_observable):
     responses.add(responses.GET, expected_url, json=mock_resp, status=200)
 
     with patch("time.sleep"):
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["hostnames"] == hostnames
@@ -1095,12 +1095,12 @@ def test_analyze_hostnames_many_items(secrets_with_valid_key, ipv4_observable):
 def test_analyze_location_string_formatting(secrets_with_valid_key, ipv4_observable):
     """Test location string is formatted as 'Country, City'."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {"country_iso": "US", "city": "New York"},
             "network": {},
             "company": {},
@@ -1117,7 +1117,7 @@ def test_analyze_location_string_formatting(secrets_with_valid_key, ipv4_observa
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     assert result["location"] == "United States, New York"
@@ -1131,12 +1131,12 @@ def test_analyze_location_with_empty_city(secrets_with_valid_key, ipv4_observabl
     TODO (Bug #8): Location formatting could be improved.
     """
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {"country_iso": "US", "city": ""},
             "network": {},
             "company": {},
@@ -1153,7 +1153,7 @@ def test_analyze_location_with_empty_city(secrets_with_valid_key, ipv4_observabl
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        result = engine.analyze(ipv4_observable, "IPv4")
+        result = engine.analyze(ipv4_observable)
 
     assert result is not None
     # Empty string gets replaced with "Unknown" by the `or "Unknown"` pattern
@@ -1164,12 +1164,12 @@ def test_analyze_location_with_empty_city(secrets_with_valid_key, ipv4_observabl
 def test_analyze_export_workflow_ipv4(secrets_with_valid_key, ipv4_observable):
     """Test complete workflow: analyze IPv4 -> export."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv4_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv4_observable,
+            "ip": ipv4_observable.value,
             "location": {"country_iso": "US", "city": "Los Angeles"},
             "network": {"type": "residential", "service": "ISP", "region": "west"},
             "company": {"name": "Example ISP", "business": ["Mail"], "description": "ISP"},
@@ -1186,7 +1186,7 @@ def test_analyze_export_workflow_ipv4(secrets_with_valid_key, ipv4_observable):
         mock_country_obj.name = "United States"
         mock_country.return_value = mock_country_obj
 
-        analysis = engine.analyze(ipv4_observable, "IPv4")
+        analysis = engine.analyze(ipv4_observable)
         export = engine.create_export_row(analysis)
 
     assert export["ws_cn"] == "US"
@@ -1199,12 +1199,12 @@ def test_analyze_export_workflow_ipv4(secrets_with_valid_key, ipv4_observable):
 def test_analyze_export_workflow_ipv6(secrets_with_valid_key, ipv6_observable):
     """Test complete workflow: analyze IPv6 -> export."""
     engine = WebscoutEngine(secrets_with_valid_key, proxies={}, ssl_verify=True)
-    expected_url = f"https://api.webscout.io/query/ip/{ipv6_observable}"
+    expected_url = f"https://api.webscout.io/query/ip/{ipv6_observable.value}"
 
     mock_resp = {
         "status": "success",
         "data": {
-            "ip": ipv6_observable,
+            "ip": ipv6_observable.value,
             "location": {"country_iso": "GB", "city": "London"},
             "network": {},
             "company": {},
@@ -1221,7 +1221,7 @@ def test_analyze_export_workflow_ipv6(secrets_with_valid_key, ipv6_observable):
         mock_country_obj.name = "United Kingdom"
         mock_country.return_value = mock_country_obj
 
-        analysis = engine.analyze(ipv6_observable, "IPv6")
+        analysis = engine.analyze(ipv6_observable)
         export = engine.create_export_row(analysis)
 
     assert export["ws_cn"] == "GB"
@@ -1276,8 +1276,8 @@ def test_analyze_multiple_ips_same_engine(secrets_with_valid_key):
     )
 
     with patch("time.sleep"):
-        result_ipv4 = engine.analyze(ipv4, "IPv4")
-        result_ipv6 = engine.analyze(ipv6, "IPv6")
+        result_ipv4 = engine.analyze(Observable(value=ipv4, type=ObservableType.IPV4))
+        result_ipv6 = engine.analyze(Observable(value=ipv6, type=ObservableType.IPV6))
 
     assert result_ipv4 is not None
     assert result_ipv6 is not None

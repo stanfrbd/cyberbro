@@ -1,5 +1,5 @@
 <td>
-    {% if result.type == "Email" and result.hudsonrock and result.hudsonrock.stealers %}
+    {% if result.type == "EMAIL" and result.hudsonrock and result.hudsonrock.stealers %}
         <strong>Compromised Computer Details:</strong><br/>
         {% for stealer in result.hudsonrock.stealers %}
             {% if stealer.computer_name %}

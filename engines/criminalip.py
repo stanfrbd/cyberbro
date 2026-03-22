@@ -5,9 +5,10 @@ from typing import Any, Self
 
 import requests
 from pydantic import BaseModel, Field, ValidationError, model_validator
-from requests.exceptions import HTTPError
+from requests.exceptions import RequestException
 
 from models.base_engine import BaseEngine
+from models.observable import Observable, ObservableType
 from utils.config import Secrets, get_config
 
 logger = logging.getLogger(__name__)
@@ -102,7 +103,7 @@ class SuspiciousInfoReport(BaseModel):
         if not 199 < self.status < 300:
             raise ValueError(
                 f"Unable to generate Suspicious Info Report for IP: {self.ip}."
-                f"Status Code: {self.status}{self.model_dump_json()}"
+                f"Status Code: {self.status}"
             )
         return self
 
@@ -140,7 +141,7 @@ def get_suspicious_info_report(
             url, params=params, headers=headers, proxies=proxies, verify=ssl_verify
         )
         response.raise_for_status()
-    except HTTPError as e:
+    except RequestException as e:
         logger.error(
             f"Error retrieving Criminal IP Suspicious Info report for {observable}: {e}",
         )
@@ -166,15 +167,20 @@ class CriminalIPEngine(BaseEngine):
         return "criminalip"
 
     @property
-    def supported_types(self):
-        return ["IPv4", "IPv6"]
+    def supported_types(self) -> ObservableType:
+        """
+        I'm seeing errors with IPv6 addresses, and not finding any
+        documentation the API site that says CriminalIP actually supports
+        IPv6 after all.
+        """
+        return ObservableType.IPV4
 
     @property
     def execute_after_reverse_dns(self):
         # IP-only engine, runs after potential IP pivot
         return True
 
-    def analyze(self, observable_value: str, observable_type: str) -> dict | None:
+    def analyze(self, observable: Observable) -> dict | None:
         """Perform Criminal IP analysis using the preserved helper/models."""
 
         api_key: str = self.secrets.criminalip_api_key
@@ -184,7 +190,7 @@ class CriminalIPEngine(BaseEngine):
             return None
 
         report: SuspiciousInfoReport | None = get_suspicious_info_report(
-            api_key, observable_value, self.proxies, self.ssl_verify
+            api_key, observable.value, self.proxies, self.ssl_verify
         )
 
         if not report:
@@ -205,31 +211,3 @@ class CriminalIPEngine(BaseEngine):
             "cip_score_outbound": score.get("outbound"),
             "cip_abuse_count": analysis_result.get("abuse_record_count"),
         }
-
-
-# --- Main Block for Testing (Preserved) ---
-
-if __name__ == "__main__":
-    # Example usage
-    api_key: str = retrieve_api_key()
-    ssl_verify: bool = False
-
-    if not api_key:
-        logger.error("API key is not configured.")
-        exit(1)
-
-    observable: str = input("Enter an IP address: ")
-
-    if not observable:
-        logger.error("No observable provided.")
-        exit(1)
-
-    report: SuspiciousInfoReport | None = get_suspicious_info_report(
-        api_key, observable, ssl_verify=ssl_verify
-    )
-
-    if report:
-        print("Suspicious Info Report:")
-        print(report)
-    else:
-        logger.error("Failed to retrieve the report.")

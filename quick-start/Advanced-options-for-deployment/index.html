@@ -690,10 +690,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#supervisord-options-for-docker-only" class="md-nav__link">
+  <a href="#gunicorn-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supervisord options (for docker only)
+        Gunicorn options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flask-server-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flask server settings
       
     </span>
   </a>
@@ -2095,10 +2106,21 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#supervisord-options-for-docker-only" class="md-nav__link">
+  <a href="#gunicorn-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Supervisord options (for docker only)
+        Gunicorn options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flask-server-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flask server settings
       
     </span>
   </a>
@@ -2228,6 +2250,16 @@
 <p>You can add these environment variables in a <code>docker-compose-custom.yml</code> or just a <code>docker-compose-custom.yml</code> with a <code>.env</code>.<br />
 If you don't specify proxy, no proxy will be used.</p>
 </div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Recommended usage:
+- If you want to change the exposed Docker port, prefer using a <code>.env</code> file for <strong>all</strong> configuration values.
+- If you keep the default Docker port mapping, using <code>secrets.json</code> remains sufficient.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Roadmap: we plan to progressively phase out <code>secrets.json</code> support in favor of <code>.env</code>-based configuration, which is more standard for container deployments.</p>
+</div>
 <p>Here is a list of all available environment variables that can be used with examples:</p>
 <div class="highlight"><pre><span></span><code><span class="nv">PROXY_URL</span><span class="o">=</span>http://127.0.0.1:9000
 <span class="nv">VIRUSTOTAL</span><span class="o">=</span>api_key_here
@@ -2258,9 +2290,13 @@ If you don't specify proxy, no proxy will be used.</p>
 <span class="nv">RL_ANALYZE_API_KEY</span><span class="o">=</span>token_here
 <span class="nv">RL_ANALYZE_URL</span><span class="o">=</span>https://spectra_analyze_url_here
 <span class="nv">ROSTI_API_KEY</span><span class="o">=</span>token_here
-<span class="nv">SUPERVISORD_WORKERS_COUNT</span><span class="o">=</span><span class="m">4</span>
-<span class="nv">SUPERVISORD_THREADS_COUNT</span><span class="o">=</span><span class="m">4</span>
-<span class="nv">SUPERVISORD_TIMEOUT</span><span class="o">=</span><span class="m">200</span>
+<span class="nv">GUNICORN_WORKERS_COUNT</span><span class="o">=</span><span class="m">4</span>
+<span class="nv">GUNICORN_THREADS_COUNT</span><span class="o">=</span><span class="m">4</span>
+<span class="nv">GUNICORN_TIMEOUT</span><span class="o">=</span><span class="m">200</span>
+<span class="nv">FLASK_DEBUG</span><span class="o">=</span><span class="nb">false</span>
+<span class="nv">FLASK_PORT</span><span class="o">=</span><span class="m">5000</span>
+<span class="nv">HOST_PORT</span><span class="o">=</span><span class="m">5000</span>
+<span class="nv">FLASK_HOST</span><span class="o">=</span><span class="m">0</span>.0.0.0
 <span class="nv">API_PREFIX</span><span class="o">=</span>my_api
 <span class="nv">MAX_FORM_MEMORY_SIZE</span><span class="o">=</span><span class="m">1048576</span>
 <span class="nv">GUI_ENABLED_ENGINES</span><span class="o">=</span>reverse_dns,rdap_whois
@@ -2277,12 +2313,18 @@ If you don't specify proxy, no proxy will be used.</p>
 <div class="highlight"><pre><span></span><code>ghcr.io/stanfrbd/cyberbro:latest
 </code></pre></div>
 <p>Example of <code>docker-compose-custom.yml</code> (note: no <code>"</code> in environment variables)</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In Docker, <code>ports:</code> is resolved by Docker Compose <strong>before</strong> Cyberbro reads <code>secrets.json</code>.
+To keep networking predictable, use environment variables for Docker networking values (<code>FLASK_PORT</code>, <code>HOST_PORT</code>, <code>FLASK_HOST</code>).
+Keep <code>secrets.json</code> for API keys and app options.</p>
+</div>
 <div class="highlight"><pre><span></span><code>services:
   web:
     image: ghcr.io/stanfrbd/cyberbro:latest
     container_name: cyberbro
     ports:
-      - &quot;5000:5000&quot;
+        - &quot;${HOST_PORT:-5000}:${FLASK_PORT:-5000}&quot;
     environment:
       - FLASK_ENV=production
       - ABUSEIPDB=${ABUSEIPDB:-}
@@ -2316,12 +2358,15 @@ If you don't specify proxy, no proxy will be used.</p>
       - CONFIG_PAGE_ENABLED=${CONFIG_PAGE_ENABLED:-}
       - SSL_VERIFY=${SSL_VERIFY:-}
       - PROXY_URL=${PROXY_URL:-}
-      - GUI_CACHE_TIMEOUT=${GUI_CACHE_TIMEOUT1800:-}
-      - API_CACHE_TIMEOUT=${API_CACHE_TIMEOUT86400:-}
+        - GUI_CACHE_TIMEOUT=${GUI_CACHE_TIMEOUT:-1800}
+        - API_CACHE_TIMEOUT=${API_CACHE_TIMEOUT:-86400}
       - GUI_ENABLED_ENGINES=${GUI_ENABLED_ENGINES:-}
-      - SUPERVISORD_WORKERS_COUNT=${SUPERVISORD_WORKERS_COUNT:-}
-      - SUPERVISORD_THREADS_COUNT=${SUPERVISORD_THREADS_COUNT:-}
-      - SUPERVISORD_TIMEOUT=${SUPERVISORD_TIMEOUT:-}
+      - GUNICORN_WORKERS_COUNT=${GUNICORN_WORKERS_COUNT:-}
+      - GUNICORN_THREADS_COUNT=${GUNICORN_THREADS_COUNT:-}
+      - GUNICORN_TIMEOUT=${GUNICORN_TIMEOUT:-}
+      - FLASK_DEBUG=${FLASK_DEBUG:-}
+        - FLASK_PORT=${FLASK_PORT:-5000}
+        - FLASK_HOST=${FLASK_HOST:-0.0.0.0}
       - API_PREFIX=${API_PREFIX:-}
       - MAX_FORM_MEMORY_SIZE=${MAX_FORM_MEMORY_SIZE:-}
       - DISABLE_VERSION_CHECK=${DISABLE_VERSION_CHECK:-}
@@ -2347,22 +2392,69 @@ This may lead to unexpected behavior as the application will try to read both fi
 <p><code>./data:/app/data</code>: This maps the <code>data</code> directory on your host machine to the <code>/app/data</code> directory inside the container. This is mandatory for persisting the database <code>results.db</code> that is used by Cyberbro.<br />
 <code>./logs:/var/log/cyberbro</code>: This maps the <code>logs</code> directory on your host machine to the <code>/var/log/cyberbro</code> directory inside the container. This is useful for persisting log files generated by the application, allowing you to access and analyze logs even after the container is stopped or removed.</p>
 </div>
-<h2 id="supervisord-options-for-docker-only">Supervisord options (for docker only)<a class="headerlink" href="#supervisord-options-for-docker-only" title="Permanent link">&para;</a></h2>
-<p>This options will be applied only if the script <code>prod/advanced_config.py</code> is run (automatic in docker)</p>
+<h2 id="gunicorn-options">Gunicorn options<a class="headerlink" href="#gunicorn-options" title="Permanent link">&para;</a></h2>
+<p>These options are applied via <code>prod/gunicorn.conf.py</code>, which reads them from <code>get_config()</code> at
+startup.</p>
 <p><strong>In <code>secrets.json</code>:</strong></p>
 <ul>
-<li>Adding <code>"supervisord_workers_count": 4</code> in <code>secrets.json</code> will set <code>-w 4</code> in <code>supervisord.conf</code></li>
-<li>Adding <code>"supervisord_threads_count": 4</code> in <code>secrets.json</code> will set <code>-t 4</code> in <code>supervisord.conf</code></li>
-<li>Adding <code>"supervisord_timeout": 200</code> in <code>secrets.json</code> will set <code>--timeout 200</code> in <code>supervisord.conf</code></li>
+<li>Adding <code>"gunicorn_workers_count": 4</code> in <code>secrets.json</code> will set the number of gunicorn worker processes</li>
+<li>Adding <code>"gunicorn_threads_count": 4</code> in <code>secrets.json</code> will set the number of threads per worker</li>
+<li>Adding <code>"gunicorn_timeout": 200</code> in <code>secrets.json</code> will set the worker timeout in seconds</li>
 </ul>
 <p><strong>Or using environment variables:</strong></p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">SUPERVISORD_WORKERS_COUNT</span><span class="o">=</span><span class="m">4</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">SUPERVISORD_THREADS_COUNT</span><span class="o">=</span><span class="m">4</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">SUPERVISORD_TIMEOUT</span><span class="o">=</span><span class="m">200</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GUNICORN_WORKERS_COUNT</span><span class="o">=</span><span class="m">4</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GUNICORN_THREADS_COUNT</span><span class="o">=</span><span class="m">4</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GUNICORN_TIMEOUT</span><span class="o">=</span><span class="m">200</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>These variables are optional, so if they don't exist in <code>secrets.json</code>, the original config (in <code>prod/supervisord.conf</code>) will be applied by default.</p>
+<p>These variables are optional. If they don't exist in <code>secrets.json</code> or ENV, the defaults (<code>workers=1</code>, <code>threads=1</code>, <code>timeout=120</code>) will be used.</p>
+</div>
+<h2 id="flask-server-settings">Flask server settings<a class="headerlink" href="#flask-server-settings" title="Permanent link">&para;</a></h2>
+<p>These options control the interface and port that gunicorn/Flask binds to, as well as debug mode.</p>
+<p><strong><code>flask_debug</code></strong> — enables Flask debug mode (default: <code>false</code>).</p>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>Never enable <code>flask_debug</code> in production. It exposes an interactive debugger and disables security features.</p>
+</div>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;flask_debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+</code></pre></div>
+<p><strong>Or using environment variables:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">FLASK_DEBUG</span><span class="o">=</span><span class="nb">false</span>
+</code></pre></div>
+<hr />
+<p><strong><code>flask_port</code></strong> — port that gunicorn/Flask binds to inside the container (default: <code>5000</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>In Docker</strong>, the container-side port is mapped from <code>FLASK_PORT</code> in Compose (<code>"${HOST_PORT:-5000}:${FLASK_PORT:-5000}"</code>).
+If you change the internal bind port, set <code>FLASK_PORT</code> in <code>.env</code> (or shell env) so Compose and app use the same value.</p>
+</div>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;flask_port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5000</span>
+</code></pre></div>
+<p><strong>Or using environment variables:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">FLASK_PORT</span><span class="o">=</span><span class="m">5000</span>
+</code></pre></div>
+<p>Optional (host side):</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">HOST_PORT</span><span class="o">=</span><span class="m">5000</span>
+</code></pre></div>
+<hr />
+<p><strong><code>flask_host</code></strong> — network interface gunicorn binds to (default: <code>0.0.0.0</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>In Docker</strong>, changing <code>flask_host</code> from <code>0.0.0.0</code> may prevent the container from being reachable on the mapped port.</p>
+</div>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;flask_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.0.0.0&quot;</span>
+</code></pre></div>
+<p><strong>Or using environment variables:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">FLASK_HOST</span><span class="o">=</span><span class="m">0</span>.0.0.0
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All three Flask server settings are optional. If omitted, defaults are <code>flask_debug=false</code>, <code>flask_port=5000</code>, <code>flask_host=0.0.0.0</code>.
+In Docker, you can also set <code>HOST_PORT</code> (default <code>5000</code>) for the host-side mapping.</p>
 </div>
 <h2 id="api-prefix-in-apppy-and-indexhtml-options">API prefix in <code>app.py</code> and <code>index.html</code> options<a class="headerlink" href="#api-prefix-in-apppy-and-indexhtml-options" title="Permanent link">&para;</a></h2>
 <p><strong>In <code>secrets.json</code>:</strong></p>
@@ -2401,7 +2493,7 @@ With environment variable: <code>GUI_ENABLED_ENGINES=reverse_dns,rdap_whois,ipqu
 <h2 id="ssl-verification-settings-for-requests-backend">SSL verification settings for requests (backend)<a class="headerlink" href="#ssl-verification-settings-for-requests-backend" title="Permanent link">&para;</a></h2>
 <div class="admonition danger">
 <p class="admonition-title">Danger</p>
-<p>This is really insecure to do disable it, do it at your own risk.</p>
+<p>This is really insecure to disable it, do it at your own risk.</p>
 </div>
 <p>You can change the default behavior using the following:</p>
 <p><strong>In <code>secrets.json</code>:</strong></p>
@@ -2429,15 +2521,15 @@ With environment variable: <code>GUI_ENABLED_ENGINES=reverse_dns,rdap_whois,ipqu
 <p>This variable is optional, so if it doesn't exist in <code>secrets.json</code> or ENV, it will be disabled by default.</p>
 </div>
 <h2 id="upload-more-than-1mb-observables-in-the-form">Upload more than 1MB observables in the form<a class="headerlink" href="#upload-more-than-1mb-observables-in-the-form" title="Permanent link">&para;</a></h2>
-<p>By default, the form in the GUI only accepts 1MB of data. You can change this limit using the following:
-<strong>In <code>secrets.json</code>:</strong>
-Adding <code>"max_form_memory_size": 1048576</code> in <code>secrets.json</code> will set the limit to 1MB (1048576 bytes) in the form.
-<strong>Or using environment variables:</strong>
+<p>By default, the form in the GUI only accepts 1MB of data. You can change this limit using the following:</p>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<p>Adding <code>"max_form_memory_size": 1048576</code> in <code>secrets.json</code> will set the limit to 1MB (1048576 bytes) in the form.</p>
+<p><strong>Or using environment variables:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MAX_FORM_MEMORY_SIZE</span><span class="o">=</span><span class="m">1048576</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The value must be set in bytes, so 1MB = 1048576 bytes, 2MB = 2097152 bytes, etc.<br />
+<p>The value must be set in bytes, so 1MB = 1048576 bytes, 2MB = 2097152 bytes, etc.
 Don't set it too high, it can cause problems with the database or treatment of the data.<br />
 This variable is optional, so if it doesn't exist in <code>secrets.json</code> or ENV, it will use the default parameter (1MB).</p>
 </div>
@@ -2445,15 +2537,15 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
 <h2 id="cache-timeout-for-the-gui">Cache timeout for the GUI<a class="headerlink" href="#cache-timeout-for-the-gui" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This is the timeout for the cache in the GUI, not the API.
+<p>This is the timeout for the cache in the GUI, not the API.<br />
 The default value is 1800 seconds (30 minutes).<br />
 You can change this value using the following:</p>
 </div>
-<p><strong>In <code>secrets.json</code>:</strong>
-Adding <code>"gui_cache_timeout": 1800</code> in <code>secrets.json</code> will set the timeout to 30 minutes (1800 seconds) in the GUI.
-<strong>Or using environment variables:</strong>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<p>Adding <code>"gui_cache_timeout": 1800</code> in <code>secrets.json</code> will set the timeout to 30 minutes (1800 seconds) in the GUI.</p>
+<p><strong>Or using environment variables:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">GUI_CACHE_TIMEOUT</span><span class="o">=</span><span class="m">1800</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The value must be set in seconds, so 1 minute = 60 seconds, 1 hour = 3600 seconds, etc.<br />
@@ -2463,15 +2555,15 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
 <h2 id="cache-timeout-for-the-api">Cache timeout for the API<a class="headerlink" href="#cache-timeout-for-the-api" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This is the timeout for the cache in the API, not the GUI.
+<p>This is the timeout for the cache in the API, not the GUI.<br />
 The default value is 86400 seconds (24 hours).<br />
 You can change this value using the following:</p>
 </div>
-<p><strong>In <code>secrets.json</code>:</strong>
-Adding <code>"api_cache_timeout": 86400</code> in <code>secrets.json</code> will set the timeout to 24 hours (86400 seconds) in the API.
-<strong>Or using environment variables:</strong>
+<p><strong>In <code>secrets.json</code>:</strong></p>
+<p>Adding <code>"api_cache_timeout": 86400</code> in <code>secrets.json</code> will set the timeout to 24 hours (86400 seconds) in the API.</p>
+<p><strong>Or using environment variables:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">API_CACHE_TIMEOUT</span><span class="o">=</span><span class="m">86400</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The value must be set in seconds, so 1 minute = 60 seconds, 1 hour = 3600 seconds, etc.<br />
@@ -2511,7 +2603,7 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 2, 2026 18:02:53 UTC"><span class="timeago" datetime="2026-03-02T18:02:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 2, 2026 18:02:53 UTC">2026-03-02</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 22, 2026 15:39:52 UTC"><span class="timeago" datetime="2026-03-22T15:39:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 22, 2026 15:39:52 UTC">2026-03-22</span>
   </span>
 
     
@@ -2535,7 +2627,7 @@ This variable is optional, so if it doesn't exist in <code>secrets.json</code> o
       
     </span>
     <nav>
-      Stig Dahl, copilot-swe-agent[bot], stanfrbd
+      Jon Mark Allen, Stig Dahl, copilot-swe-agent[bot], stanfrbd
     </nav>
   </span>
 

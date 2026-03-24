@@ -124,8 +124,8 @@ class ServiceNowEngine(BaseEngine):
             unique_keys: set[str] = set()
             for item in merged_results:
                 dedup_key = (
-                    f"{item.get('number','')}|{item.get('created_on','')}|"
-                    f"{item.get('short_description','')}"
+                    f"{item.get('number', '')}|{item.get('created_on', '')}|"
+                    f"{item.get('short_description', '')}"
                 )
                 if dedup_key in unique_keys:
                     continue
@@ -230,9 +230,7 @@ class ServiceNowEngine(BaseEngine):
                         ),
                         "type": incident.get(
                             "type",
-                            incident.get(
-                                "category", incident.get("sys_class_name", "Unknown")
-                            ),
+                            incident.get("category", incident.get("sys_class_name", "Unknown")),
                         ),
                         "table": table_name,
                         "web_link": web_link,
@@ -276,13 +274,11 @@ class ServiceNowEngine(BaseEngine):
 
         if table_name == "incident":
             return (
-                f"{servicenow_url}/now/nav/ui/classic/params/target/"
-                f"incident.do%3Fsys_id%3D{sys_id}"
+                f"{servicenow_url}/now/nav/ui/classic/params/target/incident.do%3Fsys_id%3D{sys_id}"
             )
 
         return (
-            f"{servicenow_url}/now/nav/ui/classic/params/target/"
-            f"{table_name}.do%3Fsys_id%3D{sys_id}"
+            f"{servicenow_url}/now/nav/ui/classic/params/target/{table_name}.do%3Fsys_id%3D{sys_id}"
         )
 
     def create_export_row(self, analysis_result: Any) -> dict:

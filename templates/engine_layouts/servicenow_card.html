@@ -1,0 +1,31 @@
+<div class="card">
+    <h3>ServiceNow</h3>
+    {% if analysis_results.results[0].servicenow and analysis_results.results[0].servicenow.global_total > 0 %}
+    <div style="margin-bottom: 1rem;">
+        <p><strong>Global Search:</strong> <a href="{{ analysis_results.results[0].servicenow.links.global_search }}"
+                target="_blank">{{ analysis_results.results[0].servicenow.global_total }} results</a></p>
+        <p><strong>Stats:</strong>
+            INC {{ analysis_results.results[0].servicenow.inc_total }} |
+            SIR {{ analysis_results.results[0].servicenow.sir_total }} |
+            SN_SI_TASK {{ analysis_results.results[0].servicenow.table_totals.get('sir_task', 0) }} |
+            TASK {{ analysis_results.results[0].servicenow.table_totals.get('task', 0) }} |
+            INCIDENT_TASK {{ analysis_results.results[0].servicenow.table_totals.get('incident_task', 0) }} |
+            REQUEST {{ analysis_results.results[0].servicenow.table_totals.get('request', 0) }} |
+            REQUEST_ITEM {{ analysis_results.results[0].servicenow.table_totals.get('request_item', 0) }}
+        </p>
+        {% if analysis_results.results[0].servicenow.global_results %}
+        <p><strong>Top 5 Global (most recent):</strong></p>
+        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+            {% for incident in analysis_results.results[0].servicenow.global_results %}
+            <li>
+                <a href="{{ incident.web_link }}" target="_blank">{{ incident.number }}</a>:
+                {{ incident.short_description }} ({{ incident.created_on }})
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% else %}
+    <p>Not Found</p>
+    {% endif %}
+</div>

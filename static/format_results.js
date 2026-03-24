@@ -483,3 +483,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+if (result.servicenow) {
+    plainText += `ServiceNow:\n`;
+    if (result.servicenow.global_total > 0) {
+        plainText += `  Global Search: ${result.servicenow.global_total}\n`;
+        if (result.servicenow.links?.global_search) {
+            plainText += `  Search Link: ${result.servicenow.links.global_search}\n`;
+        }
+        plainText += `  Stats: INC ${result.servicenow.inc_total || 0}, SIR ${result.servicenow.sir_total || 0}, SN_SI_TASK ${result.servicenow.table_totals?.sir_task || 0}, TASK ${result.servicenow.table_totals?.task || 0}, INCIDENT_TASK ${result.servicenow.table_totals?.incident_task || 0}, REQUEST ${result.servicenow.table_totals?.request || 0}, REQUEST_ITEM ${result.servicenow.table_totals?.request_item || 0}\n`;
+        if (result.servicenow.global_results && result.servicenow.global_results.length > 0) {
+            plainText += `  Top 5 Global:\n`;
+            result.servicenow.global_results.forEach(incident => {
+                plainText += `    - ${incident.number}: ${incident.short_description}\n`;
+                plainText += `      Created: ${incident.created_on}, Table: ${incident.table}\n`;
+                if (incident.web_link) {
+                    plainText += `      Link: ${incident.web_link}\n`;
+                }
+            });
+        }
+    }
+}

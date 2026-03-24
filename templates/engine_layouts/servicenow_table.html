@@ -1,0 +1,34 @@
+<td>
+    {% if result.servicenow and result.servicenow.global_total > 0 %}
+    <div>
+        <strong>Global Search:</strong> <a href="{{ result.servicenow.links.global_search }}" target="_blank">{{
+            result.servicenow.global_total }}</a><br />
+
+        <div style="font-size: 0.85em; margin-top: 0.25rem;">
+            <strong>Stats:</strong>
+            INC {{ result.servicenow.inc_total }} |
+            SIR {{ result.servicenow.sir_total }} |
+            SN_SI_TASK {{ result.servicenow.table_totals.get('sir_task', 0) }} |
+            TASK {{ result.servicenow.table_totals.get('task', 0) }} |
+            INCIDENT_TASK {{ result.servicenow.table_totals.get('incident_task', 0) }} |
+            REQUEST {{ result.servicenow.table_totals.get('request', 0) }} |
+            REQUEST_ITEM {{ result.servicenow.table_totals.get('request_item', 0) }}
+        </div>
+
+        {% if result.servicenow.global_results %}
+        <strong style="font-size: 0.9em;">Top 5 Global:</strong>
+        <ul style="margin: 0.25rem 0; padding-left: 1rem; font-size: 0.9em;">
+            {% for incident in result.servicenow.global_results %}
+            <li>
+                <a href="{{ incident.web_link }}" target="_blank">{{ incident.number }}</a>:
+                {{ incident.short_description[:50] }}...
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+    </div>
+    {% else %}
+    Not Found
+    {% endif %}
+</td>

@@ -92,6 +92,9 @@
     {% if analysis_results.results[0].dfir_iris %}
     {% include "engine_layouts/dfir_iris_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].servicenow %}
+    {% include "engine_layouts/servicenow_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].rl_analyze %}
     {% include "engine_layouts/rl_analyze_card.html" %}
     {% endif %}

@@ -193,6 +193,10 @@
                     <th>DFIR-IRIS</th>
                     {% endif %}
 
+                    {% if "servicenow" in analysis_results.selected_engines %}
+                    <th>ServiceNow</th>
+                    {% endif %}
+
                     {% if "rl_analyze" in analysis_results.selected_engines %}
                     <th>Reversing Labs Spectra Analyze</th>
                     {% endif %}
@@ -370,6 +374,10 @@
 
                     {% if "dfir_iris" in analysis_results.selected_engines %}
                     {% include "engine_layouts/dfir_iris_table.html" %}
+                    {% endif %}
+
+                    {% if "servicenow" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/servicenow_table.html" %}
                     {% endif %}
 
                     {% if "rl_analyze" in analysis_results.selected_engines %}

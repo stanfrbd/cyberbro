@@ -572,6 +572,37 @@
                 });
             }
 
+            if (entry.servicenow && (entry.servicenow.inc_total > 0 || entry.servicenow.sir_total > 0)) {
+                if (entry.servicenow.inc_results && entry.servicenow.inc_results.length > 0) {
+                    entry.servicenow.inc_results.forEach((incident) => {
+                        const incNodeId = incident.number || "INC";
+                        addNode(incNodeId, incNodeId, "servicenow_inc", "https://img.icons8.com/officexs/32/list.png");
+                        const incLabel = `ServiceNow INC (${incident.priority})`;
+                        edges.push({ from: obs, to: incNodeId, label: incLabel });
+
+                        if (incident.state) {
+                            const stateNode = `Status: ${incident.state}`;
+                            addNode(stateNode, stateNode, "servicenow_state", "https://img.icons8.com/officexs/32/general-update.png");
+                            edges.push({ from: incNodeId, to: stateNode, label: "State" });
+                        }
+                    });
+                }
+
+                if (entry.servicenow.sir_results && entry.servicenow.sir_results.length > 0) {
+                    entry.servicenow.sir_results.forEach((incident) => {
+                        const sirNodeId = incident.number || "SIR";
+                        addNode(sirNodeId, sirNodeId, "servicenow_sir", "https://img.icons8.com/officexs/32/security-checked.png");
+                        const sirLabel = `ServiceNow SIR (${incident.priority})`;
+                        edges.push({ from: obs, to: sirNodeId, label: sirLabel });
+
+                        if (incident.state) {
+                            const stateNode = `Status: ${incident.state}`;
+                            addNode(stateNode, stateNode, "servicenow_state", "https://img.icons8.com/officexs/32/general-update.png");
+                            edges.push({ from: sirNodeId, to: stateNode, label: "State" });
+                        }
+                    });
+                }
+            }
             if (entry.bad_asn) {
                 const badAsnData = entry.bad_asn;
 

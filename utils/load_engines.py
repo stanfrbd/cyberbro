@@ -26,6 +26,7 @@ from engines.reversinglabs_spectra_analyze import RLAnalyzeEngine
 from engines.rosti import RostiEngine
 from engines.shodan import ShodanEngine
 from engines.spur_us import SpurUSEngine
+from engines.servicenow import ServiceNowEngine
 from engines.threatfox import ThreatFoxEngine
 from engines.urlscan import URLScanEngine
 from engines.virustotal import VirusTotalEngine
@@ -72,6 +73,7 @@ def get_engine_instances(
         RLAnalyzeEngine(secrets, proxies, ssl_verify),
         RostiEngine(secrets, proxies, ssl_verify),
         SpurUSEngine(secrets, proxies, ssl_verify),
+        ServiceNowEngine(secrets, proxies, ssl_verify),
         ThreatFoxEngine(secrets, proxies, ssl_verify),
         URLScanEngine(secrets, proxies, ssl_verify),
         WebscoutEngine(secrets, proxies, ssl_verify),

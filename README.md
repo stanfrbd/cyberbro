@@ -129,6 +129,9 @@ cp secrets-sample.json secrets.json
     "rl_analyze_api_key": "token_here",
     "rl_analyze_url": "https://spectra_analyse_url_here",
     "rosti_api_key": "token_here",
+    "servicenow_username": "username_here",
+    "servicenow_password": "password_here",
+    "servicenow_url": "https://instance.service-now.com",
     "shodan": "token_here",
     "spur_us": "token_here",
     "threatfox": "token_here",
@@ -323,6 +326,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Phishtank](https://www.phishtank.com/)
 * [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence
+* [ServiceNow](https://www.servicenow.com/)
 * [Shodan](https://developer.shodan.io/)
 * [Spur.us](https://spur.us/)
 * [ThreatFox](https://threatfox.abuse.ch/api/)

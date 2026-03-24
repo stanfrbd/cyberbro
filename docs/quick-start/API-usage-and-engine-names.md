@@ -402,6 +402,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, domain, URL, email  
 **Explaination**: Searches Rösti threat intelligence IOC data for observed values, API key required (see https://rosti.bin.re/api)
 
+### ServiceNow
+**Name**: `servicenow`  
+**Supports**: IP, BOGON, domain, URL, email, hash  
+**Explaination**: Performs global ServiceNow search across incidents, SecOps incidents/tasks, tasks and requests, username/password required
+
 ### Shodan
 **Name**: `shodan`  
 **Supports**: ports, IP  

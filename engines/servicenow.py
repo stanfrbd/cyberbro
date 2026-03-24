@@ -75,7 +75,10 @@ class ServiceNowEngine(BaseEngine):
             "global_total": 0,
             "table_totals": {},
             "links": {
-                "global_search": f"{servicenow_url}/text_search_exact_match.do?sysparm_search={query_value_encoded}",
+                "global_search": (
+                    f"{servicenow_url}/text_search_exact_match.do"
+                    f"?sysparm_search={query_value_encoded}"
+                ),
             },
         }
 
@@ -180,7 +183,10 @@ class ServiceNowEngine(BaseEngine):
             "sysparm_query": query,
             "sysparm_limit": 200,
             "sysparm_exclude_reference_link": "true",
-            "sysparm_fields": "sys_id,number,short_description,description,sys_created_on,type,category,sys_class_name",
+            "sysparm_fields": (
+                "sys_id,number,short_description,description,"
+                "sys_created_on,type,category,sys_class_name"
+            ),
         }
 
         try:

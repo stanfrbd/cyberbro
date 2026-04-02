@@ -14,6 +14,7 @@
             <thead>
                 <tr>
                     <th style="width: 70px; text-align: center;">Type</th>
+                    <th>Hostname</th>
                     <th>Address</th>
                     <th style="width: 90px; white-space: nowrap;">First</th>
                     <th style="width: 90px; white-space: nowrap;">Last</th>
@@ -23,6 +24,7 @@
                 {% for record in passive_dns.top_records %}
                 <tr>
                     <td style="width: 52px; text-align: center;">{{ record.record_type or '-' }}</td>
+                    <td title="{{ record.hostname }}">{{ record.hostname or '-' }}</td>
                     <td>{{ record.address or '-' }}</td>
                     <td style="width: 104px; white-space: nowrap;">{{ record.first.split('T')[0] if record.first else
                         '-' }}</td>

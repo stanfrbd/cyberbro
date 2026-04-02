@@ -119,7 +119,7 @@ class AlienVaultPassiveDNSEngine(BaseEngine):
                 "error": f"http_{status_code}",
                 "link": link,
             }
-        except requests.exceptions.RequestException as exc:
+        except requests.exceptions.RequestException:
             logger.error(
                 "Network error while querying AlienVault passive DNS for '%s'",
                 indicator_value,

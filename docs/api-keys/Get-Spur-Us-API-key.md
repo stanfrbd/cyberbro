@@ -18,8 +18,7 @@ However, they offer a free access to the website to verify IP addresses. Just li
 !!! note
     Ensure that you comply with Spur.us's terms of service when using their platform. If you encounter issues, contact their support team for assistance.
 
-Fill the `secrets.json` file with `"spur_us"`  
-or use the environment variable `SPUR_US` in your configuration or docker-compose file.
+Set the `SPUR_US` environment variable in your `.env` file or deployment environment.
 
 !!! warning
     If you don't have API key, only the result URL will be displayed with the note "Unknown - Behind Captcha" in Cyberbro. You'll then have to click on the link and complete the CAPTCHA to access the information. There is no API free tier available.

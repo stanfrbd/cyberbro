@@ -11,8 +11,8 @@
 
 To interact with the Crowdstrike API, you need to obtain the following credentials:
 
-- Client ID (`"crowdstrike_client_id"` in `secrets.json` or `CROWDSTRIKE_CLIENT_ID` environment variable).
-- Client Secret (`"crowdstrike_client_secret"` in `secrets.json` or `CROWDSTRIKE_CLIENT_SECRET` environment variable).
+- Client ID (`CROWDSTRIKE_CLIENT_ID` environment variable).
+- Client Secret (`CROWDSTRIKE_CLIENT_SECRET` environment variable).
 
 Additionally, you need to assign the appropriate API permissions to your application to interact with Indicators of Compromise (IOC) and Intel.
 
@@ -53,7 +53,7 @@ For more information, consult [the official documentation](https://falcon.crowds
 
 ## Configure Falcon URL
 !!! tip
-    To configure the Falcon link (clickable in the GUI), users may utilize the optional `"crowdstrike_falcon_base_url": "https://falcon.crowdstrike.com"` setting in `secrets.json` or the `CROWDSTRIKE_FALCON_BASE_URL` environment variable.  
+    To configure the Falcon link (clickable in the GUI), use the optional `CROWDSTRIKE_FALCON_BASE_URL` environment variable.  
     By default, this variable is set to "https://falcon.crowdstrike.com". For instance, those operating within the US2 region should specify the prefix as "https://falcon.us-2.crowdstrike.com".
 
 ## Screenshots

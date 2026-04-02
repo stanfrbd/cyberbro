@@ -5,4 +5,4 @@
 !!! info
     You are limited to 500 queries a day with the free VT API.
 
-You can fill the `secrets.json` accordingly with the variable `virustotal` or the environment variable `VIRUSTOTAL` in your custom docker-compose file.
+Set the `VIRUSTOTAL` environment variable in your `.env` file or deployment environment.

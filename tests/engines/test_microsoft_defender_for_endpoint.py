@@ -40,6 +40,16 @@ def mde_engine(secrets_with_key):
     return MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
 
 
+@pytest.fixture(autouse=True)
+def reset_mde_token_cache():
+    """Reset in-memory token cache between tests."""
+    with MDEEngine._token_lock:
+        MDEEngine._cached_token = None
+    yield
+    with MDEEngine._token_lock:
+        MDEEngine._cached_token = None
+
+
 @pytest.fixture
 def ipv4_observable():
     """IPv4 observable for testing."""
@@ -178,47 +188,44 @@ def test_check_token_validity_malformed_jwt(mde_engine, caplog):
     assert "Failed to decode MDE token" in caplog.text
 
 
-@patch("pathlib.Path.read_text")
-def test_read_token_success(mock_read_text, mde_engine):
-    """Test _read_token returns token when file exists and token is valid."""
+def test_read_token_success(mde_engine):
+    """Test _read_token returns token when in-memory token is valid."""
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = f"{valid_token}\n"
+    with MDEEngine._token_lock:
+        MDEEngine._cached_token = valid_token
+
     result = mde_engine._read_token()
     assert result == valid_token
 
 
-@patch("pathlib.Path.read_text")
-def test_read_token_invalid_token(mock_read_text, mde_engine, caplog):
-    """Test _read_token returns None when token validation fails."""
-    mock_read_text.return_value = "invalid_token"
+def test_read_token_invalid_token(mde_engine, caplog):
+    """Test _read_token returns None when in-memory token validation fails."""
+    with MDEEngine._token_lock:
+        MDEEngine._cached_token = "invalid_token"
+
     caplog.set_level(logging.ERROR)
     result = mde_engine._read_token()
     assert result is None
 
 
-@patch("pathlib.Path.read_text")
-def test_read_token_file_not_found(mock_read_text, mde_engine, caplog):
-    """Test _read_token returns None when file cannot be read."""
-    mock_read_text.side_effect = FileNotFoundError()
-    caplog.set_level(logging.ERROR)
+def test_read_token_cache_empty(mde_engine):
+    """Test _read_token returns None when cache is empty."""
     result = mde_engine._read_token()
     assert result is None
-    assert "Failed to read token from file" in caplog.text
 
 
-@patch("pathlib.Path.read_text")
-def test_read_token_strip_whitespace(mock_read_text, mde_engine):
-    """Test _read_token strips whitespace from token."""
+def test_read_token_whitespace_token_invalid(mde_engine):
+    """Test _read_token strips surrounding whitespace in cached token."""
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = f"  {valid_token}  \n"
-    result = mde_engine._read_token()
-    assert result == valid_token
+    with MDEEngine._token_lock:
+        MDEEngine._cached_token = f"  {valid_token}  \n"
+
+    assert mde_engine._read_token() == valid_token
 
 
 @responses.activate
-@patch("pathlib.Path.write_text")
-def test_get_token_success(mock_write_text, secrets_with_key):
-    """Test _get_token successfully fetches and caches token."""
+def test_get_token_success(secrets_with_key):
+    """Test _get_token successfully fetches and stores token in memory."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     url = f"https://login.microsoftonline.com/{secrets_with_key.mde_tenant_id}/oauth2/token"
     access_token = create_valid_jwt_token()
@@ -232,7 +239,7 @@ def test_get_token_success(mock_write_text, secrets_with_key):
 
     result = engine._get_token()
     assert result == access_token
-    mock_write_text.assert_called_once_with(access_token)
+    assert engine._cached_token == access_token
 
 
 @responses.activate
@@ -292,11 +299,11 @@ def test_get_token_missing_client_id(secrets_with_key, caplog):
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_token_fallback_logic(mock_read_text, secrets_with_key, ipv4_observable):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_token_fallback_logic(mock_read_token, secrets_with_key, ipv4_observable):
     """Test analyze uses fallback token from _get_token when _read_token returns None."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    mock_read_text.return_value = "invalid_token"
+    mock_read_token.return_value = None
     valid_token = create_valid_jwt_token()
     oauth_url = f"https://login.microsoftonline.com/{secrets_with_key.mde_tenant_id}/oauth2/token"
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
@@ -320,13 +327,13 @@ def test_analyze_token_fallback_logic(mock_read_text, secrets_with_key, ipv4_obs
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
+@patch.object(MDEEngine, "_read_token")
 def test_analyze_invalid_token_returns_none(
-    mock_read_text, secrets_with_key, ipv4_observable, caplog
+    mock_read_token, secrets_with_key, ipv4_observable, caplog
 ):
     """Test analyze returns None when no valid token is available."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
-    mock_read_text.return_value = "invalid"
+    mock_read_token.return_value = None
     oauth_url = f"https://login.microsoftonline.com/{secrets_with_key.mde_tenant_id}/oauth2/token"
 
     responses.add(
@@ -348,7 +355,7 @@ def test_analyze_invalid_token_returns_none(
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
+@patch.object(MDEEngine, "_read_token")
 @pytest.mark.parametrize(
     "observable,expected_endpoint",
     [
@@ -384,12 +391,12 @@ def test_analyze_invalid_token_returns_none(
     ],
 )
 def test_analyze_observable_routing(
-    mock_read_text, secrets_with_key, observable, expected_endpoint
+    mock_read_token, secrets_with_key, observable, expected_endpoint
 ):
     """Test analyze routes to correct API endpoint for all observable types."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     base_url = "https://api.securitycenter.microsoft.com"
     stats_url = base_url + expected_endpoint
@@ -416,12 +423,12 @@ def test_analyze_observable_routing(
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_unsupported_observable_type(mock_read_text, secrets_with_key):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_unsupported_observable_type(mock_read_token, secrets_with_key):
     """Test analyze returns None for unsupported observable types."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     result = engine.analyze(Observable(value="test@example.com", type=ObservableType.EMAIL))
     assert result is None
@@ -434,12 +441,12 @@ def test_analyze_unsupported_observable_type(mock_read_text, secrets_with_key):
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_domain_extraction_simple(mock_read_text, secrets_with_key):
+@patch.object(MDEEngine, "_read_token")
+def test_url_domain_extraction_simple(mock_read_token, secrets_with_key):
     """Test URL domain extraction with simple URL."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     url_observable = Observable(value="https://example.com/path", type=ObservableType.URL)
     responses.add(
@@ -454,12 +461,12 @@ def test_url_domain_extraction_simple(mock_read_text, secrets_with_key):
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_domain_extraction_with_port(mock_read_text, secrets_with_key):
+@patch.object(MDEEngine, "_read_token")
+def test_url_domain_extraction_with_port(mock_read_token, secrets_with_key):
     """Test URL domain extraction correctly removes port."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     url_observable = Observable(value="https://example.com:8443/path", type=ObservableType.URL)
     responses.add(
@@ -474,12 +481,12 @@ def test_url_domain_extraction_with_port(mock_read_text, secrets_with_key):
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_domain_extraction_with_subdomain(mock_read_text, secrets_with_key):
+@patch.object(MDEEngine, "_read_token")
+def test_url_domain_extraction_with_subdomain(mock_read_token, secrets_with_key):
     """Test URL domain extraction preserves subdomains."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     url_observable = Observable(value="https://api.example.com/v1/path", type=ObservableType.URL)
     responses.add(
@@ -494,12 +501,12 @@ def test_url_domain_extraction_with_subdomain(mock_read_text, secrets_with_key):
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_domain_extraction_with_query_string(mock_read_text, secrets_with_key):
+@patch.object(MDEEngine, "_read_token")
+def test_url_domain_extraction_with_query_string(mock_read_token, secrets_with_key):
     """Test URL domain extraction removes query parameters."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     url_observable = Observable(
         value="https://example.com/path?id=123&name=test", type=ObservableType.URL
@@ -516,12 +523,12 @@ def test_url_domain_extraction_with_query_string(mock_read_text, secrets_with_ke
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_domain_extraction_with_fragment(mock_read_text, secrets_with_key):
+@patch.object(MDEEngine, "_read_token")
+def test_url_domain_extraction_with_fragment(mock_read_token, secrets_with_key):
     """Test URL domain extraction removes fragment identifiers."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     url_observable = Observable(value="https://example.com/path#section", type=ObservableType.URL)
     responses.add(
@@ -536,12 +543,12 @@ def test_url_domain_extraction_with_fragment(mock_read_text, secrets_with_key):
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_parsing_malformed_no_protocol(mock_read_text, secrets_with_key, caplog):
+@patch.object(MDEEngine, "_read_token")
+def test_url_parsing_malformed_no_protocol(mock_read_token, secrets_with_key, caplog):
     """Test URL parsing with malformed URL (no protocol)."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     caplog.set_level(logging.ERROR)
     result = engine.analyze(Observable(value="example.com/path", type=ObservableType.URL))
@@ -550,12 +557,12 @@ def test_url_parsing_malformed_no_protocol(mock_read_text, secrets_with_key, cap
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_url_parsing_malformed_no_path(mock_read_text, secrets_with_key, caplog):
+@patch.object(MDEEngine, "_read_token")
+def test_url_parsing_malformed_no_path(mock_read_token, secrets_with_key, caplog):
     """Test URL parsing with malformed URL (no path after domain)."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     caplog.set_level(logging.ERROR)
     result = engine.analyze(Observable(value="https://example.com", type=ObservableType.URL))
@@ -568,12 +575,12 @@ def test_url_parsing_malformed_no_path(mock_read_text, secrets_with_key, caplog)
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_success_complete_response(mock_read_text, secrets_with_key, ipv4_observable):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_success_complete_response(mock_read_token, secrets_with_key, ipv4_observable):
     """Test successful API response with all data fields."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(
@@ -590,7 +597,7 @@ def test_analyze_success_complete_response(mock_read_text, secrets_with_key, ipv
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
+@patch.object(MDEEngine, "_read_token")
 @pytest.mark.parametrize(
     "datetime_str,expected_date",
     [
@@ -601,12 +608,12 @@ def test_analyze_success_complete_response(mock_read_text, secrets_with_key, ipv
     ],
 )
 def test_analyze_date_simplification_various_formats(
-    mock_read_text, secrets_with_key, ipv4_observable, datetime_str, expected_date
+    mock_read_token, secrets_with_key, ipv4_observable, datetime_str, expected_date
 ):
     """Test date simplification with various ISO datetime formats."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     mock_response = mock_mde_stats_response(ipv4_observable.value)
     mock_response["orgFirstSeen"] = datetime_str
@@ -627,12 +634,12 @@ def test_analyze_date_simplification_various_formats(
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_missing_date_fields(mock_read_text, secrets_with_key, ipv4_observable):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_missing_date_fields(mock_read_token, secrets_with_key, ipv4_observable):
     """Test analyze handles missing date fields gracefully."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     mock_response = mock_mde_stats_response(ipv4_observable.value)
     del mock_response["orgFirstSeen"]
@@ -653,12 +660,12 @@ def test_analyze_missing_date_fields(mock_read_text, secrets_with_key, ipv4_obse
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_null_date_fields(mock_read_text, secrets_with_key, ipv4_observable):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_null_date_fields(mock_read_token, secrets_with_key, ipv4_observable):
     """Test analyze handles null date fields."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     mock_response = mock_mde_stats_response(ipv4_observable.value)
     mock_response["orgFirstSeen"] = None
@@ -677,12 +684,12 @@ def test_analyze_null_date_fields(mock_read_text, secrets_with_key, ipv4_observa
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_empty_string_date_fields(mock_read_text, secrets_with_key, ipv4_observable):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_empty_string_date_fields(mock_read_token, secrets_with_key, ipv4_observable):
     """Test analyze handles empty string date fields."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     mock_response = mock_mde_stats_response(ipv4_observable.value)
     mock_response["orgFirstSeen"] = ""
@@ -706,12 +713,12 @@ def test_analyze_empty_string_date_fields(mock_read_text, secrets_with_key, ipv4
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_md5_triggers_file_info(mock_read_text, secrets_with_key, md5_hash):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_md5_triggers_file_info(mock_read_token, secrets_with_key, md5_hash):
     """Test analyze makes secondary file info call for MD5 hash."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}"
@@ -735,12 +742,12 @@ def test_analyze_md5_triggers_file_info(mock_read_text, secrets_with_key, md5_ha
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_sha1_triggers_file_info(mock_read_text, secrets_with_key, sha1_hash):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_sha1_triggers_file_info(mock_read_token, secrets_with_key, sha1_hash):
     """Test analyze makes secondary file info call for SHA1 hash."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{sha1_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{sha1_hash.value}"
@@ -764,12 +771,12 @@ def test_analyze_sha1_triggers_file_info(mock_read_text, secrets_with_key, sha1_
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_sha256_triggers_file_info(mock_read_text, secrets_with_key, sha256_hash):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_sha256_triggers_file_info(mock_read_token, secrets_with_key, sha256_hash):
     """Test analyze makes secondary file info call for SHA256 hash."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{sha256_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{sha256_hash.value}"
@@ -793,12 +800,12 @@ def test_analyze_sha256_triggers_file_info(mock_read_text, secrets_with_key, sha
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_file_info_all_fields_present(mock_read_text, secrets_with_key, md5_hash):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_file_info_all_fields_present(mock_read_token, secrets_with_key, md5_hash):
     """Test analyze includes all file info fields in result."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}"
@@ -828,12 +835,12 @@ def test_analyze_file_info_all_fields_present(mock_read_text, secrets_with_key, 
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_file_info_missing_fields(mock_read_text, secrets_with_key, md5_hash):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_file_info_missing_fields(mock_read_token, secrets_with_key, md5_hash):
     """Test analyze sets missing file info fields to 'Unknown'."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}"
@@ -863,7 +870,7 @@ def test_analyze_file_info_missing_fields(mock_read_text, secrets_with_key, md5_
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
+@patch.object(MDEEngine, "_read_token")
 @pytest.mark.parametrize(
     "field_name",
     [
@@ -876,11 +883,11 @@ def test_analyze_file_info_missing_fields(mock_read_text, secrets_with_key, md5_
         "determinationValue",
     ],
 )
-def test_analyze_file_info_partial_fields(mock_read_text, secrets_with_key, md5_hash, field_name):
+def test_analyze_file_info_partial_fields(mock_read_token, secrets_with_key, md5_hash, field_name):
     """Test analyze handles missing individual file info fields."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}"
@@ -907,12 +914,12 @@ def test_analyze_file_info_partial_fields(mock_read_text, secrets_with_key, md5_
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_file_info_request_failure(mock_read_text, secrets_with_key, md5_hash, caplog):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_file_info_request_failure(mock_read_token, secrets_with_key, md5_hash, caplog):
     """Test analyze returns None when file info request fails."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}/stats"
     file_info_url = f"https://api.securitycenter.microsoft.com/api/files/{md5_hash.value}"
@@ -936,12 +943,12 @@ def test_analyze_file_info_request_failure(mock_read_text, secrets_with_key, md5
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_ipv4_no_file_info_call(mock_read_text, secrets_with_key, ipv4_observable):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_ipv4_no_file_info_call(mock_read_token, secrets_with_key, ipv4_observable):
     """Test analyze does not make file info call for non-hash observables."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(
@@ -962,15 +969,15 @@ def test_analyze_ipv4_no_file_info_call(mock_read_text, secrets_with_key, ipv4_o
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
+@patch.object(MDEEngine, "_read_token")
 @pytest.mark.parametrize("status_code", [401, 403, 500, 502, 503])
 def test_analyze_http_error_codes(
-    mock_read_text, secrets_with_key, ipv4_observable, status_code, caplog
+    mock_read_token, secrets_with_key, ipv4_observable, status_code, caplog
 ):
     """Test analyze returns None for various HTTP error codes."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(
@@ -986,12 +993,12 @@ def test_analyze_http_error_codes(
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_connection_timeout(mock_read_text, secrets_with_key, ipv4_observable, caplog):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_connection_timeout(mock_read_token, secrets_with_key, ipv4_observable, caplog):
     """Test analyze returns None when request times out."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(
@@ -1007,12 +1014,12 @@ def test_analyze_connection_timeout(mock_read_text, secrets_with_key, ipv4_obser
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_connection_error(mock_read_text, secrets_with_key, ipv4_observable, caplog):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_connection_error(mock_read_token, secrets_with_key, ipv4_observable, caplog):
     """Test analyze returns None when connection fails."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(
@@ -1028,12 +1035,12 @@ def test_analyze_connection_error(mock_read_text, secrets_with_key, ipv4_observa
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
-def test_analyze_invalid_json_response(mock_read_text, secrets_with_key, ipv4_observable, caplog):
+@patch.object(MDEEngine, "_read_token")
+def test_analyze_invalid_json_response(mock_read_token, secrets_with_key, ipv4_observable, caplog):
     """Test analyze returns None when response JSON is invalid."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(
@@ -1050,14 +1057,14 @@ def test_analyze_invalid_json_response(mock_read_text, secrets_with_key, ipv4_ob
 
 
 @responses.activate
-@patch("pathlib.Path.read_text")
+@patch.object(MDEEngine, "_read_token")
 def test_analyze_response_missing_expected_fields(
-    mock_read_text, secrets_with_key, ipv4_observable
+    mock_read_token, secrets_with_key, ipv4_observable
 ):
     """Test analyze handles response with missing expected fields."""
     engine = MDEEngine(secrets_with_key, proxies={}, ssl_verify=True)
     valid_token = create_valid_jwt_token()
-    mock_read_text.return_value = valid_token
+    mock_read_token.return_value = valid_token
 
     stats_url = f"https://api.securitycenter.microsoft.com/api/ips/{ipv4_observable.value}/stats"
     responses.add(

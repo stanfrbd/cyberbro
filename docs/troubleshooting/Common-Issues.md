@@ -45,5 +45,5 @@ By default, the database used by Cyberbro is stored in the `data` directory insi
 ## My API keys seem to be ignored or not stored
 
 !!! danger
-    Make sure you use either `secrets.json` or `.env` file for your deployment, not both.  
-    This may lead to unexpected behavior as the application will try to read both files and may override some values.
+    Ensure your `.env` file is present and values are correctly named (uppercase).
+    Cyberbro now uses environment variables only.

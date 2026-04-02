@@ -23,5 +23,4 @@ MISP (Malware Information Sharing Platform & Threat Sharing) is an open-source t
 !!! note
     Keep your API key confidential. If you believe your key has been compromised, you can regenerate it from the same profile page.
 
-Fill the `secrets.json` file with `"misp_url"` and `"misp_api_key"`  
-or use the environment variables `MISP_URL` and `MISP_API_KEY` in your configuration or docker-compose file.
+Set `MISP_URL` and `MISP_API_KEY` in your `.env` file or deployment environment.

@@ -2,4 +2,4 @@
 2. Go to [https://www.abuseipdb.com/account/api](https://www.abuseipdb.com/account/api)
 3. Get your API key.
 
-You can fill the `secrets.json` accordingly with the variable `"abuseipdb"` or the environment variable `ABUSEIPDB` in your custom docker-compose file.
+Set the `ABUSEIPDB` environment variable in your `.env` file or deployment environment.

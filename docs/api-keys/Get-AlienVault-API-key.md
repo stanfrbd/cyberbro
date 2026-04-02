@@ -23,5 +23,4 @@ AlienVault OTX (Open Threat Exchange) is a collaborative threat intelligence pla
 !!! note
     Keep your API key confidential. If you believe your key has been compromised, you can regenerate it from the same settings page.
 
-Fill the `secrets.json` file with `"alienvault"`  
-or use the environment variable `ALIENVAULT` in your configuration or docker-compose file.
+Set the `ALIENVAULT` environment variable in your `.env` file or deployment environment.

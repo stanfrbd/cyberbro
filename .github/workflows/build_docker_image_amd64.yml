@@ -3,8 +3,6 @@ on:
   push:
     tags:
       - 'v*'
-    branches:
-      - main
 
 jobs:
   build:
@@ -21,7 +19,13 @@ jobs:
         run: echo ${{ secrets.DEPLOYMENT_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Build Docker image
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/cyberbro:latest .
+        run: |
+          docker build \
+            -t ghcr.io/${{ github.repository_owner }}/cyberbro:latest \
+            -t ghcr.io/${{ github.repository_owner }}/cyberbro:${{ github.ref_name }} \
+            .
 
       - name: Push Docker image
-        run: docker push ghcr.io/${{ github.repository_owner }}/cyberbro:latest
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/cyberbro:latest
+          docker push ghcr.io/${{ github.repository_owner }}/cyberbro:${{ github.ref_name }}

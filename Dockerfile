@@ -1,9 +1,9 @@
 # Use the official Python image from the Docker Hub, version 3.13-slim
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
-# Update the package list and install supervisor and nano, then clean up the apt cache
+# Update the package list and install supervisor, then clean up the apt cache
 RUN apt-get update && \
-    apt-get install -y supervisor nano && \
+    apt-get install -y supervisor && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the working directory inside the container to /app

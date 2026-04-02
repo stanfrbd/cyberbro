@@ -8,7 +8,7 @@
 * `docker compose build --no-cache` (optional)
 * `docker compose up --build --force-recreate -d`
 !!! warning
-    Be careful that your `secrets.json` / `.env` is up to date.
+    Be careful that your `.env` is up to date.
 
 ## Using the image from GitHub packages
 
@@ -37,4 +37,4 @@ docker-compose up -d --pull always --force-recreate
 * `gunicorn -b 0.0.0.0:5000 app:app --timeout 120` (or using `supervisord.conf`)
 
 !!! warning
-    Be careful that your `secrets.json` is up to date
+    Be careful that your `.env` or exported environment variables are up to date.

@@ -104,6 +104,9 @@
     {% if analysis_results.results[0].alienvault %}
     {% include "engine_layouts/alienvault_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].alienvault_passive_dns %}
+    {% include "engine_layouts/alienvault_passive_dns_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].crtsh %}
     {% include "engine_layouts/crtsh_card.html" %}
     {% endif %}

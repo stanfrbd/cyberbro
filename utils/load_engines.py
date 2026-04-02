@@ -1,6 +1,7 @@
 from engines.abuseipdb import AbuseIPDBEngine
 from engines.abusix import AbusixEngine
 from engines.alienvault import AlienVaultEngine
+from engines.alienvault_passive_dns import AlienVaultPassiveDNSEngine
 from engines.bad_asn import BadASNEngine
 from engines.chrome_extension import ChromeExtensionEngine
 from engines.criminalip import CriminalIPEngine
@@ -48,6 +49,7 @@ def get_engine_instances(
         ReverseDNSEngine(secrets, proxies, ssl_verify),
         AbusixEngine(secrets, proxies, ssl_verify),
         AlienVaultEngine(secrets, proxies, ssl_verify),
+        AlienVaultPassiveDNSEngine(secrets, proxies, ssl_verify),
         BadASNEngine(secrets, proxies, ssl_verify),
         ChromeExtensionEngine(secrets, proxies, ssl_verify),
         CriminalIPEngine(secrets, proxies, ssl_verify),

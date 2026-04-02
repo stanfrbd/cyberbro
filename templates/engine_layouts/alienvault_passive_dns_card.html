@@ -1,0 +1,44 @@
+<div class="card">
+    <h3>Alienvault Passive DNS</h3>
+    {% if analysis_results.results[0].alienvault_passive_dns %}
+    {% set passive_dns = analysis_results.results[0].alienvault_passive_dns %}
+    {% if passive_dns.error %}
+    <p>Request failed: {{ passive_dns.error }}</p>
+    {% elif passive_dns.count == 0 %}
+    <p>No passive DNS record found</p>
+    {% else %}
+    <p><strong>Total records:</strong> {{ passive_dns.count }}</p>
+    <div
+        style="max-height: 340px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+        <table border="1" cellpadding="5" cellspacing="0" style="margin: 0;">
+            <thead>
+                <tr>
+                    <th>Hostname</th>
+                    <th>Address</th>
+                    <th>Type</th>
+                    <th>First</th>
+                    <th>Last</th>
+                    <th>Country</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in passive_dns.top_records %}
+                <tr>
+                    <td title="{{ record.hostname }}">{{ record.hostname or '-' }}</td>
+                    <td>{{ record.address or '-' }}</td>
+                    <td>{{ record.record_type or '-' }}</td>
+                    <td>{{ record.first or '-' }}</td>
+                    <td>{{ record.last or '-' }}</td>
+                    <td>{{ record.country or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p><strong>Showing:</strong> top 10 records</p>
+    <p><strong>Link: </strong><a href="{{ passive_dns.link }}" target="_blank">See on Alienvault</a></p>
+    {% endif %}
+    {% else %}
+    <p>Not applicable</p>
+    {% endif %}
+</div>

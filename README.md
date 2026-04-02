@@ -301,6 +301,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [AbuseIPDB](https://docs.abuseipdb.com/)
 * [Abusix](https://abusix.com/)
 * [Alienvault](https://otx.alienvault.com/)
+* [Alienvault Passive DNS endpoint](https://otx.alienvault.com/api/v1/indicators/domain/example.com/passive_dns)
 * [CriminalIP](https://www.criminalip.io/)
 * [CrowdStrike](https://www.crowdstrike.com/)
 * [crt.sh](https://crt.sh/)

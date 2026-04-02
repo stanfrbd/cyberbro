@@ -217,6 +217,10 @@
                     <th>Alienvault</th>
                     {% endif %}
 
+                    {% if "alienvault_passive_dns" in analysis_results.selected_engines %}
+                    <th>Alienvault Passive DNS</th>
+                    {% endif %}
+
                     {% if "google_dns" in analysis_results.selected_engines %}
                     <th>Google DNS (common records)</th>
                     {% endif %}
@@ -394,6 +398,10 @@
 
                     {% if "alienvault" in analysis_results.selected_engines %}
                     {% include "engine_layouts/alienvault_table.html" %}
+                    {% endif %}
+
+                    {% if "alienvault_passive_dns" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/alienvault_passive_dns_table.html" %}
                     {% endif %}
 
                     {% if "google_dns" in analysis_results.selected_engines %}

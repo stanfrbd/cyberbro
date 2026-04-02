@@ -1,0 +1,38 @@
+<td>
+    {% if result.alienvault_passive_dns %}
+    {% set passive_dns = result.alienvault_passive_dns %}
+    {% if passive_dns.error %}
+    Request failed: {{ passive_dns.error }}
+    {% elif passive_dns.count == 0 %}
+    No passive DNS record found
+    {% else %}
+    <strong>Total records:</strong> {{ passive_dns.count }}<br />
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Address</th>
+                <th>Type</th>
+                <th>First</th>
+                <th>Last</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in passive_dns.top_records %}
+            <tr>
+                <td title="{{ record.hostname }}">{{ record.hostname or '-' }}</td>
+                <td>{{ record.address or '-' }}</td>
+                <td>{{ record.record_type or '-' }}</td>
+                <td>{{ record.first or '-' }}</td>
+                <td>{{ record.last or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <strong>Showing:</strong> top 10 records<br />
+    <strong>Link: </strong><a href="{{ passive_dns.link }}" target="_blank">See on Alienvault</a>
+    {% endif %}
+    {% else %}
+    Not applicable
+    {% endif %}
+</td>

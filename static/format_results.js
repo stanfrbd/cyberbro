@@ -271,6 +271,27 @@ function formatResults(data) {
 
         }
 
+        if (result.alienvault_passive_dns) {
+            plainText += `Alienvault Passive DNS:\n`;
+            plainText += `  - Total records: ${result.alienvault_passive_dns.count || 0}\n`;
+            if (Array.isArray(result.alienvault_passive_dns.top_records) && result.alienvault_passive_dns.top_records.length > 0) {
+                result.alienvault_passive_dns.top_records.forEach(passiveDnsRecord => {
+                    const hostname = passiveDnsRecord.hostname || '-';
+                    const address = passiveDnsRecord.address || '-';
+                    const recordType = passiveDnsRecord.record_type || '-';
+                    const firstSeen = passiveDnsRecord.first || '-';
+                    const lastSeen = passiveDnsRecord.last || '-';
+                    plainText += `  - ${hostname} -> ${address} (${recordType}) [${firstSeen} / ${lastSeen}]\n`;
+                });
+            }
+            if (result.alienvault_passive_dns.error) {
+                plainText += `  - Error: ${result.alienvault_passive_dns.error}\n`;
+            }
+            if (result.alienvault_passive_dns.link) {
+                plainText += `  - Link: ${result.alienvault_passive_dns.link}\n`;
+            }
+        }
+
         if (result.hudsonrock) {
             plainText += `Hudson Rock:\n`;
 

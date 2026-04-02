@@ -1,13 +1,16 @@
-from models.observable import Observable, ObservableType
-import pytest
-import responses
-from engines.alienvault import parse_alienvault_response, query_alienvault, get_endpoint
-from utils.config import QueryError
 from pathlib import Path
 import json
 from urllib.parse import quote
+
+import pytest
+import requests
+import responses
+from engines.alienvault import get_endpoint, parse_alienvault_response, query_alienvault
+from engines.alienvault_passive_dns import AlienVaultPassiveDNSEngine
+from models.observable import Observable, ObservableType
 from requests.exceptions import HTTPError, Timeout
 from pytest_mock import MockerFixture
+from utils.config import QueryError, Secrets
 
 
 @pytest.fixture(scope="session")
@@ -287,3 +290,158 @@ def test_get_endpoint(type: ObservableType, artifact: str, endpoint: str | None)
     result: str | None = get_endpoint(artifact, type)
 
     assert endpoint == result
+
+
+def _passive_dns_engine_with_key() -> AlienVaultPassiveDNSEngine:
+    secrets = Secrets()
+    secrets.alienvault = "test-api-key"
+    return AlienVaultPassiveDNSEngine(secrets, proxies={}, ssl_verify=True)
+
+
+@responses.activate
+def test_analyze_alienvault_passive_dns_success_top_records() -> None:
+    engine = _passive_dns_engine_with_key()
+    observable = Observable(value="stealer.cy", type=ObservableType.FQDN)
+
+    records = [
+        {
+            "address": "185.178.208.160",
+            "first": "2025-09-12T09:47:59",
+            "last": "2025-09-12T09:47:59",
+            "hostname": f"h{i}.stealer.cy",
+            "record_type": "A",
+            "flag_title": "Russia",
+            "asn": "AS57724 ddos guard ltd",
+        }
+        for i in range(1, 13)
+    ]
+
+    responses.add(
+        responses.GET,
+        "https://otx.alienvault.com/api/v1/indicators/domain/stealer.cy/passive_dns",
+        json={"passive_dns": records, "count": 213},
+        status=200,
+    )
+
+    result = engine.analyze(observable)
+
+    assert result is not None
+    assert result["count"] == 213
+    assert len(result["top_records"]) == 10
+    assert len(result["passive_dns"]) == 12
+    assert result["error"] is None
+
+
+@responses.activate
+def test_analyze_alienvault_passive_dns_ipv4_endpoint() -> None:
+    engine = _passive_dns_engine_with_key()
+
+    responses.add(
+        responses.GET,
+        "https://otx.alienvault.com/api/v1/indicators/IPv4/1.1.1.1/passive_dns",
+        json={
+            "passive_dns": [
+                {
+                    "address": "1.1.1.1",
+                    "hostname": "twinnklyy9star.com",
+                    "record_type": "A",
+                    "first": "2026-04-02T11:31:50",
+                    "last": "2026-04-02T11:31:50",
+                    "asset_type": "domain",
+                }
+            ],
+            "count": 1,
+        },
+        status=200,
+    )
+
+    result = engine.analyze(Observable(value="1.1.1.1", type=ObservableType.IPV4))
+
+    assert result is not None
+    assert result["count"] == 1
+    assert result["error"] is None
+    assert result["top_records"][0]["hostname"] == "twinnklyy9star.com"
+    assert result["top_records"][0]["address"] == "1.1.1.1"
+    assert result["link"] == "https://otx.alienvault.com/indicator/ip/1.1.1.1"
+
+
+@responses.activate
+def test_analyze_alienvault_passive_dns_ipv6_endpoint_and_payload_variation() -> None:
+    engine = _passive_dns_engine_with_key()
+
+    responses.add(
+        responses.GET,
+        f"https://otx.alienvault.com/api/v1/indicators/IPv6/{quote('2606:4700:4700::1111')}/passive_dns",
+        json={
+            "passive_dns": [
+                {
+                    "address": "2606:4700:4700::1111",
+                    "record_type": "AAAA",
+                    "first": "2026-04-02T11:31:50",
+                    "last": "2026-04-02T11:31:50",
+                }
+            ]
+        },
+        status=200,
+    )
+
+    result = engine.analyze(Observable(value="2606:4700:4700::1111", type=ObservableType.IPV6))
+
+    assert result is not None
+    assert result["count"] == 1
+    assert result["error"] is None
+    assert result["top_records"][0]["hostname"] is None
+    assert result["top_records"][0]["record_type"] == "AAAA"
+
+
+@responses.activate
+def test_analyze_alienvault_passive_dns_http_error() -> None:
+    engine = _passive_dns_engine_with_key()
+
+    responses.add(
+        responses.GET,
+        "https://otx.alienvault.com/api/v1/indicators/domain/stealer.cy/passive_dns",
+        json={"detail": "forbidden"},
+        status=403,
+    )
+
+    result = engine.analyze(Observable(value="stealer.cy", type=ObservableType.FQDN))
+
+    assert result is not None
+    assert result["error"] == "http_403"
+    assert result["count"] == 0
+
+
+@responses.activate
+def test_analyze_alienvault_passive_dns_invalid_json() -> None:
+    engine = _passive_dns_engine_with_key()
+
+    responses.add(
+        responses.GET,
+        "https://otx.alienvault.com/api/v1/indicators/domain/stealer.cy/passive_dns",
+        body="not-json",
+        status=200,
+        content_type="application/json",
+    )
+
+    result = engine.analyze(Observable(value="stealer.cy", type=ObservableType.FQDN))
+
+    assert result is not None
+    assert result["error"] == "invalid_json"
+
+
+@responses.activate
+def test_analyze_alienvault_passive_dns_timeout() -> None:
+    engine = _passive_dns_engine_with_key()
+
+    responses.add(
+        responses.GET,
+        "https://otx.alienvault.com/api/v1/indicators/domain/stealer.cy/passive_dns",
+        body=requests.exceptions.Timeout(),
+    )
+
+    result = engine.analyze(Observable(value="stealer.cy", type=ObservableType.FQDN))
+
+    assert result is not None
+    assert result["error"] == "timeout"
+    assert result["count"] == 0

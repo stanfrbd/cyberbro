@@ -282,6 +282,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, free API key required  
 **Explaination**: Checks Alienvault for IP, domain, URL, hash, free API key required
 
+### Alienvault Passive DNS
+**Name**: `alienvault_passive_dns`  
+**Supports**: domain, URL, IPv4, IPv6, free API key required  
+**Explaination**: Checks Alienvault OTX passive DNS historical records for domains, URLs, IPv4 and IPv6, and returns top 10 records in GUI (full count included)
+
 ### AbuseIPDB
 **Name**: `abuseipdb`  
 **Supports**: IP, free API key required  

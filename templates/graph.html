@@ -1030,6 +1030,36 @@
                 });
             }
 
+            // Alienvault Passive DNS (top records)
+            if (entry.alienvault_passive_dns?.top_records) {
+                entry.alienvault_passive_dns.top_records.forEach((record) => {
+                    const hostname = record.hostname;
+                    const address = record.address;
+                    if (hostname && hostname.trim() !== "") {
+                        addNode(
+                            hostname,
+                            hostname,
+                            "alienvault_passive_dns_hostname",
+                            "https://img.icons8.com/officexs/32/root-server.png",
+                        );
+                        edges.push({ from: obs, to: hostname, label: "Alienvault Passive DNS hostname" });
+                    }
+
+                    if (address && address.trim() !== "") {
+                        addNode(
+                            address,
+                            address,
+                            "alienvault_passive_dns_ip",
+                            "https://img.icons8.com/officexs/32/server.png",
+                        );
+                        edges.push({ from: obs, to: address, label: "Alienvault Passive DNS address" });
+                        if (hostname && hostname.trim() !== "") {
+                            edges.push({ from: hostname, to: address, label: "resolves to" });
+                        }
+                    }
+                });
+            }
+
             // Check for MISP events
             if (entry.misp && entry.misp.events && Array.isArray(entry.misp.events)) {
                 entry.misp.events.forEach((mispEvent) => {

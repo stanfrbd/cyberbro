@@ -13,23 +13,21 @@
         <table border="1" cellpadding="5" cellspacing="0" style="margin: 0;">
             <thead>
                 <tr>
-                    <th>Hostname</th>
+                    <th style="width: 70px; text-align: center;">Type</th>
                     <th>Address</th>
-                    <th>Type</th>
-                    <th>First</th>
-                    <th>Last</th>
-                    <th>Country</th>
+                    <th style="width: 90px; white-space: nowrap;">First</th>
+                    <th style="width: 90px; white-space: nowrap;">Last</th>
                 </tr>
             </thead>
             <tbody>
                 {% for record in passive_dns.top_records %}
                 <tr>
-                    <td title="{{ record.hostname }}">{{ record.hostname or '-' }}</td>
+                    <td style="width: 52px; text-align: center;">{{ record.record_type or '-' }}</td>
                     <td>{{ record.address or '-' }}</td>
-                    <td>{{ record.record_type or '-' }}</td>
-                    <td>{{ record.first or '-' }}</td>
-                    <td>{{ record.last or '-' }}</td>
-                    <td>{{ record.country or '-' }}</td>
+                    <td style="width: 104px; white-space: nowrap;">{{ record.first.split('T')[0] if record.first else
+                        '-' }}</td>
+                    <td style="width: 104px; white-space: nowrap;">{{ record.last.split('T')[0] if record.last else '-'
+                        }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

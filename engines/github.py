@@ -5,6 +5,7 @@ import requests
 
 from models.base_engine import BaseEngine
 from models.observable import Observable, ObservableType
+from utils.http_headers import build_browser_like_headers
 
 logger = logging.getLogger(__name__)
 
@@ -28,16 +29,23 @@ class GitHubEngine(BaseEngine):
             | ObservableType.EMAIL
         )
 
+    def _build_grep_headers(self) -> dict[str, str]:
+        # grep.app returns 429 for obvious automation fingerprints
+        # like the default python-requests User-Agent.
+        return build_browser_like_headers(origin="https://grep.app", referer="https://grep.app/")
+
     def analyze(self, observable: Observable) -> dict[str, Any] | None:
         try:
             params: dict[str, str] = {"q": observable.value}
             response = requests.get(
                 url="https://grep.app/api/search",
                 params=params,
+                headers=self._build_grep_headers(),
                 proxies=self.proxies,
                 verify=self.ssl_verify,
                 timeout=5,
             )
+
             response.raise_for_status()
             data = response.json()
 

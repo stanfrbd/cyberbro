@@ -4,9 +4,9 @@
 
 To interact with the Microsoft Defender for Endpoint API, you need to obtain the following credentials:
 
-- Tenant ID (`"mde_tenant_id"` in `secrets.json` or `MDE_TENANT_ID` environment variable).
-- Client ID (`"mde_client_id"` in `secrets.json` or `MDE_CLIENT_ID` environment variable).
-- Client Secret (`"mde_client_secret"` in `secrets.json` or `MDE_CLIENT_SECRET` environment variable).
+- Tenant ID (`MDE_TENANT_ID` environment variable).
+- Client ID (`MDE_CLIENT_ID` environment variable).
+- Client Secret (`MDE_CLIENT_SECRET` environment variable).
 
 Additionally, you need to assign the appropriate API permissions to your application to check IP addresses, hashes, domains, and URLs.
 

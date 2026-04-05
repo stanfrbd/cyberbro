@@ -1,10 +1,11 @@
-import json
 import logging
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+
+from dotenv import load_dotenv
 
 
 class QueryError(Exception):
@@ -19,7 +20,6 @@ class Secrets:
     api_cache_timeout: int = 86400  # Default to 1 day
     api_prefix: str = "api"
     alienvault: str = ""
-    config_page_enabled: bool = False
     criminalip_api_key: str = ""
     crowdstrike_client_id: str = ""
     crowdstrike_client_secret: str = ""
@@ -28,7 +28,7 @@ class Secrets:
     dfir_iris_api_key: str = ""
     flask_debug: bool = False
     flask_port: int = 5000
-    flask_host: str = "0.0.0.0"  # nosec: B104
+    flask_host: str = "127.0.0.1"
     google_cse_cx: str = ""
     google_cse_key: str = ""
     google_safe_browsing: str = ""
@@ -140,49 +140,36 @@ BASE_DIR: Path = Path.resolve(Path(__file__).parent.parent)
 
 logger.debug(f"{BASE_DIR=}")
 
-# Define the path to the secrets file
-SECRETS_FILE: Path = Path(BASE_DIR / "secrets.json")
-
 # Initialize secrets dictionary with default values
 DEFAULT_SECRETS: Secrets = Secrets()
 
 
-def read_secrets_from_file(secrets_file: Path) -> Secrets:
-    """Load secrets from a JSON file, if it exists.
+def load_env_file(env_file: Path) -> None:
+    """Load environment variables from a .env file when present."""
 
-    Return a dictionary with any updated secrets.
-    """
+    if env_file.exists():
+        load_dotenv(dotenv_path=env_file, override=False)
+        logger.info(
+            "Loaded environment variables from .env file at %s. "
+            "This file is optional and intended for local/dev use; "
+            "in production, inject variables directly into the environment.",
+            env_file,
+        )
+        return
 
-    # Make a copy of the defaults, we can compare for changes later
-    secrets: Secrets = Secrets()
-
-    # Load secrets from secrets.json if it exists
-    if secrets_file.exists():
-        try:
-            with secrets_file.open() as f:
-                secrets.update(json.load(f))
-        except OSError as e:
-            print("Unable to read secrets file. Reading environment variables anyway...")
-            logger.debug(f"Error reading secrets file: {e}")
-            logger.error("Unable to read secrets file. Reading environment variables anyway...")
-        except json.JSONDecodeError as e:
-            print("Error while decoding secrets:", e)
-            logger.debug(f"Error while decoding secrets: {e}")
-            logger.error("Error while decoding secrets. Reading environment variables anyway...")
-    else:
-        print("Secrets file not found. Reading environment variables anyway...")
-        logger.info("Secrets file not found. Reading environment variables anyway...")
-
-    return secrets
+    logger.debug(
+        "No .env file found at %s. Relying on environment variables already present in the process.",  # noqa: E501
+        env_file,
+    )
 
 
 def read_secrets_from_env(secrets: Secrets) -> Secrets:
-    """Load secrets from envrionment variables.
+    """Load secrets from environment variables.
 
-    Override the config file if the environment variable is set.
+    Each secret field is read from the corresponding uppercase environment variable.
     """
 
-    # Load secrets from environment variables - override the ones from secrets.json, if present
+    # Load secrets from environment variables.
     env_configured: bool = False
 
     for key in secrets:
@@ -194,7 +181,7 @@ def read_secrets_from_env(secrets: Secrets) -> Secrets:
     if not env_configured:
         msg: str = (
             "No environment variables were configured. "
-            "You can configure secrets later in secrets.json."
+            "Create a .env file from .env.sample or export variables before startup."
         )
         print(msg)
         logger.info(msg)
@@ -202,44 +189,16 @@ def read_secrets_from_env(secrets: Secrets) -> Secrets:
     return secrets
 
 
-def save_secrets_to_file(secrets: Secrets, secrets_file: Path) -> None:
-    """Save the secrets to a JSON file."""
-
-    # Save the secrets to the secrets.json file
-    try:
-        with secrets_file.open("w") as f:
-            json.dump(asdict(secrets), f, indent=4)
-    except OSError as e:
-        print(f"Unable to write secrets file: {e}")
-        logger.error(f"Unable to write secrets file: {e}")
-        return
-    except json.JSONDecodeError as e:
-        print("Error while encoding secrets:", e)
-        logger.error("Error while encoding secrets: %s", e)
-        return
-
-    print("Secrets file was updated.")
-    logger.info("Secrets file was updated.")
-
-    return
-
-
 @lru_cache
 def get_config() -> Secrets:
     """Get the configuration for the application."""
 
-    secrets: Secrets = read_secrets_from_file(SECRETS_FILE)
+    load_env_file(BASE_DIR / ".env")
+    secrets: Secrets = Secrets()
     secrets = read_secrets_from_env(secrets)
 
     if not secrets.get("proxy_url"):
         print("No proxy URL was set. Using no proxy.")
         logger.info("No proxy URL was set. Using no proxy.")
-
-    # If the secrets are not the same as the defaults, save them to the file
-    if secrets != DEFAULT_SECRETS:
-        if not SECRETS_FILE.exists():
-            print("Secrets file was not found. Attempting to save current values to a new one.")
-
-        save_secrets_to_file(secrets, SECRETS_FILE)
 
     return secrets

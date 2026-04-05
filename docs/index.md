@@ -18,7 +18,7 @@
     Explore the Cyberbro API, supported engines, and integration details.
 
 - **[Advanced Deployment Options](quick-start/Advanced-options-for-deployment.md)**  
-    Customize your deployment with environment variables, Docker Compose, and advanced settings.
+    Configure `.env`, migration from `secrets.json`, Docker Compose, and advanced runtime settings.
 
 - **[Upgrade Cyberbro](quick-start/Upgrade-Cyberbro.md)**  
     Step-by-step guide to safely upgrade your Cyberbro instance.

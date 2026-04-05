@@ -1,6 +1,6 @@
 import logging
+import threading
 import time
-from pathlib import Path
 from typing import Any
 
 import jwt
@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class MDEEngine(BaseEngine):
+    _cached_token: str | None = None
+    _token_lock = threading.Lock()
+
     @property
     def name(self):
         return "mde"
@@ -46,20 +49,22 @@ class MDEEngine(BaseEngine):
             return False
 
     def _read_token(self) -> str | None:
-        try:
-            # TODO: Future refactoring - Line 40 uses hardcoded filename "mde_token.txt"
-            # This could cause thread-safety issues in multi-threaded environments.
-            # Consider using a thread-safe token cache (e.g., tempfile with session ID or
-            # in-memory cache with locking) instead of a shared file.
-            token_path = Path("mde_token.txt")
-            token = token_path.read_text().strip()
-            if self._check_token_validity(token):
-                return token
-        except Exception as e:
-            logger.error("Failed to read token from file: %s", e, exc_info=True)
+        with self._token_lock:
+            token = self._cached_token
+
+        if token:
+            token = token.strip()
+
+        if token and self._check_token_validity(token):
+            return token
+
         return None
 
     def _get_token(self) -> str:
+        cached_token = self._read_token()
+        if cached_token:
+            return cached_token
+
         url = f"https://login.microsoftonline.com/{self.secrets.mde_tenant_id}/oauth2/token"
         resource_app_id_uri = "https://api.securitycenter.microsoft.com"
         # TODO: Future refactoring - Consider pre-validating that mde_tenant_id,
@@ -82,8 +87,10 @@ class MDEEngine(BaseEngine):
 
         try:
             aad_token = json_response["access_token"]
-            token_path = Path("mde_token.txt")
-            token_path.write_text(aad_token)
+
+            with self._token_lock:
+                type(self)._cached_token = aad_token
+
             return aad_token
         except KeyError:
             logger.error("Unable to retrieve token from JSON response: %s", json_response)

@@ -4,7 +4,6 @@ import logging
 import threading
 import time
 import uuid
-from dataclasses import asdict
 from functools import lru_cache
 from pathlib import Path
 
@@ -24,7 +23,6 @@ from utils.config import (
     Secrets,
     get_config,
 )
-from utils.config_update import process_config_update
 from utils.export import export_to_csv, export_to_excel, prepare_data_for_export
 from utils.history import (
     apply_time_range_filter,
@@ -35,7 +33,7 @@ from utils.stats import get_analysis_stats
 from utils.utils import extract_observables
 
 # Canonical version string displayed in the about page and used for update checks
-VERSION: str = "v0.12.0"
+VERSION: str = "v0.13.0"
 
 
 class InvalidCachefileError(Exception):
@@ -69,7 +67,7 @@ DATA_DIR: Path = Path(BASE_DIR) / "data"
 if not DATA_DIR.exists():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Read the secrets from the secrets.json file
+# Read the secrets from environment variables / .env
 secrets: Secrets = get_config()
 
 # Cache configuration
@@ -86,9 +84,6 @@ logger.debug(f"MAX_FORM_MEMORY_SIZE: {app.config['MAX_FORM_MEMORY_SIZE']}")
 
 # Define API_PREFIX
 API_PREFIX: str = secrets.api_prefix
-
-# Enable the config page - not intended for public use since authentication is not implemented
-app.config["CONFIG_PAGE_ENABLED"] = secrets.config_page_enabled
 
 # Define GUI_ENABLED_ENGINES
 GUI_ENABLED_ENGINES: list = secrets.gui_enabled_engines
@@ -386,31 +381,6 @@ def stats() -> tuple[str, int]:
 def about() -> tuple[str, int]:
     """Render the about page."""
     return render_template("about.html", version=app.config["VERSION"]), 200
-
-
-@app.route("/config")
-def config() -> tuple[str, int]:
-    """Render the config page."""
-    if not app.config.get("CONFIG_PAGE_ENABLED", False):
-        return render_template("404.html"), 404
-    return render_template("config.html", secrets=asdict(secrets)), 200
-
-
-@app.route("/update_config", methods=["POST"])
-def update_config() -> tuple[Response, int]:
-    """Update config from the form data"""
-    if not app.config.get("CONFIG_PAGE_ENABLED", False):
-        return jsonify({"message": "Configuration update is disabled."}), 403
-
-    # Process the configuration update
-    response_data, status_code = process_config_update(secrets, request)
-
-    # Update global GUI_ENABLED_ENGINES if engines were updated
-    if response_data.get("updated_engines"):
-        global GUI_ENABLED_ENGINES
-        GUI_ENABLED_ENGINES = response_data["updated_engines"]
-
-    return jsonify({"message": response_data["message"]}), status_code
 
 
 @app.route(f"/{API_PREFIX}/results/<analysis_id>", methods=["GET"])

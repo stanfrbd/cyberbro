@@ -23,5 +23,4 @@
 6. **Optional, use a dedicated service account**  
    To have a dedicated service account that can only do global search, you will first need to add a group with the `search_across_cases` permissions. Create a new group and give it only that permission. When creating a new user, check the `Use as service account` and assign the group to the user.
 
-Fill out the `secrets.json` file accordingly with `"dfir_iris_url"` and `"dfir_iris_api_key"`
-or use the environment variables `DFIR_IRIS_URL` and `DFIR_IRIS_API_KEY` in your custom docker-compose file.
+Set `DFIR_IRIS_URL` and `DFIR_IRIS_API_KEY` in your `.env` file or deployment environment.

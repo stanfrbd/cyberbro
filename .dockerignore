@@ -34,6 +34,10 @@ tests
 # Ignore CNAME file
 CNAME
 
+# Ignore local secrets/config files
+.env
+secrets.json
+
 # ignore docs/
 docs/
 
@@ -42,3 +46,6 @@ site/
 
 # Ignore site cache
 .cache/
+
+# Ignore custom scripts
+scripts/

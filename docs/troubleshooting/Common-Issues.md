@@ -42,8 +42,27 @@ For more details on volume mappings and other advanced deployment options, see t
 
 By default, the database used by Cyberbro is stored in the `data` directory inside the Docker container at `/app/data/results.db`, which is mapped to the `data` directory in the Cyberbro folder on your host machine. You can configure the database storage location by changing the volume mapping in your Docker configuration to point to a different directory if needed.
 
+## Docker database permission issues
+
+If Cyberbro starts but cannot read or write `results.db` (permission denied), the fastest recovery is usually:
+
+1. Stop the stack.
+2. Remove volumes/bind-mounted state related to `data` (and optionally `logs`).
+3. Redeploy the container.
+
+For most users, Cyberbro history is not critical data, so resetting volumes is often acceptable.
+
+If you need to keep history, copy `results.db` first, then fix ownership/permissions on the host and redeploy.
+
+In most deployments, Cyberbro handles ownership migration automatically for the `cyberbro` runtime user (starting with `v0.13.0`), so most users are not affected.
+Residual permission issues are more likely on hardened hosts, for example with SELinux enabled or equivalent host-level security policies.
+
+!!! note
+    If you are migrating from older root-based containers, permission conflicts can happen on existing bind mounts.
+    A clean redeploy is the simplest approach; manual ownership fix remains possible when history must be preserved.
+
 ## My API keys seem to be ignored or not stored
 
 !!! danger
-    Make sure you use either `secrets.json` or `.env` file for your deployment, not both.  
-    This may lead to unexpected behavior as the application will try to read both files and may override some values.
+    Ensure your `.env` file is present and values are correctly named (uppercase).
+    Cyberbro now uses environment variables only.

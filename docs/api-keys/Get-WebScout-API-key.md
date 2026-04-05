@@ -16,5 +16,5 @@ To use the WebScout API, you need to obtain an API key. Follow these steps to ge
 2. Click on the "Generate API Key" button.
 3. Your new API key will be displayed. Make sure to copy and store it securely.
 
-Use it with Cyberbro by using `"webscout"` variable in `secrets.json` file or `WEBSCOUT` environment variable.
+Set the `WEBSCOUT` environment variable in your `.env` file or deployment environment.
 

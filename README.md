@@ -81,7 +81,7 @@ without having to deploy a **complex** solution. Read the docs at https://docs.c
 
 > [!TIP]
 > If you are lazy, you need Docker. \
-> Do a `git clone` ; copy `secrets-sample.json` to `secrets.json` ; `docker compose up` then go to `localhost:5000`. Yep, that's it!
+> Do a `git clone` ; copy `.env.sample` to `.env` ; `docker compose up` then go to `localhost:5000`. Yep, that's it!
 
 # Getting Started
 
@@ -95,65 +95,56 @@ cd cyberbro
 ## Edit the config file (mandatory)
 
 ```
-cp secrets-sample.json secrets.json
+cp .env.sample .env
 ```
 
 > [!NOTE]
-> Don't have API keys? No problem, just copy the `secrets-sample.json` to `secrets.json` and leave all like this. Be careful if a proxy is used. \
+> Don't have API keys? No problem, just copy `.env.sample` to `.env` and leave optional values empty. Be careful if a proxy is used. \
 > You will be able to use **all free engines!**
 
-* Fill values (including proxy if needed) in the `secrets.json` file.
+* Fill values (including proxy if needed) in the `.env` file.
 
-```json
-{
-    "abuseipdb": "token_here",
-    "alienvault": "token_here",
-    "criminalip_api_key": "token_here",
-    "crowdstrike_client_id": "client_id_here",
-    "crowdstrike_client_secret": "client_secret_here",
-    "dfir_iris_api_key": "token_here",
-    "dfir_iris_url": "https://dfir-iris.local",
-    "google_cse_cx": "cx_here",
-    "google_cse_key": "key_here",
-    "google_safe_browsing": "token_here",
-    "ipapi": "token_here",
-    "ipinfo": "token_here",
-    "mde_client_id": "client_id_here",
-    "mde_client_secret": "client_secret_here",
-    "mde_tenant_id": "tenant_here",
-    "misp_api_key": "token_here",
-    "misp_url": "https://misp.local",
-    "opencti_api_key": "token_here",
-    "opencti_url": "https://demo.opencti.io",
-    "proxy_url": "",
-    "rl_analyze_api_key": "token_here",
-    "rl_analyze_url": "https://spectra_analyse_url_here",
-    "rosti_api_key": "token_here",
-    "shodan": "token_here",
-    "spur_us": "token_here",
-    "threatfox": "token_here",
-    "virustotal": "token_here",
-    "webscout": "token_here"
-}
+> [!WARNING]
+> `.env` contains sensitive secrets and must never be committed.
+> For production/team deployments, use SOPS, Vault, or an equivalent secret manager workflow.
+
+```bash
+ABUSEIPDB=token_here
+ALIENVAULT=token_here
+CRIMINALIP_API_KEY=token_here
+CROWDSTRIKE_CLIENT_ID=client_id_here
+CROWDSTRIKE_CLIENT_SECRET=client_secret_here
+DFIR_IRIS_API_KEY=token_here
+DFIR_IRIS_URL=https://dfir-iris.local
+GOOGLE_CSE_CX=cx_here
+GOOGLE_CSE_KEY=key_here
+GOOGLE_SAFE_BROWSING=token_here
+IPAPI=token_here
+IPINFO=token_here
+MDE_CLIENT_ID=client_id_here
+MDE_CLIENT_SECRET=client_secret_here
+MDE_TENANT_ID=tenant_here
+MISP_API_KEY=token_here
+MISP_URL=https://misp.local
+OPENCTI_API_KEY=token_here
+OPENCTI_URL=https://demo.opencti.io
+PROXY_URL=
+RL_ANALYZE_API_KEY=token_here
+RL_ANALYZE_URL=https://spectra_analyse_url_here
+ROSTI_API_KEY=token_here
+SHODAN=token_here
+SPUR_US=token_here
+THREATFOX=token_here
+VIRUSTOTAL=token_here
+WEBSCOUT=token_here
 ```
 
-* Obtain API keys from the official documentation of each service.
-* Microsoft Defender for Endpoint (MDE) is a paid service and can be skipped if you don't have an account (unchecked by default).
-
 > [!IMPORTANT]
-> You can modify the configuration via the GUI at [http://127.0.0.1:5000/config](http://127.0.0.1:5000/config). \
-> This endpoint is disabled by default for security reasons, as it is not protected. \
-> To enable it, set `"config_page_enabled":true` in `secrets.json` or use `CONFIG_PAGE_ENABLED=true` as environment variable. \
-> **This is not recommended for public or team use, as it exposes your API keys.**
+> Starting with version `v0.13.0`, Cyberbro no longer supports `secrets.json` and the `/config` page. Cf. [discussion 165](https://github.com/stanfrbd/cyberbro/discussions/165).\
+> If you already have a legacy `secrets.json`, convert it to `.env` with:
+> `python3 scripts/secrets_json_to_env.py`
 
-See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment) in the docs to get all custom option.
-
-> [!IMPORTANT]
-> `secrets.json` support is still fully supported for now for regular application settings and API keys.
-> For Docker **port mapping** changes, prefer `.env` / environment variables (`FLASK_PORT`, optional `HOST_PORT`) because `docker compose` resolves `ports:` before Cyberbro reads `secrets.json`.
-> If you keep the default port mapping (`5000:5000`), `secrets.json` alone is sufficient.
->
-> Roadmap: configuration is expected to progressively move toward `.env` as the standard deployment method.
+See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment) in the docs.
 
 # Launch the app
 
@@ -161,6 +152,7 @@ See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Adva
 
 > [!WARNING]
 > Make sure you install the `compose` plugin as `docker compose` and not `docker-compose`.
+> In Docker, the app binds to `0.0.0.0` inside the container even if your local `.env` sets `FLASK_HOST=127.0.0.1`.
 
 ```bash
 docker compose up # use -d to run in background and use --build to rebuild the image
@@ -168,7 +160,7 @@ docker compose up # use -d to run in background and use --build to rebuild the i
 
 * Go to http://127.0.0.1:5000 and Enjoy.
 
-> Don't forget to edit the `secrets.json` before building the image.
+> Don't forget to edit `.env` before building the image.
 
 See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment) in the docs to get all Docker deployment options.
 
@@ -353,7 +345,7 @@ Your contributions are greatly appreciated!
 ```
 MIT License
 
-Copyright (c) 2025 stanfrbd
+Copyright (c) 2024-2026 stanfrbd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

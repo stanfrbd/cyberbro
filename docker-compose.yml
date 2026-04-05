@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cyberbro-web
+    container_name: cyberbro
     ports:
       - "${HOST_PORT:-5000}:${FLASK_PORT:-5000}"
     environment:
@@ -11,7 +11,6 @@ services:
       - ALIENVAULT=${ALIENVAULT:-}
       - API_CACHE_TIMEOUT=${API_CACHE_TIMEOUT:-}
       - API_PREFIX=${API_PREFIX:-}
-      - CONFIG_PAGE_ENABLED=${CONFIG_PAGE_ENABLED:-}
       - CRIMINALIP_API_KEY=${CRIMINALIP_API_KEY:-}
       - CROWDSTRIKE_CLIENT_ID=${CROWDSTRIKE_CLIENT_ID:-}
       - CROWDSTRIKE_CLIENT_SECRET=${CROWDSTRIKE_CLIENT_SECRET:-}
@@ -20,7 +19,7 @@ services:
       - DFIR_IRIS_URL=${DFIR_IRIS_URL:-}
       - FLASK_ENV=production
       - FLASK_DEBUG=${FLASK_DEBUG:-}
-      - FLASK_HOST=${FLASK_HOST:-0.0.0.0}
+      - FLASK_HOST=0.0.0.0
       - FLASK_PORT=${FLASK_PORT:-5000}
       - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
       - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
@@ -51,7 +50,18 @@ services:
       - VIRUSTOTAL=${VIRUSTOTAL:-}
       - WEBSCOUT=${WEBSCOUT:-}
       - DISABLE_VERSION_CHECK=${DISABLE_VERSION_CHECK:-}
+      - MIGRATE_OWNERSHIP_ON_START=${MIGRATE_OWNERSHIP_ON_START:-true}
     restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import os,urllib.request; port=os.getenv('FLASK_PORT','5000'); urllib.request.urlopen(f'http://127.0.0.1:{port}/', timeout=5)\" || exit 1",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     volumes:
       - ./data:/app/data
       - ./logs:/var/log/cyberbro

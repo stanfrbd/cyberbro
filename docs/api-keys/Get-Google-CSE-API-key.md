@@ -7,4 +7,4 @@ Google Custom Search Engine (CSE) will help you to get Google results for Cyberb
 !!! info
     Google Custom Search API has usage limits. The free tier allows for 100 search queries per day. For higher usage, consider enabling billing on your Google Cloud project ($5 per 1000 queries).
 
-You can fill the `secrets.json` accordingly with the variables `"google_cse_key"` and `"google_cse_cx"`, or use the environment variables `GOOGLE_CSE_KEY` and `GOOGLE_CSE_CX` in your custom docker-compose file.
+Set `GOOGLE_CSE_KEY` and `GOOGLE_CSE_CX` in your `.env` file or deployment environment.

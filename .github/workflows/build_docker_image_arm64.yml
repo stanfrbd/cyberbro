@@ -3,8 +3,6 @@ on:
   push:
     tags:
       - 'v*'
-    branches:
-      - main
 
 jobs:
   build:
@@ -21,5 +19,11 @@ jobs:
         run: echo ${{ secrets.DEPLOYMENT_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Build Docker image for arm64
-        run: docker buildx build --platform linux/arm64 -t ghcr.io/${{ github.repository_owner }}/cyberbro-arm64:latest --push .
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            -t ghcr.io/${{ github.repository_owner }}/cyberbro-arm64:latest \
+            -t ghcr.io/${{ github.repository_owner }}/cyberbro-arm64:${{ github.ref_name }} \
+            --push \
+            .
 

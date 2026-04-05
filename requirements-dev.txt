@@ -1,6 +1,6 @@
-pre-commit
-ruff
-pytest
-pytest-mock
-responses
-fakerx
+pre-commit>=4.5.1
+ruff>=0.15.5
+pytest>=9.0.2
+pytest-mock>=3.15.1
+responses>=0.26.0
+fakerx>=0.2.0

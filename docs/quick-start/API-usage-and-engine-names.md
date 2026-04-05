@@ -202,7 +202,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 
 
 ## Note about caching and ignoring cache
-* The API results are cached for 24 hours by default. You can change this by modifying the `api_cache_timeout` parameter in the `secrets.json` file or by setting the corresponding environment variable. Refer to this document for more details: [advanced options](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment).
+* The API results are cached for 24 hours by default. You can change this with the `API_CACHE_TIMEOUT` environment variable. Refer to this document for more details: [advanced options](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment).
 
 * You can bypass caching for a specific request by including `"ignore_cache": true` in the data section of your request. Ignoring the cache will force the system to perform the analysis again. For example:
 

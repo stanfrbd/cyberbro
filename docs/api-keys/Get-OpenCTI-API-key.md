@@ -24,5 +24,4 @@ OpenCTI is an open-source platform that provides a powerful and flexible way to 
 !!! note
     On the demo instance, the key will be regenerated every 24 hours. If you are using OpenCTI in a production environment, you can manage your API keys more securely.
 
-Fill the `secrets.json` file accordingly with `"opencti_url"` and `"opencti_api_key"`  
-or use the environment variables `OPENCTI_URL` and `OPENCTI_API_KEY` in your custom docker-compose file.
+Set `OPENCTI_URL` and `OPENCTI_API_KEY` in your `.env` file or deployment environment.

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Deletes the version cache file if it exists - useful after updating the app
-if [ -f "data/version_cache.json" ]; then
-    rm "data/version_cache.json"
-fi
+set -eu
 
-# Start supervisord
-/usr/bin/supervisord -c /app/prod/supervisord.conf
+exec /usr/local/bin/gunicorn -c prod/gunicorn.conf.py app:app

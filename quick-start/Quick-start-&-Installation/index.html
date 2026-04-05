@@ -617,17 +617,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#edit-the-config-file-mandatory" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Edit the config file (mandatory)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#launch-the-app" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -642,7 +631,7 @@
   <a href="#lazy-and-easy-use-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Lazy and easy - use docker
+        Lazy and easy - use Docker
       
     </span>
   </a>
@@ -2073,17 +2062,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#edit-the-config-file-mandatory" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Edit the config file (mandatory)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#launch-the-app" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2098,7 +2076,7 @@
   <a href="#lazy-and-easy-use-docker" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Lazy and easy - use docker
+        Lazy and easy - use Docker
       
     </span>
   </a>
@@ -2155,75 +2133,41 @@
 <h1 id="getting-started-tldr">Getting Started - TL;DR<a class="headerlink" href="#getting-started-tldr" title="Permanent link">&para;</a></h1>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>If you are lazy, you need Docker.<br />
-Do a <code>git clone</code> ; copy <code>secrets-sample.json</code> to <code>secrets.json</code> ; <code>docker compose up</code> then go to <code>localhost:5000</code>.<br />
-Yep, that's it!</p>
+<p>If you are lazy, use Docker.
+Do a <code>git clone</code> ; copy <code>.env.sample</code> to <code>.env</code> ; <code>docker compose up</code> then go to <code>localhost:5000</code>.</p>
 </div>
-<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">docker compose version</span><span data-ty>Docker Compose version v2.5.0</span><span data-ty="input" data-ty-prompt="$">git clone https://github.com/stanfrbd/cyberbro</span><span data-ty="input" data-ty-prompt="$">cd cyberbro</span><span data-ty="input" data-ty-prompt="$">cp secrets-sample.json secrets.json</span><span data-ty="input" data-ty-prompt="$">docker compose up --build # use -d to run in background</span><span data-ty><br>Go to http://127.0.0.1:5000/<br></span></div>
+<div class="termy" data-termynal data-ty-macos data-ty-title="bash"><span data-ty="input" data-ty-prompt="$">docker compose version</span><span data-ty>Docker Compose version v2.5.0</span><span data-ty="input" data-ty-prompt="$">git clone https://github.com/stanfrbd/cyberbro</span><span data-ty="input" data-ty-prompt="$">cd cyberbro</span><span data-ty="input" data-ty-prompt="$">cp .env.sample .env</span><span data-ty="input" data-ty-prompt="$">docker compose up --build</span><span data-ty><br>Go to http://127.0.0.1:5000/<br></span></div>
 
 <h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <ul>
-<li>To get started, clone the repository</li>
+<li>Clone the repository:</li>
 </ul>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/stanfrbd/cyberbro
 <span class="nb">cd</span><span class="w"> </span>cyberbro
 </code></pre></div>
-<h2 id="edit-the-config-file-mandatory">Edit the config file (mandatory)<a class="headerlink" href="#edit-the-config-file-mandatory" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>cp secrets-sample.json secrets.json
+<ul>
+<li>Create your environment file:</li>
+</ul>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>.env.sample<span class="w"> </span>.env
 </code></pre></div>
+<ul>
+<li>Fill your <code>.env</code> values (API keys, proxy, runtime options).</li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Don't have API keys? No problem—just copy the <code>secrets-sample.json</code> to <code>secrets.json</code> and leave everything as is.</p>
-<p>Be careful if a proxy is used.<br />
-You will be able to use <strong>all free engines!</strong></p>
+<p>No API keys yet? Keep <code>.env</code> mostly empty and start with free engines.</p>
 </div>
-<ul>
-<li>Fill values (including proxy if needed) in the <code>secrets.json</code> file.</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;abuseipdb&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;alienvault&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;criminalip_api_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;crowdstrike_client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_id_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;crowdstrike_client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_secret_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dfir_iris_api_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;dfir_iris_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://dfir-iris.local&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;google_cse_cx&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cx_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;google_cse_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;key_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;google_safe_browsing&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;ipapi&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;ipinfo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;mde_client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_id_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;mde_client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_secret_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;mde_tenant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tenant_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;misp_api_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;misp_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://misp.local&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;opencti_api_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;opencti_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://demo.opencti.io&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;proxy_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;rl_analyze_api_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;rl_analyze_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://spectra_analyse_url_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;rosti_api_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;shodan&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;spur_us&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;threatfox&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;virustotal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;webscout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token_here&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
-<ul>
-<li>Obtain API keys from the official documentation of each service.</li>
-<li>Microsoft Defender for Endpoint (MDE) is a paid service and can be skipped if you don't have an account (unchecked by default).</li>
-</ul>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>You can modify the configuration via the GUI at <a href="http://127.0.0.1:5000/config">http://127.0.0.1:5000/config</a>.<br />
-This endpoint is disabled by default for security reasons, as it is not protected.<br />
-To enable it, set <code>"config_page_enabled":true</code> in <code>secrets.json</code> or use <code>CONFIG_PAGE_ENABLED=true</code> as environment variable.<br />
-<strong>This is not recommended for public or team use, as it exposes your API keys.</strong></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do not commit <code>.env</code> in Git.</p>
 </div>
+<div class="admonition danger">
+<p class="admonition-title">Danger</p>
+<p>For production/team use, store <code>.env</code> secrets with SOPS, Vault, or an equivalent secrets manager.</p>
+</div>
+<p>See <a href="https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment">Advanced options for deployment</a> for the full list of variables and migration guidance.</p>
 <h2 id="launch-the-app">Launch the app<a class="headerlink" href="#launch-the-app" title="Permanent link">&para;</a></h2>
-<h2 id="lazy-and-easy-use-docker">Lazy and easy - use docker<a class="headerlink" href="#lazy-and-easy-use-docker" title="Permanent link">&para;</a></h2>
+<h2 id="lazy-and-easy-use-docker">Lazy and easy - use Docker<a class="headerlink" href="#lazy-and-easy-use-docker" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Make sure you install the <code>compose</code> plugin as <code>docker compose</code> and not <code>docker-compose</code>.</p>
@@ -2231,11 +2175,8 @@ To enable it, set <code>"config_page_enabled":true</code> in <code>secrets.json<
 <div class="highlight"><pre><span></span><code>docker<span class="w"> </span>compose<span class="w"> </span>up<span class="w"> </span><span class="c1"># use -d to run in background and use --build to rebuild the image</span>
 </code></pre></div>
 <ul>
-<li>Go to http://127.0.0.1:5000 and Enjoy.</li>
+<li>Go to http://127.0.0.1:5000 and enjoy.</li>
 </ul>
-<blockquote>
-<p>Don't forget to edit the <code>secrets.json</code> before building the image.</p>
-</blockquote>
 <h2 id="using-the-docker-image-from-github-packages-and-a-custom-docker-compose-file">Using the docker image from GitHub Packages and a custom <code>docker compose</code> file<a class="headerlink" href="#using-the-docker-image-from-github-packages-and-a-custom-docker-compose-file" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>See more</strong> in <a href="https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment">Advanced deployment options</a></li>
@@ -2254,17 +2195,13 @@ To enable it, set <code>"config_page_enabled":true</code> in <code>secrets.json<
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>When running without Docker, gunicorn's behavior is controlled by settings in <code>secrets.json</code>: <code>flask_port</code> (bind port), <code>flask_host</code> (bind interface), <code>gunicorn_workers_count</code>, <code>gunicorn_threads_count</code>, and <code>gunicorn_timeout</code>.</p>
+<p>When running without Docker, gunicorn behavior is controlled by environment variables such as <code>FLASK_PORT</code>, <code>FLASK_HOST</code>, <code>GUNICORN_WORKERS_COUNT</code>, <code>GUNICORN_THREADS_COUNT</code>, and <code>GUNICORN_TIMEOUT</code>.</p>
 </div>
 <ul>
-<li>Run the app with in development mode.</li>
+<li>Run the app in development mode.</li>
 </ul>
 <div class="highlight"><pre><span></span><code>python3<span class="w"> </span>app.py
 </code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><code>secrets.json</code> must be present according to the sample, before building image or launching.</p>
-</div>
 
 
 
@@ -2287,7 +2224,7 @@ To enable it, set <code>"config_page_enabled":true</code> in <code>secrets.json<
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 22, 2026 14:39:05 UTC"><span class="timeago" datetime="2026-03-22T14:39:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 22, 2026 14:39:05 UTC">2026-03-22</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 30, 2026 14:13:39 UTC"><span class="timeago" datetime="2026-03-30T14:13:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 30, 2026 14:13:39 UTC">2026-03-30</span>
   </span>
 
     
@@ -2311,7 +2248,7 @@ To enable it, set <code>"config_page_enabled":true</code> in <code>secrets.json<
       
     </span>
     <nav>
-      Jon Mark Allen, Stig Dahl, stanfrbd
+      Jon Mark Allen, stanfrbd
     </nav>
   </span>
 

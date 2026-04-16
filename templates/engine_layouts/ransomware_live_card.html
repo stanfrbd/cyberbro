@@ -1,0 +1,39 @@
+<div class="card">
+    <h3>Ransomware.Live</h3>
+
+    {% if analysis_results.results[0].ransomware_live and analysis_results.results[0].ransomware_live.found %}
+        <p><strong>Victims found:</strong> {{ analysis_results.results[0].ransomware_live.count }}</p>
+
+        {% for victim in analysis_results.results[0].ransomware_live.victims %}
+        <div style="margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+            {% if victim.victim %}
+                <p><strong>Victim:</strong> {{ victim.victim }}</p>
+            {% endif %}
+            {% if victim.group %}
+                <p><strong>Group:</strong> {{ victim.group }}</p>
+            {% endif %}
+            {% if victim.published %}
+                <p><strong>Published:</strong> {{ victim.published }}</p>
+            {% endif %}
+            {% if victim.website %}
+                <p><strong>Website:</strong> {{ victim.website }}</p>
+            {% endif %}
+            {% if victim.description %}
+                <p><strong>Description:</strong> {{ victim.description }}</p>
+            {% endif %}
+            {% if victim.url %}
+                <p><a href="{{ victim.url }}" target="_blank">Source</a></p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        {% if analysis_results.results[0].ransomware_live.link %}
+            <p><a href="{{ analysis_results.results[0].ransomware_live.link }}" target="_blank">View on Ransomware.Live</a></p>
+        {% endif %}
+
+    {% elif analysis_results.results[0].ransomware_live and analysis_results.results[0].ransomware_live.found == false %}
+        <p>Not Found</p>
+    {% else %}
+        <p>Not applicable</p>
+    {% endif %}
+</div>

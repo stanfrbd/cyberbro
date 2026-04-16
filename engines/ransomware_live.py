@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from urllib.parse import quote
 
 import requests
 from requests.exceptions import JSONDecodeError, RequestException
@@ -72,7 +73,7 @@ class RansomwareLiveEngine(BaseEngine):
                     }
                 )
 
-        search_url = f"https://www.ransomware.live/search?q={query_value}&scope=all"
+        search_url = f"https://www.ransomware.live/search?q={quote(query_value)}&scope=all"
         return {
             "found": len(victims) > 0,
             "count": len(victims),

@@ -1,7 +1,7 @@
 <td>
     {% if result.ransomware_live and result.ransomware_live.found %}
         <strong>{{ result.ransomware_live.count }} victim(s)</strong>
-        {% set groups = result.ransomware_live.victims | map(attribute='group') | select | unique | list %}
+        {% set groups = result.ransomware_live.victims | map(attribute='group_name') | select | unique | list %}
         {% if groups %}
             <div style="color: var(--text-secondary); font-size: 0.85em;">
                 Groups: {{ groups | join(', ') }}

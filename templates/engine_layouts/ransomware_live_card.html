@@ -6,23 +6,17 @@
 
         {% for victim in analysis_results.results[0].ransomware_live.victims %}
         <div style="margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
-            {% if victim.victim %}
-                <p><strong>Victim:</strong> {{ victim.victim }}</p>
+            {% if victim.victim_name %}
+                <p><strong>Victim:</strong> {{ victim.victim_name }}</p>
             {% endif %}
-            {% if victim.group %}
-                <p><strong>Group:</strong> {{ victim.group }}</p>
-            {% endif %}
-            {% if victim.published %}
-                <p><strong>Published:</strong> {{ victim.published }}</p>
+            {% if victim.group_name %}
+                <p><strong>Group:</strong> {{ victim.group_name }}</p>
             {% endif %}
             {% if victim.website %}
                 <p><strong>Website:</strong> {{ victim.website }}</p>
             {% endif %}
-            {% if victim.description %}
-                <p><strong>Description:</strong> {{ victim.description }}</p>
-            {% endif %}
-            {% if victim.url %}
-                <p><a href="{{ victim.url }}" target="_blank">Source</a></p>
+            {% if victim.discovered %}
+                <p><strong>Discovered:</strong> {{ victim.discovered }}</p>
             {% endif %}
         </div>
         {% endfor %}

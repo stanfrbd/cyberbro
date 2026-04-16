@@ -32,13 +32,15 @@ class RansomwareLiveEngine(BaseEngine):
         else:
             query_value = observable.value
 
-        url = f"https://api-pro.ransomware.live/victims/domain/{query_value}"
-        headers = {"Authorization": f"Bearer {self.secrets.ransomware_live_api_key}"}
+        url = "https://api-pro.ransomware.live/victims/search"
+        headers = {"api-key": self.secrets.ransomware_live_api_key}
+        params = {"query": query_value}
 
         try:
             response = requests.get(
                 url,
                 headers=headers,
+                params=params,
                 proxies=self.proxies,
                 verify=self.ssl_verify,
                 timeout=10,
@@ -61,12 +63,10 @@ class RansomwareLiveEngine(BaseEngine):
                     continue
                 victims.append(
                     {
-                        "victim": item.get("victim"),
-                        "group": item.get("group"),
-                        "published": item.get("published"),
+                        "victim_name": item.get("victim_name"),
+                        "group_name": item.get("group_name"),
                         "website": item.get("website"),
-                        "description": item.get("description"),
-                        "url": item.get("url"),
+                        "discovered": item.get("discovered"),
                     }
                 )
 
@@ -74,7 +74,7 @@ class RansomwareLiveEngine(BaseEngine):
             "found": len(victims) > 0,
             "count": len(victims),
             "victims": victims,
-            "link": f"https://ransomware.live/#/victim/{query_value}",
+            "link": f"https://ransomware.live/victims?q={query_value}",
         }
 
     def create_export_row(self, analysis_result: Any) -> dict:
@@ -86,9 +86,11 @@ class RansomwareLiveEngine(BaseEngine):
                 "ransomware_live_victims": None,
             }
 
-        groups = list({v["group"] for v in analysis_result.get("victims", []) if v.get("group")})
+        groups = list(
+            {v["group_name"] for v in analysis_result.get("victims", []) if v.get("group_name")}
+        )
         victim_names = list(
-            {v["victim"] for v in analysis_result.get("victims", []) if v.get("victim")}
+            {v["victim_name"] for v in analysis_result.get("victims", []) if v.get("victim_name")}
         )
 
         return {

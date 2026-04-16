@@ -156,6 +156,19 @@ function formatResults(data) {
                 });
             }
         }
+        if (result.ransomware_live) {
+            plainText += `Ransomware.Live: Found: ${result.ransomware_live.found}, Count: ${result.ransomware_live.count}\n`;
+            if (result.ransomware_live.victims && result.ransomware_live.victims.length > 0) {
+                result.ransomware_live.victims.forEach(victim => {
+                    if (victim.post_title) plainText += `  - ${victim.post_title}`;
+                    if (victim.group_name) plainText += ` (${victim.group_name})`;
+                    if (victim.discovered) plainText += ` [${victim.discovered}]`;
+                    plainText += `\n`;
+                    if (victim.permalink) plainText += `    ${victim.permalink}\n`;
+                });
+            }
+            if (result.ransomware_live.search_url) plainText += `  Search: ${result.ransomware_live.search_url}\n`;
+        }
         if (result.google && result.google.results.length > 0) {
             plainText += `Google:\n`;
             result.google.results.forEach(googleResult => {

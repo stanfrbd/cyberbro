@@ -7,11 +7,14 @@
                 Groups: {{ groups | join(', ') }}
             </div>
         {% endif %}
-        {% if result.ransomware_live.link %}
-            <div><a href="{{ result.ransomware_live.link }}" target="_blank">View details</a></div>
+        {% if result.ransomware_live.search_url %}
+            <div><a href="{{ result.ransomware_live.search_url }}" target="_blank">Search on Ransomware.Live</a></div>
         {% endif %}
     {% elif result.ransomware_live and result.ransomware_live.found == false %}
         Not Found
+        {% if result.ransomware_live.search_url %}
+            <div><a href="{{ result.ransomware_live.search_url }}" target="_blank">Search on Ransomware.Live</a></div>
+        {% endif %}
     {% else %}
         Not applicable
     {% endif %}

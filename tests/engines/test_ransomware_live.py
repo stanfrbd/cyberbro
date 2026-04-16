@@ -44,14 +44,19 @@ def url_observable():
     return Observable(value="https://example.com/some/path", type=ObservableType.URL)
 
 
-VICTIM_RESPONSE = [
-    {
-        "victim_name": "Example Corp",
-        "group_name": "lockbit3",
-        "website": "example.com",
-        "discovered": "2024-01-15T12:00:00Z",
-    }
-]
+VICTIM_RESPONSE = {
+    "query": "example.com",
+    "count": 1,
+    "victims": [
+        {
+            "post_title": "Example Corp (example.com)",
+            "group_name": "lockbit3",
+            "website": "example.com",
+            "discovered": "2024-01-15T12:00:00Z",
+            "permalink": "https://www.ransomware.live/id/abc123",
+        }
+    ],
+}
 
 
 # ============================================================================
@@ -73,11 +78,12 @@ def test_analyze_fqdn_victim_found(fqdn_observable, secrets_with_key):
     assert result["count"] == 1
     assert len(result["victims"]) == 1
     victim = result["victims"][0]
-    assert victim["victim_name"] == "Example Corp"
+    assert victim["post_title"] == "Example Corp (example.com)"
     assert victim["group_name"] == "lockbit3"
     assert victim["website"] == "example.com"
     assert victim["discovered"] == "2024-01-15T12:00:00Z"
-    assert result["link"] == f"https://ransomware.live/victims?q={fqdn_observable.value}"
+    assert victim["permalink"] == "https://www.ransomware.live/id/abc123"
+    assert result["search_url"] == f"https://www.ransomware.live/search?q={fqdn_observable.value}&scope=all"
 
 
 @responses.activate
@@ -85,7 +91,7 @@ def test_analyze_fqdn_no_victims(fqdn_observable, secrets_with_key):
     """Test analysis where domain is not found as ransomware victim."""
     engine = RansomwareLiveEngine(secrets_with_key, proxies={}, ssl_verify=True)
 
-    responses.add(responses.GET, API_URL, json=[], status=200)
+    responses.add(responses.GET, API_URL, json={"count": 0, "victims": []}, status=200)
 
     result = engine.analyze(fqdn_observable)
 
@@ -100,7 +106,7 @@ def test_analyze_uses_correct_endpoint_and_auth(fqdn_observable, secrets_with_ke
     """Test that the correct endpoint, params, and auth header are used."""
     engine = RansomwareLiveEngine(secrets_with_key, proxies={}, ssl_verify=True)
 
-    responses.add(responses.GET, API_URL, json=[], status=200)
+    responses.add(responses.GET, API_URL, json={"count": 0, "victims": []}, status=200)
 
     engine.analyze(fqdn_observable)
 
@@ -121,7 +127,7 @@ def test_analyze_url_extracts_domain(url_observable, secrets_with_key):
 
     assert result is not None
     assert result["found"] is True
-    assert result["link"] == "https://ransomware.live/victims?q=example.com"
+    assert result["search_url"] == "https://www.ransomware.live/search?q=example.com&scope=all"
 
 
 def test_analyze_missing_api_key(fqdn_observable, secrets_without_key, caplog):
@@ -208,20 +214,26 @@ def test_analyze_multiple_victims(fqdn_observable, secrets_with_key):
     """Test that multiple victim records are returned and parsed correctly."""
     engine = RansomwareLiveEngine(secrets_with_key, proxies={}, ssl_verify=True)
 
-    multi_response = [
-        {
-            "victim_name": "Example Corp",
-            "group_name": "lockbit3",
-            "website": "example.com",
-            "discovered": "2024-01-15T12:00:00Z",
-        },
-        {
-            "victim_name": "Example Corp",
-            "group_name": "alphv",
-            "website": "example.com",
-            "discovered": "2023-11-01T08:30:00Z",
-        },
-    ]
+    multi_response = {
+        "query": "example.com",
+        "count": 2,
+        "victims": [
+            {
+                "post_title": "Example Corp",
+                "group_name": "lockbit3",
+                "website": "example.com",
+                "discovered": "2024-01-15T12:00:00Z",
+                "permalink": "https://www.ransomware.live/id/abc1",
+            },
+            {
+                "post_title": "Example Corp",
+                "group_name": "alphv",
+                "website": "example.com",
+                "discovered": "2023-11-01T08:30:00Z",
+                "permalink": "https://www.ransomware.live/id/abc2",
+            },
+        ],
+    }
     responses.add(responses.GET, API_URL, json=multi_response, status=200)
 
     result = engine.analyze(fqdn_observable)
@@ -241,19 +253,21 @@ def test_create_export_row_found():
         "count": 2,
         "victims": [
             {
-                "victim_name": "Example Corp",
+                "post_title": "Example Corp",
                 "group_name": "lockbit3",
                 "website": "example.com",
                 "discovered": "2024-01-15T12:00:00Z",
+                "permalink": "https://www.ransomware.live/id/abc1",
             },
             {
-                "victim_name": "Example Corp",
+                "post_title": "Example Corp",
                 "group_name": "alphv",
                 "website": "example.com",
                 "discovered": "2023-11-01T08:30:00Z",
+                "permalink": "https://www.ransomware.live/id/abc2",
             },
         ],
-        "link": "https://ransomware.live/victims?q=example.com",
+        "search_url": "https://www.ransomware.live/search?q=example.com&scope=all",
     }
 
     row = engine.create_export_row(analysis_result)
@@ -272,7 +286,7 @@ def test_create_export_row_not_found():
         "found": False,
         "count": 0,
         "victims": [],
-        "link": "https://ransomware.live/victims?q=example.com",
+        "search_url": "https://www.ransomware.live/search?q=example.com&scope=all",
     }
 
     row = engine.create_export_row(analysis_result)

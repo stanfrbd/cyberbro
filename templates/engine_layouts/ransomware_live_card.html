@@ -6,8 +6,8 @@
 
         {% for victim in analysis_results.results[0].ransomware_live.victims %}
         <div style="margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
-            {% if victim.victim_name %}
-                <p><strong>Victim:</strong> {{ victim.victim_name }}</p>
+            {% if victim.post_title %}
+                <p><strong>Title:</strong> {{ victim.post_title }}</p>
             {% endif %}
             {% if victim.group_name %}
                 <p><strong>Group:</strong> {{ victim.group_name }}</p>
@@ -18,15 +18,21 @@
             {% if victim.discovered %}
                 <p><strong>Discovered:</strong> {{ victim.discovered }}</p>
             {% endif %}
+            {% if victim.permalink %}
+                <p><a href="{{ victim.permalink }}" target="_blank">View on Ransomware.Live</a></p>
+            {% endif %}
         </div>
         {% endfor %}
 
-        {% if analysis_results.results[0].ransomware_live.link %}
-            <p><a href="{{ analysis_results.results[0].ransomware_live.link }}" target="_blank">View on Ransomware.Live</a></p>
+        {% if analysis_results.results[0].ransomware_live.search_url %}
+            <p><a href="{{ analysis_results.results[0].ransomware_live.search_url }}" target="_blank">Search on Ransomware.Live</a></p>
         {% endif %}
 
     {% elif analysis_results.results[0].ransomware_live and analysis_results.results[0].ransomware_live.found == false %}
         <p>Not Found</p>
+        {% if analysis_results.results[0].ransomware_live.search_url %}
+            <p><a href="{{ analysis_results.results[0].ransomware_live.search_url }}" target="_blank">Search on Ransomware.Live</a></p>
+        {% endif %}
     {% else %}
         <p>Not applicable</p>
     {% endif %}

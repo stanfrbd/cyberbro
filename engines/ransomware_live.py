@@ -57,24 +57,27 @@ class RansomwareLiveEngine(BaseEngine):
             return None
 
         victims: list[dict[str, Any]] = []
-        if isinstance(data, list):
-            for item in data:
+        if isinstance(data, dict):
+            raw_victims = data.get("victims") or []
+            for item in raw_victims:
                 if not isinstance(item, dict):
                     continue
                 victims.append(
                     {
-                        "victim_name": item.get("victim_name"),
+                        "post_title": item.get("post_title"),
                         "group_name": item.get("group_name"),
                         "website": item.get("website"),
                         "discovered": item.get("discovered"),
+                        "permalink": item.get("permalink"),
                     }
                 )
 
+        search_url = f"https://www.ransomware.live/search?q={query_value}&scope=all"
         return {
             "found": len(victims) > 0,
             "count": len(victims),
             "victims": victims,
-            "link": f"https://ransomware.live/victims?q={query_value}",
+            "search_url": search_url,
         }
 
     def create_export_row(self, analysis_result: Any) -> dict:
@@ -89,13 +92,13 @@ class RansomwareLiveEngine(BaseEngine):
         groups = list(
             {v["group_name"] for v in analysis_result.get("victims", []) if v.get("group_name")}
         )
-        victim_names = list(
-            {v["victim_name"] for v in analysis_result.get("victims", []) if v.get("victim_name")}
+        post_titles = list(
+            {v["post_title"] for v in analysis_result.get("victims", []) if v.get("post_title")}
         )
 
         return {
             "ransomware_live_found": analysis_result.get("found"),
             "ransomware_live_count": analysis_result.get("count"),
             "ransomware_live_groups": ", ".join(groups) if groups else None,
-            "ransomware_live_victims": ", ".join(victim_names) if victim_names else None,
+            "ransomware_live_victims": ", ".join(post_titles) if post_titles else None,
         }

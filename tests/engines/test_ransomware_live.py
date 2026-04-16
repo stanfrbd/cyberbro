@@ -106,8 +106,8 @@ def test_analyze_uses_correct_endpoint_and_auth(fqdn_observable, secrets_with_ke
 
     assert len(responses.calls) == 1
     req = responses.calls[0].request
-    assert "query=example.com" in req.url
-    assert req.headers.get("api-key") == "test_api_key_12345"
+    assert "q=example.com" in req.url
+    assert req.headers.get("X-API-KEY") == "test_api_key_12345"
 
 
 @responses.activate

@@ -33,8 +33,8 @@ class RansomwareLiveEngine(BaseEngine):
             query_value = observable.value
 
         url = "https://api-pro.ransomware.live/victims/search"
-        headers = {"api-key": self.secrets.ransomware_live_api_key}
-        params = {"query": query_value}
+        headers = {"X-API-KEY": self.secrets.ransomware_live_api_key}
+        params = {"q": query_value}
 
         try:
             response = requests.get(

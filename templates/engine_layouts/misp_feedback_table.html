@@ -1,0 +1,21 @@
+<td>
+    {% if result.misp_feedback %}
+        <strong>Status:</strong> 
+        {% if result.misp_feedback.status == "HIT" %}
+            <span style="color: #e74c3c; font-weight: bold;">{{ result.misp_feedback.status }}</span>
+        {% else %}
+            <span style="color: #27ae60; font-weight: bold;">{{ result.misp_feedback.status }}</span>
+        {% endif %}
+        <br/>
+        {% if result.misp_feedback.warninglists %}
+            <strong>Warninglists:</strong>
+            <ul>
+            {% for warninglist in result.misp_feedback.warninglists %}
+                <li>{{ warninglist }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

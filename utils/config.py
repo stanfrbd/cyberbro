@@ -42,6 +42,8 @@ class Secrets:
     mde_tenant_id: str = ""
     misp_api_key: str = ""
     misp_url: str = ""
+    misp_feedback_server_url: str = ""
+    misp_feedback_token: str = ""
     opencti_api_key: str = ""
     opencti_url: str = ""
     proxy_url: str = ""

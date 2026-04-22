@@ -88,9 +88,14 @@ class Secrets:
             hasattr(field_type, "__origin__")
             and field_type.__origin__ is list
             and isinstance(value, str)
-            and "," in value
         ):
-            value = [item.strip() for item in value.split(",")]
+            value = (
+                [item.strip() for item in value.split(",")]
+                if "," in value
+                else [value.strip()]
+                if value.strip()
+                else []
+            )
 
         if field_type is int:
             # Convert string to int

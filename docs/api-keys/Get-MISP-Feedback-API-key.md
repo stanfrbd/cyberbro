@@ -1,6 +1,6 @@
 ## How to Get MISP-Feedback Authentication Token
 
-MISP-Feedback is a warninglist verification service that checks observables (IPs, domains, hashes) against MISP warninglists to identify false positives. The service does not require authentication by default, but can be deployed behind a reverse proxy or authentication gateway that uses HTTP Basic Authentication.
+[MISP-Feedback](https://github.com/MISP/misp-feedback/) is a warninglist verification service that checks observables (IPs, domains, hashes) against MISP warninglists to identify false positives. The service does not require authentication by default, but can be deployed behind a reverse proxy or authentication gateway that uses HTTP Basic Authentication.
 
 ## Overview
 

@@ -47,6 +47,7 @@ class Secrets:
     opencti_api_key: str = ""
     opencti_url: str = ""
     proxy_url: str = ""
+    ransomware_live_api_key: str = ""
     rl_analyze_url: str = ""
     rl_analyze_api_key: str = ""
     rosti_api_key: str = ""

@@ -407,6 +407,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, domain, URL, email  
 **Explaination**: Searches Rösti threat intelligence IOC data for observed values, API key required (see https://rosti.bin.re/api)
 
+### Ransomware.Live
+**Name**: `ransomware_live`  
+**Supports**: domain, URL  
+**Explanation**: Checks the Ransomware.Live Pro API to determine whether a domain has appeared as a ransomware victim on a data leak site (DLS), paid API key required (see https://www.ransomware.live/api)
+
 ### Shodan
 **Name**: `shodan`  
 **Supports**: ports, IP  

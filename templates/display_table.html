@@ -232,6 +232,10 @@
                     {% if "crtsh" in analysis_results.selected_engines %}
                     <th>crt.sh</th>
                     {% endif %}
+
+                    {% if "ransomware_live" in analysis_results.selected_engines %}
+                    <th>Ransomware.Live</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -414,6 +418,10 @@
 
                     {% if "crtsh" in analysis_results.selected_engines %}
                     {% include "engine_layouts/crtsh_table.html" %}
+                    {% endif %}
+
+                    {% if "ransomware_live" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/ransomware_live_table.html" %}
                     {% endif %}
 
                 </tr>

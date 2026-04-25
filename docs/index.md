@@ -60,6 +60,7 @@
 - [Get IPinfo API Key](api-keys/Get-IPinfo-API-key.md)
 - [Get MDE (Microsoft Defender for Endpoint) API Credentials](api-keys/Get-MDE-(Microsoft-Defender-for-Endpoint)-API-credentials.md)
 - [Get MISP API Key](api-keys/Get-MISP-API-key.md)
+- [Get MISP-Feedback Authentication Token](api-keys/Get-MISP-Feedback-API-key.md)
 - [Get OpenCTI API Key](api-keys/Get-OpenCTI-API-key.md)
 - [Get Reversing Labs Spectra Analyze API key](api-keys/Get-ReversingLabs-Spectra-API-key.md)
 - [Get Rösti API Key](api-keys/Get-Rosti-API-key.md)

@@ -230,6 +230,14 @@ function formatResults(data) {
             }
         }
 
+        if (result.misp_feedback) {
+            plainText += `MISP-Feedback:\n`;
+            plainText += `  - Status: ${result.misp_feedback.status}\n`;
+            if (result.misp_feedback.warninglists && result.misp_feedback.warninglists.length > 0) {
+                plainText += `  - Warninglists: ${result.misp_feedback.warninglists.join(', ')}\n`;
+            }
+        }
+
         if (result.criminalip) {
             plainText += `Criminal IP:\n`;
             plainText += `  - Abuse Record Count: ${result.criminalip.abuse_record_count}\n`;

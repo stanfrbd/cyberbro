@@ -70,6 +70,8 @@ MDE_CLIENT_ID=client_id_here
 MDE_CLIENT_SECRET=client_secret_here
 MISP_URL=https://misp.local
 MISP_API_KEY=api_key_here
+MISP_FEEDBACK_SERVER_URL=https://misp-feedback.local
+MISP_FEEDBACK_TOKEN=token_here
 SHODAN=api_key_here
 SPUR_US=api_key_here
 THREATFOX=api_key_here
@@ -139,6 +141,8 @@ services:
       - MDE_TENANT_ID=${MDE_TENANT_ID:-}
       - MISP_API_KEY=${MISP_API_KEY:-}
       - MISP_URL=${MISP_URL:-}
+      - MISP_FEEDBACK_SERVER_URL=${MISP_FEEDBACK_SERVER_URL:-}
+      - MISP_FEEDBACK_TOKEN=${MISP_FEEDBACK_TOKEN:-}
       - OPENCTI_API_KEY=${OPENCTI_API_KEY:-}
       - OPENCTI_URL=${OPENCTI_URL:-}
       - RL_ANALYZE_API_KEY=${RL_ANALYZE_API_KEY:-}

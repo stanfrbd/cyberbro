@@ -89,6 +89,9 @@
     {% if analysis_results.results[0].misp %}
     {% include "engine_layouts/misp_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].misp_feedback %}
+    {% include "engine_layouts/misp_feedback_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].dfir_iris %}
     {% include "engine_layouts/dfir_iris_card.html" %}
     {% endif %}

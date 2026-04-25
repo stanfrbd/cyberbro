@@ -225,6 +225,10 @@
                     <th>MISP</th>
                     {% endif %}
 
+                    {% if "misp_feedback" in analysis_results.selected_engines %}
+                    <th>MISP-feedback</th>
+                    {% endif %}
+
                     {% if "crtsh" in analysis_results.selected_engines %}
                     <th>crt.sh</th>
                     {% endif %}
@@ -402,6 +406,10 @@
 
                     {% if "misp" in analysis_results.selected_engines %}
                     {% include "engine_layouts/misp_table.html" %}
+                    {% endif %}
+
+                    {% if "misp_feedback" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/misp_feedback_table.html" %}
                     {% endif %}
 
                     {% if "crtsh" in analysis_results.selected_engines %}

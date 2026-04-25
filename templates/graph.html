@@ -1049,6 +1049,24 @@
                 });
             }
 
+            // Check for MISP-Feedback results
+            if (entry.misp_feedback) {
+                const status = entry.misp_feedback.status;
+                const group = status === "HIT" ? "misp_feedback_hit" : "misp_feedback_clean";
+                const nodeLabel = `MISP-Feedback: ${status}`;
+                addNode(
+                    nodeLabel,
+                    nodeLabel,
+                    group,
+                    "https://img.icons8.com/officexs/32/warning.png"
+                );
+                let edgeLabel = `Status: ${status}`;
+                if (entry.misp_feedback.warninglists && entry.misp_feedback.warninglists.length > 0) {
+                    edgeLabel += ` (${entry.misp_feedback.warninglists.join(", ")})`;
+                }
+                edges.push({ from: obs, to: nodeLabel, label: edgeLabel });
+            }
+
             // Check for Reversing Labs Spectra Analyze events
             if (entry.rl_analyze && entry.rl_analyze.reports > 0) {
                 const rlNodeLabel = "Reversing Labs Spectra Analyze observed";
@@ -1187,6 +1205,8 @@
                 reverse_dns: { color: { background: "#d4a6ff" } },
                 malware: { color: { background: "#ffcccb" } },
                 bad_asn: { color: { background: "#ff4444" } },
+                misp_feedback_hit: { color: { background: "#ff9999" } },
+                misp_feedback_clean: { color: { background: "#99ff99" } },
             },
             physics: {
                 stabilization: false,

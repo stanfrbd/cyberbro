@@ -8,5 +8,5 @@
 
 ## Without docker
 1. Edit `.env` (or exported environment variables) with the updated values.
-2. Restart your `gunicorn` process or service (e.g. `systemctl restart cyberbro` or `docker restart cyberbro`).
+2. Restart your `gunicorn` process or service (e.g. `systemctl restart cyberbro-service` or you can use `supervisord` which is probably the best option to run without docker).
 3. Then go to http://127.0.0.1:5000 and use Cyberbro.

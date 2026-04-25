@@ -18,8 +18,10 @@ from engines.ipinfo import IPInfoEngine
 from engines.ipquery import IPQueryEngine
 from engines.microsoft_defender_for_endpoint import MDEEngine
 from engines.misp import MISPEngine
+from engines.misp_feedback import MispFeedbackEngine
 from engines.opencti import OpenCTIEngine
 from engines.phishtank import PhishTankEngine
+from engines.ransomware_live import RansomwareLiveEngine
 from engines.rdap_whois import RDAPWhoisEngine
 from engines.reverse_dns import ReverseDNSEngine
 from engines.reversinglabs_spectra_analyze import RLAnalyzeEngine
@@ -66,8 +68,10 @@ def get_engine_instances(
         IPQueryEngine(secrets, proxies, ssl_verify),
         MDEEngine(secrets, proxies, ssl_verify),
         MISPEngine(secrets, proxies, ssl_verify),
+        MispFeedbackEngine(secrets, proxies, ssl_verify),
         OpenCTIEngine(secrets, proxies, ssl_verify),
         PhishTankEngine(secrets, proxies, ssl_verify),
+        RansomwareLiveEngine(secrets, proxies, ssl_verify),
         RDAPWhoisEngine(secrets, proxies, ssl_verify),
         RLAnalyzeEngine(secrets, proxies, ssl_verify),
         RostiEngine(secrets, proxies, ssl_verify),

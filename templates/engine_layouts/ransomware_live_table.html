@@ -1,0 +1,21 @@
+<td>
+    {% if result.ransomware_live and result.ransomware_live.found %}
+        <strong>{{ result.ransomware_live.count }} victim(s)</strong>
+        {% set groups = result.ransomware_live.victims | map(attribute='group_name') | select | unique | list %}
+        {% if groups %}
+            <div style="color: var(--text-secondary); font-size: 0.85em;">
+                Groups: {{ groups | join(', ') }}
+            </div>
+        {% endif %}
+        {% if result.ransomware_live.search_url %}
+            <div><a href="{{ result.ransomware_live.search_url }}" target="_blank">Search on Ransomware.Live</a></div>
+        {% endif %}
+    {% elif result.ransomware_live and result.ransomware_live.found == false %}
+        Not Found
+        {% if result.ransomware_live.search_url %}
+            <div><a href="{{ result.ransomware_live.search_url }}" target="_blank">Search on Ransomware.Live</a></div>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

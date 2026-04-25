@@ -372,6 +372,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, domain, URL, hash  
 **Explaination**: Checks MISP for IP, domain, URL, hash, free API key required
 
+### MISP-Feedback
+**Name**: `misp_feedback`  
+**Supports**: hash, IP, domain, free_no_key  
+**Explaination**: Checks MISP-Feedback warninglists for IP, domain, hashes to identify false positives, free, no API key required
+
 ### OpenCTI
 **Name**: `opencti` 
 **Supports**: domain, URL, IP, hash  
@@ -401,6 +406,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `rosti`  
 **Supports**: IP, domain, URL, email  
 **Explaination**: Searches Rösti threat intelligence IOC data for observed values, API key required (see https://rosti.bin.re/api)
+
+### Ransomware.Live
+**Name**: `ransomware_live`  
+**Supports**: domain, URL  
+**Explanation**: Checks the Ransomware.Live Pro API to determine whether a domain has appeared as a ransomware victim on a data leak site (DLS), paid API key required (see https://www.ransomware.live/api)
 
 ### Shodan
 **Name**: `shodan`  

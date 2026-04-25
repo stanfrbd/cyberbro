@@ -42,9 +42,12 @@ class Secrets:
     mde_tenant_id: str = ""
     misp_api_key: str = ""
     misp_url: str = ""
+    misp_feedback_server_url: str = ""
+    misp_feedback_token: str = ""
     opencti_api_key: str = ""
     opencti_url: str = ""
     proxy_url: str = ""
+    ransomware_live_api_key: str = ""
     rl_analyze_url: str = ""
     rl_analyze_api_key: str = ""
     rosti_api_key: str = ""
@@ -86,9 +89,14 @@ class Secrets:
             hasattr(field_type, "__origin__")
             and field_type.__origin__ is list
             and isinstance(value, str)
-            and "," in value
         ):
-            value = [item.strip() for item in value.split(",")]
+            value = (
+                [item.strip() for item in value.split(",")]
+                if "," in value
+                else [value.strip()]
+                if value.strip()
+                else []
+            )
 
         if field_type is int:
             # Convert string to int

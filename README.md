@@ -126,9 +126,12 @@ MDE_CLIENT_SECRET=client_secret_here
 MDE_TENANT_ID=tenant_here
 MISP_API_KEY=token_here
 MISP_URL=https://misp.local
+MISP_FEEDBACK_SERVER_URL=https://misp-feedback.local
+MISP_FEEDBACK_TOKEN=token_here
 OPENCTI_API_KEY=token_here
 OPENCTI_URL=https://demo.opencti.io
 PROXY_URL=
+RANSOMWARE_LIVE_API_KEY=token_here
 RL_ANALYZE_API_KEY=token_here
 RL_ANALYZE_URL=https://spectra_analyse_url_here
 ROSTI_API_KEY=token_here
@@ -310,9 +313,11 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Ioc.One](https://ioc.one/)
 * [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
 * [MISP](https://www.misp-project.org/)
+* [MISP Feedback](https://github.com/MISP/misp-feedback/)
 * [OpenCTI](https://www.opencti.io/)
 * [OpenRDAP](https://www.openrdap.org/)
 * [Phishtank](https://www.phishtank.com/)
+* [Ransomware.Live](https://ransomware.live/)
 * [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence
 * [Shodan](https://developer.shodan.io/)
@@ -334,7 +339,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Axel](https://github.com/botlabsDev) who develops [Ioc.One](https://ioc.one/) and added a specific User-Agent allowing scraping of Ioc[.]One.
 * [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase, including CriminalIP. 
 * [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
-* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine, adding DFIR IRIS search and fixing Bandit issues.
+* [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine, adding DFIR IRIS search and fixing Bandit issues, correcting MISP engine, adding MISP Feedback engine.
 * [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 * [Maxime Berthault - Maxou56800](https://github.com/Maxou56800) for developing Cyberbro CLI.
 

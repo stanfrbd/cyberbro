@@ -951,6 +951,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#misp-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MISP-Feedback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#opencti" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1010,6 +1021,17 @@
     <span class="md-ellipsis">
       
         Rösti
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ransomwarelive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ransomware.Live
       
     </span>
   </a>
@@ -1506,6 +1528,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -1838,6 +1864,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api-keys/Get-MISP-Feedback-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get MISP-Feedback Authentication Token
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api-keys/Get-OpenCTI-API-key/" class="md-nav__link">
         
   
@@ -1902,6 +1956,34 @@
     
   
     Get Rösti API Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-keys/Get-Ransomware-Live-API-key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Get Ransomware.Live API Key
   
 
     
@@ -2713,6 +2795,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#misp-feedback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MISP-Feedback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#opencti" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2772,6 +2865,17 @@
     <span class="md-ellipsis">
       
         Rösti
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ransomwarelive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ransomware.Live
       
     </span>
   </a>
@@ -3201,6 +3305,10 @@ For more advanced usage, such as bypassing cache or customizing engine selection
 <p><strong>Name</strong>: <code>misp</code><br />
 <strong>Supports</strong>: IP, domain, URL, hash<br />
 <strong>Explaination</strong>: Checks MISP for IP, domain, URL, hash, free API key required</p>
+<h3 id="misp-feedback">MISP-Feedback<a class="headerlink" href="#misp-feedback" title="Permanent link">&para;</a></h3>
+<p><strong>Name</strong>: <code>misp_feedback</code><br />
+<strong>Supports</strong>: hash, IP, domain, free_no_key<br />
+<strong>Explaination</strong>: Checks MISP-Feedback warninglists for IP, domain, hashes to identify false positives, free, no API key required</p>
 <h3 id="opencti">OpenCTI<a class="headerlink" href="#opencti" title="Permanent link">&para;</a></h3>
 <p><strong>Name</strong>: <code>opencti</code> 
 <strong>Supports</strong>: domain, URL, IP, hash<br />
@@ -3225,6 +3333,10 @@ For more advanced usage, such as bypassing cache or customizing engine selection
 <p><strong>Name</strong>: <code>rosti</code><br />
 <strong>Supports</strong>: IP, domain, URL, email<br />
 <strong>Explaination</strong>: Searches Rösti threat intelligence IOC data for observed values, API key required (see https://rosti.bin.re/api)</p>
+<h3 id="ransomwarelive">Ransomware.Live<a class="headerlink" href="#ransomwarelive" title="Permanent link">&para;</a></h3>
+<p><strong>Name</strong>: <code>ransomware_live</code><br />
+<strong>Supports</strong>: domain, URL<br />
+<strong>Explanation</strong>: Checks the Ransomware.Live Pro API to determine whether a domain has appeared as a ransomware victim on a data leak site (DLS), paid API key required (see https://www.ransomware.live/api)</p>
 <h3 id="shodan">Shodan<a class="headerlink" href="#shodan" title="Permanent link">&para;</a></h3>
 <p><strong>Name</strong>: <code>shodan</code><br />
 <strong>Supports</strong>: ports, IP<br />
@@ -3271,7 +3383,7 @@ For more advanced usage, such as bypassing cache or customizing engine selection
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 30, 2026 14:13:39 UTC"><span class="timeago" datetime="2026-03-30T14:13:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 30, 2026 14:13:39 UTC">2026-03-30</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="April 22, 2026 10:41:28 UTC"><span class="timeago" datetime="2026-04-22T10:41:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="April 22, 2026 10:41:28 UTC">2026-04-22</span>
   </span>
 
     
@@ -3295,7 +3407,7 @@ For more advanced usage, such as bypassing cache or customizing engine selection
       
     </span>
     <nav>
-      Felix Friedberger, Stig Dahl, stanfrbd
+      Felix Friedberger, Stig Dahl, copilot-swe-agent[bot], stanfrbd
     </nav>
   </span>
 

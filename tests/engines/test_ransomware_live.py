@@ -83,7 +83,10 @@ def test_analyze_fqdn_victim_found(fqdn_observable, secrets_with_key):
     assert victim["website"] == "example.com"
     assert victim["discovered"] == "2024-01-15T12:00:00Z"
     assert victim["permalink"] == "https://www.ransomware.live/id/abc123"
-    assert result["search_url"] == f"https://www.ransomware.live/search?q={fqdn_observable.value}&scope=all"
+    assert (
+        result["search_url"]
+        == f"https://www.ransomware.live/search?q={fqdn_observable.value}&scope=all"
+    )
 
 
 @responses.activate

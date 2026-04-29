@@ -1,0 +1,11 @@
+<td>
+    {% if result.hister %}
+        <strong>Results:</strong> {{ result.hister.total }}<br/>
+        {% for item in result.hister.results %}
+            <a href="{{ item.url }}" target="_blank" title="{{ item.title }}">{{ item.title[:60] }}{% if item.title | length > 60 %}…{% endif %}</a>{% if item.added %} <small>· {{ item.added }}</small>{% endif %}<br/>
+        {% endfor %}
+        <strong>Link: </strong><a href="{{ result.hister.link }}" target="_blank">See on Hister</a><br/>
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

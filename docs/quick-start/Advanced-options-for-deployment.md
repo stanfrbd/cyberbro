@@ -65,6 +65,8 @@ IPINFO=api_key_here
 GOOGLE_CSE_KEY=api_key_here
 GOOGLE_CSE_CX=cx_here
 GOOGLE_SAFE_BROWSING=api_key_here
+HISTER_TOKEN=token_here
+HISTER_BASE_URL=https://hister.example.com
 MDE_TENANT_ID=tenant_here
 MDE_CLIENT_ID=client_id_here
 MDE_CLIENT_SECRET=client_secret_here
@@ -153,6 +155,8 @@ services:
       - THREATFOX=${THREATFOX:-}
       - VIRUSTOTAL=${VIRUSTOTAL:-}
       - WEBSCOUT=${WEBSCOUT:-}
+      - HISTER_TOKEN=${HISTER_TOKEN:-}
+      - HISTER_BASE_URL=${HISTER_BASE_URL:-}
       - SSL_VERIFY=${SSL_VERIFY:-}
       - PROXY_URL=${PROXY_URL:-}
       - GUI_CACHE_TIMEOUT=${GUI_CACHE_TIMEOUT:-1800}

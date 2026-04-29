@@ -140,6 +140,8 @@ SPUR_US=token_here
 THREATFOX=token_here
 VIRUSTOTAL=token_here
 WEBSCOUT=token_here
+HISTER_TOKEN=token_here
+HISTER_BASE_URL=https://hister.example.com
 ```
 
 > [!IMPORTANT]
@@ -305,6 +307,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Google](https://google.com/)
 * [Google DNS](https://dns.google/)
 * [Grep.App](https://grep.app/)
+* [Hister](https://hister.org/)
 * [Hudson Rock](https://hudsonrock.com/)
 * [ICANN](https://lookup.icann.org/)
 * [IPapi](https://ipapi.is/)

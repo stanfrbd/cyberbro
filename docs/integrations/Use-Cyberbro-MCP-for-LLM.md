@@ -5,7 +5,7 @@
 Cyberbro MCP is a Model Context Protocol (MCP) server that enables Large Language Models (LLMs) to extract, analyze, and check the reputation of Indicators of Compromise (IoCs) from unstructured input, leveraging multiple threat intelligence sources.
 
 !!! info
-    MCP is a standard that allows applications to provide context and functionality to LLMs in a secure, standardized way—similar to a web API, but designed for LLM integrations.
+    MCP is a standard that allows applications to provide context and functionality to LLMs in a secure, standardized way. It is similar to a web API, but designed for LLM integrations.
 
 ![mcp-cyberbro-demo](https://github.com/user-attachments/assets/99ee5538-c95a-40ca-bff5-3cdf3aa86235)
 

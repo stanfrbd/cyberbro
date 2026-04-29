@@ -119,6 +119,8 @@ DFIR_IRIS_URL=https://dfir-iris.local
 GOOGLE_CSE_CX=cx_here
 GOOGLE_CSE_KEY=key_here
 GOOGLE_SAFE_BROWSING=token_here
+HISTER_TOKEN=token_here
+HISTER_BASE_URL=https://hister.example.com
 IPAPI=token_here
 IPINFO=token_here
 MDE_CLIENT_ID=client_id_here
@@ -140,8 +142,6 @@ SPUR_US=token_here
 THREATFOX=token_here
 VIRUSTOTAL=token_here
 WEBSCOUT=token_here
-HISTER_TOKEN=token_here
-HISTER_BASE_URL=https://hister.example.com
 ```
 
 > [!IMPORTANT]

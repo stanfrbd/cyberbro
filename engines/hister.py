@@ -90,8 +90,11 @@ class HisterEngine(BaseEngine):
                 "results": results,
                 "link": search_url,
             }
-        except Exception as e:
-            logger.error(f"Error querying Hister: {e}")
+        except requests.exceptions.RequestException as e:
+            logger.exception("Error querying Hister: %s", e)
+            return None
+        except json.JSONDecodeError as e:
+            logger.exception("Invalid JSON returned by Hister: %s", e)
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

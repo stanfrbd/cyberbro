@@ -335,7 +335,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ### Hister
 **Name**: `hister`  
 **Supports**: IP, domain, URL, email, extension, hash, API key and base URL required  
-**Explaination**: Searches your personal Hister self-hosted index for any observable, API key and base URL required
+**Explanation**: Searches your personal Hister self-hosted index for any observable, API key and base URL required
 
 ### Hudson Rock
 **Name**: `hudsonrock`  

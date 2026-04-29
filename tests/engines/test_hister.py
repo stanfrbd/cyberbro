@@ -135,8 +135,11 @@ def test_analyze_sends_correct_headers_and_params(fqdn_observable, secrets_with_
     assert req.headers.get("Authorization") == "Bearer test_token_abc"
     assert req.headers.get("Origin") == "hister://"
     assert "query=" in req.url
-    query_raw = [p.split("=", 1)[1] for p in req.url.split("?", 1)[1].split("&") if p.startswith("query=")][0]
+    query_raw = [
+        p.split("=", 1)[1] for p in req.url.split("?", 1)[1].split("&") if p.startswith("query=")
+    ][0]
     from urllib.parse import unquote_plus
+
     query_obj = json.loads(unquote_plus(query_raw))
     assert query_obj["text"] == "example.com"
     assert query_obj["limit"] == 10

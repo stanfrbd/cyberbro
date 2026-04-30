@@ -16,4 +16,4 @@ tldextract>=5.3.1
 crowdstrike-falconpy>=1.6.0
 beautifulsoup4>=4.12.2
 tenacity>=9.1.4
-python-dotenv>=1.2.1
+python-dotenv>=1.2.2

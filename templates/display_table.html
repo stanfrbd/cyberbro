@@ -217,6 +217,10 @@
                     <th>Alienvault</th>
                     {% endif %}
 
+                    {% if "hister" in analysis_results.selected_engines %}
+                    <th>Hister</th>
+                    {% endif %}
+
                     {% if "google_dns" in analysis_results.selected_engines %}
                     <th>Google DNS (common records)</th>
                     {% endif %}
@@ -402,6 +406,10 @@
 
                     {% if "alienvault" in analysis_results.selected_engines %}
                     {% include "engine_layouts/alienvault_table.html" %}
+                    {% endif %}
+
+                    {% if "hister" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/hister_table.html" %}
                     {% endif %}
 
                     {% if "google_dns" in analysis_results.selected_engines %}

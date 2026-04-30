@@ -332,6 +332,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: risk, domain, IP  
 **Explaination**: Checks Google Safe Browsing, free API key required
 
+### Hister
+**Name**: `hister`  
+**Supports**: IP, domain, URL, email, extension, hash, API key and base URL required  
+**Explanation**: Searches your personal Hister self-hosted index for any observable, API key and base URL required
+
 ### Hudson Rock
 **Name**: `hudsonrock`  
 **Supports**: domain, URL, email, free_no_key  

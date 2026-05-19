@@ -113,6 +113,9 @@
     {% if analysis_results.results[0].ransomware_live %}
     {% include "engine_layouts/ransomware_live_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].hister %}
+    {% include "engine_layouts/hister_card.html" %}
+    {% endif %}
 </div><!-- cards-results-container -->
 
 <script src="{{ url_for('static', filename='single-observable-copy.js') }}"></script>

@@ -292,6 +292,16 @@ function formatResults(data) {
 
         }
 
+        if (result.hister) {
+            plainText += `Hister:\n`;
+            plainText += `  - Total results: ${result.hister.total}\n`;
+            if (result.hister.total > 0) {
+                result.hister.results.forEach(histerResult => {
+                    plainText += `  - ${histerResult.title}: ${histerResult.url}\n`;
+                });
+            }
+        }
+
         if (result.hudsonrock) {
             plainText += `Hudson Rock:\n`;
 

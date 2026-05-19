@@ -1039,6 +1039,22 @@
                 });
             }
 
+            // Hister results
+            if (entry.hister?.results) {
+                entry.hister.results.forEach((result) => {
+                    const histerTitle = result.title || result.url;
+                    if (histerTitle && histerTitle.trim() !== "") {
+                        addNode(
+                            histerTitle,
+                            histerTitle,
+                            "hister_result",
+                            "https://img.icons8.com/officexs/32/document.png",
+                        );
+                        edges.push({ from: obs, to: histerTitle, label: "Hister" });
+                    }
+                });
+            }
+
             // Check for MISP events
             if (entry.misp && entry.misp.events && Array.isArray(entry.misp.events)) {
                 entry.misp.events.forEach((mispEvent) => {

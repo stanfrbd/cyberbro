@@ -1,0 +1,14 @@
+<div class="card">
+    <h3>Hister</h3>
+    {% if analysis_results.results[0].hister.total > 0 %}
+    <p><strong>Results: </strong>{{ analysis_results.results[0].hister.total }}</p>
+    {% for item in analysis_results.results[0].hister.results %}
+    <p style="margin: 0.2rem 0;">
+        <a href="{{ item.url }}" target="_blank" title="{{ item.title }}">{{ item.title[:60] }}{% if item.title | length > 60 %}…{% endif %}</a>{% if item.added %} <small style="color: var(--muted-color);">· {{ item.added }}</small>{% endif %}
+    </p>
+    {% endfor %}
+    {% else %}
+    <p>Not found</p>
+    {% endif %}
+    <p><strong>Link: </strong><a href="{{ analysis_results.results[0].hister.link }}" target="_blank">See on Hister</a></p>
+</div>

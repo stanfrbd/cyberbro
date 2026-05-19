@@ -56,6 +56,7 @@
 - [Get DFIR-Iris API Key](api-keys/Get-DFIR-IRIS-API-key.md)
 - [Get Google CSE API Key](api-keys/Get-Google-CSE-API-key.md)
 - [Get Google Safe Browsing API Key](api-keys/Get-Google-Safe-Browing-API-key.md)
+- [Get Hister API Key](api-keys/Get-Hister-API-key.md)
 - [Get IPapi API Key](api-keys/Get-IPapi-API-key.md)
 - [Get IPinfo API Key](api-keys/Get-IPinfo-API-key.md)
 - [Get MDE (Microsoft Defender for Endpoint) API Credentials](api-keys/Get-MDE-(Microsoft-Defender-for-Endpoint)-API-credentials.md)

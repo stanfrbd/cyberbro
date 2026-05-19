@@ -11,6 +11,7 @@ from engines.github import GitHubEngine
 from engines.google import GoogleCSEEngine
 from engines.google_dns import GoogleDNSEngine
 from engines.google_safe_browsing import GoogleSafeBrowsingEngine
+from engines.hister import HisterEngine
 from engines.hudsonrock import HudsonRockEngine
 from engines.ioc_one import IOCOneHTMLEngine, IOCOnePDFEngine
 from engines.ipapi import IPAPIEngine
@@ -60,6 +61,7 @@ def get_engine_instances(
         GoogleCSEEngine(secrets, proxies, ssl_verify),
         GoogleDNSEngine(secrets, proxies, ssl_verify),
         GoogleSafeBrowsingEngine(secrets, proxies, ssl_verify),
+        HisterEngine(secrets, proxies, ssl_verify),
         HudsonRockEngine(secrets, proxies, ssl_verify),
         IOCOneHTMLEngine(secrets, proxies, ssl_verify),
         IOCOnePDFEngine(secrets, proxies, ssl_verify),

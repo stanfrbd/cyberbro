@@ -10,6 +10,12 @@
         {% if result.recorded_future.threat_lists and result.recorded_future.threat_lists | length > 0 %}
         <strong>Lists: </strong>{{ result.recorded_future.threat_lists[:3] | join(', ') }}<br/>
         {% endif %}
+        {% if result.recorded_future.vpn_list and result.recorded_future.vpn_list | length > 0 %}
+        <strong>VPN: </strong>{{ result.recorded_future.vpn_list | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.proxy_list and result.recorded_future.proxy_list | length > 0 %}
+        <strong>Proxy: </strong>{{ result.recorded_future.proxy_list | join(', ') }}<br/>
+        {% endif %}
         {% if result.recorded_future.country %}
         <strong>Country: </strong><span class="country country-{{result.recorded_future.country | lower}}">{{ result.recorded_future.country }}</span>
         {% if result.recorded_future.country_code %}

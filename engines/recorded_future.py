@@ -11,7 +11,9 @@ from models.observable import Observable, ObservableFlag, ObservableType
 logger = logging.getLogger(__name__)
 
 _RF_BASE_URL = "https://api.recordedfuture.com/v2"
-_IP_FIELDS = "entity,risk,intelCard,sightings,timestamps,location,threatLists"
+_IP_FIELDS = (
+    "entity,risk,intelCard,sightings,timestamps,location,threatLists,vpnCurrent,proxyCurrent"
+)
 _DOMAIN_FIELDS = "entity,risk,intelCard,sightings,timestamps,threatLists"
 _HASH_FIELDS = "entity,risk,intelCard,sightings,timestamps,fileHashes,hashAlgorithm"
 _URL_FIELDS = "entity,risk,intelCard,sightings,timestamps"
@@ -135,6 +137,13 @@ class RecordedFutureEngine(BaseEngine):
                 elif asn_raw:
                     asn = asn_raw
 
+            # Parse VPN/proxy associations (IP types only)
+            vpn_list: list[str] = []
+            proxy_list: list[str] = []
+            if obs_type in _IP_TYPES:
+                vpn_list = [v["name"] for v in (data.get("vpnCurrent") or []) if v.get("name")]
+                proxy_list = [v["name"] for v in (data.get("proxyCurrent") or []) if v.get("name")]
+
             # Parse hash algorithm (hash types only)
             hash_algorithm = ""
             if obs_type in _HASH_TYPES:
@@ -153,6 +162,8 @@ class RecordedFutureEngine(BaseEngine):
                 "country": country,
                 "country_code": country_code,
                 "asn": asn,
+                "vpn_list": vpn_list,
+                "proxy_list": proxy_list,
                 "hash_algorithm": hash_algorithm,
                 "link": link,
             }
@@ -172,10 +183,14 @@ class RecordedFutureEngine(BaseEngine):
                 "rf_threat_lists": None,
                 "rf_country": None,
                 "rf_asn": None,
+                "rf_vpn": None,
+                "rf_proxy": None,
                 "rf_hash_algorithm": None,
             }
         rules = analysis_result.get("rules") or []
         threat_lists = analysis_result.get("threat_lists") or []
+        vpn_list = analysis_result.get("vpn_list") or []
+        proxy_list = analysis_result.get("proxy_list") or []
         return {
             "rf_risk_score": analysis_result.get("risk_score"),
             "rf_risk_level": analysis_result.get("risk_level"),
@@ -186,5 +201,7 @@ class RecordedFutureEngine(BaseEngine):
             "rf_threat_lists": ", ".join(threat_lists) if threat_lists else None,
             "rf_country": analysis_result.get("country"),
             "rf_asn": analysis_result.get("asn"),
+            "rf_vpn": ", ".join(vpn_list) if vpn_list else None,
+            "rf_proxy": ", ".join(proxy_list) if proxy_list else None,
             "rf_hash_algorithm": analysis_result.get("hash_algorithm"),
         }

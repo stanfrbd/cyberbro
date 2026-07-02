@@ -399,6 +399,8 @@ function formatResults(data) {
                 plainText += `, ASN: ${result.recorded_future.asn}`;
             }
             plainText += "\n";
+            if (result.recorded_future.vpn_list && result.recorded_future.vpn_list.length > 0) plainText += `- VPN: ${result.recorded_future.vpn_list.join(', ')}\n`;
+            if (result.recorded_future.proxy_list && result.recorded_future.proxy_list.length > 0) plainText += `- Proxy: ${result.recorded_future.proxy_list.join(', ')}\n`;
         }
 
         if (result.rl_analyze) {

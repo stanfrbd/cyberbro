@@ -27,6 +27,22 @@
     </div>
     {% endif %}
 
+    {% if analysis_results.results[0].recorded_future.vpn_list and analysis_results.results[0].recorded_future.vpn_list | length > 0 %}
+    <div class="rf-badges">
+        {% for vpn in analysis_results.results[0].recorded_future.vpn_list %}
+        <span class="badge badge-info">VPN: {{ vpn }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.proxy_list and analysis_results.results[0].recorded_future.proxy_list | length > 0 %}
+    <div class="rf-badges">
+        {% for proxy in analysis_results.results[0].recorded_future.proxy_list %}
+        <span class="badge badge-secondary">Proxy: {{ proxy }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     {% if analysis_results.results[0].recorded_future.country %}
     <p><strong>Country: </strong>{{ analysis_results.results[0].recorded_future.country }}
         {% if analysis_results.results[0].recorded_future.country_code %}
@@ -75,6 +91,14 @@
             background-color: #fd7e14;
             color: white;
         }
+        .badge-info {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
         /* High-risk card contrast overrides */
         .high-detection p,
         .high-detection h3 {
@@ -93,6 +117,16 @@
             border: 1px solid rgba(255, 255, 255, 0.7);
         }
         .high-detection .badge-warning {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: #1a0000;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+        .high-detection .badge-info {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+        .high-detection .badge-secondary {
             background-color: rgba(255, 255, 255, 0.40);
             color: #1a0000;
             border: 1px solid rgba(255, 255, 255, 0.65);

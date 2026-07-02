@@ -28,7 +28,11 @@
     {% endif %}
 
     {% if analysis_results.results[0].recorded_future.country %}
-    <p><strong>Country: </strong>{{ analysis_results.results[0].recorded_future.country }}</p>
+    <p><strong>Country: </strong>{{ analysis_results.results[0].recorded_future.country }}
+        {% if analysis_results.results[0].recorded_future.country_code %}
+        <span class="fi fi-{{ analysis_results.results[0].recorded_future.country_code }}"></span>
+        {% endif %}
+    </p>
     {% endif %}
 
     {% if analysis_results.results[0].recorded_future.asn %}

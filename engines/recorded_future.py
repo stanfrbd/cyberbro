@@ -2,6 +2,7 @@ import logging
 import urllib.parse
 from typing import Any
 
+import pycountry
 import requests
 
 from models.base_engine import BaseEngine
@@ -116,11 +117,17 @@ class RecordedFutureEngine(BaseEngine):
             # Parse location data (IP types only)
             # Real API nests geo under location.location; country is a plain string
             country = ""
+            country_code = ""
             asn = ""
             if obs_type in _IP_TYPES:
                 location = data.get("location") or {}
                 geo = location.get("location") or {}
                 country = geo.get("country") or ""
+                if country:
+                    try:
+                        country_code = pycountry.countries.lookup(country).alpha_2.lower()
+                    except LookupError:
+                        country_code = ""
                 asn_raw = location.get("asn") or ""
                 organization = location.get("organization") or ""
                 if asn_raw and organization:
@@ -144,6 +151,7 @@ class RecordedFutureEngine(BaseEngine):
                 "last_seen": last_seen,
                 "threat_lists": threat_lists,
                 "country": country,
+                "country_code": country_code,
                 "asn": asn,
                 "hash_algorithm": hash_algorithm,
                 "link": link,

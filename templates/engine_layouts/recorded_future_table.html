@@ -11,7 +11,10 @@
         <strong>Lists: </strong>{{ result.recorded_future.threat_lists[:3] | join(', ') }}<br/>
         {% endif %}
         {% if result.recorded_future.country %}
-        <strong>Country: </strong>{{ result.recorded_future.country }}<br/>
+        <strong>Country: </strong><span class="country country-{{result.recorded_future.country | lower}}">{{ result.recorded_future.country }}</span>
+        {% if result.recorded_future.country_code %}
+        <span class="fi fi-{{ result.recorded_future.country_code }}"></span>
+        {% endif %}<br/>
         {% endif %}
         {% if result.recorded_future.asn %}
         <strong>ASN: </strong>{{ result.recorded_future.asn }}<br/>

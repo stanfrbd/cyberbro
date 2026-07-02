@@ -1,5 +1,5 @@
 {% if analysis_results.results[0].recorded_future and analysis_results.results[0].recorded_future.risk_score >= 65 %}
-    <div class="card high-detection" style="background-color: red;">
+    <div class="card high-detection" style="background-color: red; color: white;">
 {% else %}
     <div class="card">
 {% endif %}
@@ -70,6 +70,24 @@
         .badge-warning {
             background-color: #fd7e14;
             color: white;
+        }
+        /* High-risk card contrast overrides */
+        .high-detection a {
+            color: white !important;
+            text-decoration: underline;
+        }
+        .high-detection strong {
+            color: white;
+        }
+        .high-detection .badge-danger {
+            background-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .high-detection .badge-warning {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
         }
     </style>
 

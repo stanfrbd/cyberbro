@@ -290,7 +290,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ### Bad ASN Check
 **Name**: `bad_asn`  
 **Supports**: IP, risk, free_no_key  
-**Explaination**: Malicious ASN detection (free, no API key). Checks if IP's ASN is listed in Spamhaus ASNDROP, Brianhama Bad ASN databases, or LETHAL-FORENSICS ASN Blacklist (VPN/anonymization services). Requires ipapi, ipinfo, or ipquery engine for ASN data
+**Explaination**: Malicious ASN detection (free, no API key). Checks if IP's ASN is listed in Spamhaus ASNDROP, Brianhama Bad ASN databases, or LETHAL-FORENSICS ASN Blacklist (VPN/anonymization services). Requires ipapi, ipinfo, ipquery, or recorded_future engine for ASN data
 
 ### CrowdStrike
 **Name**: `crowdstrike`  

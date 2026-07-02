@@ -141,8 +141,12 @@ class RecordedFutureEngine(BaseEngine):
             vpn_list: list[str] = []
             proxy_list: list[str] = []
             if obs_type in _IP_TYPES:
-                vpn_list = [v["name"] for v in (data.get("vpnCurrent") or []) if v.get("name")]
-                proxy_list = [v["name"] for v in (data.get("proxyCurrent") or []) if v.get("name")]
+                vpn_list = [
+                    v["service"] for v in (data.get("vpnCurrent") or []) if v.get("service")
+                ]
+                proxy_list = [
+                    v["service"] for v in (data.get("proxyCurrent") or []) if v.get("service")
+                ]
 
             # Parse hash algorithm (hash types only)
             hash_algorithm = ""

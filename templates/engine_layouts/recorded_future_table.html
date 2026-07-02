@@ -1,0 +1,34 @@
+<td>
+    {% if result.recorded_future %}
+        <strong>Risk: </strong><a href="{{ result.recorded_future.link }}" target="_blank">{{ result.recorded_future.risk_score }} – {{ result.recorded_future.risk_level }}</a><br/>
+        {% if result.recorded_future.sightings > 0 %}
+        <strong>Sightings: </strong>{{ result.recorded_future.sightings }}<br/>
+        {% endif %}
+        {% if result.recorded_future.rules and result.recorded_future.rules | length > 0 %}
+        <strong>Rules: </strong>{{ result.recorded_future.rules[:3] | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.threat_lists and result.recorded_future.threat_lists | length > 0 %}
+        <strong>Lists: </strong>{{ result.recorded_future.threat_lists[:3] | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.vpn_list and result.recorded_future.vpn_list | length > 0 %}
+        <strong>VPN: </strong>{{ result.recorded_future.vpn_list | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.proxy_list and result.recorded_future.proxy_list | length > 0 %}
+        <strong>Proxy: </strong>{{ result.recorded_future.proxy_list | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.country %}
+        <strong>Country: </strong><span class="country country-{{result.recorded_future.country | lower}}">{{ result.recorded_future.country }}</span>
+        {% if result.recorded_future.country_code %}
+        <span class="fi fi-{{ result.recorded_future.country_code }}"></span>
+        {% endif %}<br/>
+        {% endif %}
+        {% if result.recorded_future.asn %}
+        <strong>ASN: </strong>{{ result.recorded_future.asn }}<br/>
+        {% endif %}
+        {% if result.recorded_future.hash_algorithm %}
+        <strong>Algorithm: </strong>{{ result.recorded_future.hash_algorithm }}<br/>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

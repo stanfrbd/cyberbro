@@ -24,6 +24,7 @@ from engines.opencti import OpenCTIEngine
 from engines.phishtank import PhishTankEngine
 from engines.ransomware_live import RansomwareLiveEngine
 from engines.rdap_whois import RDAPWhoisEngine
+from engines.recorded_future import RecordedFutureEngine
 from engines.reverse_dns import ReverseDNSEngine
 from engines.reversinglabs_spectra_analyze import RLAnalyzeEngine
 from engines.rosti import RostiEngine
@@ -75,6 +76,7 @@ def get_engine_instances(
         PhishTankEngine(secrets, proxies, ssl_verify),
         RansomwareLiveEngine(secrets, proxies, ssl_verify),
         RDAPWhoisEngine(secrets, proxies, ssl_verify),
+        RecordedFutureEngine(secrets, proxies, ssl_verify),
         RLAnalyzeEngine(secrets, proxies, ssl_verify),
         RostiEngine(secrets, proxies, ssl_verify),
         SpurUSEngine(secrets, proxies, ssl_verify),

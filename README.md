@@ -134,6 +134,7 @@ OPENCTI_API_KEY=token_here
 OPENCTI_URL=https://demo.opencti.io
 PROXY_URL=
 RANSOMWARE_LIVE_API_KEY=token_here
+RECORDED_FUTURE_API_KEY=token_here
 RL_ANALYZE_API_KEY=token_here
 RL_ANALYZE_URL=https://spectra_analyse_url_here
 ROSTI_API_KEY=token_here
@@ -321,6 +322,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [OpenRDAP](https://www.openrdap.org/)
 * [Phishtank](https://www.phishtank.com/)
 * [Ransomware.Live](https://ransomware.live/)
+* [Recorded Future](https://www.recordedfuture.com/) - Threat Intelligence for IP, domain, hash, URL
 * [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence
 * [Shodan](https://developer.shodan.io/)

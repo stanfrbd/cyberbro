@@ -63,6 +63,7 @@
 - [Get MISP API Key](api-keys/Get-MISP-API-key.md)
 - [Get MISP-Feedback Authentication Token](api-keys/Get-MISP-Feedback-API-key.md)
 - [Get OpenCTI API Key](api-keys/Get-OpenCTI-API-key.md)
+- [Get Recorded Future API Key](api-keys/Get-Recorded-Future-API-key.md)
 - [Get Reversing Labs Spectra Analyze API key](api-keys/Get-ReversingLabs-Spectra-API-key.md)
 - [Get Rösti API Key](api-keys/Get-Rosti-API-key.md)
 - [Get Shodan API Key](api-keys/Get-Shodan-API-key.md)

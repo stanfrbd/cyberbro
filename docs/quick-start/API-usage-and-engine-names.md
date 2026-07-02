@@ -392,6 +392,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: risk, domain, URL, free_no_key  
 **Explaination**: Checks Phishtank for domains, URL, free, no API key
 
+### Recorded Future
+**Name**: `recorded_future`  
+**Supports**: ip, domain, hash, url  
+**Explanation**: Recorded Future Threat Intelligence for IP, domain, hash, URL, paid API key required
+
 ### RDAP / Whois
 **Name**: `rdap_whois`
 **Supports**: default, abuse, domain, free_no_key

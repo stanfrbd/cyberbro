@@ -1,0 +1,25 @@
+<td>
+    {% if result.recorded_future %}
+        <strong>Risk: </strong><a href="{{ result.recorded_future.link }}" target="_blank">{{ result.recorded_future.risk_score }} – {{ result.recorded_future.risk_level }}</a><br/>
+        {% if result.recorded_future.sightings > 0 %}
+        <strong>Sightings: </strong>{{ result.recorded_future.sightings }}<br/>
+        {% endif %}
+        {% if result.recorded_future.rules and result.recorded_future.rules | length > 0 %}
+        <strong>Rules: </strong>{{ result.recorded_future.rules[:3] | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.threat_lists and result.recorded_future.threat_lists | length > 0 %}
+        <strong>Lists: </strong>{{ result.recorded_future.threat_lists[:3] | join(', ') }}<br/>
+        {% endif %}
+        {% if result.recorded_future.country %}
+        <strong>Country: </strong>{{ result.recorded_future.country }}<br/>
+        {% endif %}
+        {% if result.recorded_future.asn %}
+        <strong>ASN: </strong>{{ result.recorded_future.asn }}<br/>
+        {% endif %}
+        {% if result.recorded_future.hash_algorithm %}
+        <strong>Algorithm: </strong>{{ result.recorded_future.hash_algorithm }}<br/>
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

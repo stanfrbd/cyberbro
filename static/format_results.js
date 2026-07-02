@@ -384,6 +384,23 @@ function formatResults(data) {
             }
         }
 
+        if (result.recorded_future) {
+            plainText += `Recorded Future: Risk: ${result.recorded_future.risk_score} (${result.recorded_future.risk_level})`;
+            if (result.recorded_future.rules && result.recorded_future.rules.length > 0) {
+                plainText += `, Rules: ${result.recorded_future.rules.slice(0, 3).join(", ")}`;
+            }
+            if (result.recorded_future.threat_lists && result.recorded_future.threat_lists.length > 0) {
+                plainText += `, Lists: ${result.recorded_future.threat_lists.slice(0, 3).join(", ")}`;
+            }
+            if (result.recorded_future.country) {
+                plainText += `, Country: ${result.recorded_future.country}`;
+            }
+            if (result.recorded_future.asn) {
+                plainText += `, ASN: ${result.recorded_future.asn}`;
+            }
+            plainText += "\n";
+        }
+
         if (result.rl_analyze) {
             plainText += `Reversing Labs Spectra Analyze:\n`;
             if (result.rl_analyze.malicious) {

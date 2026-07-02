@@ -106,7 +106,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 { name: "abuseipdb", label: "AbuseIPDB", supports: "risk", checked: false, description: "IP reputation & abuse reports", tooltip: "Checks AbuseIPDB for IP, reversed obtained IP for a given domain / URL, free API key required" },
                 { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, description: "Abuse contact lookup (free)", tooltip: "Checks abuse contact with Abusix only for IP, reversed obtained IP for a given domain / URL, free, no API key" },
                 { name: "alienvault", label: "Alienvault", supports: "hash ip domain url", checked: false, description: "Threat intelligence platform", tooltip: "Checks Alienvault for IP, domain, URL, hash, free API key required" },
-                { name: "bad_asn", label: "Bad ASN Check", supports: "ip risk free_no_key", checked: false, description: "Malicious ASN detection (free)", tooltip: "Checks if IP's ASN is listed in Spamhaus ASNDROP, Brianhama Bad ASN databases, or LETHAL-FORENSICS ASN Blacklist. Requires ipapi, ipinfo, or ipquery engine. Free, no API key" },
+                { name: "bad_asn", label: "Bad ASN Check", supports: "ip risk free_no_key", checked: false, description: "Malicious ASN detection (free)", tooltip: "Checks if IP's ASN is listed in Spamhaus ASNDROP, Brianhama Bad ASN databases, or LETHAL-FORENSICS ASN Blacklist. Requires ipapi, ipinfo, ipquery, webscout, or recorded_future engine. Free, no API key" },
                 { name: "criminalip", label: "Criminal IP", supports: "ip", checked: false, description: "Attack surface & threat hunting", tooltip: "Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting, free, with paid upgrades available" },
                 { name: "crowdstrike", label: "CrowdStrike", supports: "hash ip domain url", checked: false, description: "Advanced threat detection", tooltip: "Checks CrowdStrike for IP, domain, URL, hash, paid API key required" },
                 { name: "crtsh", label: "crt.sh", supports: "domain url free_no_key", checked: false, description: "Certificate transparency logs", tooltip: "Checks crt.sh for subdomains using the certificate transparency logs given domain / URL, free, no API key" },
@@ -310,11 +310,11 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
              */
             const ENGINE_DEPENDENCIES = {
                 bad_asn: {
-                    providers: ['ipapi', 'ipinfo', 'ipquery', 'webscout'],
+                    providers: ['ipapi', 'ipinfo', 'ipquery', 'webscout', 'recorded_future'],
                     message: {
                         title: '⚠️ ASN Provider Required',
                         body: 'You selected <strong>Bad ASN Check</strong> but no ASN provider is selected. Bad ASN requires an ASN provider to work properly.',
-                        providers: 'Please select one of: <strong>IPapi</strong>, <strong>IPinfo</strong>, <strong>IPquery</strong>, or <strong>WebScout</strong>.'
+                        providers: 'Please select one of: <strong>IPapi</strong>, <strong>IPinfo</strong>, <strong>IPquery</strong>, <strong>WebScout</strong>, or <strong>Recorded Future</strong>.'
                     }
                 }
             };
@@ -453,7 +453,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                             You selected <strong>Bad ASN Check</strong> but none of the required ASN providers are enabled in your configuration.
                         </p>
                         <p style="color: var(--text-color, #666); line-height: 1.6;">
-                            Please enable at least one of these engines in your settings: <strong>IPapi</strong>, <strong>IPinfo</strong>, <strong>IPquery</strong>, or <strong>WebScout</strong>.
+                            Please enable at least one of these engines in your settings: <strong>IPapi</strong>, <strong>IPinfo</strong>, <strong>IPquery</strong>, <strong>WebScout</strong>, or <strong>Recorded Future</strong>.
                         </p>
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             <button id="okBtn" class="btn btn-icon" style="flex: 1;">
@@ -486,7 +486,8 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                         'ipapi': 'IPapi',
                         'ipinfo': 'IPinfo',
                         'ipquery': 'IPquery',
-                        'webscout': 'WebScout'
+                        'webscout': 'WebScout',
+                        'recorded_future': 'Recorded Future'
                     };
                     return `<strong>${names[p] || p}</strong>`;
                 });

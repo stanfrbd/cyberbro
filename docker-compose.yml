@@ -6,8 +6,20 @@ services:
     container_name: cyberbro
     ports:
       - "${HOST_PORT:-5000}:${FLASK_PORT:-5000}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - ABUSEIPDB=${ABUSEIPDB:-}
+      - AI_VERDICT_ENABLED=${AI_VERDICT_ENABLED:-}
+      - AI_VERDICT_PROVIDER=${AI_VERDICT_PROVIDER:-}
+      - AI_VERDICT_API_URL=${AI_VERDICT_API_URL:-}
+      - AI_VERDICT_API_KEY=${AI_VERDICT_API_KEY:-}
+      - AI_VERDICT_AUTH_HEADER=${AI_VERDICT_AUTH_HEADER:-}
+      - AI_VERDICT_API_VERSION=${AI_VERDICT_API_VERSION:-}
+      - AI_VERDICT_MODEL=${AI_VERDICT_MODEL:-}
+      - AI_VERDICT_PROMPT=${AI_VERDICT_PROMPT:-}
+      - AI_VERDICT_MAX_TOKENS=${AI_VERDICT_MAX_TOKENS:-}
+      - AI_VERDICT_TIMEOUT=${AI_VERDICT_TIMEOUT:-}
       - ALIENVAULT=${ALIENVAULT:-}
       - API_CACHE_TIMEOUT=${API_CACHE_TIMEOUT:-}
       - API_PREFIX=${API_PREFIX:-}

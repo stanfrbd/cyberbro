@@ -1,0 +1,41 @@
+<td>
+    {% if result.ai_verdict %}
+    {% set status = result.ai_verdict.status | lower %}
+    {% if status == "success" %}
+    {% set severity = result.ai_verdict.severity | lower %}
+    {% set detail_lines = [] %}
+    {% if result.ai_verdict.rationales %}
+    {% set _ = detail_lines.append("Rationales: " ~ (result.ai_verdict.rationales | join("; "))) %}
+    {% endif %}
+    {% if result.ai_verdict.recommendations %}
+    {% set _ = detail_lines.append("Recommendations: " ~ (result.ai_verdict.recommendations | join("; "))) %}
+    {% endif %}
+    {% set details = detail_lines | join(" | ") %}
+    {% if severity in ["critical", "high"] %}
+    <span class="badge badge-danger">{{ result.ai_verdict.severity | upper }}</span><br />
+    {% elif severity == "medium" %}
+    <span class="badge badge-warning">{{ result.ai_verdict.severity | upper }}</span><br />
+    {% elif severity == "low" %}
+    <span class="badge badge-success">{{ result.ai_verdict.severity | upper }}</span><br />
+    {% else %}
+    <span class="badge badge-info">{{ result.ai_verdict.severity | upper }}</span><br />
+    {% endif %}
+    <strong>{{ result.ai_verdict.verdict | upper }}</strong>
+    ({{ result.ai_verdict.confidence }}%)
+    {% if details %}
+    <button class="ai-verdict-info-btn" type="button" title="{{ details }}" aria-label="AI verdict rationales and recommendations">
+        <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    </button>
+    {% endif %}
+    {% else %}
+    <span class="badge badge-warning">{{ result.ai_verdict.status }}</span><br />
+    {{ result.ai_verdict.summary }}
+    {% endif %}
+    {% else %}
+    No AI verdict
+    {% endif %}
+</td>

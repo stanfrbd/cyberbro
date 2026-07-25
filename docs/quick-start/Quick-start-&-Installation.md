@@ -32,6 +32,7 @@ cp .env.sample .env
 ```
 
 * Fill your `.env` values (API keys, proxy, runtime options).
+* AI Verdict is optional and disabled by default. Enable `AI_VERDICT_ENABLED=true` only if you want to use OpenAI, Anthropic, Google Gemini, Microsoft Foundry, Ollama, LM Studio, or another OpenAI-compatible provider.
 
 !!! note
     No API keys yet? Keep `.env` mostly empty and start with free engines.

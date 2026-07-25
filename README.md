@@ -110,6 +110,16 @@ cp .env.sample .env
 
 ```bash
 ABUSEIPDB=token_here
+AI_VERDICT_ENABLED=false
+AI_VERDICT_PROVIDER=openai
+AI_VERDICT_API_URL=
+AI_VERDICT_API_KEY=
+AI_VERDICT_AUTH_HEADER=
+AI_VERDICT_API_VERSION=
+AI_VERDICT_MODEL=gpt-4.1-mini
+AI_VERDICT_PROMPT=You are a senior CTI analyst. Review the Cyberbro engine results and return a concise JSON verdict for the observable.
+AI_VERDICT_MAX_TOKENS=1000
+AI_VERDICT_TIMEOUT=30
 ALIENVAULT=token_here
 CRIMINALIP_API_KEY=token_here
 CROWDSTRIKE_CLIENT_ID=client_id_here
@@ -297,6 +307,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 
 * [AbuseIPDB](https://docs.abuseipdb.com/)
 * [Abusix](https://abusix.com/)
+* AI Verdict providers: [OpenAI](https://platform.openai.com/docs), [Anthropic](https://docs.anthropic.com/), [Google Gemini](https://ai.google.dev/), [Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/), Ollama, LM Studio, and OpenAI-compatible APIs. For local providers in Docker, use `host.docker.internal` instead of `localhost`.
 * [Alienvault](https://otx.alienvault.com/)
 * [CriminalIP](https://www.criminalip.io/)
 * [CrowdStrike](https://www.crowdstrike.com/)

@@ -287,6 +287,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, free API key required  
 **Explaination**: Checks AbuseIPDB for IP, reversed obtained IP for a given domain/URL, free API key required
 
+### AI Verdict
+**Name**: `ai_verdict`  
+**Supports**: IP, domain, URL, hash, email, extension  
+**Explanation**: Runs after all selected engines and asks a configured AI provider to summarize the selected engine outputs into a JSON verdict with severity, confidence, rationales, and recommendations. Supports OpenAI, Anthropic, Google Gemini, Microsoft Foundry, Ollama, LM Studio, and OpenAI-compatible endpoints. Disabled by default.
+
 ### Bad ASN Check
 **Name**: `bad_asn`  
 **Supports**: IP, risk, free_no_key  

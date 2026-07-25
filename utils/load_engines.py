@@ -1,5 +1,6 @@
 from engines.abuseipdb import AbuseIPDBEngine
 from engines.abusix import AbusixEngine
+from engines.ai_verdict import AiVerdictEngine
 from engines.alienvault import AlienVaultEngine
 from engines.bad_asn import BadASNEngine
 from engines.chrome_extension import ChromeExtensionEngine
@@ -46,6 +47,7 @@ def get_engine_instances(
     """
     engines = [
         AbuseIPDBEngine(secrets, proxies, ssl_verify),
+        AiVerdictEngine(secrets, proxies, ssl_verify),
         ShodanEngine(secrets, proxies, ssl_verify),
         VirusTotalEngine(secrets, proxies, ssl_verify),
         ReverseDNSEngine(secrets, proxies, ssl_verify),

@@ -11,6 +11,14 @@ class MicrosoftFoundryProvider(OpenAICompatibleProvider):
             default_auth_header="api-key",
         )
 
+    def validate_config(self, request: AiVerdictProviderRequest) -> str:
+        # Azure/Foundry can embed the model name in the endpoint URL, so model may be empty.
+        if not request.api_key:
+            return "AI verdict API key is not configured."
+        if not request.api_url:
+            return "AI verdict API URL is required for provider 'microsoft_foundry'."
+        return ""
+
     def _api_url(self, request: AiVerdictProviderRequest) -> str:
         if not request.api_url:
             return ""

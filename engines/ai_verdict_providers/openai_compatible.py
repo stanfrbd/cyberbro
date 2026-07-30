@@ -87,8 +87,6 @@ class OpenAICompatibleProvider(AiVerdictProviderClient):
         auth_header = request.auth_header.strip().lower() or self._default_auth_header
         if auth_header in {"api-key", "x-api-key"}:
             headers[auth_header] = request.api_key
-        elif auth_header == "bearer":
-            headers["Authorization"] = f"Bearer {request.api_key}"
         else:
             headers["Authorization"] = f"Bearer {request.api_key}"
 

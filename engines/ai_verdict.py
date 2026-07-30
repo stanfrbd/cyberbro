@@ -150,8 +150,6 @@ class AiVerdictEngine(BaseEngine):
             ensure_ascii=False,
         )
         base_prompt = self.secrets.ai_verdict_prompt
-        base_prompt = base_prompt.replace("{observable}", observable_json)
-        base_prompt = base_prompt.replace("{engine_results}", engine_results_json)
 
         return (
             f"{base_prompt}\n\n"

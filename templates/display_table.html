@@ -97,6 +97,9 @@
                     <th style="width: 40px; text-align: center;">▼</th>
                     <th>Observable</th>
                     <th>Type</th>
+                    {% if "ai_verdict" in analysis_results.selected_engines %}
+                    <th>AI Verdict</th>
+                    {% endif %}
                     {% if "reverse_dns" in analysis_results.selected_engines %}
                     <th>DNS Lookup</th>
                     {% endif %}
@@ -288,6 +291,9 @@
                         %}...{% endif %}</td>
 
                     <td class="observable-type">{{ result.type }}</td>
+                    {% if "ai_verdict" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/ai_verdict_table.html" %}
+                    {% endif %}
                     {% if "reverse_dns" in analysis_results.selected_engines %}
                     {% include "engine_layouts/reverse_dns_table.html" %}
                     {% endif %}

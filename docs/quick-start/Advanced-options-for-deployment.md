@@ -60,6 +60,16 @@ PROXY_URL=http://127.0.0.1:9000
 VIRUSTOTAL=api_key_here
 ALIENVAULT=api_key_here
 ABUSEIPDB=api_key_here
+AI_VERDICT_ENABLED=false
+AI_VERDICT_PROVIDER=openai
+AI_VERDICT_API_URL=
+AI_VERDICT_API_KEY=
+AI_VERDICT_AUTH_HEADER=
+AI_VERDICT_API_VERSION=
+AI_VERDICT_MODEL=gpt-4.1-mini
+AI_VERDICT_PROMPT=You are a senior CTI analyst. Review the Cyberbro engine results and return a concise JSON verdict for the observable.
+AI_VERDICT_MAX_TOKENS=1000
+AI_VERDICT_TIMEOUT=30
 IPAPI=api_key_here
 IPINFO=api_key_here
 GOOGLE_CSE_KEY=api_key_here
@@ -126,6 +136,16 @@ services:
     environment:
       - FLASK_ENV=production
       - ABUSEIPDB=${ABUSEIPDB:-}
+      - AI_VERDICT_ENABLED=${AI_VERDICT_ENABLED:-}
+      - AI_VERDICT_PROVIDER=${AI_VERDICT_PROVIDER:-}
+      - AI_VERDICT_API_URL=${AI_VERDICT_API_URL:-}
+      - AI_VERDICT_API_KEY=${AI_VERDICT_API_KEY:-}
+      - AI_VERDICT_AUTH_HEADER=${AI_VERDICT_AUTH_HEADER:-}
+      - AI_VERDICT_API_VERSION=${AI_VERDICT_API_VERSION:-}
+      - AI_VERDICT_MODEL=${AI_VERDICT_MODEL:-}
+      - AI_VERDICT_PROMPT=${AI_VERDICT_PROMPT:-}
+      - AI_VERDICT_MAX_TOKENS=${AI_VERDICT_MAX_TOKENS:-}
+      - AI_VERDICT_TIMEOUT=${AI_VERDICT_TIMEOUT:-}
       - ALIENVAULT=${ALIENVAULT:-}
       - CRIMINALIP_API_KEY=${CRIMINALIP_API_KEY:-}
       - CROWDSTRIKE_CLIENT_ID=${CROWDSTRIKE_CLIENT_ID:-}
@@ -228,6 +248,52 @@ export GUI_ENABLED_ENGINES=reverse_dns,rdap_whois
 ```
 
 If unset, all engines are displayed.
+
+### AI Verdict
+
+AI Verdict is disabled by default and only runs when the `ai_verdict` engine is selected.
+
+```bash
+export AI_VERDICT_ENABLED=true
+export AI_VERDICT_PROVIDER=openai
+export AI_VERDICT_API_KEY=api_key_here
+export AI_VERDICT_MODEL=gpt-4.1-mini
+```
+
+Supported providers are `openai`, `anthropic`, `google`, `microsoft_foundry`, `ollama`, `lm_studio`, and `openai_compatible`.
+
+For OpenAI-compatible providers (`openai`, `ollama`, `lm_studio`, `openai_compatible`), `AI_VERDICT_API_URL` accepts either a full endpoint such as `http://localhost:11434/v1/chat/completions` or a base URL such as `http://localhost:11434`.
+
+For Microsoft Foundry, set the full chat completion URL for your deployment. Azure OpenAI v1 endpoints usually look like this:
+
+```bash
+export AI_VERDICT_PROVIDER=microsoft_foundry
+export AI_VERDICT_API_URL=https://<resource>.openai.azure.com/openai/v1/chat/completions
+export AI_VERDICT_API_KEY=api_key_here
+export AI_VERDICT_MODEL=<deployment_name>
+```
+
+Foundry model inference endpoints can also be used:
+
+```bash
+export AI_VERDICT_API_URL=https://<resource>.services.ai.azure.com/models/chat/completions
+export AI_VERDICT_API_VERSION=2024-05-01-preview
+```
+
+For local OpenAI-compatible models:
+
+```bash
+export AI_VERDICT_PROVIDER=ollama
+export AI_VERDICT_MODEL=gemma4:latest
+```
+
+If Cyberbro runs in Docker and the local AI provider runs on the Docker host, use `host.docker.internal` instead of `localhost`:
+
+```bash
+export AI_VERDICT_API_URL=http://host.docker.internal:11434
+```
+
+See [Configure AI Verdict](../api-keys/Get-AI-Verdict-API-key.md) for provider-specific examples.
 
 ### SSL verification
 

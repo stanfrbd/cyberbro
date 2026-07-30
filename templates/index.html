@@ -66,6 +66,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             const engineIcons = {
                 'abuseipdb': '⚠️',
                 'abusix': '📧',
+                'ai_verdict': 'AI',
                 'alienvault': '🛡️',
                 'hister': '🔍',
                 'bad_asn': '🚫',
@@ -104,6 +105,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
             const allEngines = [
                 { name: "abuseipdb", label: "AbuseIPDB", supports: "risk", checked: false, description: "IP reputation & abuse reports", tooltip: "Checks AbuseIPDB for IP, reversed obtained IP for a given domain / URL, free API key required" },
                 { name: "abusix", label: "Abusix", supports: "abuse free_no_key", checked: false, description: "Abuse contact lookup (free)", tooltip: "Checks abuse contact with Abusix only for IP, reversed obtained IP for a given domain / URL, free, no API key" },
+                { name: "ai_verdict", label: "AI Verdict", supports: "domain url ip hash extension ai", checked: false, description: "AI-assisted verdict summary", tooltip: "Runs last and summarizes selected engine outputs. Supports OpenAI, Anthropic, Google Gemini, Microsoft Foundry, Ollama, LM Studio, and OpenAI-compatible providers." },
                 { name: "alienvault", label: "Alienvault", supports: "hash ip domain url", checked: false, description: "Threat intelligence platform", tooltip: "Checks Alienvault for IP, domain, URL, hash, free API key required" },
                 { name: "bad_asn", label: "Bad ASN Check", supports: "ip risk free_no_key", checked: false, description: "Malicious ASN detection (free)", tooltip: "Checks if IP's ASN is listed in Spamhaus ASNDROP, Brianhama Bad ASN databases, or LETHAL-FORENSICS ASN Blacklist. Requires ipapi, ipinfo, or ipquery engine. Free, no API key" },
                 { name: "criminalip", label: "Criminal IP", supports: "ip", checked: false, description: "Attack surface & threat hunting", tooltip: "Criminal IP is an OSINT search engine specialized in attack surface assessment and threat hunting, free, with paid upgrades available" },
@@ -530,6 +532,13 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
              */
             function validateEngineSelection(event) {
                 const selectedEngines = getSelectedEngines();
+
+                if (selectedEngines.includes('ai_verdict')) {
+                    const supportingEngines = selectedEngines.filter(engine => engine !== 'ai_verdict');
+                    if (supportingEngines.length < 2) {
+                        window.alert('AI verdict should have multiple engines selected for better results. Use all available engines for stronger AI-assisted assessment.');
+                    }
+                }
 
                 // Check each engine for missing dependencies
                 for (const engineName in ENGINE_DEPENDENCIES) {

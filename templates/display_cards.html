@@ -8,6 +8,9 @@
         </div>
         <p style="margin-top: 0.5rem;">{{ analysis_results.results[0].type }}</p>
     </div>
+    {% if analysis_results.results[0].ai_verdict %}
+    {% include "engine_layouts/ai_verdict_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].reverse_dns and analysis_results.results[0].reverse_dns.reverse_dns %}
     {% include "engine_layouts/reverse_dns_card.html" %}
     {% endif %}

@@ -1111,6 +1111,22 @@
                 edges.push({ from: obs, to: rlNodeLabel, label: rlEdgeLabel });
             }
 
+            // Check for Recorded Future data
+            if (entry.recorded_future && entry.recorded_future.risk_score > 0) {
+                const rfNodeLabel = "Recorded Future flagged";
+                addNode(
+                    rfNodeLabel,
+                    rfNodeLabel,
+                    "recorded_future_flagged",
+                    "https://img.icons8.com/officexs/32/fire-element.png",
+                );
+                let rfEdgeLabel = `RF Risk: ${entry.recorded_future.risk_score}`;
+                if (entry.recorded_future.rules && entry.recorded_future.rules.length > 0) {
+                    rfEdgeLabel += `, ${entry.recorded_future.rules[0]}`;
+                }
+                edges.push({ from: obs, to: rfNodeLabel, label: rfEdgeLabel });
+            }
+
             // Check for Chrome / Edge extension data
             if (entry.type == "CHROME_EXTENSION") {
                 const extensionName = entry.extension.name;

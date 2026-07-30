@@ -37,7 +37,8 @@
             result.ipquery.country_name not in countries) or (result.webscout and result.webscout.country_name not in
             countries) or (result.ipapi and result.ipapi.location is defined and result.ipapi.location and
             result.ipapi.location.country and result.ipapi.location.country not in countries) or (result.abuseipdb and
-            result.abuseipdb.country_name and result.abuseipdb.country_name not in countries) %}
+            result.abuseipdb.country_name and result.abuseipdb.country_name not in countries) or (result.recorded_future
+            and result.recorded_future.country and result.recorded_future.country not in countries) %}
             {% if result.ipinfo and result.ipinfo.country_name not in countries %}
             {% set _ = countries.append(result.ipinfo.country_name) %}
             <option value="{{ result.ipinfo.country_name | lower }}">{{ result.ipinfo.country_name }}</option>
@@ -63,6 +64,11 @@
             %}
             {% set _ = countries.append(result.abuseipdb.country_name) %}
             <option value="{{ result.abuseipdb.country_name | lower }}">{{ result.abuseipdb.country_name }}</option>
+            {% endif %}
+
+            {% if result.recorded_future and result.recorded_future.country and result.recorded_future.country not in countries %}
+            {% set _ = countries.append(result.recorded_future.country) %}
+            <option value="{{ result.recorded_future.country | lower }}">{{ result.recorded_future.country }}</option>
             {% endif %}
             {% endif %}
             {% endfor %}
@@ -239,6 +245,10 @@
 
                     {% if "ransomware_live" in analysis_results.selected_engines %}
                     <th>Ransomware.Live</th>
+                    {% endif %}
+
+                    {% if "recorded_future" in analysis_results.selected_engines %}
+                    <th>Recorded Future</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -430,6 +440,10 @@
 
                     {% if "ransomware_live" in analysis_results.selected_engines %}
                     {% include "engine_layouts/ransomware_live_table.html" %}
+                    {% endif %}
+
+                    {% if "recorded_future" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/recorded_future_table.html" %}
                     {% endif %}
 
                 </tr>

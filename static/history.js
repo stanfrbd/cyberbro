@@ -47,7 +47,14 @@ function filterTableClientSide() {
             Array.from(td).forEach(cell => {
                 const p = cell.querySelector('p');
                 if (p && p.title) {
-                    p.innerHTML = p.title.replace(new RegExp(searchValue, 'gi'), match => `<span style="background-color: yellow;">${match}</span>`);
+                    // Escape HTML in searchValue to prevent XSS
+                    const escaped = searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    p.innerHTML = p.title.replace(new RegExp(escaped, 'gi'), match => {
+                        const span = document.createElement('span');
+                        span.style.backgroundColor = 'yellow';
+                        span.textContent = match;
+                        return span.outerHTML;
+                    });
                 }
             });
         }

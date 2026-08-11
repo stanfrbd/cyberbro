@@ -1,0 +1,24 @@
+{
+  "data": {
+    "entity": {"id": "idn:example.com", "name": "example.com"},
+    "risk": {
+      "score": 45,
+      "criticalityLabel": "Suspicious",
+      "riskString": "2/61",
+      "evidenceDetails": [
+        {"rule": "Phishing Domain", "criticality": 3, "criticalityLabel": "Malicious"},
+        {"rule": "Newly Registered Domain", "criticality": 1, "criticalityLabel": "Low"}
+      ]
+    },
+    "intelCard": "https://app.recordedfuture.com/portal/intelligence-card/idn%3Aexample.com",
+    "sightings": [
+      {"source": "report", "published": "2024-05-01T00:00:00.000Z", "title": "Phishing campaign"},
+      {"source": "analyst_note", "published": "2024-01-01T00:00:00.000Z", "title": "Domain flagged"}
+    ],
+    "timestamps": {
+      "firstSeen": "2024-01-01T00:00:00.000Z",
+      "lastSeen": "2024-05-01T00:00:00.000Z"
+    },
+    "threatLists": [{"id": "report:ccc", "name": "Phishing Domains", "type": "EntityList"}]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "data": {
+    "entity": {"id": "ip:1.1.1.1", "name": "1.1.1.1"},
+    "risk": {
+      "score": 85,
+      "criticalityLabel": "Malicious",
+      "riskString": "3/58",
+      "evidenceDetails": [
+        {"rule": "C&C Server", "criticality": 4, "criticalityLabel": "Very Malicious"},
+        {"rule": "Recent Phishing Source", "criticality": 3, "criticalityLabel": "Malicious"},
+        {"rule": "Historically Reported in Threat List", "criticality": 2, "criticalityLabel": "Unusual"}
+      ]
+    },
+    "intelCard": "https://app.recordedfuture.com/portal/intelligence-card/ip%3A1.1.1.1",
+    "sightings": [
+      {"source": "analyst_note", "published": "2024-06-01T08:00:00.000Z", "title": "C2 observed"},
+      {"source": "report", "published": "2023-01-15T12:00:00.000Z", "title": "Phishing campaign"}
+    ],
+    "timestamps": {
+      "firstSeen": "2023-01-15T12:00:00.000Z",
+      "lastSeen": "2024-06-01T08:00:00.000Z"
+    },
+    "location": {
+      "organization": "Example ISP",
+      "asn": "AS12345",
+      "location": {
+        "continent": "Europe",
+        "country": "Russia",
+        "city": null
+      }
+    },
+    "threatLists": [
+      {"id": "report:aaa", "name": "Ransomware C2", "type": "EntityList"},
+      {"id": "report:bbb", "name": "APT28 Infrastructure", "type": "EntityList"}
+    ]
+  }
+}

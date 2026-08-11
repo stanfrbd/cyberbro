@@ -1,0 +1,25 @@
+{
+  "data": {
+    "entity": {
+      "id": "url:https://malicious.example.com/path",
+      "name": "https://malicious.example.com/path"
+    },
+    "risk": {
+      "score": 72,
+      "criticalityLabel": "Malicious",
+      "riskString": "1/39",
+      "evidenceDetails": [
+        {"rule": "Phishing URL", "criticality": 3, "criticalityLabel": "Malicious"}
+      ]
+    },
+    "intelCard": "https://app.recordedfuture.com/portal/intelligence-card/url%3Ahttps%3A%2F%2Fmalicious.example.com%2Fpath",
+    "sightings": [
+      {"source": "report", "published": "2024-06-15T00:00:00.000Z", "title": "Phishing report"},
+      {"source": "analyst_note", "published": "2024-03-01T00:00:00.000Z", "title": "URL flagged"}
+    ],
+    "timestamps": {
+      "firstSeen": "2024-03-01T00:00:00.000Z",
+      "lastSeen": "2024-06-15T00:00:00.000Z"
+    }
+  }
+}

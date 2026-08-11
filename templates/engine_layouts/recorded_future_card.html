@@ -1,0 +1,136 @@
+{% if analysis_results.results[0].recorded_future and analysis_results.results[0].recorded_future.risk_score >= 65 %}
+    <div class="card high-detection" style="background-color: red; color: white;">
+{% else %}
+    <div class="card">
+{% endif %}
+
+    <h3>Recorded Future</h3>
+    <p><strong>Risk: </strong><a href="{{ analysis_results.results[0].recorded_future.link }}" target="_blank">{{ analysis_results.results[0].recorded_future.risk_score }} – {{ analysis_results.results[0].recorded_future.risk_level }}</a></p>
+
+    {% if analysis_results.results[0].recorded_future.sightings > 0 %}
+    <p><strong>Sightings: </strong>{{ analysis_results.results[0].recorded_future.sightings }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.rules and analysis_results.results[0].recorded_future.rules | length > 0 %}
+    <div class="rf-badges">
+        {% for rule in analysis_results.results[0].recorded_future.rules[:3] %}
+        <span class="badge badge-danger">{{ rule }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.threat_lists and analysis_results.results[0].recorded_future.threat_lists | length > 0 %}
+    <div class="rf-badges">
+        {% for tl in analysis_results.results[0].recorded_future.threat_lists %}
+        <span class="badge badge-warning">{{ tl }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.vpn_list and analysis_results.results[0].recorded_future.vpn_list | length > 0 %}
+    <div class="rf-badges">
+        {% for vpn in analysis_results.results[0].recorded_future.vpn_list %}
+        <span class="badge badge-info">VPN: {{ vpn }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.proxy_list and analysis_results.results[0].recorded_future.proxy_list | length > 0 %}
+    <div class="rf-badges">
+        {% for proxy in analysis_results.results[0].recorded_future.proxy_list %}
+        <span class="badge badge-secondary">Proxy: {{ proxy }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.country %}
+    <p><strong>Country: </strong>{{ analysis_results.results[0].recorded_future.country }}
+        {% if analysis_results.results[0].recorded_future.country_code %}
+        <span class="fi fi-{{ analysis_results.results[0].recorded_future.country_code }}"></span>
+        {% endif %}
+    </p>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.asn %}
+    <p><strong>ASN: </strong>{{ analysis_results.results[0].recorded_future.asn }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.hash_algorithm %}
+    <p><strong>Algorithm: </strong>{{ analysis_results.results[0].recorded_future.hash_algorithm }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.first_seen %}
+    <p><strong>First Seen: </strong>{{ analysis_results.results[0].recorded_future.first_seen }}</p>
+    {% endif %}
+
+    {% if analysis_results.results[0].recorded_future.last_seen %}
+    <p><strong>Last Seen: </strong>{{ analysis_results.results[0].recorded_future.last_seen }}</p>
+    {% endif %}
+
+    <style>
+        .rf-badges {
+            margin: 0.5rem 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.35em 0.65em;
+            font-size: 0.75em;
+            font-weight: bold;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        .badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-warning {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .badge-info {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        /* High-risk card contrast overrides */
+        .high-detection p,
+        .high-detection h3 {
+            color: white !important;
+        }
+        .high-detection a {
+            color: white !important;
+            text-decoration: underline;
+        }
+        .high-detection strong {
+            color: white !important;
+        }
+        .high-detection .badge-danger {
+            background-color: rgba(255, 255, 255, 0.45);
+            color: #1a0000;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        .high-detection .badge-warning {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: #1a0000;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+        .high-detection .badge-info {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: #000;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+        .high-detection .badge-secondary {
+            background-color: rgba(255, 255, 255, 0.40);
+            color: #1a0000;
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+    </style>
+
+</div>

@@ -99,7 +99,7 @@ class DFIRIrisEngine(BaseEngine):
                 notes_body = self._build_search_body(observable, "notes")
                 notes_data = self._query(dfir_iris_url, notes_body)
                 notes_links = [
-                    f"{dfir_iris_url}/case/notes/search?search_input={observable.value}&cid={case_id}"
+                    f"{dfir_iris_url}/case/notes?cid={case_id}"
                     for case_id in self._extract_case_ids(notes_data)
                 ]
             except Exception as e:

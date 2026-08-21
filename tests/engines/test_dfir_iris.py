@@ -655,10 +655,7 @@ def test_analyze_notes_enabled_merges_ioc_and_notes_links(
     assert result is not None
     assert result["reports"] == 2
     ioc_link = f"{secrets_with_notes_enabled.dfir_iris_url}/case/ioc?cid=1"
-    notes_link = (
-        f"{secrets_with_notes_enabled.dfir_iris_url}/case/notes/search"
-        f"?search_input={ipv4_observable.value}&cid=2"
-    )
+    notes_link = f"{secrets_with_notes_enabled.dfir_iris_url}/case/notes?cid=2"
     assert ioc_link in result["links"]
     assert notes_link in result["links"]
 
@@ -676,10 +673,7 @@ def test_analyze_notes_only_hit_returns_notes_link(secrets_with_notes_enabled, i
 
     assert result is not None
     assert result["reports"] == 1
-    notes_link = (
-        f"{secrets_with_notes_enabled.dfir_iris_url}/case/notes/search"
-        f"?search_input={ipv4_observable.value}&cid=3"
-    )
+    notes_link = f"{secrets_with_notes_enabled.dfir_iris_url}/case/notes?cid=3"
     assert result["links"] == [notes_link]
 
 

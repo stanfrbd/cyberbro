@@ -23,4 +23,5 @@
 6. **Optional, use a dedicated service account**  
    To have a dedicated service account that can only do global search, you will first need to add a group with the `search_across_cases` permissions. Create a new group and give it only that permission. When creating a new user, check the `Use as service account` and assign the group to the user.
 
-Set `DFIR_IRIS_URL` and `DFIR_IRIS_API_KEY` in your `.env` file or deployment environment.
+Set `DFIR_IRIS_URL` and `DFIR_IRIS_API_KEY` in your `.env` file or deployment environment.  
+Set the `DFIR_IRIS_SEARCH_NOTES` to `true` if you also want to search for indicators in the notes. Default (`false`) is to only search for observables in IOCs. Enabling this feature will return results for both findings if applicable.

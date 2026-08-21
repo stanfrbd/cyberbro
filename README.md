@@ -116,6 +116,7 @@ CROWDSTRIKE_CLIENT_ID=client_id_here
 CROWDSTRIKE_CLIENT_SECRET=client_secret_here
 DFIR_IRIS_API_KEY=token_here
 DFIR_IRIS_URL=https://dfir-iris.local
+DFIR_IRIS_SEARCH_NOTES=false
 GOOGLE_CSE_CX=cx_here
 GOOGLE_CSE_KEY=key_here
 GOOGLE_SAFE_BROWSING=token_here

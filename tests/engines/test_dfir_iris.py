@@ -37,6 +37,15 @@ def secrets_without_url():
 
 
 @pytest.fixture
+def secrets_with_notes_enabled():
+    s = Secrets()
+    s.dfir_iris_api_key = "test_api_key_12345"
+    s.dfir_iris_url = "https://dfir-iris.example.com"
+    s.dfir_iris_search_notes = True
+    return s
+
+
+@pytest.fixture
 def ipv4_observable():
     return Observable(value="192.168.1.1", type=ObservableType.IPV4)
 
@@ -571,3 +580,175 @@ def test_analyze_url_includes_cid_parameter(secrets_with_both_keys, ipv4_observa
     assert result is not None
     # Verify the request was made to the correct URL
     assert "cid=1" in responses.calls[0].request.url
+
+
+# ============================================================================
+# Notes search feature
+# ============================================================================
+
+
+def test_dfir_iris_search_notes_defaults_to_false():
+    """Test that the DFIR_IRIS_SEARCH_NOTES config field defaults to False."""
+    assert Secrets().dfir_iris_search_notes is False
+
+
+@responses.activate
+def test_analyze_notes_disabled_by_default_only_queries_ioc(
+    secrets_with_both_keys, ipv4_observable
+):
+    """Test that only a single ioc search request is made when notes search is disabled."""
+    engine = DFIRIrisEngine(secrets_with_both_keys, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_both_keys.dfir_iris_url}/search?cid=1"
+
+    mock_resp = {"data": [{"case_id": 1}]}
+    responses.add(responses.POST, url, json=mock_resp, status=200)
+
+    result = engine.analyze(ipv4_observable)
+
+    assert result is not None
+    assert len(responses.calls) == 1
+    request_body = json.loads(responses.calls[0].request.body)
+    assert request_body["search_type"] == "ioc"
+
+
+@responses.activate
+def test_analyze_notes_enabled_queries_both_ioc_and_notes(
+    secrets_with_notes_enabled, ipv4_observable
+):
+    """Test that both ioc and notes searches are performed when notes search is enabled."""
+    engine = DFIRIrisEngine(secrets_with_notes_enabled, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_notes_enabled.dfir_iris_url}/search?cid=1"
+
+    ioc_resp = {"data": [{"case_id": 1}]}
+    notes_resp = {"data": [{"case_id": 2}]}
+    responses.add(responses.POST, url, json=ioc_resp, status=200)
+    responses.add(responses.POST, url, json=notes_resp, status=200)
+
+    result = engine.analyze(ipv4_observable)
+
+    assert result is not None
+    assert len(responses.calls) == 2
+
+    first_body = json.loads(responses.calls[0].request.body)
+    second_body = json.loads(responses.calls[1].request.body)
+    assert first_body["search_type"] == "ioc"
+    assert second_body["search_type"] == "notes"
+    # Same wildcard pattern is reused for both search types
+    assert first_body["search_value"] == second_body["search_value"]
+
+
+@responses.activate
+def test_analyze_notes_enabled_merges_ioc_and_notes_links(
+    secrets_with_notes_enabled, ipv4_observable
+):
+    """Test that ioc and notes links are merged into a single links list when both have hits."""
+    engine = DFIRIrisEngine(secrets_with_notes_enabled, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_notes_enabled.dfir_iris_url}/search?cid=1"
+
+    ioc_resp = {"data": [{"case_id": 1}]}
+    notes_resp = {"data": [{"case_id": 2}]}
+    responses.add(responses.POST, url, json=ioc_resp, status=200)
+    responses.add(responses.POST, url, json=notes_resp, status=200)
+
+    result = engine.analyze(ipv4_observable)
+
+    assert result is not None
+    assert result["reports"] == 2
+    ioc_link = f"{secrets_with_notes_enabled.dfir_iris_url}/case/ioc?cid=1"
+    notes_link = (
+        f"{secrets_with_notes_enabled.dfir_iris_url}/case/notes/search"
+        f"?search_input={ipv4_observable.value}&cid=2"
+    )
+    assert ioc_link in result["links"]
+    assert notes_link in result["links"]
+
+
+@responses.activate
+def test_analyze_notes_only_hit_returns_notes_link(secrets_with_notes_enabled, ipv4_observable):
+    """Test that a notes-only hit (no ioc hits) still returns a result with the notes link."""
+    engine = DFIRIrisEngine(secrets_with_notes_enabled, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_notes_enabled.dfir_iris_url}/search?cid=1"
+
+    responses.add(responses.POST, url, json={"data": []}, status=200)
+    responses.add(responses.POST, url, json={"data": [{"case_id": 3}]}, status=200)
+
+    result = engine.analyze(ipv4_observable)
+
+    assert result is not None
+    assert result["reports"] == 1
+    notes_link = (
+        f"{secrets_with_notes_enabled.dfir_iris_url}/case/notes/search"
+        f"?search_input={ipv4_observable.value}&cid=3"
+    )
+    assert result["links"] == [notes_link]
+
+
+@responses.activate
+def test_analyze_ioc_only_hit_with_notes_enabled(secrets_with_notes_enabled, ipv4_observable):
+    """Test that an ioc-only hit (no notes hits) still returns a result with the ioc link."""
+    engine = DFIRIrisEngine(secrets_with_notes_enabled, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_notes_enabled.dfir_iris_url}/search?cid=1"
+
+    responses.add(responses.POST, url, json={"data": [{"case_id": 1}]}, status=200)
+    responses.add(responses.POST, url, json={"data": []}, status=200)
+
+    result = engine.analyze(ipv4_observable)
+
+    assert result is not None
+    assert result["reports"] == 1
+    ioc_link = f"{secrets_with_notes_enabled.dfir_iris_url}/case/ioc?cid=1"
+    assert result["links"] == [ioc_link]
+
+
+@responses.activate
+def test_analyze_notes_search_failure_is_non_fatal(
+    secrets_with_notes_enabled, ipv4_observable, caplog
+):
+    """Test that a failed notes search does not fail the whole analysis; ioc results are kept."""
+    engine = DFIRIrisEngine(secrets_with_notes_enabled, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_notes_enabled.dfir_iris_url}/search?cid=1"
+
+    responses.add(responses.POST, url, json={"data": [{"case_id": 1}]}, status=200)
+    responses.add(responses.POST, url, json={"error": "server error"}, status=500)
+
+    caplog.set_level(logging.WARNING)
+    result = engine.analyze(ipv4_observable)
+
+    assert result is not None
+    assert result["reports"] == 1
+    ioc_link = f"{secrets_with_notes_enabled.dfir_iris_url}/case/ioc?cid=1"
+    assert result["links"] == [ioc_link]
+    assert "Error querying DFIR-IRIS notes" in caplog.text
+
+
+@responses.activate
+def test_analyze_ioc_search_failure_remains_fatal_with_notes_enabled(
+    secrets_with_notes_enabled, ipv4_observable, caplog
+):
+    """Test that a failed ioc search still returns None even when notes search is enabled."""
+    engine = DFIRIrisEngine(secrets_with_notes_enabled, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_notes_enabled.dfir_iris_url}/search?cid=1"
+
+    responses.add(responses.POST, url, json={"error": "server error"}, status=500)
+
+    caplog.set_level(logging.ERROR)
+    result = engine.analyze(ipv4_observable)
+
+    assert result is None
+    # Only the ioc request should have been attempted
+    assert len(responses.calls) == 1
+    assert "Error querying DFIR-IRIS for" in caplog.text
+
+
+@responses.activate
+def test_analyze_notes_disabled_no_hits_returns_none(secrets_with_both_keys, ipv4_observable):
+    """Test that no ioc hits and notes disabled returns None."""
+    engine = DFIRIrisEngine(secrets_with_both_keys, proxies={}, ssl_verify=True)
+    url = f"{secrets_with_both_keys.dfir_iris_url}/search?cid=1"
+
+    responses.add(responses.POST, url, json={"data": []}, status=200)
+
+    result = engine.analyze(ipv4_observable)
+
+    assert result is None
+    assert len(responses.calls) == 1

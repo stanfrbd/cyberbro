@@ -56,13 +56,12 @@ class DFIRIrisEngine(BaseEngine):
             "Content-Type": "application/json",
         }
         payload = json.dumps(body)
-        # NOTE: Original code uses proxies=None here, keeping that behavior.
         response = requests.post(
             url,
             params=params,
             headers=headers,
             data=payload,
-            proxies=None,
+            proxies=self.proxies,
             verify=self.ssl_verify,
             timeout=5,
         )

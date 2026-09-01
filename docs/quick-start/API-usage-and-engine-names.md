@@ -427,6 +427,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: VPN, proxy, paid API key required  
 **Explaination**: Checks Spur.us for IP, reversed obtained IP for a given domain/URL, paid API key required
 
+### ScanMalware
+**Name**: `scanmalware`  
+**Supports**: domain, URL, IP, free_no_key  
+**Explaination**: Checks the ScanMalware archive of sandboxed URL scans for IP, domains, URL, free, no API key. A verdict is only reported for an address that was itself scanned, never one that a scan merely redirected to.
+
 ### ThreatFox
 **Name**: `threatfox`  
 **Supports**: IP, domain, URL, free  

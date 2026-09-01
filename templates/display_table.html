@@ -185,6 +185,10 @@
                     <th>URLscan</th>
                     {% endif %}
 
+                    {% if "scanmalware" in analysis_results.selected_engines %}
+                    <th>ScanMalware</th>
+                    {% endif %}
+
                     {% if "opencti" in analysis_results.selected_engines %}
                     <th>OpenCTI</th>
                     {% endif %}
@@ -374,6 +378,10 @@
 
                     {% if "urlscan" in analysis_results.selected_engines %}
                     {% include "engine_layouts/urlscan_table.html" %}
+                    {% endif %}
+
+                    {% if "scanmalware" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/scanmalware_table.html" %}
                     {% endif %}
 
                     {% if "opencti" in analysis_results.selected_engines %}

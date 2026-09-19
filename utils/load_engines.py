@@ -27,6 +27,7 @@ from engines.rdap_whois import RDAPWhoisEngine
 from engines.reverse_dns import ReverseDNSEngine
 from engines.reversinglabs_spectra_analyze import RLAnalyzeEngine
 from engines.rosti import RostiEngine
+from engines.scanmalware import ScanMalwareEngine
 from engines.shodan import ShodanEngine
 from engines.spur_us import SpurUSEngine
 from engines.threatfox import ThreatFoxEngine
@@ -77,6 +78,7 @@ def get_engine_instances(
         RDAPWhoisEngine(secrets, proxies, ssl_verify),
         RLAnalyzeEngine(secrets, proxies, ssl_verify),
         RostiEngine(secrets, proxies, ssl_verify),
+        ScanMalwareEngine(secrets, proxies, ssl_verify),
         SpurUSEngine(secrets, proxies, ssl_verify),
         ThreatFoxEngine(secrets, proxies, ssl_verify),
         URLScanEngine(secrets, proxies, ssl_verify),

@@ -47,6 +47,10 @@
     {% if analysis_results.results[0].urlscan %}
     {% include "engine_layouts/urlscan_card.html" %}
     {% endif %}
+
+    {% if analysis_results.results[0].scanmalware %}
+    {% include "engine_layouts/scanmalware_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].google_dns %}
     {% include "engine_layouts/google_dns_card.html" %}
     {% endif %}

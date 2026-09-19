@@ -3048,37 +3048,37 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">cURL</label><label for="__tabbed_1_2">Python</label><label for="__tabbed_1_3">JavaScript</label><label for="__tabbed_1_4">HTTP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">  &quot;text&quot;: &quot;cyberbro.net&quot;,</span>
-<span class="s1">  &quot;engines&quot;: [&quot;reverse_dns&quot;, &quot;rdap_whois&quot;]</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"http://localhost:5000/api/analyze"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">  "text": "cyberbro.net",</span>
+<span class="s1">  "engines": ["reverse_dns", "rdap_whois"]</span>
+<span class="s1">  }'</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"http://localhost:5000/api/analyze"</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">}</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-  <span class="s2">&quot;engines&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span> <span class="s2">&quot;rdap_whois&quot;</span><span class="p">]</span>
+  <span class="s2">"text"</span><span class="p">:</span> <span class="s2">"cyberbro.net"</span><span class="p">,</span>
+  <span class="s2">"engines"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"reverse_dns"</span><span class="p">,</span> <span class="s2">"rdap_whois"</span><span class="p">]</span>
 <span class="p">}</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">"http://localhost:5000/api/analyze"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;Content-Type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span>
+<span class="w">    </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
-<span class="w">    </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap_whois&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">"cyberbro.net"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"reverse_dns"</span><span class="p">,</span><span class="w"> </span><span class="s2">"rdap_whois"</span><span class="p">]</span>
 <span class="w">  </span><span class="p">})</span>
 <span class="p">})</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
@@ -3091,16 +3091,16 @@
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
 
 <span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;engines&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap_whois&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cyberbro.net"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"engines"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"reverse_dns"</span><span class="p">,</span><span class="w"> </span><span class="s2">"rdap_whois"</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 </div>
 </div>
 </div>
 <div class="highlight"><span class="filename">Example Response</span><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;analysis_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e88de647-b153-4904-91e5-8f5c79174854&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;link&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<span class="w">  </span><span class="nt">"analysis_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e88de647-b153-4904-91e5-8f5c79174854"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/results/e88de647-b153-4904-91e5-8f5c79174854"</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />
@@ -3109,19 +3109,19 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="2:4"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">cURL</label><label for="__tabbed_2_2">Python</label><label for="__tabbed_2_3">JavaScript</label><label for="__tabbed_2_4">HTTP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span><span class="s2">"http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854"</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854&quot;</span><span class="p">)</span>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">"http://localhost:5000/api/is_analysis_complete/e88de647-b153-4904-91e5-8f5c79174854"</span><span class="p">)</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
 </code></pre></div>
@@ -3134,7 +3134,7 @@
 </div>
 </div>
 <div class="highlight"><span class="filename">Example Response</span><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;complete&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="nt">"complete"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </code></pre></div>
 <hr />
@@ -3143,19 +3143,19 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="3:4"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><input id="__tabbed_3_4" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">cURL</label><label for="__tabbed_3_2">Python</label><label for="__tabbed_3_3">JavaScript</label><label for="__tabbed_3_4">HTTP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code>curl<span class="w"> </span><span class="s2">"http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854&quot;</span><span class="p">)</span>
+<div class="highlight"><span class="filename">Request</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">"http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"</span><span class="p">)</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
 <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
 </code></pre></div>
@@ -3169,35 +3169,35 @@
 </div>
 <div class="highlight"><span class="filename">Example Response</span><pre><span></span><code><span class="p">[</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;observable&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;rdap_whois&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;abuse_contact&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;registrar-abuse@cloudflare.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-12-20&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;data_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;rdap&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;registrar-abuse@cloudflare.com&quot;</span>
+<span class="w">  </span><span class="nt">"observable"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cyberbro.net"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"rdap_whois"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"abuse_contact"</span><span class="p">:</span><span class="w"> </span><span class="s2">"registrar-abuse@cloudflare.com"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"creation_date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-12-20"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"data_source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"rdap"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"emails"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"registrar-abuse@cloudflare.com"</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;expiration_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-12-20&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;link&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://rdap.verisign.com/net/v1/domain/CYBERBRO.NET&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;name_servers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;anderson.ns.cloudflare.com&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;lisa.ns.cloudflare.com&quot;</span>
+<span class="w">    </span><span class="nt">"expiration_date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-12-20"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"link"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://rdap.verisign.com/net/v1/domain/CYBERBRO.NET"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"name_servers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"anderson.ns.cloudflare.com"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"lisa.ns.cloudflare.com"</span>
 <span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;organization&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;registrant&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;registrant_country&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;registrant_email&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;registrar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cloudflare, Inc.&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;update_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-11-20&quot;</span>
+<span class="w">    </span><span class="nt">"organization"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"registrant"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"registrant_country"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"registrant_email"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"registrar"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Cloudflare, Inc."</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"update_date"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2025-11-20"</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;reverse_dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;reverse_dns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="s2">&quot;172.67.197.226&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="s2">&quot;104.21.42.7&quot;</span>
+<span class="w">  </span><span class="nt">"reverse_dns"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"reverse_dns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"172.67.197.226"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"104.21.42.7"</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;reversed_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FQDN&quot;</span>
+<span class="w">  </span><span class="nt">"reversed_success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"FQDN"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
@@ -3219,38 +3219,38 @@ For more advanced usage, such as bypassing cache or customizing engine selection
 <div class="tabbed-set tabbed-alternate" data-tabs="4:4"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">cURL</label><label for="__tabbed_4_2">Python</label><label for="__tabbed_4_3">JavaScript</label><label for="__tabbed_4_4">HTTP</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;text&quot;: &quot;cyberbro.net&quot;,</span>
-<span class="s1">    &quot;engines&quot;: [&quot;reverse_dns&quot;, &quot;rdap_whois&quot;],</span>
-<span class="s1">    &quot;ignore_cache&quot;: true</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"http://localhost:5000/api/analyze"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "text": "cyberbro.net",</span>
+<span class="s1">    "engines": ["reverse_dns", "rdap_whois"],</span>
+<span class="s1">    "ignore_cache": true</span>
+<span class="s1">  }'</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span>
-<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">"http://localhost:5000/api/analyze"</span>
+<span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Content-Type"</span><span class="p">:</span> <span class="s2">"application/json"</span><span class="p">}</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;engines&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span> <span class="s2">&quot;rdap_whois&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;ignore_cache&quot;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="s2">"text"</span><span class="p">:</span> <span class="s2">"cyberbro.net"</span><span class="p">,</span>
+    <span class="s2">"engines"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"reverse_dns"</span><span class="p">,</span> <span class="s2">"rdap_whois"</span><span class="p">],</span>
+    <span class="s2">"ignore_cache"</span><span class="p">:</span> <span class="kc">True</span>
 <span class="p">}</span>
 <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+<div class="highlight"><span class="filename">Request with Cache Ignored</span><pre><span></span><code><span class="nx">fetch</span><span class="p">(</span><span class="s2">"http://localhost:5000/api/analyze"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;Content-Type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;application/json&quot;</span>
+<span class="w">        </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
-<span class="w">        </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap_whois&quot;</span><span class="p">],</span>
+<span class="w">        </span><span class="nx">text</span><span class="o">:</span><span class="w"> </span><span class="s2">"cyberbro.net"</span><span class="p">,</span>
+<span class="w">        </span><span class="nx">engines</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"reverse_dns"</span><span class="p">,</span><span class="w"> </span><span class="s2">"rdap_whois"</span><span class="p">],</span>
 <span class="w">        </span><span class="nx">ignore_cache</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="w">    </span><span class="p">})</span>
 <span class="p">})</span>
@@ -3264,9 +3264,9 @@ For more advanced usage, such as bypassing cache or customizing engine selection
 <span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
 
 <span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cyberbro.net&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;engines&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;reverse_dns&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;rdap_whois&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;ignore_cache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="nt">"text"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cyberbro.net"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"engines"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"reverse_dns"</span><span class="p">,</span><span class="w"> </span><span class="s2">"rdap_whois"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"ignore_cache"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
 <span class="p">}</span>
 </code></pre></div>
 </div>

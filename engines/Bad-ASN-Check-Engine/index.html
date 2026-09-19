@@ -3210,10 +3210,10 @@
 </ul>
 <p><strong>Example Entry:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AS12345&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EXAMPLE-AS&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;domain&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;cc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RU&quot;</span>
+<span class="w">  </span><span class="nt">"asn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AS12345"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asname"</span><span class="p">:</span><span class="w"> </span><span class="s2">"EXAMPLE-AS"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"domain"</span><span class="p">:</span><span class="w"> </span><span class="s2">"example.com"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"cc"</span><span class="p">:</span><span class="w"> </span><span class="s2">"RU"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <h3 id="2-brianhama-bad-asn-list">2. Brianhama Bad ASN List<a class="headerlink" href="#2-brianhama-bad-asn-list" title="Permanent link">&para;</a></h3>
@@ -3224,8 +3224,8 @@
 <li><strong>Data Included</strong>: ASN number, entity name</li>
 </ul>
 <p><strong>Example Entry:</strong>
-<div class="highlight"><pre><span></span><code>&quot;ASN&quot;,&quot;Entity&quot;
-&quot;12345&quot;,&quot;Example Malicious Entity&quot;
+<div class="highlight"><pre><span></span><code>"ASN","Entity"
+"12345","Example Malicious Entity"
 </code></pre></div></p>
 <h3 id="3-lethal-forensics-asn-blacklist">3. LETHAL-FORENSICS ASN Blacklist<a class="headerlink" href="#3-lethal-forensics-asn-blacklist" title="Permanent link">&para;</a></h3>
 <ul>
@@ -3235,8 +3235,8 @@
 <li><strong>Data Included</strong>: ASN number, organization name, VPN services info, date</li>
 </ul>
 <p><strong>Example Entry:</strong>
-<div class="highlight"><pre><span></span><code>&quot;ASN&quot;,&quot;OrgName&quot;,&quot;Info&quot;,&quot;Date&quot;
-&quot;174&quot;,&quot;Cogent Communications&quot;,&quot;CyberGhost VPN, Mullvad VPN, PIA VPN, ProtonVPN, Pure VPN&quot;,&quot;2024-12-17&quot;
+<div class="highlight"><pre><span></span><code>"ASN","OrgName","Info","Date"
+"174","Cogent Communications","CyberGhost VPN, Mullvad VPN, PIA VPN, ProtonVPN, Pure VPN","2024-12-17"
 </code></pre></div></p>
 <h3 id="data-merging-strategy">Data Merging Strategy<a class="headerlink" href="#data-merging-strategy" title="Permanent link">&para;</a></h3>
 <p>When an ASN appears in multiple lists, the information is combined:</p>
@@ -3314,12 +3314,12 @@ Status: malicious
 - Higher risk scores</p>
 <p><strong>Example Output:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;malicious&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;risk_score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spamhaus ASNDROP (...) + Brianhama Bad ASN List (...)&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASN 12345 is listed in bad ASN databases. Risk Score: 80/100. Source: ...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asn_org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Example Malicious Org&quot;</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"malicious"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"12345"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"risk_score"</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Spamhaus ASNDROP (...) + Brianhama Bad ASN List (...)"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ASN 12345 is listed in bad ASN databases. Risk Score: 80/100. Source: ..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asn_org_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Example Malicious Org"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <h3 id="2-potentially_legitimate">2. <code>potentially_legitimate</code><a class="headerlink" href="#2-potentially_legitimate" title="Permanent link">&para;</a></h3>
@@ -3330,13 +3330,13 @@ Status: malicious
 - Lower risk scores due to -30 penalty</p>
 <p><strong>Example Output:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;potentially_legitimate&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16509&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;risk_score&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LETHAL-FORENSICS ASN Blacklist (Amazon.com Inc., ProtonVPN, 2024-12-17)&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASN 16509 is listed in bad ASN databases BUT this appears to be a legitimate cloud/hosting provider...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;legitimate_but_abused&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asn_org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Amazon.com, Inc.&quot;</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"potentially_legitimate"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"16509"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"risk_score"</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LETHAL-FORENSICS ASN Blacklist (Amazon.com Inc., ProtonVPN, 2024-12-17)"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ASN 16509 is listed in bad ASN databases BUT this appears to be a legitimate cloud/hosting provider..."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"legitimate_but_abused"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asn_org_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Amazon.com, Inc."</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <div class="admonition info">
@@ -3347,9 +3347,9 @@ Status: malicious
 <p>The ASN is NOT listed in any bad ASN database.</p>
 <p><strong>Example Output:</strong>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unlisted&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;15169&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;details&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASN 15169 is not listed in bad ASN databases&quot;</span>
+<span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unlisted"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"15169"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ASN 15169 is not listed in bad ASN databases"</span>
 <span class="p">}</span>
 </code></pre></div></p>
 <div class="admonition warning">
@@ -3372,12 +3372,12 @@ Status: malicious
 <li>Submit the analysis</li>
 </ol>
 <h3 id="via-api">Via API<a class="headerlink" href="#via-api" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:5000/api/analyze&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
-<span class="s1">    &quot;text&quot;: &quot;1.2.3.4&quot;,</span>
-<span class="s1">    &quot;engines&quot;: [&quot;ipapi&quot;, &quot;bad_asn&quot;]</span>
-<span class="s1">  }&#39;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">"http://localhost:5000/api/analyze"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">"Content-Type: application/json"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">'{</span>
+<span class="s1">    "text": "1.2.3.4",</span>
+<span class="s1">    "engines": ["ipapi", "bad_asn"]</span>
+<span class="s1">  }'</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Engine Order</p>
@@ -3464,11 +3464,11 @@ Status: malicious
 <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BadASNEngine</span><span class="p">(</span><span class="n">BaseEngine</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;bad_asn&quot;</span>
+        <span class="k">return</span> <span class="s2">"bad_asn"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">supported_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;IPv4&quot;</span><span class="p">,</span> <span class="s2">&quot;IPv6&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">"IPv4"</span><span class="p">,</span> <span class="s2">"IPv6"</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">execute_after_reverse_dns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -3476,8 +3476,8 @@ Status: malicious
 </code></pre></div>
 <h3 id="background-service">Background Service<a class="headerlink" href="#background-service" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">background_updater</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the bad ASN cache every 24 hours.&quot;&quot;&quot;</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Bad ASN background updater started&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Updates the bad ASN cache every 24 hours."""</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Bad ASN background updater started"</span><span class="p">)</span>
     <span class="n">update_bad_asn_cache</span><span class="p">()</span>  <span class="c1"># Initial update</span>
 
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -3486,11 +3486,11 @@ Status: malicious
 </code></pre></div>
 <h3 id="cache-structure">Cache Structure<a class="headerlink" href="#cache-structure" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1706281234.567</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;asns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;12345&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Spamhaus ASNDROP (Example AS, example.com, RU)&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;67890&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Brianhama Bad ASN List (Example Entity)&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;174&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LETHAL-FORENSICS ASN Blacklist (Cogent Communications, Multiple VPNs, 2024-12-17)&quot;</span>
+<span class="w">  </span><span class="nt">"last_updated"</span><span class="p">:</span><span class="w"> </span><span class="mf">1706281234.567</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"asns"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"12345"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Spamhaus ASNDROP (Example AS, example.com, RU)"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"67890"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Brianhama Bad ASN List (Example Entity)"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"174"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LETHAL-FORENSICS ASN Blacklist (Cogent Communications, Multiple VPNs, 2024-12-17)"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

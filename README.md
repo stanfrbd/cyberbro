@@ -347,6 +347,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine, adding DFIR IRIS search and fixing Bandit issues, correcting MISP engine, adding MISP Feedback engine.
 * [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 * [Maxime Berthault - Maxou56800](https://github.com/Maxou56800) for developing Cyberbro CLI.
+* [Jonas Lejon](https://github.com/jonaslejon) for adding ScanMalware engine.
 
 Your contributions are greatly appreciated!
 

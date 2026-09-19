@@ -199,6 +199,20 @@ function formatResults(data) {
                 plainText += `  - ${domain.domain} (${domain.count})\n`;
             });
         }
+        if (result.scanmalware && result.scanmalware.scan_count > 0) {
+            plainText += `ScanMalware: Scan Count: ${result.scanmalware.scan_count}\n`;
+            if (result.scanmalware.verdict) {
+                plainText += `  - Verdict: ${result.scanmalware.verdict}`;
+                if (result.scanmalware.confidence !== null && result.scanmalware.confidence !== undefined) {
+                    plainText += ` (${result.scanmalware.confidence}% confidence)`;
+                }
+                plainText += `\n`;
+                // Name the address the verdict belongs to: a domain is not
+                // malicious because one page on it was.
+                plainText += `  - Verdict is for: ${result.scanmalware.scanned_url}\n`;
+            }
+            plainText += `  - Link: ${result.scanmalware.link}\n`;
+        }
         if (result.crtsh && result.crtsh.scan_count > 0) {
             plainText += `crt.sh: Scan Count: ${result.urlscan.scan_count}\n`;
             result.crtsh.top_domains.forEach(domain => {

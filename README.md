@@ -324,6 +324,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Ransomware.Live](https://ransomware.live/)
 * [ReversingLabs Spectra Analyze](https://www.reversinglabs.com/products/spectra-analyze)
 * [Rösti](https://rosti.bin.re/) - Repackaged Open Source Threat Intelligence
+* [ScanMalware](https://scanmalware.com/)
 * [Shodan](https://developer.shodan.io/)
 * [Spur.us](https://spur.us/)
 * [ThreatFox](https://threatfox.abuse.ch/api/)

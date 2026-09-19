@@ -85,6 +85,7 @@ CROWDSTRIKE_CLIENT_SECRET=client_secret_here
 CROWDSTRIKE_FALCON_BASE_URL=https://falcon.crowdstrike.com
 DFIR_IRIS_URL=https://dfir-iris.local
 DFIR_IRIS_API_KEY=token_here
+DFIR_IRIS_SEARCH_NOTES=false
 WEBSCOUT=token_here
 RL_ANALYZE_API_KEY=token_here
 RL_ANALYZE_URL=https://spectra_analyze_url_here
@@ -133,6 +134,7 @@ services:
       - CROWDSTRIKE_FALCON_BASE_URL=${CROWDSTRIKE_FALCON_BASE_URL:-}
       - DFIR_IRIS_API_KEY=${DFIR_IRIS_API_KEY:-}
       - DFIR_IRIS_URL=${DFIR_IRIS_URL:-}
+      - DFIR_IRIS_SEARCH_NOTES=${DFIR_IRIS_SEARCH_NOTES:-false}
       - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
       - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
       - GOOGLE_SAFE_BROWSING=${GOOGLE_SAFE_BROWSING:-}

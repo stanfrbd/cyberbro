@@ -1,0 +1,41 @@
+{% set verdict = analysis_results.results[0].ai_verdict %}
+{% set status = verdict.status | lower %}
+{% set severity = verdict.severity | lower %}
+<div class="card">
+    {% set detail_lines = [] %}
+    {% if verdict.rationales %}
+    {% set _ = detail_lines.append("Rationales: " ~ (verdict.rationales | join("; "))) %}
+    {% endif %}
+    {% if verdict.recommendations %}
+    {% set _ = detail_lines.append("Recommendations: " ~ (verdict.recommendations | join("; "))) %}
+    {% endif %}
+    {% set details = detail_lines | join(" | ") %}
+    <h3>
+        AI Verdict
+        {% if details %}
+        <button class="ai-verdict-info-btn" type="button" title="{{ details }}" aria-label="AI verdict rationales and recommendations">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        </button>
+        {% endif %}
+    </h3>
+    {% if status == "success" %}
+    {% if severity in ["critical", "high"] %}
+    <p><strong>Severity: </strong><span class="badge badge-danger">{{ verdict.severity | upper }}</span></p>
+    {% elif severity == "medium" %}
+    <p><strong>Severity: </strong><span class="badge badge-warning">{{ verdict.severity | upper }}</span></p>
+    {% elif severity == "low" %}
+    <p><strong>Severity: </strong><span class="badge badge-success">{{ verdict.severity | upper }}</span></p>
+    {% else %}
+    <p><strong>Severity: </strong><span class="badge badge-info">{{ verdict.severity | upper }}</span></p>
+    {% endif %}
+    <p><strong>Verdict: </strong>{{ verdict.verdict | upper }}</p>
+    <p><strong>Confidence: </strong>{{ verdict.confidence }}%</p>
+    {% else %}
+    <p><strong>Status: </strong><span class="badge badge-warning">{{ verdict.status }}</span></p>
+    <p>{{ verdict.summary }}</p>
+    {% endif %}
+</div>

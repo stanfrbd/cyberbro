@@ -50,6 +50,7 @@
 
 ## 🔑 API Key Guides
 
+- [Configure AI Verdict](api-keys/Get-AI-Verdict-API-key.md)
 - [Get AbuseIPDB API Key](api-keys/Get-AbuseIPDB-API-key.md)
 - [Get AlienVault API Key](api-keys/Get-AlienVault-API-key.md)
 - [Get Crowdstrike API Credentials](api-keys/Get-Crowdstrike-API-Credentials.md)

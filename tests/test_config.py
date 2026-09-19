@@ -46,6 +46,14 @@ def test_read_secrets_from_env_success(mocker: MockerFixture):
     mock_getenv = mocker.patch("os.getenv")
     mock_getenv.side_effect = lambda x: {
         "ABUSEIPDB": "0123456789abcdef",
+        "AI_VERDICT_ENABLED": "true",
+        "AI_VERDICT_TIMEOUT": "45",
+        "AI_VERDICT_PROVIDER": "anthropic",
+        "AI_VERDICT_MODEL": "claude-sonnet-4-5",
+        "AI_VERDICT_PROMPT": "Return a verdict.",
+        "AI_VERDICT_AUTH_HEADER": "api-key",
+        "AI_VERDICT_API_VERSION": "preview",
+        "AI_VERDICT_MAX_TOKENS": "1200",
         "GUI_ENABLED_ENGINES": "engine1,engine2",
         "FLASK_DEBUG": "true",
     }.get(x)
@@ -54,6 +62,14 @@ def test_read_secrets_from_env_success(mocker: MockerFixture):
     result = read_secrets_from_env(secrets)
 
     assert result.abuseipdb == "0123456789abcdef"
+    assert result.ai_verdict_enabled is True
+    assert result.ai_verdict_timeout == 45
+    assert result.ai_verdict_provider == "anthropic"
+    assert result.ai_verdict_model == "claude-sonnet-4-5"
+    assert result.ai_verdict_prompt == "Return a verdict."
+    assert result.ai_verdict_auth_header == "api-key"
+    assert result.ai_verdict_api_version == "preview"
+    assert result.ai_verdict_max_tokens == 1200
     assert result.gui_enabled_engines == ["engine1", "engine2"]
     assert result.flask_debug is True
 

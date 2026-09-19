@@ -1023,6 +1023,75 @@ body.dark-mode .row-toggle:hover {
     color: var(--text-secondary);
 }
 
+.badge {
+    border-radius: var(--radius-sm);
+    color: white;
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0.25rem 0.45rem;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.badge-danger {
+    background-color: var(--danger-color);
+}
+
+.badge-warning {
+    background-color: var(--warning-color);
+    color: #212529;
+}
+
+.badge-success {
+    background-color: var(--success-color);
+}
+
+.badge-info {
+    background-color: var(--info-color);
+}
+
+.ai-verdict-info-btn {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-full);
+    color: var(--primary-color);
+    cursor: help;
+    display: inline-flex;
+    height: 1.15rem;
+    justify-content: center;
+    line-height: 1;
+    margin: 0 0 0 var(--spacing-xs);
+    padding: 0;
+    vertical-align: middle;
+    width: 1.15rem;
+}
+
+.ai-verdict-info-btn:hover {
+    color: var(--primary-hover-color);
+    transform: translateY(-1px);
+}
+
+.ai-verdict-info-btn svg {
+    fill: none;
+    height: 100%;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+    width: 100%;
+}
+
+body.dark-mode .ai-verdict-info-btn {
+    color: var(--primary-light);
+}
+
+body.dark-mode .ai-verdict-info-btn:hover {
+    color: #8bc5ff;
+}
+
 .card table {
     font-size: 0.875rem;
     width: 100%;

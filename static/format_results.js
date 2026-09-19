@@ -3,6 +3,13 @@ function formatResults(data) {
     data.forEach(result => {
         plainText += `Observable: ${result.observable}\nType: ${result.type}\n`;
 
+        if (result.ai_verdict) {
+            plainText += `AI Verdict: Status: ${result.ai_verdict.status}, Verdict: ${result.ai_verdict.verdict}, Severity: ${result.ai_verdict.severity}, Confidence: ${result.ai_verdict.confidence}%\n`;
+            if (result.ai_verdict.summary) plainText += `- Summary: ${result.ai_verdict.summary}\n`;
+            if (result.ai_verdict.rationales && result.ai_verdict.rationales.length > 0) plainText += `- Rationales: ${result.ai_verdict.rationales.join('; ')}\n`;
+            if (result.ai_verdict.recommendations && result.ai_verdict.recommendations.length > 0) plainText += `- Recommendations: ${result.ai_verdict.recommendations.join('; ')}\n`;
+        }
+
         if (result.rdap_whois) {
             plainText += `RDAP / Whois:\n`;
             if (result.rdap_whois.data_source) plainText += `- Data Source: ${result.rdap_whois.data_source}\n`;

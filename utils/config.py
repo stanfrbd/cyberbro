@@ -17,6 +17,19 @@ class Secrets:
     """Dataclass to hold the secrets for the application."""
 
     abuseipdb: str = ""
+    ai_verdict_enabled: bool = False
+    ai_verdict_provider: str = "openai"
+    ai_verdict_api_url: str = ""
+    ai_verdict_api_key: str = ""
+    ai_verdict_auth_header: str = ""
+    ai_verdict_api_version: str = ""
+    ai_verdict_model: str = "gpt-4.1-mini"
+    ai_verdict_prompt: str = (
+        "You are a senior CTI analyst. Review the Cyberbro engine results and return a "
+        "concise JSON verdict for the observable."
+    )
+    ai_verdict_max_tokens: int = 1000
+    ai_verdict_timeout: int = 30
     api_cache_timeout: int = 86400  # Default to 1 day
     api_prefix: str = "api"
     alienvault: str = ""

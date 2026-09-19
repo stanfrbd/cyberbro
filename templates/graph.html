@@ -174,7 +174,7 @@
         const edges = [];
         const addedNodes = new Set();
 
-        function addNode(id, label, group = "default", imageUrl = null) {
+        function addNode(id, label, group = "default", imageUrl = null, title = null) {
             if (!addedNodes.has(id)) {
                 const newNode = {
                     id,
@@ -185,6 +185,9 @@
                 if (imageUrl) {
                     newNode.shape = "image";
                     newNode.image = imageUrl;
+                }
+                if (title) {
+                    newNode.title = title;
                 }
 
                 nodes.push(newNode);
@@ -197,6 +200,38 @@
             if (!obs) return;
 
             addNode(obs, obs, "observable", "https://img.icons8.com/officexs/32/goal.png");
+
+            if (entry.ai_verdict) {
+                const aiVerdict = entry.ai_verdict;
+                const aiSeverity = aiVerdict.severity || "info";
+                const aiVerdictValue = aiVerdict.verdict || "unknown";
+                const aiConfidence = aiVerdict.confidence || 0;
+                const aiNodeId = `AI Verdict (${obs})`;
+                const aiRationales = Array.isArray(aiVerdict.rationales)
+                    ? aiVerdict.rationales.join("<br>")
+                    : "";
+                const aiTitle = [
+                    `<strong>AI Verdict</strong>`,
+                    `Status: ${aiVerdict.status || "unknown"}`,
+                    `Verdict: ${aiVerdictValue}`,
+                    `Severity: ${aiSeverity}`,
+                    `Confidence: ${aiConfidence}%`,
+                    aiVerdict.summary ? `Summary: ${aiVerdict.summary}` : "",
+                    aiRationales ? `Rationales:<br>${aiRationales}` : "",
+                ].filter(Boolean).join("<br>");
+                addNode(
+                    aiNodeId,
+                    `AI Verdict: ${aiSeverity.toUpperCase()}`,
+                    "ai_verdict",
+                    "https://img.icons8.com/officexs/32/ai.png",
+                    aiTitle,
+                );
+                edges.push({
+                    from: obs,
+                    to: aiNodeId,
+                    label: `${aiVerdictValue.toUpperCase()} (${aiConfidence}%)`,
+                });
+            }
 
             const providers = ["ipinfo", "ipquery", "webscout", "ipapi"];
             providers.forEach((provider) => {

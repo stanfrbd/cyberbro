@@ -117,6 +117,7 @@ def analyze_observable(
             not engine.execute_after_reverse_dns
             and not engine.is_pivot_engine
             and engine.name != "chrome_extension"
+            and engine.name != "ai_verdict"
         ):
             run_engine(engine, working_observable, result)
 
@@ -164,6 +165,7 @@ def analyze_observable(
             and not engine.is_pivot_engine
             and engine.name != "chrome_extension"
             and engine.name != "bad_asn"
+            and engine.name != "ai_verdict"
         ):
             run_engine(engine, working_observable, result)
 
@@ -171,6 +173,11 @@ def analyze_observable(
     # Run bad_asn last so it can access ASN data from ipapi, ipinfo, etc.
     for engine in active_instances:
         if engine.name == "bad_asn":
+            run_engine(engine, working_observable, result)
+
+    # 6. Phase 5: AI Verdict must be the final engine and only consumes selected engine output.
+    for engine in active_instances:
+        if engine.name == "ai_verdict":
             run_engine(engine, working_observable, result)
 
     result_queue.put((index, result))

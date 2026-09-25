@@ -316,6 +316,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [IPquery](https://ipquery.gitbook.io/ipquery-docs)
 * [Ioc.One](https://ioc.one/)
 * [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
+* [Microsoft Entra ID (OpenID Configuration)](https://login.microsoftonline.com/)
 * [MISP](https://www.misp-project.org/)
 * [MISP Feedback](https://github.com/MISP/misp-feedback/)
 * [OpenCTI](https://www.opencti.io/)

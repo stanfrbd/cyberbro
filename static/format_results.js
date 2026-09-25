@@ -36,6 +36,22 @@ function formatResults(data) {
             plainText += `URL: ${result.extension.url}\n`;
         }
 
+        if (result.ms_tenant_check) {
+            plainText += `Microsoft Tenant Check (${result.ms_tenant_check.domain}):\n`;
+            plainText += `  - Tenant found: ${result.ms_tenant_check.tenant_found}\n`;
+            if (result.ms_tenant_check.tenant_id) plainText += `  - Tenant ID: ${result.ms_tenant_check.tenant_id}\n`;
+            if (result.ms_tenant_check.tenant_region_scope) {
+                const regionDisplay = result.ms_tenant_check.tenant_region_name
+                    ? `${result.ms_tenant_check.tenant_region_name} (${result.ms_tenant_check.tenant_region_scope})`
+                    : result.ms_tenant_check.tenant_region_scope;
+                plainText += `  - Region: ${regionDisplay}\n`;
+            }
+            plainText += `  - Office 365 MX: ${result.ms_tenant_check.is_office365_mx}\n`;
+            if (result.ms_tenant_check.mx_records && result.ms_tenant_check.mx_records.length > 0) {
+                plainText += `  - MX Records: ${result.ms_tenant_check.mx_records.join(', ')}\n`;
+            }
+        }
+
         if (result.google_dns && result.google_dns.Answer && result.google_dns.Answer.length > 0) {
             plainText += `Google DNS (common records):\n`;
             result.google_dns.Answer.forEach(dnsRecord => {

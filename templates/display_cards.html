@@ -54,6 +54,9 @@
     {% if analysis_results.results[0].google_dns %}
     {% include "engine_layouts/google_dns_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].ms_tenant_check %}
+    {% include "engine_layouts/ms_tenant_check_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].mde %}
     {% include "engine_layouts/mde_card.html" %}
     {% endif %}

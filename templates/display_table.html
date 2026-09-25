@@ -229,6 +229,10 @@
                     <th>Google DNS (common records)</th>
                     {% endif %}
 
+                    {% if "ms_tenant_check" in analysis_results.selected_engines %}
+                    <th>Microsoft Tenant Check</th>
+                    {% endif %}
+
                     {% if "misp" in analysis_results.selected_engines %}
                     <th>MISP</th>
                     {% endif %}
@@ -422,6 +426,10 @@
 
                     {% if "google_dns" in analysis_results.selected_engines %}
                     {% include "engine_layouts/google_dns_table.html" %}
+                    {% endif %}
+
+                    {% if "ms_tenant_check" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/ms_tenant_check_table.html" %}
                     {% endif %}
 
                     {% if "misp" in analysis_results.selected_engines %}

@@ -20,6 +20,7 @@ from engines.ipquery import IPQueryEngine
 from engines.microsoft_defender_for_endpoint import MDEEngine
 from engines.misp import MISPEngine
 from engines.misp_feedback import MispFeedbackEngine
+from engines.ms_tenant_check import MsTenantCheckEngine
 from engines.opencti import OpenCTIEngine
 from engines.phishtank import PhishTankEngine
 from engines.ransomware_live import RansomwareLiveEngine
@@ -56,6 +57,7 @@ def get_engine_instances(
         ChromeExtensionEngine(secrets, proxies, ssl_verify),
         CriminalIPEngine(secrets, proxies, ssl_verify),
         CrowdstrikeEngine(secrets, proxies, ssl_verify),
+        MsTenantCheckEngine(secrets, proxies, ssl_verify),
         CrtShEngine(secrets, proxies, ssl_verify),
         DFIRIrisEngine(secrets, proxies, ssl_verify),
         GitHubEngine(secrets, proxies, ssl_verify),

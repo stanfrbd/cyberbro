@@ -48,6 +48,7 @@ nav:
       - Upgrade Cyberbro: quick-start/Upgrade-Cyberbro.md
   - Engines:
       - Bad ASN Check: engines/Bad-ASN-Check-Engine.md
+      - Microsoft Tenant Check: engines/MS-Tenant-Check-Engine.md
   - Integrations:
       - Cyberbro in KASM Workspaces: integrations/Cyberbro-in-KASM-Workspaces.md
       - Cyberbro Browser Extension: integrations/Cyberbro-browser-extension.md

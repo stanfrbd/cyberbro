@@ -25,3 +25,6 @@ CLAUDE.md
 
 # Playwright MCP files
 .playwright-mcp/
+
+# Log files
+*.log

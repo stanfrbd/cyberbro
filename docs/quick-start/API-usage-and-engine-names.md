@@ -302,11 +302,6 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: IP, free or paid API key required  
 **Explaination**: Checks CriminalIP for IP, reversed obtained IP for a given domain / URL, free or paid API key required
 
-### Microsoft Tenant Check
-**Name**: `ms_tenant_check`  
-**Supports**: domain, email, free_no_key  
-**Explanation**: Checks if a domain or email address is linked to a Microsoft Entra ID (Azure AD) tenant by querying the OpenID configuration endpoint. Also checks MX records via Google DNS to detect Office 365 email, free, no API key
-
 ### crt.sh
 **Name**: `crtsh`  
 **Supports**: domain, URL, free_no_key  
@@ -376,6 +371,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `mde`  
 **Supports**: hash, IP, domain, URL  
 **Explaination**: Checks Microsoft Defender for Endpoint, paid API info on Azure required
+
+### Microsoft Tenant Check
+**Name**: `ms_tenant_check`  
+**Supports**: domain, email, free_no_key  
+**Explanation**: Checks if a domain or email address is linked to a Microsoft Entra ID (Azure AD) tenant by querying the OpenID configuration endpoint. Also checks MX records via Google DNS to detect Office 365 email, free, no API key
 
 ### MISP
 **Name**: `misp`  

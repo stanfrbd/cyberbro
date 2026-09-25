@@ -22,3 +22,9 @@ secrets.json
 # Claude Code
 CLAUDE.md
 .claude/
+
+# Playwright MCP files
+.playwright-mcp/
+
+# Log files
+*.log

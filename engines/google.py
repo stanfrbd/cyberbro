@@ -9,6 +9,8 @@ from models.observable import Observable, ObservableType
 
 logger = logging.getLogger(__name__)
 
+GOOGLE_CSE_DEFAULT_URL: str = "https://www.googleapis.com/customsearch/v1"
+
 
 class GoogleCSEEngine(BaseEngine):
     @property
@@ -49,7 +51,9 @@ class GoogleCSEEngine(BaseEngine):
 
         q = f'{dorks_prefix}"{observable.value}"'
 
-        url: str = "https://www.googleapis.com/customsearch/v1"
+        # Overridable so deployments can point at a Custom Search JSON API-compatible
+        # endpoint (Google discontinues the Custom Search JSON API on 2027-01-01).
+        url: str = self.secrets.google_cse_url or GOOGLE_CSE_DEFAULT_URL
         params: dict[str, str] = {"key": google_cse_key, "cx": google_cse_cx, "q": q}
 
         try:

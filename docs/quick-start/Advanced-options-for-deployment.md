@@ -64,6 +64,7 @@ IPAPI=api_key_here
 IPINFO=api_key_here
 GOOGLE_CSE_KEY=api_key_here
 GOOGLE_CSE_CX=cx_here
+GOOGLE_CSE_URL=https://www.googleapis.com/customsearch/v1
 GOOGLE_SAFE_BROWSING=api_key_here
 HISTER_TOKEN=token_here
 HISTER_BASE_URL=https://hister.example.com
@@ -137,6 +138,7 @@ services:
       - DFIR_IRIS_SEARCH_NOTES=${DFIR_IRIS_SEARCH_NOTES:-false}
       - GOOGLE_CSE_KEY=${GOOGLE_CSE_KEY:-}
       - GOOGLE_CSE_CX=${GOOGLE_CSE_CX:-}
+      - GOOGLE_CSE_URL=${GOOGLE_CSE_URL:-}
       - GOOGLE_SAFE_BROWSING=${GOOGLE_SAFE_BROWSING:-}
       - IPAPI=${IPAPI:-}
       - IPINFO=${IPINFO:-}

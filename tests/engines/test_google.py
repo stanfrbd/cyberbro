@@ -673,3 +673,85 @@ def test_engine_supported_types(secrets_with_credentials):
     )
 
     assert engine.supported_types == expected_types
+
+
+# ============================================================================
+# Configurable endpoint (GOOGLE_CSE_URL)
+# ============================================================================
+
+
+@patch("time.sleep")
+@responses.activate
+def test_analyze_uses_default_google_url(mock_sleep, secrets_with_credentials):
+    """Without GOOGLE_CSE_URL, requests go to Google's endpoint."""
+    engine = GoogleCSEEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    observable = Observable(value="example.com", type=ObservableType.FQDN)
+
+    responses.add(
+        responses.GET,
+        "https://www.googleapis.com/customsearch/v1",
+        json={"items": [], "searchInformation": {"totalResults": "0"}},
+        status=200,
+    )
+
+    result = engine.analyze(observable)
+
+    assert result == {"results": [], "total": 0}
+    assert responses.calls[0].request.url.startswith("https://www.googleapis.com/customsearch/v1?")
+
+
+@patch("time.sleep")
+@responses.activate
+def test_analyze_uses_custom_cse_url(mock_sleep, secrets_with_credentials):
+    """GOOGLE_CSE_URL redirects requests to a compatible endpoint with the same params."""
+    custom_url = "https://cse.example.test/customsearch/v1"
+    secrets_with_credentials.google_cse_url = custom_url
+    engine = GoogleCSEEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    observable = Observable(value="example.com", type=ObservableType.FQDN)
+
+    responses.add(
+        responses.GET,
+        custom_url,
+        json={
+            "items": [{"title": "T", "snippet": "S", "link": "https://example.com"}],
+            "searchInformation": {"totalResults": "1"},
+        },
+        status=200,
+    )
+
+    result = engine.analyze(observable)
+
+    assert result is not None
+    assert result["total"] == 1
+    assert result["results"][0] == {"title": "T", "description": "S", "url": "https://example.com"}
+    sent = responses.calls[0].request.url
+    assert sent.startswith(custom_url + "?")
+    assert "key=test_api_key_value" in sent
+    assert "cx=test_cx_value" in sent
+
+
+@patch("time.sleep")
+@responses.activate
+def test_analyze_blank_cse_url_falls_back_to_google(mock_sleep, secrets_with_credentials):
+    """A blank GOOGLE_CSE_URL value falls back to Google's endpoint."""
+    secrets_with_credentials.google_cse_url = ""
+    engine = GoogleCSEEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    observable = Observable(value="example.com", type=ObservableType.FQDN)
+
+    responses.add(
+        responses.GET,
+        "https://www.googleapis.com/customsearch/v1",
+        json={"items": [], "searchInformation": {"totalResults": "0"}},
+        status=200,
+    )
+
+    assert engine.analyze(observable) == {"results": [], "total": 0}
+
+
+def test_google_cse_url_read_from_environment(monkeypatch):
+    """GOOGLE_CSE_URL is loaded from the environment like other secrets."""
+    from utils.config import read_secrets_from_env
+
+    monkeypatch.setenv("GOOGLE_CSE_URL", "https://cse.example.test/customsearch/v1")
+    secrets = read_secrets_from_env(Secrets())
+    assert secrets.google_cse_url == "https://cse.example.test/customsearch/v1"

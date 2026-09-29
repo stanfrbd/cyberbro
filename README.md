@@ -119,6 +119,7 @@ DFIR_IRIS_URL=https://dfir-iris.local
 DFIR_IRIS_SEARCH_NOTES=false
 GOOGLE_CSE_CX=cx_here
 GOOGLE_CSE_KEY=key_here
+GOOGLE_CSE_URL=https://www.googleapis.com/customsearch/v1
 GOOGLE_SAFE_BROWSING=token_here
 HISTER_TOKEN=token_here
 HISTER_BASE_URL=https://hister.example.com

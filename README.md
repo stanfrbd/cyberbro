@@ -350,6 +350,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 * [Maxime Berthault - Maxou56800](https://github.com/Maxou56800) for developing Cyberbro CLI.
 * [Jonas Lejon](https://github.com/jonaslejon) for adding ScanMalware engine.
+* [egeoguz04](https://github.com/egeoguz04) for allowing the config of the Google CSE endpoint. This will be useful for the upcoming Google changes.
 
 Your contributions are greatly appreciated!
 

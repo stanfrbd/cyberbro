@@ -141,7 +141,7 @@ def test_analyze_sends_correct_headers_and_params(fqdn_observable, secrets_with_
     from urllib.parse import unquote_plus
 
     query_obj = json.loads(unquote_plus(query_raw))
-    assert query_obj["text"] == "example.com"
+    assert query_obj["text"] == '"example.com"'
     assert query_obj["limit"] == 10
     assert "url" in query_obj["fields"]
 

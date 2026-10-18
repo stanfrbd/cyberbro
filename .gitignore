@@ -28,3 +28,7 @@ CLAUDE.md
 
 # Log files
 *.log
+# Local frontend tooling and generated output
+frontend/node_modules/
+static/ui/
+preview/

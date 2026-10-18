@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101416">
+    <title>Cyberbro · Investigation workspace</title>
+    <link rel="icon" href="/favicon.ico">
+    {% for stylesheet in frontend_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='ui/' ~ stylesheet) }}">
+    {% endfor %}
+</head>
+<body>
+    <div id="app"></div>
+    <script>window.CYBERBRO_CONFIG = {{ frontend_config | tojson }};</script>
+    <script type="module" src="{{ url_for('static', filename='ui/' ~ frontend_script) }}"></script>
+</body>
+</html>

@@ -16,7 +16,8 @@ from flask_cors import CORS
 
 from models.analysis_result import AnalysisResult, db
 from models.observable import Observable, ObservableFlag
-from utils.analysis import check_analysis_in_progress, perform_analysis
+from modern_ui import create_ui_blueprint
+from utils.analysis import LOADED_ENGINES, check_analysis_in_progress, perform_analysis
 from utils.bad_asn_manager import background_updater
 from utils.config import (
     BASE_DIR,
@@ -89,6 +90,9 @@ API_PREFIX: str = secrets.api_prefix
 
 # Define GUI_ENABLED_ENGINES
 GUI_ENABLED_ENGINES: list = secrets.gui_enabled_engines
+
+# Opt-in frontend preview. Existing routes and API contracts stay unchanged.
+app.register_blueprint(create_ui_blueprint(API_PREFIX, sorted(LOADED_ENGINES), GUI_ENABLED_ENGINES))
 
 # Update the database URI to use the data directory
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DATA_DIR / 'results.db'}"

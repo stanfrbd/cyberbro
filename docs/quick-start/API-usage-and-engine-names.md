@@ -390,7 +390,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ### OpenCTI
 **Name**: `opencti` 
 **Supports**: domain, URL, IP, hash  
-**Explaination**: Searches OpenCTI results for all types of observable, API key required
+**Explaination**: Matches exact observable values, names, aliases and simple STIX patterns, and includes linked indicators. URL lookups use the host. API key required. See [matching behavior](../api-keys/Get-OpenCTI-API-key.md#matching-behavior).
 
 ### Phishtank
 **Name**: `phishtank`  

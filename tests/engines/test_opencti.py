@@ -336,7 +336,12 @@ class TestOpenCTIObservableTypeRouting:
             status=200,
         )
 
-        observable = Observable(value="192.0.2.1", type=observable_type)
+        observable = Observable(
+            value="https://192.0.2.1/path"
+            if observable_type is ObservableType.URL
+            else "192.0.2.1",
+            type=observable_type,
+        )
         result = engine_with_key.analyze(observable)
 
         assert result is not None
@@ -599,7 +604,9 @@ class TestOpenCTIDualAPICallScenarios:
 
         result = engine_with_key.analyze(ipv4_observable)
 
-        assert result is None
+        assert result is not None
+        assert result["global_count"] == 2
+        assert result["latest_indicator_name"] is None
 
     @responses.activate
     def test_first_succeeds_second_fails_401(
@@ -1004,7 +1011,9 @@ class TestOpenCTIIndicatorQueryEdgeCases:
 
         result = engine_with_key.analyze(ipv4_observable)
 
-        assert result is None
+        assert result is not None
+        assert result["global_count"] == 2
+        assert result["latest_indicator_name"] is None
 
 
 class TestOpenCTIHTTPErrors:

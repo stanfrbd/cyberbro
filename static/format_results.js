@@ -237,10 +237,13 @@ function formatResults(data) {
         }
         if (result.opencti && result.opencti.global_count > 0) {
             plainText += `OpenCTI:\n`;
-            plainText += `  - Global Count: ${result.opencti.global_count}\n`;
+            plainText += `  - Exact Matches and Linked Indicators: ${result.opencti.global_count}\n`;
             plainText += `  - Entity Counts:\n`;
             for (const [entity, count] of Object.entries(result.opencti.entity_counts)) {
                 plainText += `    - ${entity}: ${count}\n`;
+            }
+            if (result.opencti.results_truncated) {
+                plainText += `  - Partial results: counts and latest indicator cover retrieved results only.\n`;
             }
             plainText += `  - Search Link: ${result.opencti.search_link}\n`;
             plainText += `  - Latest Entity Created At: ${result.opencti.latest_created_at}\n`;

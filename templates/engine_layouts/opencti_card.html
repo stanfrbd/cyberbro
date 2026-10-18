@@ -5,8 +5,11 @@
         {% endif %}
 
         <h3>OpenCTI</h3>
+        {% if analysis_results.results[0].opencti.results_truncated %}
+        <p><strong>Partial results:</strong> counts and latest indicator cover retrieved results only.</p>
+        {% endif %}
         <p>
-            <strong>Global count:</strong> {{ analysis_results.results[0].opencti.global_count }}
+            <strong>Exact matches and linked indicators:</strong> {{ analysis_results.results[0].opencti.global_count }}
         </p>
         <p>
             <strong>Entity counts:</strong>

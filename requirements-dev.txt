@@ -1,5 +1,5 @@
 pre-commit>=4.6.2
-ruff>=0.16.10
+ruff>=0.17.1
 pytest>=9.1.1
 pytest-mock>=3.16.0
 responses>=0.26.3

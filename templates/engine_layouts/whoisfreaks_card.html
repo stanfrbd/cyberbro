@@ -1,0 +1,28 @@
+{% set wf = analysis_results.results[0].whoisfreaks %}
+<div class="card">
+    <h3>WhoisFreaks</h3>
+    <p><strong>WHOIS history records: </strong><a href="{{ wf.link }}" target="_blank">{{ wf.history_records }}</a>
+        {% if wf.first_record %}({{ wf.first_record }} to {{ wf.last_record }}){% endif %}</p>
+    {% if wf.earliest_creation_date %}
+    <p><strong>Earliest creation date: </strong>{{ wf.earliest_creation_date }}</p>
+    {% endif %}
+    {% if wf.registrars and wf.registrars | length > 0 %}
+    <p><strong>Registrars seen: </strong>
+        {% for r in wf.registrars %}{{ r.name }}{% if r.last_seen %} ({{ r.first_seen }} to {{ r.last_seen }}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+    {% if wf.registrants and wf.registrants | length > 0 %}
+    <p><strong>Past registrants: </strong></p>
+    <ul>
+        {% for r in wf.registrants %}
+        <li>{{ [r.name, r.company, r.email, r.country] | select | join(' / ') }}{% if r.last_seen %} ({{ r.first_seen }} to {{ r.last_seen }}){% else %} (undated record){% endif %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if wf.reverse_whois %}
+    <p><strong>Reverse WHOIS on {{ wf.reverse_whois.pivot_email }}: </strong>{{ wf.reverse_whois.total_domains }} domain(s)</p>
+    {% if wf.reverse_whois.domains and wf.reverse_whois.domains | length > 0 %}
+    <p><strong>Other domains: </strong>{{ wf.reverse_whois.domains | join(', ') }}</p>
+    {% endif %}
+    {% endif %}
+</div>

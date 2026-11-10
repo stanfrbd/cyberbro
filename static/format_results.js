@@ -23,6 +23,37 @@ function formatResults(data) {
             }
         }
 
+        if (result.whoisfreaks) {
+            const wf = result.whoisfreaks;
+            plainText += `WhoisFreaks:
+`;
+            plainText += `- WHOIS History Records: ${wf.history_records}`;
+            if (wf.first_record) plainText += ` (${wf.first_record} to ${wf.last_record})`;
+            plainText += `
+`;
+            if (wf.earliest_creation_date) plainText += `- Earliest Creation Date: ${wf.earliest_creation_date}
+`;
+            if (wf.registrars && wf.registrars.length > 0) {
+                plainText += `- Registrars: ${wf.registrars.map(r => r.name).join(', ')}
+`;
+            }
+            if (wf.registrants && wf.registrants.length > 0) {
+                wf.registrants.forEach(r => {
+                    const who = [r.name, r.company, r.email, r.country].filter(Boolean).join(' / ');
+                    plainText += `- Past Registrant: ${who}${r.last_seen ? ` (${r.first_seen} to ${r.last_seen})` : ''}
+`;
+                });
+            }
+            if (wf.reverse_whois) {
+                plainText += `- Reverse WHOIS (${wf.reverse_whois.pivot_email}): ${wf.reverse_whois.total_domains} domain(s)`;
+                if (wf.reverse_whois.domains && wf.reverse_whois.domains.length > 0) {
+                    plainText += `, e.g. ${wf.reverse_whois.domains.join(', ')}`;
+                }
+                plainText += `
+`;
+            }
+        }
+
         if (result.reverse_dns) {
             plainText += `Reverse DNS (local DNS): ${result.reverse_dns.reverse_dns.join(', ')}\n`;
         }

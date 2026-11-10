@@ -1,0 +1,29 @@
+<td>
+    {% if result.whoisfreaks %}
+        {% set wf = result.whoisfreaks %}
+        <strong>History records: </strong><a href="{{ wf.link }}" target="_blank">{{ wf.history_records }}</a><br/>
+        {% if wf.first_record %}
+            <strong>Seen: </strong>{{ wf.first_record }} to {{ wf.last_record }}<br/>
+        {% endif %}
+        {% if wf.earliest_creation_date %}
+            <strong>Earliest creation: </strong>{{ wf.earliest_creation_date }}<br/>
+        {% endif %}
+        {% if wf.registrars and wf.registrars | length > 0 %}
+            <strong>Registrars: </strong>{{ wf.registrars | map(attribute='name') | join(', ') }}<br/>
+        {% endif %}
+        {% if wf.registrants and wf.registrants | length > 0 %}
+            <strong>Past registrants: </strong><br/>
+            {% for r in wf.registrants %}
+                {{ [r.name, r.company, r.email] | select | join(' / ') }}{% if r.last_seen %} ({{ r.last_seen }}){% endif %}<br/>
+            {% endfor %}
+        {% endif %}
+        {% if wf.reverse_whois %}
+            <strong>Reverse WHOIS ({{ wf.reverse_whois.pivot_email }}): </strong>{{ wf.reverse_whois.total_domains }} domain(s)<br/>
+            {% for d in wf.reverse_whois.domains %}
+                {{ d }}<br/>
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

@@ -144,6 +144,7 @@ SPUR_US=token_here
 THREATFOX=token_here
 VIRUSTOTAL=token_here
 WEBSCOUT=token_here
+WHOISFREAKS=token_here
 ```
 
 > [!IMPORTANT]
@@ -333,6 +334,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [URLscan](https://urlscan.io/)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
 * [WebScout](https://webscout.io/)
+* [WhoisFreaks](https://whoisfreaks.com/)
 
 > [!NOTE]
 > Any questions? Check the https://docs.cyberbro.net or raise an [issue](https://github.com/stanfrbd/cyberbro/issues/new) \

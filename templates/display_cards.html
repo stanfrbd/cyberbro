@@ -20,6 +20,9 @@
     {% if analysis_results.results[0].rdap_whois %}
     {% include "engine_layouts/rdap_whois_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].whoisfreaks %}
+    {% include "engine_layouts/whoisfreaks_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].ipquery %}
     {% include "engine_layouts/ipquery_card.html" %}
     {% endif %}

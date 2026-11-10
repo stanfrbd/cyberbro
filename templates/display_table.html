@@ -157,6 +157,10 @@
                     <th>RDAP / Whois</th>
                     {% endif %}
 
+                    {% if "whoisfreaks" in analysis_results.selected_engines %}
+                    <th>WhoisFreaks</th>
+                    {% endif %}
+
                     {% if "threatfox" in analysis_results.selected_engines %}
                     <th>ThreatFox</th>
                     {% endif %}
@@ -354,6 +358,10 @@
 
                     {% if "rdap_whois" in analysis_results.selected_engines %}
                     {% include "engine_layouts/rdap_whois_table.html" %}
+                    {% endif %}
+
+                    {% if "whoisfreaks" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/whoisfreaks_table.html" %}
                     {% endif %}
 
                     {% if "threatfox" in analysis_results.selected_engines %}

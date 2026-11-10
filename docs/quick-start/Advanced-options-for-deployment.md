@@ -88,6 +88,7 @@ DFIR_IRIS_URL=https://dfir-iris.local
 DFIR_IRIS_API_KEY=token_here
 DFIR_IRIS_SEARCH_NOTES=false
 WEBSCOUT=token_here
+WHOISFREAKS=api_key_here
 RL_ANALYZE_API_KEY=token_here
 RL_ANALYZE_URL=https://spectra_analyze_url_here
 ROSTI_API_KEY=token_here
@@ -159,6 +160,7 @@ services:
       - THREATFOX=${THREATFOX:-}
       - VIRUSTOTAL=${VIRUSTOTAL:-}
       - WEBSCOUT=${WEBSCOUT:-}
+      - WHOISFREAKS=${WHOISFREAKS:-}
       - HISTER_TOKEN=${HISTER_TOKEN:-}
       - HISTER_BASE_URL=${HISTER_BASE_URL:-}
       - SSL_VERIFY=${SSL_VERIFY:-}

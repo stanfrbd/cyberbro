@@ -1228,6 +1228,45 @@
             }
         });
 
+        data.forEach((entry) => {
+            if ((entry.type === "FQDN" || entry.type === "URL") && entry.whoisfreaks) {
+                const wf = entry.whoisfreaks;
+
+                (wf.registrars || []).forEach((registrar) => {
+                    addNode(
+                        registrar.name,
+                        registrar.name,
+                        "whoisfreaks_registrar",
+                        "https://img.icons8.com/officexs/32/organization.png",
+                    );
+                    edges.push({ from: entry.observable, to: registrar.name, label: "Registrar (WhoisFreaks history)" });
+                });
+
+                (wf.registrants || []).forEach((registrant) => {
+                    const id = registrant.email || registrant.company || registrant.name;
+                    if (!id) return;
+                    addNode(
+                        id,
+                        id,
+                        "whoisfreaks_registrant",
+                        registrant.email
+                            ? "https://img.icons8.com/officexs/32/email.png"
+                            : "https://img.icons8.com/officexs/32/organization.png",
+                    );
+                    edges.push({ from: entry.observable, to: id, label: "Past Registrant (WhoisFreaks)" });
+                });
+
+                if (wf.reverse_whois && wf.reverse_whois.pivot_email) {
+                    const pivot = wf.reverse_whois.pivot_email;
+                    addNode(pivot, pivot, "whoisfreaks_registrant", "https://img.icons8.com/officexs/32/email.png");
+                    (wf.reverse_whois.domains || []).forEach((domain) => {
+                        addNode(domain, domain, "domain", "https://img.icons8.com/officexs/32/root-server.png");
+                        edges.push({ from: pivot, to: domain, label: "Reverse WHOIS (WhoisFreaks)" });
+                    });
+                }
+            }
+        });
+
         const container = document.getElementById("network");
         const networkData = {
             nodes: new vis.DataSet(nodes),

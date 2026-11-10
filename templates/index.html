@@ -100,6 +100,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 'urlscan': '🔎',
                 'virustotal': '🦠',
                 'webscout': '🌐',
+                'whoisfreaks': '🕰️',
                 'ms_tenant_check': '🏢'
             };
 
@@ -141,6 +142,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 { name: "urlscan", label: "URLscan", supports: "domain url ip hash free_no_key", checked: false, description: "Website scanner & analyzer", tooltip: "Checks URLscan for IP, domains, URL, hash, free, no API key" },
                 { name: "virustotal", label: "VirusTotal", supports: "hash risk ip domain url", checked: false, description: "Multi-engine malware scanner", tooltip: "Checks VirusTotal for IP, domain, URL, hash, free API key required" },
                 { name: "webscout", label: "WebScout", supports: "ip vpn proxy risk", checked: false, description: "IP reputation & risk scoring", tooltip: "Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required" },
+                { name: "whoisfreaks", label: "WhoisFreaks", supports: "domain url", checked: false, description: "WHOIS history & reverse WHOIS", tooltip: "Checks WhoisFreaks WHOIS history for domain, URL, and pivots on the registrant email with reverse WHOIS when it is not privacy-protected, API key required" },
             ];
 
             const enginesToDisplay = GUI_ENABLED_ENGINES.length > 0

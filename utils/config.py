@@ -65,6 +65,7 @@ class Secrets:
     ssl_verify: bool = True
     virustotal: str = ""
     webscout: str = ""
+    whoisfreaks: str = ""
 
     # Method to iterate through the dataclass fields
     def __iter__(self):

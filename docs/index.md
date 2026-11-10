@@ -73,6 +73,7 @@
 - [Get ThreatFox API Key](api-keys/Get-ThreatFox-API-key.md)
 - [Get VirusTotal API Key](api-keys/Get-VirusTotal-API-key.md)
 - [Get WebScout API Key](api-keys/Get-WebScout-API-key.md)
+- [Get WhoisFreaks API Key](api-keys/Get-WhoisFreaks-API-key.md)
 
 ---
 

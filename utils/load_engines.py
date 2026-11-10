@@ -35,6 +35,7 @@ from engines.threatfox import ThreatFoxEngine
 from engines.urlscan import URLScanEngine
 from engines.virustotal import VirusTotalEngine
 from engines.webscout import WebscoutEngine
+from engines.whoisfreaks import WhoisFreaksEngine
 from models.base_engine import BaseEngine
 from utils.config import Secrets
 
@@ -85,6 +86,7 @@ def get_engine_instances(
         ThreatFoxEngine(secrets, proxies, ssl_verify),
         URLScanEngine(secrets, proxies, ssl_verify),
         WebscoutEngine(secrets, proxies, ssl_verify),
+        WhoisFreaksEngine(secrets, proxies, ssl_verify),
     ]
 
     return {engine.name: engine for engine in engines}

@@ -456,3 +456,8 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `webscout`  
 **Supports**: IP, free or paid API key required  
 **Explaination**: Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required
+
+### WhoisFreaks
+**Name**: `whoisfreaks`  
+**Supports**: domain, URL, API key required  
+**Explaination**: Checks WhoisFreaks WHOIS history for domain, URL (past registrars and registrants, earliest creation date). When a past registrant email is not privacy-protected, it also runs a reverse WHOIS on that email to list other domains registered with it. API key required (WHOIS history: 2 credits per domain; reverse WHOIS: 5 credits, only when a usable email is found)

@@ -1,0 +1,27 @@
+<td>
+    {% if result.vpndetection %}
+        <strong>IP: </strong><a href="{{ result.vpndetection.link }}" target="_blank">{{ result.vpndetection.ip }}</a><br />
+        <strong>Country: </strong><span class="country country-{{result.vpndetection.country_name | lower}}">{{result.vpndetection.country_name}}</span>
+        <span class="fi fi-{{ result.vpndetection.country_code | lower }}"></span><br />
+        <strong>ASN: </strong>{{ result.vpndetection.asn }} {{ result.vpndetection.as_name }}<br />
+
+        {% if result.vpndetection.is_vpn == True %}
+            <strong>VPN: </strong>{{ result.vpndetection.is_vpn }}<br />
+        {% endif %}
+
+        {% if result.vpndetection.is_tor == True %}
+            <strong>Tor: </strong>{{ result.vpndetection.is_tor }}<br />
+        {% endif %}
+
+        {% if result.vpndetection.is_relay == True %}
+            <strong>Relay: </strong>{{ result.vpndetection.relay_provider or result.vpndetection.is_relay }}<br />
+        {% endif %}
+
+        {% if result.vpndetection.is_vpn == False and result.vpndetection.is_tor == False and result.vpndetection.is_relay == False %}
+            <strong>Type: </strong>No VPN, Tor or relay<br />
+        {% endif %}
+
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

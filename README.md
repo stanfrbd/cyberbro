@@ -332,6 +332,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [ThreatFox](https://threatfox.abuse.ch/api/)
 * [URLscan](https://urlscan.io/)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
+* [VPNDetection](https://docs.vpndetection.io/)
 * [WebScout](https://webscout.io/)
 
 > [!NOTE]

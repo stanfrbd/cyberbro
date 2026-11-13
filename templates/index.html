@@ -99,6 +99,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 'threatfox': '🦊',
                 'urlscan': '🔎',
                 'virustotal': '🦠',
+                'vpndetection': '🕵️',
                 'webscout': '🌐',
                 'ms_tenant_check': '🏢'
             };
@@ -140,6 +141,7 @@ Or just IoC (plain text, separated, html, json, csv, log data, garbage data, fan
                 { name: "threatfox", label: "ThreatFox", supports: "ip domain url", checked: false, description: "Malware IOC database", tooltip: "Checks ThreatFox by Abuse.ch for IP, domains, URL, free API key required" },
                 { name: "urlscan", label: "URLscan", supports: "domain url ip hash free_no_key", checked: false, description: "Website scanner & analyzer", tooltip: "Checks URLscan for IP, domains, URL, hash, free, no API key" },
                 { name: "virustotal", label: "VirusTotal", supports: "hash risk ip domain url", checked: false, description: "Multi-engine malware scanner", tooltip: "Checks VirusTotal for IP, domain, URL, hash, free API key required" },
+                { name: "vpndetection", label: "VPNDetection", supports: "ip vpn free_no_key", checked: false, description: "VPN, Tor & relay detection (free)", tooltip: "Checks VPNDetection for IP, reversed obtained IP for a given domain / URL: VPN, Tor, privacy relay, country and ASN, free, no API key" },
                 { name: "webscout", label: "WebScout", supports: "ip vpn proxy risk", checked: false, description: "IP reputation & risk scoring", tooltip: "Checks WebScout for IP, reversed obtained IP for a given domain / URL, free or paid API key required" },
             ];
 

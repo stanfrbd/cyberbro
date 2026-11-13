@@ -1,0 +1,25 @@
+{% set vpnd = analysis_results.results[0].vpndetection %}
+{% if vpnd.is_vpn or vpnd.is_tor or vpnd.is_relay %}
+<div class="card warning-row" style="background-color: orange;">
+    {% else %}
+    <div class="card">
+        {% endif %}
+
+        <h3>VPNDetection</h3>
+        <p><strong>IP: </strong><a href="{{ vpnd.link }}" target="_blank">{{ vpnd.ip }}</a></p>
+        <p><strong>Country: </strong>{{ vpnd.country_name }} <span class="fi fi-{{ vpnd.country_code | lower }}"></span></p>
+        <p><strong>ASN: </strong>{{ vpnd.asn }} {{ vpnd.as_name }}</p>
+
+        {% if vpnd.is_vpn %}
+        <p><strong>VPN: </strong>{{ vpnd.is_vpn }}</p>
+        {% endif %}
+        {% if vpnd.is_tor %}
+        <p><strong>Tor: </strong>{{ vpnd.is_tor }}</p>
+        {% endif %}
+        {% if vpnd.is_relay %}
+        <p><strong>Relay: </strong>{{ vpnd.relay_provider or vpnd.is_relay }}</p>
+        {% endif %}
+        {% if not vpnd.is_vpn and not vpnd.is_tor and not vpnd.is_relay %}
+        <p><strong>Type: </strong>No VPN, Tor or relay</p>
+        {% endif %}
+    </div>

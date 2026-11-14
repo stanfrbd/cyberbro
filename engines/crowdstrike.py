@@ -28,7 +28,7 @@ class CrowdstrikeEngine(BaseEngine):
             | ObservableType.SHA256
         )
 
-    def _map_observable_type(self, observable_type: ObservableType) -> str | None:
+    def _map_observable_type(self, observable_type: ObservableType) -> str:
         match observable_type:
             case ObservableType.FQDN | ObservableType.URL:
                 return "domain"
@@ -43,9 +43,9 @@ class CrowdstrikeEngine(BaseEngine):
             case ObservableType.SHA1:
                 return "sha1"
             case _:
-                return None
+                raise ValueError(f"Unsupported CrowdStrike observable type: {observable_type}")
 
-    def _generate_ioc_id(self, observable: str, mapped_type: str) -> str | None:
+    def _generate_ioc_id(self, observable: str, mapped_type: str) -> str:
         match mapped_type:
             case "domain":
                 prefix: str = "domain_"
@@ -58,7 +58,7 @@ class CrowdstrikeEngine(BaseEngine):
             case "sha1":
                 prefix = "hash_sha1_"
             case _:
-                return None
+                raise ValueError(f"Unsupported CrowdStrike indicator type: {mapped_type}")
 
         return f"{prefix}{observable}"
 
@@ -74,9 +74,6 @@ class CrowdstrikeEngine(BaseEngine):
 
     def analyze(self, observable: Observable) -> dict[str, Any] | None:
         try:
-            falcon = self._get_falcon_client()
-            falcon_url = urljoin(self.secrets.crowdstrike_falcon_base_url, "/").rstrip("/")
-
             value: str = (
                 observable.value.split("/")[2].split(":")[0]
                 if observable.type is ObservableType.URL
@@ -85,6 +82,10 @@ class CrowdstrikeEngine(BaseEngine):
 
             value = value.lower()
             mapped_type: str = self._map_observable_type(observable.type)
+            id_to_search: str = self._generate_ioc_id(value, mapped_type)
+
+            falcon = self._get_falcon_client()
+            falcon_url = urljoin(self.secrets.crowdstrike_falcon_base_url, "/").rstrip("/")
 
             # 1. Get device count
             response = falcon.command(
@@ -96,7 +97,6 @@ class CrowdstrikeEngine(BaseEngine):
                 device_count_result["device_count"] = data.get("device_count", 0)
 
             # 2. Get Intel Indicators
-            id_to_search = self._generate_ioc_id(value, mapped_type)
             request_body = {"ids": [id_to_search]}
             response = falcon.command("GetIntelIndicatorEntities", body=request_body)
 

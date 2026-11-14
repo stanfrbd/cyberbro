@@ -77,6 +77,19 @@ without having to deploy a **complex** solution. Read the docs at https://docs.c
 * **CTI Report Integration**: Fetches IoC-related reports from IoC.One.
 * **EDR Integration**: Checks observables against your own security tools (MDE, CrowdStrike).
 
+## Security and access control
+
+> [!WARNING]
+> **Cyberbro does not provide built-in authentication or authorization.** This is an intentional design choice, and native authentication is not currently planned.
+> Anyone who can reach the application may be able to launch analyses, access analysis history and results, and consume configured third-party API quotas.
+> **Do not expose Cyberbro directly to untrusted networks or the public Internet without external access controls.**
+
+For shared or remotely accessible deployments, protect **all** application routes (including API, history, results, and exports) using an established solution such as [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/), an authentication-enabled reverse proxy, or a VPN. Restrict network access with firewall rules or IP allowlists where appropriate. A reverse proxy or WAF alone does **not** provide authentication.
+
+Cyberbro is intended to remain a lightweight IOC enrichment tool rather than a multi-user threat intelligence platform. If you need integrated authentication and user management, consider a more comprehensive project such as [IntelOwl](https://github.com/intelowlproject/IntelOwl).
+
+See [SECURITY.md](SECURITY.md) for deployment expectations and vulnerability reporting.
+
 # Getting Started - TL;DR
 
 > [!TIP]
@@ -211,7 +224,7 @@ python3 app.py
 <img width="1873" height="900" alt="image" src="https://github.com/user-attachments/assets/7588ade2-9347-4497-8edd-37c5fbd8cce3" />
 
 > [!CAUTION]
-> If you intend to use this in a **production environment**, use well configured **Reverse Proxy** + **WAF** to prevent **security issues**.
+> For production or shared deployments, enforce external authentication and network access controls as described in [Security and access control](#security-and-access-control). A WAF alone is not sufficient.
 
 # Cyberbro browser extension
 

@@ -23,6 +23,9 @@
     {% if analysis_results.results[0].ipquery %}
     {% include "engine_layouts/ipquery_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].vpndetection %}
+    {% include "engine_layouts/vpndetection_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].ipinfo %}
     {% include "engine_layouts/ipinfo_card.html" %}
     {% endif %}

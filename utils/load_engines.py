@@ -34,6 +34,7 @@ from engines.spur_us import SpurUSEngine
 from engines.threatfox import ThreatFoxEngine
 from engines.urlscan import URLScanEngine
 from engines.virustotal import VirusTotalEngine
+from engines.vpndetection import VPNDetectionEngine
 from engines.webscout import WebscoutEngine
 from models.base_engine import BaseEngine
 from utils.config import Secrets
@@ -84,6 +85,7 @@ def get_engine_instances(
         SpurUSEngine(secrets, proxies, ssl_verify),
         ThreatFoxEngine(secrets, proxies, ssl_verify),
         URLScanEngine(secrets, proxies, ssl_verify),
+        VPNDetectionEngine(secrets, proxies, ssl_verify),
         WebscoutEngine(secrets, proxies, ssl_verify),
     ]
 

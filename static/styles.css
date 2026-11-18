@@ -1057,6 +1057,12 @@ body.dark-mode .row-toggle:hover {
     align-items: start;
 }
 
+/* Long result cards scroll instead of stretching their whole grid row */
+.cards-results-container > .card {
+    max-height: 32rem;
+    overflow-y: auto;
+}
+
 @media (min-width: 768px) {
     .cards-results-container {
         grid-template-columns: repeat(2, 1fr);

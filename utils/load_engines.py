@@ -20,6 +20,7 @@ from engines.ipquery import IPQueryEngine
 from engines.microsoft_defender_for_endpoint import MDEEngine
 from engines.misp import MISPEngine
 from engines.misp_feedback import MispFeedbackEngine
+from engines.ms_tenant_check import MsTenantCheckEngine
 from engines.opencti import OpenCTIEngine
 from engines.phishtank import PhishTankEngine
 from engines.ransomware_live import RansomwareLiveEngine
@@ -28,11 +29,13 @@ from engines.recorded_future import RecordedFutureEngine
 from engines.reverse_dns import ReverseDNSEngine
 from engines.reversinglabs_spectra_analyze import RLAnalyzeEngine
 from engines.rosti import RostiEngine
+from engines.scanmalware import ScanMalwareEngine
 from engines.shodan import ShodanEngine
 from engines.spur_us import SpurUSEngine
 from engines.threatfox import ThreatFoxEngine
 from engines.urlscan import URLScanEngine
 from engines.virustotal import VirusTotalEngine
+from engines.vpndetection import VPNDetectionEngine
 from engines.webscout import WebscoutEngine
 from models.base_engine import BaseEngine
 from utils.config import Secrets
@@ -56,6 +59,7 @@ def get_engine_instances(
         ChromeExtensionEngine(secrets, proxies, ssl_verify),
         CriminalIPEngine(secrets, proxies, ssl_verify),
         CrowdstrikeEngine(secrets, proxies, ssl_verify),
+        MsTenantCheckEngine(secrets, proxies, ssl_verify),
         CrtShEngine(secrets, proxies, ssl_verify),
         DFIRIrisEngine(secrets, proxies, ssl_verify),
         GitHubEngine(secrets, proxies, ssl_verify),
@@ -79,9 +83,11 @@ def get_engine_instances(
         RecordedFutureEngine(secrets, proxies, ssl_verify),
         RLAnalyzeEngine(secrets, proxies, ssl_verify),
         RostiEngine(secrets, proxies, ssl_verify),
+        ScanMalwareEngine(secrets, proxies, ssl_verify),
         SpurUSEngine(secrets, proxies, ssl_verify),
         ThreatFoxEngine(secrets, proxies, ssl_verify),
         URLScanEngine(secrets, proxies, ssl_verify),
+        VPNDetectionEngine(secrets, proxies, ssl_verify),
         WebscoutEngine(secrets, proxies, ssl_verify),
     ]
 

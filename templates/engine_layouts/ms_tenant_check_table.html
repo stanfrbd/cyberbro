@@ -1,0 +1,31 @@
+<td>
+    {% if result.ms_tenant_check %}
+    {% set r = result.ms_tenant_check %}
+    {% if r.tenant_found %}
+    <strong>✅ Tenant found</strong><br/>
+    {% if r.tenant_id %}
+    <strong>ID:</strong> {{ r.tenant_id }}<br/>
+    {% endif %}
+    {% if r.tenant_region_scope %}
+    <strong>Region:</strong>
+    {% if r.tenant_region_name %}{{ r.tenant_region_name }} ({{ r.tenant_region_scope }})
+    {% else %}{{ r.tenant_region_scope }}{% endif %}<br/>
+    {% endif %}
+    {% else %}
+    ❌ No tenant<br/>
+    {% endif %}
+    {% if r.is_office365_mx %}
+    📧 Office 365 MX<br/>
+    {% endif %}
+    {% if r.mx_records %}
+    <strong>MX:</strong>
+    <ul>
+        {% for mx in r.mx_records %}
+        <li>{{ mx }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% else %}
+    Not applicable
+    {% endif %}
+</td>

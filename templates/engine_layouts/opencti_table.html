@@ -1,6 +1,9 @@
 <td>
     {% if result.opencti %}
-        <strong>Global count:</strong> {{ result.opencti.global_count }}<br/>
+        {% if result.opencti.results_truncated %}
+        <strong>Partial results:</strong> counts and latest indicator cover retrieved results only.<br/>
+        {% endif %}
+        <strong>Exact matches and linked indicators:</strong> {{ result.opencti.global_count }}<br/>
         <strong>Entity counts:</strong>
         <ul>
         {% for entity, count in result.opencti.entity_counts.items() %}

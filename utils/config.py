@@ -26,11 +26,13 @@ class Secrets:
     crowdstrike_falcon_base_url: str = "https://falcon.crowdstrike.com"
     dfir_iris_url: str = ""
     dfir_iris_api_key: str = ""
+    dfir_iris_search_notes: bool = False
     flask_debug: bool = False
     flask_port: int = 5000
     flask_host: str = "127.0.0.1"
     google_cse_cx: str = ""
     google_cse_key: str = ""
+    google_cse_url: str = "https://www.googleapis.com/customsearch/v1"
     google_safe_browsing: str = ""
     gui_cache_timeout: int = 1800
     gui_enabled_engines: list[str] = field(default_factory=list)

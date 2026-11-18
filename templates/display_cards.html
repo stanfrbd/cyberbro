@@ -23,6 +23,9 @@
     {% if analysis_results.results[0].ipquery %}
     {% include "engine_layouts/ipquery_card.html" %}
     {% endif %}
+    {% if analysis_results.results[0].vpndetection %}
+    {% include "engine_layouts/vpndetection_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].ipinfo %}
     {% include "engine_layouts/ipinfo_card.html" %}
     {% endif %}
@@ -47,8 +50,15 @@
     {% if analysis_results.results[0].urlscan %}
     {% include "engine_layouts/urlscan_card.html" %}
     {% endif %}
+
+    {% if analysis_results.results[0].scanmalware %}
+    {% include "engine_layouts/scanmalware_card.html" %}
+    {% endif %}
     {% if analysis_results.results[0].google_dns %}
     {% include "engine_layouts/google_dns_card.html" %}
+    {% endif %}
+    {% if analysis_results.results[0].ms_tenant_check %}
+    {% include "engine_layouts/ms_tenant_check_card.html" %}
     {% endif %}
     {% if analysis_results.results[0].mde %}
     {% include "engine_layouts/mde_card.html" %}

@@ -2,6 +2,8 @@ import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
+import responses
+from responses import matchers
 
 from engines.crowdstrike import CrowdstrikeEngine
 from models.observable import Observable, ObservableType
@@ -296,7 +298,9 @@ def test_analyze_url_observable_extraction(
 
 
 @patch("engines.crowdstrike.CrowdstrikeEngine._get_falcon_client")
-def test_analyze_observable_type_mapping(mock_get_client, secrets_with_credentials):
+def test_analyze_observable_type_mapping(
+    mock_get_client: MagicMock, secrets_with_credentials: Secrets
+) -> None:
     """Test _map_observable_type for all supported types."""
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
 
@@ -308,11 +312,14 @@ def test_analyze_observable_type_mapping(mock_get_client, secrets_with_credentia
     assert engine._map_observable_type(ObservableType.SHA256) == "sha256"
     assert engine._map_observable_type(ObservableType.FQDN) == "domain"
     assert engine._map_observable_type(ObservableType.URL) == "domain"
-    assert engine._map_observable_type("UNKNOWN") is None
+    with pytest.raises(ValueError, match="Unsupported CrowdStrike observable type"):
+        engine._map_observable_type(ObservableType.EMAIL)
 
 
 @patch("engines.crowdstrike.CrowdstrikeEngine._get_falcon_client")
-def test_analyze_ioc_id_generation(mock_get_client, secrets_with_credentials):
+def test_analyze_ioc_id_generation(
+    mock_get_client: MagicMock, secrets_with_credentials: Secrets
+) -> None:
     """Test _generate_ioc_id for all types."""
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
 
@@ -329,7 +336,8 @@ def test_analyze_ioc_id_generation(mock_get_client, secrets_with_credentials):
     assert engine._generate_ioc_id(
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "sha256"
     ) == ("hash_sha256_e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-    assert engine._generate_ioc_id("observable", "unknown") is None
+    with pytest.raises(ValueError, match="Unsupported CrowdStrike indicator type"):
+        engine._generate_ioc_id("observable", "unknown")
 
 
 @patch("engines.crowdstrike.CrowdstrikeEngine._get_falcon_client")
@@ -619,14 +627,69 @@ def test_analyze_observable_case_normalization(mock_get_client, secrets_with_cre
 # ============================================================================
 
 
+@pytest.mark.parametrize("type_name", ["EMAIL", "CHROME_EXTENSION", "BOGON", "IPV4|FQDN"])
 @patch("engines.crowdstrike.CrowdstrikeEngine._get_falcon_client")
-def test_analyze_observed_type_unmapped(mock_get_client, secrets_with_credentials):
-    """Observable type not in supported list."""
+def test_analyze_observed_type_unmapped(
+    mock_get_client: MagicMock,
+    secrets_with_credentials: Secrets,
+    caplog: pytest.LogCaptureFixture,
+    type_name: str,
+) -> None:
     engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    observable = Observable.model_validate({"value": "example.com", "type": type_name})
+    mock_get_client.return_value.command.side_effect = [
+        {"status_code": 200, "body": {"resources": [{"device_count": 0}]}},
+        {"status_code": 400, "body": {"resources": []}},
+    ]
 
-    # Unsupported type should return None from _map_observable_type
-    mapped = engine._map_observable_type("UNSUPPORTED_TYPE")
-    assert mapped is None
+    with caplog.at_level(logging.ERROR):
+        result = engine.analyze(observable)
+
+    assert result is None
+    assert "Unsupported CrowdStrike observable type" in caplog.text
+    mock_get_client.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("value", "type_name", "mapped_type", "indicator_id", "indicator_value"),
+    [
+        ("1.1.1.1", "IPV4", "ipv4", "ip_address_1.1.1.1", "1.1.1.1"),
+        ("https://Example.com:8443/path", "URL", "domain", "domain_example.com", "example.com"),
+    ],
+)
+@responses.activate
+def test_analyze_real_sdk_requests(
+    secrets_with_credentials: Secrets,
+    value: str,
+    type_name: str,
+    mapped_type: str,
+    indicator_id: str,
+    indicator_value: str,
+) -> None:
+    responses.post(
+        "https://api.crowdstrike.com/oauth2/token",
+        json={"access_token": "test_token", "token_type": "bearer", "expires_in": 1800},
+    )
+    device_response: responses.BaseResponse = responses.get(
+        "https://api.crowdstrike.com/iocs/aggregates/indicators/device-count/v1",
+        json={"resources": [{"device_count": 2}]},
+        match=[matchers.query_param_matcher({"type": mapped_type, "value": indicator_value})],
+    )
+    indicator_response: responses.BaseResponse = responses.post(
+        "https://api.crowdstrike.com/intel/entities/indicators/GET/v1",
+        json={"meta": {"trace_id": "test_trace"}, "resources": []},
+        match=[matchers.json_params_matcher({"ids": [indicator_id]})],
+    )
+    engine = CrowdstrikeEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    observable = Observable.model_validate({"value": value, "type": type_name})
+
+    result = engine.analyze(observable)
+
+    assert result is not None
+    assert result["device_count"] == 2
+    assert result["indicator_found"] is False
+    assert device_response.call_count == 1
+    assert indicator_response.call_count == 1
 
 
 @patch("engines.crowdstrike.CrowdstrikeEngine._get_falcon_client")

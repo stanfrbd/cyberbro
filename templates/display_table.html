@@ -35,7 +35,8 @@
             {% for result in analysis_results.results %}
             {% if (result.ipinfo and result.ipinfo.country_name not in countries) or (result.ipquery and
             result.ipquery.country_name not in countries) or (result.webscout and result.webscout.country_name not in
-            countries) or (result.ipapi and result.ipapi.location is defined and result.ipapi.location and
+            countries) or (result.vpndetection and result.vpndetection.country_name not in countries) or
+            (result.ipapi and result.ipapi.location is defined and result.ipapi.location and
             result.ipapi.location.country and result.ipapi.location.country not in countries) or (result.abuseipdb and
             result.abuseipdb.country_name and result.abuseipdb.country_name not in countries) or (result.recorded_future
             and result.recorded_future.country and result.recorded_future.country not in countries) %}
@@ -47,6 +48,11 @@
             {% if result.ipquery and result.ipquery.country_name not in countries %}
             {% set _ = countries.append(result.ipquery.country_name) %}
             <option value="{{ result.ipquery.country_name | lower }}">{{ result.ipquery.country_name }}</option>
+            {% endif %}
+
+            {% if result.vpndetection and result.vpndetection.country_name not in countries %}
+            {% set _ = countries.append(result.vpndetection.country_name) %}
+            <option value="{{ result.vpndetection.country_name | lower }}">{{ result.vpndetection.country_name }}</option>
             {% endif %}
 
             {% if result.webscout and result.webscout.country_name not in countries %}
@@ -113,6 +119,10 @@
 
                     {% if "ipquery" in analysis_results.selected_engines %}
                     <th>IPquery</th>
+                    {% endif %}
+
+                    {% if "vpndetection" in analysis_results.selected_engines %}
+                    <th>VPNDetection</th>
                     {% endif %}
 
                     {% if "ipinfo" in analysis_results.selected_engines %}
@@ -191,6 +201,10 @@
                     <th>URLscan</th>
                     {% endif %}
 
+                    {% if "scanmalware" in analysis_results.selected_engines %}
+                    <th>ScanMalware</th>
+                    {% endif %}
+
                     {% if "opencti" in analysis_results.selected_engines %}
                     <th>OpenCTI</th>
                     {% endif %}
@@ -231,6 +245,10 @@
                     <th>Google DNS (common records)</th>
                     {% endif %}
 
+                    {% if "ms_tenant_check" in analysis_results.selected_engines %}
+                    <th>Microsoft Tenant Check</th>
+                    {% endif %}
+
                     {% if "misp" in analysis_results.selected_engines %}
                     <th>MISP</th>
                     {% endif %}
@@ -266,6 +284,9 @@
                 <tr class="warning-row">
                     {% elif result.ipquery and result.ipquery.risk_score > 50 %}
                 <tr class="high-risk">
+                    {% elif result.vpndetection and (result.vpndetection.is_vpn or result.vpndetection.is_tor or
+                    result.vpndetection.is_relay) %}
+                <tr class="warning-row">
                     {% elif result.threatfox and result.threatfox.count != 0 %}
                 <tr class="high-risk">
                     {% elif result.google_safe_browsing and result.google_safe_browsing.threat_found == "Threat found"
@@ -308,6 +329,10 @@
 
                     {% if "ipquery" in analysis_results.selected_engines %}
                     {% include "engine_layouts/ipquery_table.html" %}
+                    {% endif %}
+
+                    {% if "vpndetection" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/vpndetection_table.html" %}
                     {% endif %}
 
                     {% if "ipinfo" in analysis_results.selected_engines %}
@@ -386,6 +411,10 @@
                     {% include "engine_layouts/urlscan_table.html" %}
                     {% endif %}
 
+                    {% if "scanmalware" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/scanmalware_table.html" %}
+                    {% endif %}
+
                     {% if "opencti" in analysis_results.selected_engines %}
                     {% include "engine_layouts/opencti_table.html" %}
                     {% endif %}
@@ -424,6 +453,10 @@
 
                     {% if "google_dns" in analysis_results.selected_engines %}
                     {% include "engine_layouts/google_dns_table.html" %}
+                    {% endif %}
+
+                    {% if "ms_tenant_check" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/ms_tenant_check_table.html" %}
                     {% endif %}
 
                     {% if "misp" in analysis_results.selected_engines %}

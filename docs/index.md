@@ -30,6 +30,9 @@
 - **[Bad ASN Check](engines/Bad-ASN-Check-Engine.md)**  
     Learn how the Bad ASN Check engine works, including its background service, data sources, risk scoring algorithm, and how to use it effectively.
 
+- **[Microsoft Tenant Check](engines/MS-Tenant-Check-Engine.md)**  
+    Detect Microsoft Entra ID tenants and Office 365 MX records for a given domain or email address, free, no API key required.
+
 ---
 
 ## 🔗 Integrations

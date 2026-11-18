@@ -36,6 +36,22 @@ function formatResults(data) {
             plainText += `URL: ${result.extension.url}\n`;
         }
 
+        if (result.ms_tenant_check) {
+            plainText += `Microsoft Tenant Check (${result.ms_tenant_check.domain}):\n`;
+            plainText += `  - Tenant found: ${result.ms_tenant_check.tenant_found}\n`;
+            if (result.ms_tenant_check.tenant_id) plainText += `  - Tenant ID: ${result.ms_tenant_check.tenant_id}\n`;
+            if (result.ms_tenant_check.tenant_region_scope) {
+                const regionDisplay = result.ms_tenant_check.tenant_region_name
+                    ? `${result.ms_tenant_check.tenant_region_name} (${result.ms_tenant_check.tenant_region_scope})`
+                    : result.ms_tenant_check.tenant_region_scope;
+                plainText += `  - Region: ${regionDisplay}\n`;
+            }
+            plainText += `  - Office 365 MX: ${result.ms_tenant_check.is_office365_mx}\n`;
+            if (result.ms_tenant_check.mx_records && result.ms_tenant_check.mx_records.length > 0) {
+                plainText += `  - MX Records: ${result.ms_tenant_check.mx_records.join(', ')}\n`;
+            }
+        }
+
         if (result.google_dns && result.google_dns.Answer && result.google_dns.Answer.length > 0) {
             plainText += `Google DNS (common records):\n`;
             result.google_dns.Answer.forEach(dnsRecord => {
@@ -47,6 +63,9 @@ function formatResults(data) {
 
         if (result.ipquery) {
             plainText += `IPquery: Geolocation: ${result.ipquery.geolocation}, Country: ${result.ipquery.country_name}, ASN: ${result.ipquery.asn} ${result.ipquery.isp}, Risk Score: ${result.ipquery.risk_score}, Proxy: ${result.ipquery.is_proxy}, Tor: ${result.ipquery.is_tor}, VPN: ${result.ipquery.is_vpn}\n`;
+        }
+        if (result.vpndetection) {
+            plainText += `VPNDetection: Country: ${result.vpndetection.country_name}, ASN: ${result.vpndetection.asn} ${result.vpndetection.as_name}, VPN: ${result.vpndetection.is_vpn}, Tor: ${result.vpndetection.is_tor}, Relay: ${result.vpndetection.relay_provider || result.vpndetection.is_relay}\n`;
         }
         if (result.ipinfo) {
             plainText += `IPinfo: Geolocation: ${result.ipinfo.geolocation}, Country: ${result.ipinfo.country_name}, ASN: ${result.ipinfo.asn}\n`;
@@ -199,6 +218,20 @@ function formatResults(data) {
                 plainText += `  - ${domain.domain} (${domain.count})\n`;
             });
         }
+        if (result.scanmalware && result.scanmalware.scan_count > 0) {
+            plainText += `ScanMalware: Scan Count: ${result.scanmalware.scan_count}\n`;
+            if (result.scanmalware.verdict) {
+                plainText += `  - Verdict: ${result.scanmalware.verdict}`;
+                if (result.scanmalware.confidence !== null && result.scanmalware.confidence !== undefined) {
+                    plainText += ` (${result.scanmalware.confidence}% confidence)`;
+                }
+                plainText += `\n`;
+                // Name the address the verdict belongs to: a domain is not
+                // malicious because one page on it was.
+                plainText += `  - Verdict is for: ${result.scanmalware.scanned_url}\n`;
+            }
+            plainText += `  - Link: ${result.scanmalware.link}\n`;
+        }
         if (result.crtsh && result.crtsh.scan_count > 0) {
             plainText += `crt.sh: Scan Count: ${result.urlscan.scan_count}\n`;
             result.crtsh.top_domains.forEach(domain => {
@@ -207,10 +240,13 @@ function formatResults(data) {
         }
         if (result.opencti && result.opencti.global_count > 0) {
             plainText += `OpenCTI:\n`;
-            plainText += `  - Global Count: ${result.opencti.global_count}\n`;
+            plainText += `  - Exact Matches and Linked Indicators: ${result.opencti.global_count}\n`;
             plainText += `  - Entity Counts:\n`;
             for (const [entity, count] of Object.entries(result.opencti.entity_counts)) {
                 plainText += `    - ${entity}: ${count}\n`;
+            }
+            if (result.opencti.results_truncated) {
+                plainText += `  - Partial results: counts and latest indicator cover retrieved results only.\n`;
             }
             plainText += `  - Search Link: ${result.opencti.search_link}\n`;
             plainText += `  - Latest Entity Created At: ${result.opencti.latest_created_at}\n`;

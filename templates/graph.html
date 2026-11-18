@@ -198,13 +198,17 @@
 
             addNode(obs, obs, "observable", "https://img.icons8.com/officexs/32/goal.png");
 
-            const providers = ["ipinfo", "ipquery", "webscout", "ipapi"];
+            const providers = ["ipinfo", "ipquery", "webscout", "ipapi", "vpndetection"];
             providers.forEach((provider) => {
                 if (entry[provider]?.asn) {
                     let asn = String(entry[provider].asn || "");
 
                     if (provider === "ipquery" && entry[provider]?.isp) {
                         asn = `${asn} ${entry[provider].isp}`.trim();
+                    }
+
+                    if (provider === "vpndetection" && entry[provider]?.as_name) {
+                        asn = `${asn} ${entry[provider].as_name}`.trim();
                     }
 
                     if (provider === "webscout" && entry[provider]?.as_org) {
@@ -645,6 +649,34 @@
                         );
                         edges.push({ from: obs, to: googleTitle, label: "Google" });
                     }
+                });
+            }
+
+            // Check for MS Tenant data
+            if (entry.ms_tenant_check && entry.ms_tenant_check.tenant_found) {
+                const tenantLabel = entry.ms_tenant_check.tenant_id
+                    ? `MS Tenant: ${entry.ms_tenant_check.tenant_id}`
+                    : "MS Tenant found";
+                addNode(
+                    tenantLabel,
+                    tenantLabel,
+                    "ms_tenant_check",
+                    "https://img.icons8.com/officexs/32/home.png"
+                );
+                const regionLabel = entry.ms_tenant_check.tenant_region_scope
+                    ? `MS Tenant (${entry.ms_tenant_check.tenant_region_name || entry.ms_tenant_check.tenant_region_scope})`
+                    : "MS Tenant";
+                edges.push({ from: obs, to: tenantLabel, label: regionLabel });
+            }
+            if (entry.ms_tenant_check && entry.ms_tenant_check.mx_records && Array.isArray(entry.ms_tenant_check.mx_records)) {
+                entry.ms_tenant_check.mx_records.forEach((mx) => {
+                    addNode(
+                        mx,
+                        mx,
+                        "ms_tenant_check_mx",
+                        "https://img.icons8.com/officexs/32/email.png"
+                    );
+                    edges.push({ from: obs, to: mx, label: "MX" });
                 });
             }
 

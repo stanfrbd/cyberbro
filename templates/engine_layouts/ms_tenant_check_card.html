@@ -1,0 +1,33 @@
+<div class="card">
+    <h3>Microsoft Tenant Check</h3>
+    {% if analysis_results.results[0].ms_tenant_check %}
+    {% set r = analysis_results.results[0].ms_tenant_check %}
+    {% if r.tenant_found %}
+    <p>✅ <strong>Microsoft tenant found</strong></p>
+    {% if r.tenant_id %}
+    <p><strong>Tenant ID:</strong> {{ r.tenant_id }}</p>
+    {% endif %}
+    {% if r.tenant_region_scope %}
+    <p><strong>Region:</strong>
+        {% if r.tenant_region_name %}{{ r.tenant_region_name }} ({{ r.tenant_region_scope }})
+        {% else %}{{ r.tenant_region_scope }}{% endif %}
+    </p>
+    {% endif %}
+    {% else %}
+    <p>❌ No Microsoft tenant found</p>
+    {% endif %}
+    {% if r.mx_records %}
+    <p><strong>MX Records:</strong></p>
+    <ul>
+        {% for mx in r.mx_records %}
+        <li>{{ mx }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if r.is_office365_mx %}
+    <p>📧 <strong>Office 365 MX detected</strong></p>
+    {% endif %}
+    {% else %}
+    <p>Not applicable</p>
+    {% endif %}
+</div>

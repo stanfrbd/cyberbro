@@ -41,7 +41,7 @@ class HisterEngine(BaseEngine):
             return None
 
         query = json.dumps(
-            {"text": observable.value, "limit": 10, "fields": ["url", "title", "text"]}
+            {"text": f'"{observable.value}"', "limit": 10, "fields": ["url", "title", "text"]}
         )
         url = f"{base_url.rstrip('/')}/search"
         headers = {

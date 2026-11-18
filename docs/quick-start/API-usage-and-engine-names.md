@@ -372,6 +372,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: hash, IP, domain, URL  
 **Explaination**: Checks Microsoft Defender for Endpoint, paid API info on Azure required
 
+### Microsoft Tenant Check
+**Name**: `ms_tenant_check`  
+**Supports**: domain, email, free_no_key  
+**Explanation**: Checks if a domain or email address is linked to a Microsoft Entra ID (Azure AD) tenant by querying the OpenID configuration endpoint. Also checks MX records via Google DNS to detect Office 365 email, free, no API key
+
 ### MISP
 **Name**: `misp`  
 **Supports**: IP, domain, URL, hash  
@@ -385,7 +390,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ### OpenCTI
 **Name**: `opencti` 
 **Supports**: domain, URL, IP, hash  
-**Explaination**: Searches OpenCTI results for all types of observable, API key required
+**Explaination**: Matches exact observable values, names, aliases and simple STIX patterns, and includes linked indicators. URL lookups use the host. API key required. See [matching behavior](../api-keys/Get-OpenCTI-API-key.md#matching-behavior).
 
 ### Phishtank
 **Name**: `phishtank`  
@@ -432,6 +437,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: VPN, proxy, paid API key required  
 **Explaination**: Checks Spur.us for IP, reversed obtained IP for a given domain/URL, paid API key required
 
+### ScanMalware
+**Name**: `scanmalware`  
+**Supports**: domain, URL, IP, free_no_key  
+**Explaination**: Checks the ScanMalware archive of sandboxed URL scans for IP, domains, URL, free, no API key. A verdict is only reported for an address that was itself scanned, never one that a scan merely redirected to.
+
 ### ThreatFox
 **Name**: `threatfox`  
 **Supports**: IP, domain, URL, free  
@@ -446,6 +456,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `virustotal`  
 **Supports**: hash, risk, IP, domain, URL  
 **Explaination**: Checks VirusTotal for IP, domain, URL, hash, free API key required
+
+### VPNDetection
+**Name**: `vpndetection`  
+**Supports**: IP, VPN, free_no_key  
+**Explaination**: Checks VPNDetection for IP, reversed obtained IP for a given domain / URL: VPN, Tor, privacy relay (such as iCloud Private Relay), country and ASN, free, no API key
 
 ### WebScout
 **Name**: `webscout`  

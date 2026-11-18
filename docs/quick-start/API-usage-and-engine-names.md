@@ -452,6 +452,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: hash, risk, IP, domain, URL  
 **Explaination**: Checks VirusTotal for IP, domain, URL, hash, free API key required
 
+### VPNDetection
+**Name**: `vpndetection`  
+**Supports**: IP, VPN, free_no_key  
+**Explaination**: Checks VPNDetection for IP, reversed obtained IP for a given domain / URL: VPN, Tor, privacy relay (such as iCloud Private Relay), country and ASN, free, no API key
+
 ### WebScout
 **Name**: `webscout`  
 **Supports**: IP, free or paid API key required  

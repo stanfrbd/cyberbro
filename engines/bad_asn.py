@@ -324,6 +324,17 @@ class BadASNEngine(BaseEngine):
                 if asn_str and asn_str.isdigit():
                     return asn_str
 
+        # Try recorded_future (IP results include location.asn as "AS15169 Google LLC")
+        rf_data = context.get("recorded_future")
+        if rf_data and isinstance(rf_data, dict):
+            asn_str = rf_data.get("asn", "")
+            if asn_str and isinstance(asn_str, str) and asn_str.startswith("AS"):
+                parts = asn_str.split()
+                if len(parts) > 0:
+                    asn_num = parts[0][2:]  # Remove "AS" prefix
+                    if asn_num and asn_num.isdigit():
+                        return asn_num
+
         return None
 
     def create_export_row(self, analysis_result: dict | None) -> dict:

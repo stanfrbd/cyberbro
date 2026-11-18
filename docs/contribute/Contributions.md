@@ -12,6 +12,7 @@ For details on contributing, community standards, and licensing, see:
 ### Engine Implementation
 * Make sure the engine is added to `engines/engine_name.py` (use `engines/abuseipdb.py` as a template).
 * Make sure the engine is added to `engines/__init__.py`.
+* Make sure the engine is imported and instantiated in `utils/load_engines.py`.
 * Make sure that your engine config/secret variable (if relevant) is added to `utils/config.py`.
 
 ### Configuration & Secrets

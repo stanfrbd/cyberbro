@@ -77,6 +77,19 @@ without having to deploy a **complex** solution. Read the docs at https://docs.c
 * **CTI Report Integration**: Fetches IoC-related reports from IoC.One.
 * **EDR Integration**: Checks observables against your own security tools (MDE, CrowdStrike).
 
+## Security and access control
+
+> [!WARNING]
+> **Cyberbro does not provide built-in authentication or authorization.** This is an intentional design choice, and native authentication is not currently planned.
+> Anyone who can reach the application may be able to launch analyses, access analysis history and results, and consume configured third-party API quotas.
+> **Do not expose Cyberbro directly to untrusted networks or the public Internet without external access controls.**
+
+For shared or remotely accessible deployments, protect **all** application routes (including API, history, results, and exports) using an established solution such as [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/applications/), an authentication-enabled reverse proxy, or a VPN. Restrict network access with firewall rules or IP allowlists where appropriate. A reverse proxy or WAF alone does **not** provide authentication.
+
+Cyberbro is intended to remain a lightweight IOC enrichment tool rather than a multi-user threat intelligence platform. If you need integrated authentication and user management, consider a more comprehensive project such as [IntelOwl](https://github.com/intelowlproject/IntelOwl).
+
+See [SECURITY.md](SECURITY.md) for deployment expectations and vulnerability reporting.
+
 # Getting Started - TL;DR
 
 > [!TIP]
@@ -211,7 +224,7 @@ python3 app.py
 <img width="1873" height="900" alt="image" src="https://github.com/user-attachments/assets/7588ade2-9347-4497-8edd-37c5fbd8cce3" />
 
 > [!CAUTION]
-> If you intend to use this in a **production environment**, use well configured **Reverse Proxy** + **WAF** to prevent **security issues**.
+> For production or shared deployments, enforce external authentication and network access controls as described in [Security and access control](#security-and-access-control). A WAF alone is not sufficient.
 
 # Cyberbro browser extension
 
@@ -316,7 +329,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [IPinfo](https://ipinfo.io/developers)
 * [IPquery](https://ipquery.gitbook.io/ipquery-docs)
 * [Ioc.One](https://ioc.one/)
-* [Microsoft Defender for Endpoint](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/microsoft-defender-for-endpoint-api)
+* [Microsoft Defender for Endpoint](https://learn.microsoft.com/en-us/defender-endpoint/api/apis-intro)
 * [Microsoft Entra ID (OpenID Configuration)](https://login.microsoftonline.com/)
 * [MISP](https://www.misp-project.org/)
 * [MISP Feedback](https://github.com/MISP/misp-feedback/)
@@ -332,6 +345,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [ThreatFox](https://threatfox.abuse.ch/api/)
 * [URLscan](https://urlscan.io/)
 * [VirusTotal](https://developers.virustotal.com/v3.0/reference)
+* [VPNDetection](https://docs.vpndetection.io/)
 * [WebScout](https://webscout.io/)
 
 > [!NOTE]
@@ -347,7 +361,7 @@ A huge thank you to all the amazing contributors who made pull requests and help
 * [Jon Mark Allen](https://github.com/ubahmapk/) who added a better secret management and tests. He refactored a lot and made many improvements to the codebase, including CriminalIP. 
 * [cirosec GmbH - Felix Friedberger](https://github.com/cirosec) for adding crt.sh engine.
 * [Stig Dahl](https://github.com/sdaaish) for enhancing crt.sh engine, adding DFIR IRIS search and fixing Bandit issues, correcting MISP engine, adding MISP Feedback engine.
-* [0xffr](https://github.com/0xffr) for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
+* 0xffr for fixing issue #98 - Grep.app engine broken and commenting properly in CriminalIP engine.
 * [Maxime Berthault - Maxou56800](https://github.com/Maxou56800) for developing Cyberbro CLI.
 * [Jonas Lejon](https://github.com/jonaslejon) for adding ScanMalware engine.
 * [egeoguz04](https://github.com/egeoguz04) for allowing the config of the Google CSE endpoint. This will be useful for the upcoming Google changes.

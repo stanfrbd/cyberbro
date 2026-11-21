@@ -134,8 +134,6 @@ GOOGLE_CSE_CX=cx_here
 GOOGLE_CSE_KEY=key_here
 GOOGLE_CSE_URL=https://www.googleapis.com/customsearch/v1
 GOOGLE_SAFE_BROWSING=token_here
-HISTER_TOKEN=token_here
-HISTER_BASE_URL=https://hister.example.com
 IPAPI=token_here
 IPINFO=token_here
 MDE_CLIENT_ID=client_id_here
@@ -145,6 +143,8 @@ MISP_API_KEY=token_here
 MISP_URL=https://misp.local
 MISP_FEEDBACK_SERVER_URL=https://misp-feedback.local
 MISP_FEEDBACK_TOKEN=token_here
+NOGON_BASE_URL=https://nogon.example.com
+NOGON_TOKEN=token_here
 OPENCTI_API_KEY=token_here
 OPENCTI_URL=https://demo.opencti.io
 PROXY_URL=
@@ -322,7 +322,6 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Google](https://google.com/)
 * [Google DNS](https://dns.google/)
 * [Grep.App](https://grep.app/)
-* [Hister](https://hister.org/)
 * [Hudson Rock](https://hudsonrock.com/)
 * [ICANN](https://lookup.icann.org/)
 * [IPapi](https://ipapi.is/)
@@ -333,6 +332,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Microsoft Entra ID (OpenID Configuration)](https://login.microsoftonline.com/)
 * [MISP](https://www.misp-project.org/)
 * [MISP Feedback](https://github.com/MISP/misp-feedback/)
+* [Nogon](https://nogon.eu)
 * [OpenCTI](https://www.opencti.io/)
 * [OpenRDAP](https://www.openrdap.org/)
 * [Phishtank](https://www.phishtank.com/)

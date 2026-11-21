@@ -5,13 +5,13 @@ import pytest
 import requests
 import responses
 
-from engines.hister import HisterEngine
+from engines.nogon import NogonEngine
 from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
 logger = logging.getLogger(__name__)
 
-BASE_URL = "http://hister.local"
+BASE_URL = "http://nogon.local"
 SEARCH_URL = f"{BASE_URL}/search"
 
 
@@ -23,24 +23,24 @@ SEARCH_URL = f"{BASE_URL}/search"
 @pytest.fixture
 def secrets_with_credentials():
     s = Secrets()
-    s.hister_token = "test_token_abc"
-    s.hister_base_url = BASE_URL
+    s.nogon_token = "test_token_abc"
+    s.nogon_base_url = BASE_URL
     return s
 
 
 @pytest.fixture
 def secrets_without_token():
     s = Secrets()
-    s.hister_token = ""
-    s.hister_base_url = BASE_URL
+    s.nogon_token = ""
+    s.nogon_base_url = BASE_URL
     return s
 
 
 @pytest.fixture
 def secrets_without_base_url():
     s = Secrets()
-    s.hister_token = "test_token_abc"
-    s.hister_base_url = ""
+    s.nogon_token = "test_token_abc"
+    s.nogon_base_url = ""
     return s
 
 
@@ -94,7 +94,7 @@ DOCUMENTS_RESPONSE = {
 @responses.activate
 def test_analyze_success_returns_results(fqdn_observable, secrets_with_credentials):
     """Test successful analysis with documents returned."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(responses.GET, SEARCH_URL, json=DOCUMENTS_RESPONSE, status=200)
 
     result = engine.analyze(fqdn_observable)
@@ -112,7 +112,7 @@ def test_analyze_success_returns_results(fqdn_observable, secrets_with_credentia
 @responses.activate
 def test_analyze_success_empty_documents(fqdn_observable, secrets_with_credentials):
     """Test successful analysis with no documents."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(responses.GET, SEARCH_URL, json={"total": 0, "documents": []}, status=200)
 
     result = engine.analyze(fqdn_observable)
@@ -125,7 +125,7 @@ def test_analyze_success_empty_documents(fqdn_observable, secrets_with_credentia
 @responses.activate
 def test_analyze_sends_correct_headers_and_params(fqdn_observable, secrets_with_credentials):
     """Test that Authorization header, Origin, and query param are sent correctly."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(responses.GET, SEARCH_URL, json={"total": 0, "documents": []}, status=200)
 
     engine.analyze(fqdn_observable)
@@ -133,7 +133,7 @@ def test_analyze_sends_correct_headers_and_params(fqdn_observable, secrets_with_
     assert len(responses.calls) == 1
     req = responses.calls[0].request
     assert req.headers.get("Authorization") == "Bearer test_token_abc"
-    assert req.headers.get("Origin") == "hister://"
+    assert req.headers.get("Origin") == "nogon://"
     assert "query=" in req.url
     query_raw = [
         p.split("=", 1)[1] for p in req.url.split("?", 1)[1].split("&") if p.startswith("query=")
@@ -148,24 +148,24 @@ def test_analyze_sends_correct_headers_and_params(fqdn_observable, secrets_with_
 
 def test_analyze_missing_token_returns_none(fqdn_observable, secrets_without_token, caplog):
     """Test that engine returns None when token is not set."""
-    engine = HisterEngine(secrets_without_token, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_without_token, proxies={}, ssl_verify=True)
 
     caplog.set_level(logging.WARNING)
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Nogon (formerly Hister) token or base URL not set" in caplog.text
+    assert "Nogon token or base URL not set" in caplog.text
 
 
 def test_analyze_missing_base_url_returns_none(fqdn_observable, secrets_without_base_url, caplog):
     """Test that engine returns None when base URL is not set."""
-    engine = HisterEngine(secrets_without_base_url, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_without_base_url, proxies={}, ssl_verify=True)
 
     caplog.set_level(logging.WARNING)
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Nogon (formerly Hister) token or base URL not set" in caplog.text
+    assert "Nogon token or base URL not set" in caplog.text
 
 
 # ============================================================================
@@ -177,7 +177,7 @@ def test_analyze_missing_base_url_returns_none(fqdn_observable, secrets_without_
 @pytest.mark.parametrize("status_code", [400, 401, 403, 500])
 def test_analyze_http_error(fqdn_observable, secrets_with_credentials, status_code, caplog):
     """Test that HTTP errors return None and log the error."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(responses.GET, SEARCH_URL, json={"error": "error"}, status=status_code)
 
     caplog.set_level(logging.ERROR)
@@ -190,7 +190,7 @@ def test_analyze_http_error(fqdn_observable, secrets_with_credentials, status_co
 @responses.activate
 def test_analyze_connection_timeout(fqdn_observable, secrets_with_credentials, caplog):
     """Test that connection timeout returns None and logs the error."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(
         responses.GET,
         SEARCH_URL,
@@ -207,7 +207,7 @@ def test_analyze_connection_timeout(fqdn_observable, secrets_with_credentials, c
 @responses.activate
 def test_analyze_invalid_json(fqdn_observable, secrets_with_credentials, caplog):
     """Test that invalid JSON response returns None and logs the error."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(responses.GET, SEARCH_URL, body="not json{", status=200)
 
     caplog.set_level(logging.ERROR)
@@ -225,7 +225,7 @@ def test_analyze_invalid_json(fqdn_observable, secrets_with_credentials, caplog)
 @responses.activate
 def test_analyze_deduplicates_urls(fqdn_observable, secrets_with_credentials):
     """Test that duplicate document URLs are deduplicated."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     duplicate_response = {
         "total": 3,
         "documents": [
@@ -247,7 +247,7 @@ def test_analyze_deduplicates_urls(fqdn_observable, secrets_with_credentials):
 @responses.activate
 def test_analyze_skips_documents_without_url(fqdn_observable, secrets_with_credentials):
     """Test that documents with missing or empty URL are skipped."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     response_with_missing_url = {
         "total": 3,
         "documents": [
@@ -268,7 +268,7 @@ def test_analyze_skips_documents_without_url(fqdn_observable, secrets_with_crede
 @responses.activate
 def test_analyze_formats_added_timestamp(fqdn_observable, secrets_with_credentials):
     """Test that the 'added' timestamp is converted to a YYYY-MM-DD date string."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(
         responses.GET,
         SEARCH_URL,
@@ -292,7 +292,7 @@ def test_analyze_formats_added_timestamp(fqdn_observable, secrets_with_credentia
 @responses.activate
 def test_analyze_added_zero_gives_empty_string(fqdn_observable, secrets_with_credentials):
     """Test that added=0 results in an empty string date."""
-    engine = HisterEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
     responses.add(
         responses.GET,
         SEARCH_URL,
@@ -315,9 +315,9 @@ def test_analyze_added_zero_gives_empty_string(fqdn_observable, secrets_with_cre
 def test_analyze_base_url_trailing_slash_normalized(secrets_with_credentials):
     """Test that a trailing slash in base_url is handled correctly."""
     s = Secrets()
-    s.hister_token = "test_token_abc"
-    s.hister_base_url = BASE_URL + "/"
-    engine = HisterEngine(s, proxies={}, ssl_verify=True)
+    s.nogon_token = "test_token_abc"
+    s.nogon_base_url = BASE_URL + "/"
+    engine = NogonEngine(s, proxies={}, ssl_verify=True)
     responses.add(responses.GET, SEARCH_URL, json={"total": 0, "documents": []}, status=200)
 
     result = engine.analyze(Observable(value="1.2.3.4", type=ObservableType.IPV4))
@@ -334,7 +334,7 @@ def test_analyze_base_url_trailing_slash_normalized(secrets_with_credentials):
 
 def test_create_export_row_with_results():
     """Test export row with a valid analysis result."""
-    engine = HisterEngine(Secrets(), proxies={}, ssl_verify=True)
+    engine = NogonEngine(Secrets(), proxies={}, ssl_verify=True)
     analysis_result = {
         "total": 5,
         "results": [
@@ -346,36 +346,36 @@ def test_create_export_row_with_results():
 
     row = engine.create_export_row(analysis_result)
 
-    assert row["hister_total"] == 5
-    assert row["hister_results"] == 2
+    assert row["nogon_total"] == 5
+    assert row["nogon_results"] == 2
 
 
 def test_create_export_row_with_none():
     """Test export row when analysis result is None."""
-    engine = HisterEngine(Secrets(), proxies={}, ssl_verify=True)
+    engine = NogonEngine(Secrets(), proxies={}, ssl_verify=True)
 
     row = engine.create_export_row(None)
 
-    assert row["hister_total"] is None
-    assert row["hister_results"] is None
+    assert row["nogon_total"] is None
+    assert row["nogon_results"] is None
 
 
 def test_create_export_row_empty_results():
     """Test export row with zero results."""
-    engine = HisterEngine(Secrets(), proxies={}, ssl_verify=True)
+    engine = NogonEngine(Secrets(), proxies={}, ssl_verify=True)
     analysis_result = {"total": 0, "results": [], "link": f"{BASE_URL}/?q=example.com"}
 
     row = engine.create_export_row(analysis_result)
 
-    assert row["hister_total"] == 0
-    assert row["hister_results"] == 0
+    assert row["nogon_total"] == 0
+    assert row["nogon_results"] == 0
 
 
 def test_engine_properties():
     """Test engine name and supported_types."""
-    engine = HisterEngine(Secrets(), proxies={}, ssl_verify=True)
+    engine = NogonEngine(Secrets(), proxies={}, ssl_verify=True)
 
-    assert engine.name == "hister"
+    assert engine.name == "nogon"
     expected_types = (
         ObservableType.IPV4
         | ObservableType.IPV6

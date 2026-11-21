@@ -12,10 +12,10 @@ from models.observable import Observable, ObservableType
 logger = logging.getLogger(__name__)
 
 
-class HisterEngine(BaseEngine):
+class NogonEngine(BaseEngine):
     @property
     def name(self):
-        return "hister"
+        return "nogon"
 
     @property
     def supported_types(self) -> ObservableType:
@@ -33,11 +33,11 @@ class HisterEngine(BaseEngine):
         )
 
     def analyze(self, observable: Observable) -> dict | None:
-        token: str = self.secrets.hister_token
-        base_url: str = self.secrets.hister_base_url
+        token: str = self.secrets.nogon_token
+        base_url: str = self.secrets.nogon_base_url
 
         if not token or not base_url:
-            logger.warning("Nogon (formerly Hister) token or base URL not set")
+            logger.warning("Nogon token or base URL not set")
             return None
 
         query = json.dumps(
@@ -46,7 +46,7 @@ class HisterEngine(BaseEngine):
         url = f"{base_url.rstrip('/')}/search"
         headers = {
             "Authorization": f"Bearer {token}",
-            "Origin": "hister://",
+            "Origin": "nogon://",
         }
         params = {"query": query}
 
@@ -100,10 +100,10 @@ class HisterEngine(BaseEngine):
     def create_export_row(self, analysis_result: Any) -> dict:
         if not analysis_result:
             return {
-                "hister_total": None,
-                "hister_results": None,
+                "nogon_total": None,
+                "nogon_results": None,
             }
         return {
-            "hister_total": analysis_result.get("total"),
-            "hister_results": len(analysis_result.get("results", [])),
+            "nogon_total": analysis_result.get("total"),
+            "nogon_results": len(analysis_result.get("results", [])),
         }

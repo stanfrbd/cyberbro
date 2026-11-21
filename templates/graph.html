@@ -1071,18 +1071,18 @@
                 });
             }
 
-            // Hister results
-            if (entry.hister?.results) {
-                entry.hister.results.forEach((result) => {
-                    const histerTitle = result.title || result.url;
-                    if (histerTitle && histerTitle.trim() !== "") {
+            // Nogon results
+            if (entry.nogon?.results) {
+                entry.nogon.results.forEach((result) => {
+                    const nogonTitle = result.title || result.url;
+                    if (nogonTitle && nogonTitle.trim() !== "") {
                         addNode(
-                            histerTitle,
-                            histerTitle,
-                            "hister_result",
+                            nogonTitle,
+                            nogonTitle,
+                            "nogon_result",
                             "https://img.icons8.com/officexs/32/document.png",
                         );
-                        edges.push({ from: obs, to: histerTitle, label: "Hister" });
+                        edges.push({ from: obs, to: nogonTitle, label: "Nogon" });
                     }
                 });
             }

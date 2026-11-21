@@ -1,10 +1,10 @@
 <td>
-    {% if result.hister %}
-        <strong>Results:</strong> {{ result.hister.total }}<br/>
-        {% for item in result.hister.results %}
+    {% if result.nogon %}
+        <strong>Results:</strong> {{ result.nogon.total }}<br/>
+        {% for item in result.nogon.results %}
             <a href="{{ item.url }}" target="_blank" title="{{ item.title }}">{{ item.title[:60] }}{% if item.title | length > 60 %}…{% endif %}</a>{% if item.added %} <small>· {{ item.added }}</small>{% endif %}<br/>
         {% endfor %}
-        <strong>Link: </strong><a href="{{ result.hister.link }}" target="_blank">See on Nogon</a><br/>
+        <strong>Link: </strong><a href="{{ result.nogon.link }}" target="_blank">See on Nogon</a><br/>
     {% else %}
         Not applicable
     {% endif %}

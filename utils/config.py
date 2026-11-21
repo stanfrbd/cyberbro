@@ -36,8 +36,8 @@ class Secrets:
     google_safe_browsing: str = ""
     gui_cache_timeout: int = 1800
     gui_enabled_engines: list[str] = field(default_factory=list)
-    hister_base_url: str = ""
-    hister_token: str = ""
+    nogon_base_url: str = ""
+    nogon_token: str = ""
     ipapi: str = ""
     ipinfo: str = ""
     max_form_memory_size: int = 1_048_576

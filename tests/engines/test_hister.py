@@ -154,7 +154,7 @@ def test_analyze_missing_token_returns_none(fqdn_observable, secrets_without_tok
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Hister token or base URL not set" in caplog.text
+    assert "Nogon (formerly Hister) token or base URL not set" in caplog.text
 
 
 def test_analyze_missing_base_url_returns_none(fqdn_observable, secrets_without_base_url, caplog):
@@ -165,7 +165,7 @@ def test_analyze_missing_base_url_returns_none(fqdn_observable, secrets_without_
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Hister token or base URL not set" in caplog.text
+    assert "Nogon (formerly Hister) token or base URL not set" in caplog.text
 
 
 # ============================================================================
@@ -184,7 +184,7 @@ def test_analyze_http_error(fqdn_observable, secrets_with_credentials, status_co
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Error querying Hister" in caplog.text
+    assert "Error querying Nogon" in caplog.text
 
 
 @responses.activate
@@ -201,7 +201,7 @@ def test_analyze_connection_timeout(fqdn_observable, secrets_with_credentials, c
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Error querying Hister" in caplog.text
+    assert "Error querying Nogon" in caplog.text
 
 
 @responses.activate
@@ -214,7 +214,7 @@ def test_analyze_invalid_json(fqdn_observable, secrets_with_credentials, caplog)
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Error querying Hister" in caplog.text
+    assert "Error querying Nogon" in caplog.text
 
 
 # ============================================================================

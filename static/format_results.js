@@ -329,7 +329,7 @@ function formatResults(data) {
         }
 
         if (result.hister) {
-            plainText += `Hister:\n`;
+            plainText += `Nogon:\n`;
             plainText += `  - Total results: ${result.hister.total}\n`;
             if (result.hister.total > 0) {
                 result.hister.results.forEach(histerResult => {

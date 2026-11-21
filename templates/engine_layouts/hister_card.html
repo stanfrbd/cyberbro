@@ -1,5 +1,5 @@
 <div class="card">
-    <h3>Hister</h3>
+    <h3>Nogon</h3>
     {% if analysis_results.results[0].hister.total > 0 %}
     <p><strong>Results: </strong>{{ analysis_results.results[0].hister.total }}</p>
     {% for item in analysis_results.results[0].hister.results %}
@@ -10,5 +10,5 @@
     {% else %}
     <p>Not found</p>
     {% endif %}
-    <p><strong>Link: </strong><a href="{{ analysis_results.results[0].hister.link }}" target="_blank">See on Hister</a></p>
+    <p><strong>Link: </strong><a href="{{ analysis_results.results[0].hister.link }}" target="_blank">See on Nogon</a></p>
 </div>

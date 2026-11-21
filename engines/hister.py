@@ -37,7 +37,7 @@ class HisterEngine(BaseEngine):
         base_url: str = self.secrets.hister_base_url
 
         if not token or not base_url:
-            logger.warning("Hister token or base URL not set")
+            logger.warning("Nogon (formerly Hister) token or base URL not set")
             return None
 
         query = json.dumps(
@@ -91,10 +91,10 @@ class HisterEngine(BaseEngine):
                 "link": search_url,
             }
         except requests.exceptions.RequestException as e:
-            logger.exception("Error querying Hister: %s", e)
+            logger.exception("Error querying Nogon: %s", e)
             return None
         except json.JSONDecodeError as e:
-            logger.exception("Invalid JSON returned by Hister: %s", e)
+            logger.exception("Invalid JSON returned by Nogon: %s", e)
             return None
 
     def create_export_row(self, analysis_result: Any) -> dict:

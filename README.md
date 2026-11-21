@@ -135,7 +135,7 @@ GOOGLE_CSE_KEY=key_here
 GOOGLE_CSE_URL=https://www.googleapis.com/customsearch/v1
 GOOGLE_SAFE_BROWSING=token_here
 HISTER_TOKEN=token_here
-HISTER_BASE_URL=https://hister.example.com
+HISTER_BASE_URL=https://nogon.example.com
 IPAPI=token_here
 IPINFO=token_here
 MDE_CLIENT_ID=client_id_here
@@ -322,7 +322,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Google](https://google.com/)
 * [Google DNS](https://dns.google/)
 * [Grep.App](https://grep.app/)
-* [Hister](https://hister.org/)
+* [Nogon (formerly Hister)](https://github.com/asciimoo/nogon)
 * [Hudson Rock](https://hudsonrock.com/)
 * [ICANN](https://lookup.icann.org/)
 * [IPapi](https://ipapi.is/)

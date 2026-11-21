@@ -1,11 +1,12 @@
 import json
 import logging
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import requests
 import responses
 
-from engines.nogon import NogonEngine
+from engines import NogonEngine
 from models.observable import Observable, ObservableType
 from utils.config import Secrets
 
@@ -105,15 +106,15 @@ def test_analyze_success_returns_results(fqdn_observable, secrets_with_credentia
     assert result["results"][0]["url"] == "https://pastebin.com/abc"
     assert result["results"][0]["title"] == "Paste about example.com"
     assert result["results"][1]["url"] == "https://github.com/xyz"
-    assert "link" in result
-    assert "example.com" in result["link"]
+    assert result["link"] == f"{BASE_URL}/?q=%22example.com%22"
 
 
+@pytest.mark.parametrize("documents", [[], None])
 @responses.activate
-def test_analyze_success_empty_documents(fqdn_observable, secrets_with_credentials):
+def test_analyze_success_empty_documents(fqdn_observable, secrets_with_credentials, documents):
     """Test successful analysis with no documents."""
     engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    responses.add(responses.GET, SEARCH_URL, json={"total": 0, "documents": []}, status=200)
+    responses.add(responses.GET, SEARCH_URL, json={"total": 0, "documents": documents}, status=200)
 
     result = engine.analyze(fqdn_observable)
 
@@ -124,26 +125,42 @@ def test_analyze_success_empty_documents(fqdn_observable, secrets_with_credentia
 
 @responses.activate
 def test_analyze_sends_correct_headers_and_params(fqdn_observable, secrets_with_credentials):
-    """Test that Authorization header, Origin, and query param are sent correctly."""
     engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
-    responses.add(responses.GET, SEARCH_URL, json={"total": 0, "documents": []}, status=200)
+    responses.get(
+        SEARCH_URL,
+        json={"total": 0, "documents": []},
+        match=[
+            responses.matchers.header_matcher(
+                {"Authorization": "Bearer test_token_abc", "Accept": "application/json"}
+            ),
+            responses.matchers.query_param_matcher(
+                {"query": json.dumps({"text": '"example.com"', "limit": 10})}
+            ),
+        ],
+    )
 
-    engine.analyze(fqdn_observable)
+    assert engine.analyze(fqdn_observable) is not None
+    assert "Origin" not in responses.calls[0].request.headers
 
-    assert len(responses.calls) == 1
-    req = responses.calls[0].request
-    assert req.headers.get("Authorization") == "Bearer test_token_abc"
-    assert req.headers.get("Origin") == "nogon://"
-    assert "query=" in req.url
-    query_raw = [
-        p.split("=", 1)[1] for p in req.url.split("?", 1)[1].split("&") if p.startswith("query=")
-    ][0]
-    from urllib.parse import unquote_plus
 
-    query_obj = json.loads(unquote_plus(query_raw))
-    assert query_obj["text"] == '"example.com"'
-    assert query_obj["limit"] == 10
-    assert "url" in query_obj["fields"]
+@responses.activate
+def test_analyze_preserves_path_prefix_and_escapes_query():
+    base_url = f"{BASE_URL}/nogon"
+    secrets = Secrets(nogon_base_url=f"{base_url}/", nogon_token="test_token")
+    engine = NogonEngine(secrets, proxies={}, ssl_verify=True)
+    value = 'https://example.com/?q="a"&x=1'
+    observable = Observable(value=value, type=ObservableType.URL)
+    responses.get(f"{base_url}/search", json={"total": 0, "documents": []})
+
+    result = engine.analyze(observable)
+
+    assert result is not None
+    request_query = parse_qs(urlsplit(responses.calls[0].request.url).query)
+    query_text = json.loads(request_query["query"][0])["text"]
+    assert query_text == r'"https://example.com/?q=\"a\"&x=1"'
+    link = urlsplit(result["link"])
+    assert link.path == "/nogon/"
+    assert parse_qs(link.query) == {"q": [query_text]}
 
 
 def test_analyze_missing_token_returns_none(fqdn_observable, secrets_without_token, caplog):
@@ -214,7 +231,27 @@ def test_analyze_invalid_json(fqdn_observable, secrets_with_credentials, caplog)
     result = engine.analyze(fqdn_observable)
 
     assert result is None
-    assert "Error querying Nogon" in caplog.text
+    assert "Invalid search response returned by Nogon" in caplog.text
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        [],
+        {"error": "search failed"},
+        {"total": "1", "documents": []},
+        {"total": 1, "documents": {}},
+        {"total": 1, "documents": [{"url": "https://example.com", "added": "yesterday"}]},
+        {"total": 1, "documents": [{"url": "https://example.com", "added": 10**20}]},
+    ],
+)
+@responses.activate
+def test_analyze_malformed_response(fqdn_observable, secrets_with_credentials, payload, caplog):
+    engine = NogonEngine(secrets_with_credentials, proxies={}, ssl_verify=True)
+    responses.get(SEARCH_URL, json=payload)
+
+    assert engine.analyze(fqdn_observable) is None
+    assert "Invalid search response returned by Nogon" in caplog.text
 
 
 # ============================================================================

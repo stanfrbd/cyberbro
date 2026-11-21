@@ -1,29 +1,25 @@
-[Nogon](https://nogon.eu) is a self-hosted, privacy-focused web search engine that indexes your visited websites.
+[Nogon](https://nogon.eu) is a self-hosted search engine that indexes your visited websites and other content you import.
 
 ### Getting your Nogon token
 
-You should have already set up your Nogon instance and have an API token ready. 
-If not, please refer to the [Nogon documentation](https://nogon.eu/docs)
-
-Basically, in your config.yml, you should have something like this:
+Set up your instance using the [Nogon documentation](https://nogon.eu/docs). In single-user mode, configure an access token in Nogon's `config.yml`:
 
 ```yaml
 app:
   access_token: 'your-token-here'
 ```
 
-or set the `NOGON__APP__ACCESS_TOKEN` environment variable.
+You can also set `NOGON__APP__ACCESS_TOKEN` on the Nogon server. If user handling is enabled, use the personal access token for the account whose index Cyberbro should search.
 
-### Cyberbro Configuration
+### Cyberbro configuration
 
-Set the following environment variables:
+Set both variables in Cyberbro's environment:
 
-```bash
+```dotenv
+NOGON_BASE_URL=https://nogon.example.com
 NOGON_TOKEN=your_bearer_token_here
-NOGON_BASE_URL=https://your-nogon-instance.example.com
 ```
 
-!!! note
-    Both `NOGON_TOKEN` and `NOGON_BASE_URL` are required. There is no default public instance.
+Include the path prefix if your instance runs under one. Cyberbro sends the token as a bearer credential and uses the `nogon` engine identifier for API requests and GUI configuration.
 
-Use the `NOGON_*` environment variables and the `nogon` engine identifier. Previous `HISTER_*` settings and `hister` identifiers are no longer supported.
+This migration is a breaking change. Replace the previous engine identifier and environment settings with the Nogon values above.

@@ -36,8 +36,6 @@ class Secrets:
     google_safe_browsing: str = ""
     gui_cache_timeout: int = 1800
     gui_enabled_engines: list[str] = field(default_factory=list)
-    nogon_base_url: str = ""
-    nogon_token: str = ""
     ipapi: str = ""
     ipinfo: str = ""
     max_form_memory_size: int = 1_048_576
@@ -48,6 +46,8 @@ class Secrets:
     misp_url: str = ""
     misp_feedback_server_url: str = ""
     misp_feedback_token: str = ""
+    nogon_base_url: str = ""
+    nogon_token: str = ""
     opencti_api_key: str = ""
     opencti_url: str = ""
     proxy_url: str = ""

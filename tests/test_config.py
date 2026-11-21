@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
 
 from utils.config import (
@@ -122,3 +123,15 @@ def test_secrets_update_method_invalid_value(mocker: MockerFixture):
     secrets.update({"api_cache_timeout": "value"})
 
     assert secrets.api_cache_timeout == DEFAULT_SECRETS.api_cache_timeout
+
+
+def test_read_nogon_settings_from_env(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv("NOGON_BASE_URL", "https://nogon.example.com")
+    monkeypatch.setenv("NOGON_TOKEN", "test_token")
+    monkeypatch.setenv("GUI_ENABLED_ENGINES", "nogon")
+
+    secrets = read_secrets_from_env(Secrets())
+
+    assert secrets.nogon_base_url == "https://nogon.example.com"
+    assert secrets.nogon_token == "test_token"
+    assert secrets.gui_enabled_engines == ["nogon"]

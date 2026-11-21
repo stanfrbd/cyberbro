@@ -1074,16 +1074,14 @@
             // Nogon results
             if (entry.nogon?.results) {
                 entry.nogon.results.forEach((result) => {
-                    const nogonTitle = result.title || result.url;
-                    if (nogonTitle && nogonTitle.trim() !== "") {
-                        addNode(
-                            nogonTitle,
-                            nogonTitle,
-                            "nogon_result",
-                            "https://img.icons8.com/officexs/32/document.png",
-                        );
-                        edges.push({ from: obs, to: nogonTitle, label: "Nogon" });
-                    }
+                    const nodeId = `nogon_result:${result.url}`;
+                    addNode(
+                        nodeId,
+                        result.title || result.url,
+                        "nogon_result",
+                        "https://img.icons8.com/officexs/32/document.png",
+                    );
+                    edges.push({ from: obs, to: nodeId, label: "Nogon" });
                 });
             }
 

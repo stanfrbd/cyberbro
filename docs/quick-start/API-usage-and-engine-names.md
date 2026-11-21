@@ -332,11 +332,6 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: risk, domain, IP  
 **Explaination**: Checks Google Safe Browsing, free API key required
 
-### Nogon
-**Name**: `nogon` (API identifier)  
-**Supports**: IP, domain, URL, email, extension, hash, API key and base URL required  
-**Explanation**: Searches your personal Nogon self-hosted index for any observable, API key and base URL required
-
 ### Hudson Rock
 **Name**: `hudsonrock`  
 **Supports**: domain, URL, email, free_no_key  
@@ -386,6 +381,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `misp_feedback`  
 **Supports**: hash, IP, domain, free_no_key  
 **Explaination**: Checks MISP-Feedback warninglists for IP, domain, hashes to identify false positives, free, no API key required
+
+### Nogon
+**Name**: `nogon` (API identifier)  
+**Supports**: IP, domain, URL, email, extension, hash, API key and base URL required  
+**Explanation**: Searches your personal Nogon self-hosted index for any observable, API key and base URL required
 
 ### OpenCTI
 **Name**: `opencti` 

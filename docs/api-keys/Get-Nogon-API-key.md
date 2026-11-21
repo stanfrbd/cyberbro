@@ -1,9 +1,9 @@
-[Nogon](https://github.com/asciimoo/nogon) is a self-hosted, privacy-focused web search engine that indexes your visited websites.
+[Nogon](https://nogon.eu) is a self-hosted, privacy-focused web search engine that indexes your visited websites.
 
 ### Getting your Nogon token
 
 You should have already set up your Nogon instance and have an API token ready. 
-If not, please refer to the [Nogon documentation](https://github.com/asciimoo/nogon)
+If not, please refer to the [Nogon documentation](https://nogon.eu/docs)
 
 Basically, in your config.yml, you should have something like this:
 

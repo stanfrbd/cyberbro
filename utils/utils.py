@@ -106,7 +106,7 @@ def identify_observable_type(observable) -> ObservableType:
         ObservableType.MD5: r"^[a-fA-F0-9]{32}$",
         ObservableType.SHA1: r"^[a-fA-F0-9]{40}$",
         ObservableType.SHA256: r"^[a-fA-F0-9]{64}$",
-        ObservableType.EMAIL: r"^[\w\.-]+@[\w\.-]+\.\w+$",
+        ObservableType.EMAIL: r"^[\w.+-]+@[\w\.-]+\.\w+$",
         ObservableType.FQDN: r"^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$",
         ObservableType.URL: r"^(https?|ftp)://[^\s/$.?#].[^\s]*$",
         ObservableType.CHROME_EXTENSION: r"^[a-z]{32}$",
@@ -127,7 +127,7 @@ def extract_observables(text: str) -> list[Observable]:
         ObservableType.MD5: r"\b[a-fA-F0-9]{32}\b",
         ObservableType.SHA1: r"\b[a-fA-F0-9]{40}\b",
         ObservableType.SHA256: r"\b[a-fA-F0-9]{64}\b",
-        ObservableType.EMAIL: r"\b[\w\.-]+@[\w\.-]+\.\w+\b",
+        ObservableType.EMAIL: r"(?<![\w.+-])[\w.+-]+@[\w\.-]+\.\w+\b",
         # Simplified URL pattern for http(s) only
         # "URL": r"\bhttps?://[^\s/$.?#].[^\s]*\b",
         ObservableType.URL: r"\bhttps?://[^\s/$.?#].[^\s<>\"'\?,;\]\[\}\{]*",

@@ -29,3 +29,11 @@ jobs:
       # Step 4: run tests
       - name: Run tests
         run: pytest -q tests/
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Run graph tests
+        run: node --test tests/test_recorded_future_graph.cjs

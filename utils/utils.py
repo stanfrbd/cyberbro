@@ -172,6 +172,7 @@ def extract_observables(text: str) -> list[Observable]:
     ([0-9a-fA-F]{1,4}:){1,4}:                          # 1:2:3:4::255.255.255.255
     ((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}  # dans IPv6
     (25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))          # dans IPv6
+    (?![0-9a-fA-F:]|\.[0-9]|%)                        # Do not stop inside an address
     """,
         re.VERBOSE,
     )

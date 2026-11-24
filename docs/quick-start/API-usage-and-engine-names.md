@@ -332,11 +332,6 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: risk, domain, IP  
 **Explaination**: Checks Google Safe Browsing, free API key required
 
-### Hister
-**Name**: `hister`  
-**Supports**: IP, domain, URL, email, extension, hash, API key and base URL required  
-**Explanation**: Searches your personal Hister self-hosted index for any observable, API key and base URL required
-
 ### Hudson Rock
 **Name**: `hudsonrock`  
 **Supports**: domain, URL, email, free_no_key  
@@ -386,6 +381,12 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Name**: `misp_feedback`  
 **Supports**: hash, IP, domain, free_no_key  
 **Explaination**: Checks MISP-Feedback warninglists for IP, domain, hashes to identify false positives, free, no API key required
+
+### Nogon
+
+- **Name** `nogon`
+- **Supports** IP addresses, domains, URLs, email addresses, browser extensions, and hashes
+- **Configuration** Set the base URL and token for your self-hosted index. See the [Nogon API key guide](../api-keys/Get-Nogon-API-key.md).
 
 ### OpenCTI
 **Name**: `opencti` 

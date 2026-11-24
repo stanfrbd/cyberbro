@@ -237,8 +237,8 @@
                     <th>Alienvault</th>
                     {% endif %}
 
-                    {% if "hister" in analysis_results.selected_engines %}
-                    <th>Hister</th>
+                    {% if "nogon" in analysis_results.selected_engines %}
+                    <th>Nogon</th>
                     {% endif %}
 
                     {% if "google_dns" in analysis_results.selected_engines %}
@@ -447,8 +447,8 @@
                     {% include "engine_layouts/alienvault_table.html" %}
                     {% endif %}
 
-                    {% if "hister" in analysis_results.selected_engines %}
-                    {% include "engine_layouts/hister_table.html" %}
+                    {% if "nogon" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/nogon_table.html" %}
                     {% endif %}
 
                     {% if "google_dns" in analysis_results.selected_engines %}

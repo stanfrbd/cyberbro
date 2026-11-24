@@ -44,6 +44,17 @@ cp .env.sample .env
 
 See [Advanced options for deployment](https://docs.cyberbro.net/quick-start/Advanced-options-for-deployment) for the full list of variables and migration guidance.
 
+### Optional Nogon setup
+
+To search your self-hosted Nogon index, add these values to Cyberbro's `.env`:
+
+```dotenv
+NOGON_BASE_URL=https://nogon.example.com
+NOGON_TOKEN=your_bearer_token_here
+```
+
+Replace the example URL and token with your instance details, then select Nogon in the GUI or use `nogon` in API requests. See the [Nogon API key guide](../api-keys/Get-Nogon-API-key.md) for token setup and migration details.
+
 ## Launch the app
 
 ## Lazy and easy - use Docker

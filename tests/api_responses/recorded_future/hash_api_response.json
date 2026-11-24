@@ -1,0 +1,30 @@
+{
+  "data": {
+    "entity": {"id": "hash:abc123", "name": "abc123"},
+    "risk": {
+      "score": 97,
+      "criticalityLabel": "Very Malicious",
+      "riskString": "2/17",
+      "evidenceDetails": [
+        {"rule": "Ransomware Payload", "criticality": 4, "criticalityLabel": "Very Malicious"},
+        {"rule": "Linked to Threat Actor", "criticality": 4, "criticalityLabel": "Very Malicious"}
+      ]
+    },
+    "intelCard": "https://app.recordedfuture.com/portal/intelligence-card/hash%3Aabc123",
+    "sightings": [
+      {"source": "sandboxing", "published": "2024-04-20T00:00:00.000Z", "title": "Ransomware execution"},
+      {"source": "report", "published": "2023-06-10T00:00:00.000Z", "title": "Malware family analysis"},
+      {"source": "analyst_note", "published": "2022-06-10T00:00:00.000Z", "title": "Initial discovery"}
+    ],
+    "timestamps": {
+      "firstSeen": "2022-06-10T00:00:00.000Z",
+      "lastSeen": "2024-04-20T00:00:00.000Z"
+    },
+    "fileHashes": {
+      "md5": "5d41402abc4b2a76b9719d911017c592",
+      "sha1": "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d",
+      "sha256": "abc123def456abc123def456abc123def456abc123def456abc123def456abc12"
+    },
+    "hashAlgorithm": "SHA-256"
+  }
+}

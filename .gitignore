@@ -1,3 +1,10 @@
+# Allow test scripts while ignoring other untracked test files.
+tests/**
+!tests/**/
+!tests/**/*.py
+!tests/**/*.cjs
+!tests/**/*.sh
+
 __pycache__/
 .dccache
 .pytest_cache
@@ -11,8 +18,6 @@ data/
 log*/
 site/
 .cache/
-# test files should be added with git add -f
-tests/
 # text files should be added with git add -f
 *.txt
 # Sensitive files

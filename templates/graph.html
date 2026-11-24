@@ -198,7 +198,7 @@
 
             addNode(obs, obs, "observable", "https://img.icons8.com/officexs/32/goal.png");
 
-            const providers = ["ipinfo", "ipquery", "webscout", "ipapi", "vpndetection"];
+            const providers = ["ipinfo", "ipquery", "webscout", "ipapi", "vpndetection", "recorded_future"];
             providers.forEach((provider) => {
                 if (entry[provider]?.asn) {
                     let asn = String(entry[provider].asn || "");
@@ -244,8 +244,8 @@
                         countryCode = entry[provider].location.country_code.toLowerCase();
                     } else {
                         country = entry[provider]?.country_name
-                            ? entry[provider].country_name
-                            : country_code_to_country_name(entry[provider].country_code);
+                            || (provider === "recorded_future" && entry[provider].country)
+                            || country_code_to_country_name(entry[provider].country_code);
                         countryCode = entry[provider].country_code.toLowerCase();
                     }
 
@@ -1113,7 +1113,7 @@
                     nodeLabel,
                     nodeLabel,
                     group,
-                    "https://img.icons8.com/officexs/32/warning.png"
+                    "https://img.icons8.com/officexs/32/high-priority.png"
                 );
                 let edgeLabel = `Status: ${status}`;
                 if (entry.misp_feedback.warninglists && entry.misp_feedback.warninglists.length > 0) {
@@ -1139,6 +1139,48 @@
                     rlEdgeLabel += `RL AV: ${entry.rl_analyze.scanners}/${entry.rl_analyze.reports}, ${entry.rl_analyze.classification}`;
                 }
                 edges.push({ from: obs, to: rlNodeLabel, label: rlEdgeLabel });
+            }
+
+            if ((entry.type === "IPV4" || entry.type === "IPV6") && Array.isArray(entry.recorded_future?.vpn_list)) {
+                new Set(entry.recorded_future.vpn_list).forEach((vpnService) => {
+                    if (!vpnService) return;
+                    addNode(vpnService, vpnService, "vpn_service", "https://img.icons8.com/officexs/32/lock.png");
+                    edges.push({ from: obs, to: vpnService, label: "VPN Service (Recorded Future)" });
+                });
+            }
+
+            if (Array.isArray(entry.recorded_future?.rules)) {
+                new Set(entry.recorded_future.rules).forEach((rule) => {
+                    if (!rule) return;
+                    const nodeId = `recorded_future_rule:${rule}`;
+                    addNode(nodeId, rule, "recorded_future_rule", "https://img.icons8.com/officexs/32/high-priority.png");
+                    edges.push({ from: obs, to: nodeId, label: "Risk Rule (Recorded Future)" });
+                });
+            }
+
+            if (Array.isArray(entry.recorded_future?.threat_lists)) {
+                new Set(entry.recorded_future.threat_lists).forEach((list) => {
+                    if (!list) return;
+                    const nodeId = `recorded_future_threat_list:${list}`;
+                    addNode(nodeId, list, "recorded_future_threat_list", "https://img.icons8.com/officexs/32/high-priority.png");
+                    edges.push({ from: obs, to: nodeId, label: "Threat List (Recorded Future)" });
+                });
+            }
+
+            // Check for Recorded Future data
+            if (entry.recorded_future && entry.recorded_future.risk_score > 0) {
+                const rfNodeLabel = "Recorded Future flagged";
+                addNode(
+                    rfNodeLabel,
+                    rfNodeLabel,
+                    "recorded_future_flagged",
+                    "https://img.icons8.com/officexs/32/fire-element.png",
+                );
+                let rfEdgeLabel = `RF Risk: ${entry.recorded_future.risk_score}`;
+                if (entry.recorded_future.rules && entry.recorded_future.rules.length > 0) {
+                    rfEdgeLabel += `, ${entry.recorded_future.rules[0]}`;
+                }
+                edges.push({ from: obs, to: rfNodeLabel, label: rfEdgeLabel });
             }
 
             // Check for Chrome / Edge extension data

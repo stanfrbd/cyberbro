@@ -10,28 +10,41 @@ For details on contributing, community standards, and licensing, see:
 ## Checklist when adding a new engine
 
 ### Engine Implementation
-* Make sure the engine is added to `engines/engine_name.py` (use `engines/abuseipdb.py` as a template).
-* Make sure the engine is added to `engines/__init__.py`.
-* Make sure that your engine config/secret variable (if relevant) is added to `utils/config.py`.
+* Add the engine class to `engines/engine_name.py` (use `engines/abuseipdb.py` as a template).
+* Import and instantiate the engine in `utils/load_engines.py`.
+* Add the engine's configuration or secret fields to `utils/config.py`, if relevant.
+* Add focused tests for the engine and its edge cases in `tests/`.
+* Run `node --test tests/test_recorded_future_graph.cjs` when changing the graph.
 
 ### Configuration & Secrets
-* Make sure any API key or configuration needed for the engine is added to `.env.sample`.
-* Make sure that the templating of variables in `docker-compose.yml` is correct.
+* Add any API key or configuration needed for the engine to `.env.sample`.
+* Add any new environment variables to `docker-compose.yml` using the existing
+  variable substitution conventions and an appropriate default.
 
 ### UI & Frontend
-* Make sure the engine result can be copied to clipboard using the GUI in `static/format_results.js`.
-* Make sure every template in `templates/` has corresponding engine result template in `templates/engines_layouts/` - `engine_card.html` and `engine_table.html`.
-* Make sure the engine is added in `display_cards.html` and `display_table.html`.
-* Make sure the engine is in the GUI form `index.html` with relevant description - alphabetic order.
-* Make sure the engine is usable in the graph view in `graph.html`.
+* Add the engine's result fields to `static/format_results.js` so GUI results can
+  be copied to the clipboard.
+* Add the engine result templates to `templates/engine_layouts/`:
+  `engine_name_card.html` and `engine_name_table.html`, when both views apply.
+* Add the engine to `templates/display_cards.html` and
+  `templates/display_table.html`.
+* Add the engine to the GUI form in `templates/index.html` with a relevant
+  description, keeping the list alphabetized.
+* Make the engine usable in `templates/graph.html`, including relevant
+  engine-specific relationships or nodes.
 
 ### Documentation
-* Make sure the engine is documented in `docs/api-keys/Get-Engine-API-key.md` if relevant.
-* Make sure to add the link to the API key guide in `docs/index.md` if relevant.
-* Make sure the engine is documented in `docs/quick-start/API-usage-and-engine-names.md`.
-* Make sure to add the page to the sidebar in `mkdocs.yml`.
-* Make sure the engine is documented in `docs/quick-start/Quick-start-&-Installation.md` and in `.env` examples.
-* Make sure to add any environment variable needed to `docs/quick-start/Advanced-options-for-deployment.md` in the `docker compose` example.
-* Make sure to add references in the README.md (environment variable examples and URL of the new engine in the "API and third-party services" section).
+* Document the engine's API key setup in `docs/api-keys/` if relevant, and link
+  that guide from `docs/index.md`.
+* Document the engine name, supported observable types, and requirements in
+  `docs/quick-start/API-usage-and-engine-names.md`.
+* Add new documentation pages to the sidebar in `mkdocs.yml`.
+* Update `docs/quick-start/Quick-start-&-Installation.md` when the engine
+  requires changes to the installation or setup instructions.
+* Add the engine's environment variables to `.env.sample`, the README
+  environment example, and the environment and `docker compose` examples in
+  `docs/quick-start/Advanced-options-for-deployment.md`.
+* Add the engine and its provider URL to the README's
+  "API and third-party services" section.
 
 Note: if you use an LLM to code, just make sure to use this list as a checklist to verify everything is covered (if something is missing, add it!).

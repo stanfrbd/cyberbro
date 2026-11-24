@@ -400,7 +400,7 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 ### Recorded Future
 **Name**: `recorded_future`  
 **Supports**: ip, domain, hash, url  
-**Explanation**: Recorded Future Threat Intelligence for IP, domain, hash, URL, paid API key required
+**Explanation**: Recorded Future Threat Intelligence for IP, domain, hash, URL, paid API key required. The graph shows the risk rules and threat lists returned by the engine (up to three of each). For IPs, it also includes available ASN, country, and VPN service relationships.
 
 ### RDAP / Whois
 **Name**: `rdap_whois`

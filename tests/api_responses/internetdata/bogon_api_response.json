@@ -1,0 +1,38 @@
+{
+  "ip": "10.0.0.1",
+  "is_bogon": true,
+  "is_tor": false,
+  "is_relay": false,
+  "is_anycast": false,
+  "location": {
+    "continent": "",
+    "continent_name": "",
+    "country": "",
+    "country_name": "",
+    "timezone": "",
+    "currency_code": "",
+    "currency_name": "",
+    "currency_symbol": "",
+    "flag_emoji": "",
+    "flag_unicode": ""
+  },
+  "tor": {},
+  "relay": {},
+  "asn": {
+    "asn": 0,
+    "name": "",
+    "domain": "",
+    "type": "",
+    "prefix": "",
+    "country": "",
+    "rpki_status": ""
+  },
+  "company": {
+    "name": "",
+    "domain": ""
+  },
+  "hostname": "",
+  "abuse": {
+    "email": ""
+  }
+}

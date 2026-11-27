@@ -12,6 +12,7 @@ from engines.google import GoogleCSEEngine
 from engines.google_dns import GoogleDNSEngine
 from engines.google_safe_browsing import GoogleSafeBrowsingEngine
 from engines.hudsonrock import HudsonRockEngine
+from engines.internetdata import InternetDataEngine
 from engines.ioc_one import IOCOneHTMLEngine, IOCOnePDFEngine
 from engines.ipapi import IPAPIEngine
 from engines.ipinfo import IPInfoEngine
@@ -66,6 +67,7 @@ def get_engine_instances(
         GoogleDNSEngine(secrets, proxies, ssl_verify),
         GoogleSafeBrowsingEngine(secrets, proxies, ssl_verify),
         HudsonRockEngine(secrets, proxies, ssl_verify),
+        InternetDataEngine(secrets, proxies, ssl_verify),
         IOCOneHTMLEngine(secrets, proxies, ssl_verify),
         IOCOnePDFEngine(secrets, proxies, ssl_verify),
         IPAPIEngine(secrets, proxies, ssl_verify),

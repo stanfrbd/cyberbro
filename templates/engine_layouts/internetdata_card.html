@@ -1,0 +1,34 @@
+{% set inetd = analysis_results.results[0].internetdata %}
+{% if inetd.is_tor or inetd.is_relay %}
+<div class="card warning-row" style="background-color: orange;">
+    {% else %}
+    <div class="card">
+        {% endif %}
+
+        <h3>InternetData</h3>
+        <p><strong>IP: </strong><a href="{{ inetd.link }}" target="_blank">{{ inetd.ip }}</a></p>
+        <p><strong>Country: </strong>{{ inetd.country_name }} <span class="fi fi-{{ inetd.country_code | lower }}"></span></p>
+        <p><strong>ASN: </strong>{{ inetd.asn }} {{ inetd.as_name }}</p>
+
+        {% if inetd.company_name %}
+        <p><strong>Company: </strong>{{ inetd.company_name }}{% if inetd.company_domain %} ({{ inetd.company_domain }}){% endif %}</p>
+        {% endif %}
+        {% if inetd.hostname %}
+        <p><strong>Hostname: </strong>{{ inetd.hostname }}</p>
+        {% endif %}
+        {% if inetd.abuse_email %}
+        <p><strong>Abuse: </strong>{{ inetd.abuse_email }}</p>
+        {% endif %}
+        {% if inetd.is_bogon %}
+        <p><strong>Bogon: </strong>{{ inetd.is_bogon }}</p>
+        {% endif %}
+        {% if inetd.is_anycast %}
+        <p><strong>Anycast: </strong>{{ inetd.is_anycast }}</p>
+        {% endif %}
+        {% if inetd.is_tor %}
+        <p><strong>Tor: </strong>{{ inetd.is_tor }}</p>
+        {% endif %}
+        {% if inetd.is_relay %}
+        <p><strong>Relay: </strong>{{ inetd.relay_provider or inetd.is_relay }}</p>
+        {% endif %}
+    </div>

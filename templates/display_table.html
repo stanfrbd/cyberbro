@@ -36,6 +36,7 @@
             {% if (result.ipinfo and result.ipinfo.country_name not in countries) or (result.ipquery and
             result.ipquery.country_name not in countries) or (result.webscout and result.webscout.country_name not in
             countries) or (result.vpndetection and result.vpndetection.country_name not in countries) or
+            (result.internetdata and result.internetdata.country_name not in countries) or
             (result.ipapi and result.ipapi.location is defined and result.ipapi.location and
             result.ipapi.location.country and result.ipapi.location.country not in countries) or (result.abuseipdb and
             result.abuseipdb.country_name and result.abuseipdb.country_name not in countries) %}
@@ -52,6 +53,11 @@
             {% if result.vpndetection and result.vpndetection.country_name not in countries %}
             {% set _ = countries.append(result.vpndetection.country_name) %}
             <option value="{{ result.vpndetection.country_name | lower }}">{{ result.vpndetection.country_name }}</option>
+            {% endif %}
+
+            {% if result.internetdata and result.internetdata.country_name not in countries %}
+            {% set _ = countries.append(result.internetdata.country_name) %}
+            <option value="{{ result.internetdata.country_name | lower }}">{{ result.internetdata.country_name }}</option>
             {% endif %}
 
             {% if result.webscout and result.webscout.country_name not in countries %}
@@ -117,6 +123,10 @@
 
                     {% if "vpndetection" in analysis_results.selected_engines %}
                     <th>VPNDetection</th>
+                    {% endif %}
+
+                    {% if "internetdata" in analysis_results.selected_engines %}
+                    <th>InternetData</th>
                     {% endif %}
 
                     {% if "ipinfo" in analysis_results.selected_engines %}
@@ -277,6 +287,8 @@
                     {% elif result.vpndetection and (result.vpndetection.is_vpn or result.vpndetection.is_tor or
                     result.vpndetection.is_relay) %}
                 <tr class="warning-row">
+                    {% elif result.internetdata and (result.internetdata.is_tor or result.internetdata.is_relay) %}
+                <tr class="warning-row">
                     {% elif result.threatfox and result.threatfox.count != 0 %}
                 <tr class="high-risk">
                     {% elif result.google_safe_browsing and result.google_safe_browsing.threat_found == "Threat found"
@@ -323,6 +335,10 @@
 
                     {% if "vpndetection" in analysis_results.selected_engines %}
                     {% include "engine_layouts/vpndetection_table.html" %}
+                    {% endif %}
+
+                    {% if "internetdata" in analysis_results.selected_engines %}
+                    {% include "engine_layouts/internetdata_table.html" %}
                     {% endif %}
 
                     {% if "ipinfo" in analysis_results.selected_engines %}

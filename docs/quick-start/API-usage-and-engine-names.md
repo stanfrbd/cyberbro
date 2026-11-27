@@ -337,6 +337,11 @@ Once the analysis is complete, retrieve the results using the `analysis_id`.
 **Supports**: domain, URL, email, free_no_key  
 **Explaination**: Searches Hudson Rocks results for domains, URL, Email, free, no API key
 
+### InternetData
+**Name**: `internetdata`  
+**Supports**: IP, free_no_key  
+**Explaination**: Checks InternetData for IP, reversed obtained IP for a given domain / URL: ASN, company, country, abuse email, hostname, Tor, privacy relay (such as iCloud Private Relay) and anycast, free, no API key ([terms](https://internetdata.io/terms), [privacy](https://internetdata.io/privacy))
+
 ### Ioc.One (HTML)
 **Name**: `ioc_one_html`  
 **Supports**: domain, URL, IP, hash, scraping  

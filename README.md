@@ -324,6 +324,7 @@ curl "http://localhost:5000/api/results/e88de647-b153-4904-91e5-8f5c79174854"
 * [Grep.App](https://grep.app/)
 * [Hudson Rock](https://hudsonrock.com/)
 * [ICANN](https://lookup.icann.org/)
+* [InternetData](https://docs.internetdata.io/api)
 * [IPapi](https://ipapi.is/)
 * [IPinfo](https://ipinfo.io/developers)
 * [IPquery](https://ipquery.gitbook.io/ipquery-docs)

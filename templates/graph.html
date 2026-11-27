@@ -198,7 +198,7 @@
 
             addNode(obs, obs, "observable", "https://img.icons8.com/officexs/32/goal.png");
 
-            const providers = ["ipinfo", "ipquery", "webscout", "ipapi", "vpndetection"];
+            const providers = ["ipinfo", "ipquery", "webscout", "ipapi", "vpndetection", "internetdata"];
             providers.forEach((provider) => {
                 if (entry[provider]?.asn) {
                     let asn = String(entry[provider].asn || "");
@@ -208,6 +208,10 @@
                     }
 
                     if (provider === "vpndetection" && entry[provider]?.as_name) {
+                        asn = `${asn} ${entry[provider].as_name}`.trim();
+                    }
+
+                    if (provider === "internetdata" && entry[provider]?.as_name) {
                         asn = `${asn} ${entry[provider].as_name}`.trim();
                     }
 

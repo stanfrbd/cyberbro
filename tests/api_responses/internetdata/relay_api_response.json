@@ -1,0 +1,43 @@
+{
+  "ip": "172.224.226.1",
+  "is_bogon": false,
+  "is_tor": false,
+  "is_relay": true,
+  "is_anycast": false,
+  "location": {
+    "continent": "EU",
+    "continent_name": "Europe",
+    "country": "GB",
+    "country_name": "United Kingdom",
+    "timezone": "Europe/London",
+    "currency_code": "GBP",
+    "currency_name": "Pound",
+    "currency_symbol": "£",
+    "flag_emoji": "🇬🇧",
+    "flag_unicode": "U+1F1EC U+1F1E7"
+  },
+  "tor": {},
+  "relay": {
+    "provider": "apple_private_relay",
+    "provider_name": "Apple iCloud Private Relay",
+    "confidence": "high",
+    "last_seen": "2026-11-26"
+  },
+  "asn": {
+    "asn": 36183,
+    "name": "Akamai Technologies, Inc.",
+    "domain": "akamai.com",
+    "type": "hosting",
+    "prefix": "172.224.226.0/24",
+    "country": "US",
+    "rpki_status": "valid"
+  },
+  "company": {
+    "name": "Akamai Technologies, Inc.",
+    "domain": "akamai.com"
+  },
+  "hostname": "a172-224-226-1.source.akaquill.net",
+  "abuse": {
+    "email": "abuse@akamai.com"
+  }
+}

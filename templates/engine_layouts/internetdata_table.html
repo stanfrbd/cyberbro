@@ -1,0 +1,39 @@
+<td>
+    {% if result.internetdata %}
+        <strong>IP: </strong><a href="{{ result.internetdata.link }}" target="_blank">{{ result.internetdata.ip }}</a><br />
+        <strong>Country: </strong><span class="country country-{{result.internetdata.country_name | lower}}">{{result.internetdata.country_name}}</span>
+        <span class="fi fi-{{ result.internetdata.country_code | lower }}"></span><br />
+        <strong>ASN: </strong>{{ result.internetdata.asn }} {{ result.internetdata.as_name }}<br />
+
+        {% if result.internetdata.company_name %}
+            <strong>Company: </strong>{{ result.internetdata.company_name }}{% if result.internetdata.company_domain %} ({{ result.internetdata.company_domain }}){% endif %}<br />
+        {% endif %}
+
+        {% if result.internetdata.hostname %}
+            <strong>Hostname: </strong>{{ result.internetdata.hostname }}<br />
+        {% endif %}
+
+        {% if result.internetdata.abuse_email %}
+            <strong>Abuse: </strong>{{ result.internetdata.abuse_email }}<br />
+        {% endif %}
+
+        {% if result.internetdata.is_bogon == True %}
+            <strong>Bogon: </strong>{{ result.internetdata.is_bogon }}<br />
+        {% endif %}
+
+        {% if result.internetdata.is_anycast == True %}
+            <strong>Anycast: </strong>{{ result.internetdata.is_anycast }}<br />
+        {% endif %}
+
+        {% if result.internetdata.is_tor == True %}
+            <strong>Tor: </strong>{{ result.internetdata.is_tor }}<br />
+        {% endif %}
+
+        {% if result.internetdata.is_relay == True %}
+            <strong>Relay: </strong>{{ result.internetdata.relay_provider or result.internetdata.is_relay }}<br />
+        {% endif %}
+
+    {% else %}
+        Not applicable
+    {% endif %}
+</td>

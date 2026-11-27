@@ -67,6 +67,9 @@ function formatResults(data) {
         if (result.vpndetection) {
             plainText += `VPNDetection: Country: ${result.vpndetection.country_name}, ASN: ${result.vpndetection.asn} ${result.vpndetection.as_name}, VPN: ${result.vpndetection.is_vpn}, Tor: ${result.vpndetection.is_tor}, Relay: ${result.vpndetection.relay_provider || result.vpndetection.is_relay}\n`;
         }
+        if (result.internetdata) {
+            plainText += `InternetData: Country: ${result.internetdata.country_name}, ASN: ${result.internetdata.asn} ${result.internetdata.as_name}, Company: ${result.internetdata.company_name}, Hostname: ${result.internetdata.hostname}, Abuse: ${result.internetdata.abuse_email}, Tor: ${result.internetdata.is_tor}, Relay: ${result.internetdata.relay_provider || result.internetdata.is_relay}, Anycast: ${result.internetdata.is_anycast}\n`;
+        }
         if (result.ipinfo) {
             plainText += `IPinfo: Geolocation: ${result.ipinfo.geolocation}, Country: ${result.ipinfo.country_name}, ASN: ${result.ipinfo.asn}\n`;
         }
